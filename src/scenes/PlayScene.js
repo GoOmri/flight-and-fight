@@ -5,7 +5,7 @@ import { WaveRunner, initPath, followPath } from '../waves-runner.js';
 import { Hud, FONT } from '../hud.js';
 import { Medals, MEDAL_KEYS, saveMedals } from '../medals.js';
 
-const W = C.game.width, H = C.game.height, DEG = Math.PI / 180, TAU = Math.PI * 2;
+const W = C.game.width, H = C.game.height, R = C.game.render, DEG = Math.PI / 180, TAU = Math.PI * 2;
 // Spark colours. Death pops match the creature; no red and no gold on anything that is not a shot / coin.
 const DEATH_TINTS = {
   grunt: [0x3c3a8c, 0x8f86d8, 0xffffff],   // bat: indigo
@@ -21,6 +21,8 @@ export class PlayScene extends Phaser.Scene {
 
   create() {
     makeAllTextures(this);
+    // The canvas is R times bigger than the game (sharp text); the camera zooms back so all numbers stay logical.
+    this.cameras.main.setZoom(R).centerOn(W / 2, H / 2);
     this.score = 0;
     this.freezeMs = 0;    // hit-stop: game is frozen while > 0
     this.shipFlashUntil = 0; this.muzzleUntil = 0;
@@ -59,15 +61,15 @@ export class PlayScene extends Phaser.Scene {
       if (this.over) { if (this.time.now > this.restartAt) this.scene.restart(); return; }
       if (this.dragId !== null) return;
       this.dragId = p.id;
-      this.dragFrom.set(p.x, p.y);
+      this.dragFrom.set(p.x / R, p.y / R); // pointer is in canvas pixels, the game is R times smaller
       this.shipFrom.set(this.target.x, this.target.y); // from the target, so no jump while the ship is still catching up
     });
     this.input.on('pointermove', p => {
       if (p.id !== this.dragId || !p.isDown || this.over) return;
       const S = C.ship;
       // The finger sets the TARGET (1:1). The ship eases toward it in update().
-      this.target.x = Phaser.Math.Clamp(this.shipFrom.x + (p.x - this.dragFrom.x) * S.dragSensitivity, S.margin, W - S.margin);
-      this.target.y = Phaser.Math.Clamp(this.shipFrom.y + (p.y - this.dragFrom.y) * S.dragSensitivity, S.margin, H - S.margin);
+      this.target.x = Phaser.Math.Clamp(this.shipFrom.x + (p.x / R - this.dragFrom.x) * S.dragSensitivity, S.margin, W - S.margin);
+      this.target.y = Phaser.Math.Clamp(this.shipFrom.y + (p.y / R - this.dragFrom.y) * S.dragSensitivity, S.margin, H - S.margin);
     });
     const release = p => { if (p.id === this.dragId) this.dragId = null; };
     this.input.on('pointerup', release);

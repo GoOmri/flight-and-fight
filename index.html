@@ -11,7 +11,7 @@
 <style>
   html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; touch-action: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none; }
   /* The game is drawn small and stretched to the phone. Keep hard pixel edges, no smoothing (smoothing = blurry). */
-  canvas { display: block; touch-action: none; image-rendering: pixelated; image-rendering: crisp-edges; image-rendering: -moz-crisp-edges; }
+  canvas { display: block; touch-action: none; image-rendering: auto !important; } /* the canvas is already drawn at 3x, so the browser may smooth the last small stretch */
 </style>
 </head>
 <body>

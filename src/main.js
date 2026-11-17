@@ -1,10 +1,10 @@
 import { CONFIG } from './config.js';
 import { PlayScene } from './scenes/PlayScene.js';
 
-new Phaser.Game({
+window.__game = new Phaser.Game({
   type: Phaser.AUTO,
-  width: CONFIG.game.width,
-  height: CONFIG.game.height,
+  width: CONFIG.game.width * CONFIG.game.render,
+  height: CONFIG.game.height * CONFIG.game.render,
   backgroundColor: '#2a6fdb',
   pixelArt: true,      // sharp pixels (no smoothing) inside the game
   roundPixels: true,   // sprites sit on whole pixels, no shimmer

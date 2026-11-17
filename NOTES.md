@@ -65,3 +65,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - v0.5.0 showed a black screen: a comma in src/config.js (enemyBullet line) sat inside a comment, so the file did not load. Fixed.
 - Lesson: `node --check` did NOT catch it (ES modules). Check with the new-Function test or load the page in the browser pane and read the console BEFORE pushing.
 - Verified: page loads in the browser pane, no console errors. Unverified: on the phone.
+
+## 2026-11-18 v0.5.2: sharp text (canvas drawn 3x bigger)
+- Why: the canvas was only 240x427 and stretched up by the browser, so all text was blurry. Now the canvas is 720x1281 (config.game.render = 3) and the main camera zooms by 3, so every game number is still logical. Sprites still use nearest-neighbour, so pixel art stays hard-edged. Text resolution = render.
+- Touch input is divided by the render factor (PlayScene R). index.html: canvas image-rendering is now auto (the canvas is already 3x).
+- Debug: window.__game exposes the Phaser game (e.g. __game.scene.scenes[0].stageClear()).
+- Verified in the browser pane: HUD, "+10" texts and the STAGE CLEAR screen are crisp; drag moves the witch 1:1 as before; no console errors.
+- UNVERIFIED on the phone: sharpness, speed (the canvas has 9x the pixels; if it stutters set game.render to 2), pixel-art edges after the last small browser stretch.

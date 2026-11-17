@@ -4,7 +4,7 @@ import { CONFIG as C, z } from './config.js';
 import { PX } from './sprites.js';
 import { MEDAL_KEYS } from './medals.js';
 
-export const FONT = { fontFamily: '"Courier New", monospace', fontStyle: 'bold', resolution: 2 }; // resolution 2 = crisper text
+export const FONT = { fontFamily: '"Courier New", monospace', fontStyle: 'bold', resolution: C.game.render }; // text drawn at canvas resolution = sharp
 const W = C.game.width;
 const DARK = 0x1b1b2b, GREEN = 0x2ee86a;
 const PIP_COMING = 0, PIP_ON = 1, PIP_OFF = 2, PIP_DONE = 3, PIP_DIRTY = 4; // pip look codes (DIRTY = done, but an enemy escaped)
@@ -21,7 +21,7 @@ export class Hud {
     this.medalImgs = MEDAL_KEYS.map((k, i) =>
       scene.add.image(H.margin + i * (H.medalSize + H.medalGap), H.margin, 'medal_' + k + '_pending').setOrigin(0, 0).setDepth(depth));
     this.medalLook = MEDAL_KEYS.map(() => 'pending');
-    this.versionText = scene.add.text(H.margin, H.margin + H.medalSize + H.versionGap, 'v' + C.version, { ...FONT, resolution: 3, fontSize: H.versionSize + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: H.versionStroke }).setAlpha(H.versionAlpha).setDepth(depth);
+    this.versionText = scene.add.text(H.margin, H.margin + H.medalSize + H.versionGap, 'v' + C.version, { ...FONT, fontSize: H.versionSize + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: H.versionStroke }).setAlpha(H.versionAlpha).setDepth(depth);
 
     // CENTRE: score, weapon bars under it
     this.scoreText = scene.add.text(W / 2, H.margin, 'SCORE 0', { ...FONT, fontSize: z(18) + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: z(4) }).setOrigin(0.5, 0.5).setDepth(depth);
