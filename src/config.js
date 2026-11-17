@@ -1,5 +1,6 @@
 // All tuning numbers live here. Change them and reload the page.
 export const CONFIG = {
+  version: "0.1.1", // bump on every push so the player/Omri can see the build
   game: { width: 360, height: 640, pixelScale: 3 }, // pixelScale: size of one art pixel on screen
 
   ship: {

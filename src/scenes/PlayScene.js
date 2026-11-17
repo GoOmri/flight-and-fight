@@ -79,6 +79,7 @@ export class PlayScene extends Phaser.Scene {
 
   makeHud() {
     this.scoreText = this.add.text(8, 6, 'SCORE 0', { ...FONT, fontSize: '18px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: 4 }).setDepth(50);
+    this.versionText = this.add.text(8, 30, 'v' + C.version, { ...FONT, fontSize: '9px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: 2 }).setAlpha(0.6).setDepth(50);
     this.heartIcons = [];
     for (let i = 0; i < C.ship.hearts; i++) {
       this.heartIcons.push(this.add.image(W - 12 - i * 26, 16, 'heart').setScale(3).setOrigin(1, 0.5).setDepth(50));
