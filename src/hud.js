@@ -106,6 +106,7 @@ export class Hud {
       this.pop = Math.max(0, this.pop - dt * 1000 / C.feel.scorePopMs);
       this.scoreText.setScale(1 + C.feel.scorePopScale * this.pop);
     }
+    if (!C.hud.showWaveIndicator) return; // wave dots are switched off in config (hud.showWaveIndicator)
     // redraw the pips only when one of them changed its look
     let changed = false;
     for (let i = 0; i < this.total.length; i++) {

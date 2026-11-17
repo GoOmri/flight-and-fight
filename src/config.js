@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.3.1", // bump on every push so the player/Omri can see the build
+  version: "0.3.2", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3 }, // pixelScale: size of one art pixel in game units
@@ -118,6 +118,7 @@ export const CONFIG = {
     margin: 4,
     medalSize: 10, medalGap: 2,
     barW: 4, barH: 7, barGap: 2,
+    showWaveIndicator: false, // the 10 wave dots under the hearts: false = hidden (Omri, v0.3.2). true brings them back
     pip: 5, pipGap: 2, pipBlinkMs: 350
   }
 };
