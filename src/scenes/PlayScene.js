@@ -1,5 +1,7 @@
 import { CONFIG as C, z } from '../config.js';
 import { makeAllTextures, PX } from '../sprites.js';
+import { STAGE1 } from '../waves.js';
+import { WaveRunner, initPath, followPath } from '../waves-runner.js';
 
 const W = C.game.width, H = C.game.height;
 const FONT = { fontFamily: '"Courier New", monospace', fontStyle: 'bold', resolution: 2 }; // resolution 2 = crisper text
@@ -15,10 +17,16 @@ export class PlayScene extends Phaser.Scene {
     this.over = false;
     this.invulnUntil = 0;
     this.nextShot = 0;
-    this.clock = 0;       // game time in seconds (for the wave timeline)
-    this.spawnQueue = [];
-    this.waveIndex = 0;
-    this.loopOffset = 0;
+    // Debug helpers (type them after the web address): ?wave=N starts the stage at wave N (1-10); ?god=1 = no damage (hits still counted).
+    const q = new URLSearchParams(window.location.search);
+    this.god = q.get('god') === '1';
+    const startWave = Phaser.Math.Clamp(parseInt(q.get('wave'), 10) || 1, 1, STAGE1.length) - 1;
+    this.runner = new WaveRunner(STAGE1, startWave, C.stage.firstWaveDelay);
+    this.hooks = { enemy: (cg, i) => this.spawnEnemy(cg, i), crate: cc => this.spawnCrate(cc) };
+    this.enemyCount = 0;  // enemies alive now
+    this.clearAt = 0;     // time when STAGE CLEAR shows (0 = not yet)
+    // Counters for the medals later (shown only on the result screen for now)
+    this.enemiesSpawned = 0; this.enemiesKilled = 0; this.coinsSpawned = 0; this.coinsCollected = 0; this.hitsTaken = 0;
 
     this.makeBackground();
     this.makePools();
@@ -50,9 +58,11 @@ export class PlayScene extends Phaser.Scene {
 
     // Collisions
     this.physics.add.overlap(this.bullets, this.enemies, (b, e) => this.bulletHitsEnemy(b, e));
+    this.physics.add.overlap(this.bullets, this.crates, (b, c) => this.bulletHitsCrate(b, c));
     this.physics.add.overlap(this.ship, this.enemyBullets, (s, b) => { this.kill(b); this.hurtPlayer(); });
-    this.physics.add.overlap(this.ship, this.enemies, (s, e) => { if (this.hurtPlayer() && C.ship.ramKillsEnemy) this.crashEnemy(e); });
-    this.physics.add.overlap(this.ship, this.coins, (s, c) => { this.kill(c); this.addScore(C.coin.value); });
+    this.physics.add.overlap(this.ship, this.enemies, (s, e) => { if (e.onScreen && this.hurtPlayer() && C.ship.ramKillsEnemy) this.crashEnemy(e); });
+    this.physics.add.overlap(this.ship, this.coins, (s, c) => { this.kill(c); this.coinsCollected++; this.addScore(C.coin.value); });
+    // (crates are in no ship overlap: the ship flies through them)
   }
 
   // ---------- setup ----------
@@ -87,12 +97,14 @@ export class PlayScene extends Phaser.Scene {
     this.enemyBullets = mk('ebullet', C.enemyBullet.poolSize);
     this.enemies = mk('grunt', C.enemies.poolSize);
     this.coins = mk('coin', C.coin.poolSize);
+    this.crates = mk('crate', C.crate.poolSize);
     this.sparks = this.add.group({ defaultKey: 'square', maxSize: C.particles.poolSize });
   }
 
   makeShip() {
     this.ship = this.physics.add.image(W / 2, C.ship.startY, 'hero').setScale(PX).setDepth(10);
-    this.ship.body.setSize(C.ship.hitbox, C.ship.hitbox);
+    const hb = 2 * C.ship.hitRadius / PX; // body size is in art pixels; centred on the sprite
+    this.ship.body.setSize(hb, hb);
     this.target = new Phaser.Math.Vector2(this.ship.x, this.ship.y); // where the finger wants the ship
   }
 
@@ -153,9 +165,12 @@ export class PlayScene extends Phaser.Scene {
 
     this.moveShip(dt);
     this.autoFire(time);
-    this.runWaves(dt);
+    this.runner.update(dt, this.enemyCount, this.hooks);
     this.updateEnemies(time, dt);
+    this.updateCrates(time, dt);
     this.cullOffscreen();
+    if (!this.clearAt && this.runner.finished && this.enemyCount === 0 && this.crates.countActive(true) === 0 && this.coins.countActive(true) === 0) this.clearAt = time + C.stage.endDelayMs;
+    if (this.clearAt && time >= this.clearAt) { this.stageClear(); return; }
     this.updateSparks(dt);
 
     // invulnerability blink
@@ -180,60 +195,74 @@ export class PlayScene extends Phaser.Scene {
     }
   }
 
-  runWaves(dt) {
-    this.clock += dt;
-    const waves = C.waves;
-    while (this.waveIndex < waves.length && this.clock >= this.loopOffset + waves[this.waveIndex].t) {
-      const w = waves[this.waveIndex++];
-      for (let i = 0; i < w.count; i++) {
-        this.spawnQueue.push({ at: this.loopOffset + w.t + i * w.gap, type: w.type, x: w.x });
-      }
-    }
-    if (this.waveIndex >= waves.length && this.clock >= this.loopOffset + C.loopLength) {
-      this.loopOffset += C.loopLength; this.waveIndex = 0;
-    }
-    this.spawnQueue = this.spawnQueue.filter(q => {
-      if (this.clock < q.at) return true;
-      this.spawnEnemy(q.type, q.x);
-      return false;
-    });
+  spawnEnemy(cg, i) {
+    const g = cg.g, cfg = C.enemies[g.type];
+    const e = this.spawn(this.enemies, g.type, cg.p.sx, cg.p.sy);
+    if (!e) return;
+    initPath(e, cg.p, g.spd);
+    e.kind = g.type; e.hp = cfg.hp; e.flashUntil = 0; e.onScreen = false;
+    e.fire = g.fire || null; e.armed = false; e.fireT = 0;
+    e.coin = g.type === 'shooter' || (g.coinEvery > 0 && (i + 1) % g.coinEvery === 0); // shooters always drop 1 coin
+    this.enemyCount++; this.enemiesSpawned++;
   }
 
-  spawnEnemy(type, fx) {
-    const cfg = C.enemies[type];
-    const x = fx < 0 ? Phaser.Math.Between(30, W - 30) : fx * W;
-    const e = this.spawn(this.enemies, type, x, -20);
-    if (!e) return;
-    e.kind = type; e.hp = cfg.hp; e.baseX = x; e.age = 0; e.flashUntil = 0; e.nextShot = 0; e.leaving = false; e.stopAt = 0;
-    e.body.setVelocity(0, cfg.speed);
+  spawnCrate(cc) {
+    const c = this.spawn(this.crates, 'crate', cc.p.sx, cc.p.sy);
+    if (!c) return;
+    initPath(c, cc.p, cc.c.spd);
+    c.hp = cc.c.hp; c.coins = cc.c.coins; c.flashUntil = 0; c.onScreen = false;
   }
+
+  removeEnemy(e) { this.kill(e); this.enemyCount--; }
+
+  // An enemy can only be hit or hurt while its centre is inside the screen.
+  inside(o) { return o.x > 0 && o.x < W && o.y > 0 && o.y < H; }
 
   updateEnemies(time, dt) {
     this.enemies.children.iterate(e => {
       if (!e || !e.active) return;
-      const cfg = C.enemies[e.kind];
-      e.age += dt;
-      if (e.kind === 'zigzag') {
-        e.x = e.baseX + Math.sin(e.age * cfg.swayFreq) * cfg.swayAmp;
-      } else if (e.kind === 'shooter') {
-        if (!e.leaving && e.y >= cfg.stopY && e.body.velocity.y > 0) {
-          e.body.setVelocity(0, 0); e.stopAt = time; e.baseX = e.x; e.nextShot = time + cfg.firstShotMs;
-        }
-        if (e.body.velocity.y === 0 && !e.leaving) {
-          e.x = e.baseX + Math.sin((time - e.stopAt) / cfg.hoverMs) * cfg.hoverAmp; // gentle hover
-          if (time >= e.nextShot) { this.enemyShoot(e, cfg); e.nextShot = time + cfg.fireMs; }
-          if (time - e.stopAt > cfg.stayMs) { e.leaving = true; e.body.setVelocity(0, cfg.speed * cfg.leaveSpeedMul); }
-        }
+      if (!followPath(e, dt)) { this.removeEnemy(e); return; } // flew away
+      e.onScreen = this.inside(e);
+      if (e.fire && e.wait > 0 && e.onScreen) { // shooters fire only while stopped
+        if (!e.armed) { e.armed = true; e.fireT = e.fire.first; }
+        e.fireT -= dt;
+        if (e.fireT <= 0) { this.enemyShoot(e); e.fireT += e.fire.every; }
       }
       if (time < e.flashUntil) e.setTintFill(0xffffff); else e.clearTint();
     });
   }
 
-  enemyShoot(e, cfg) {
-    const b = this.spawn(this.enemyBullets, 'ebullet', e.x, e.y + 16);
-    if (!b) return;
-    const a = Math.atan2(this.ship.y - b.y, this.ship.x - b.x);
-    b.body.setVelocity(Math.cos(a) * cfg.bulletSpeed, Math.sin(a) * cfg.bulletSpeed);
+  updateCrates(time, dt) {
+    this.crates.children.iterate(c => {
+      if (!c || !c.active) return;
+      if (!followPath(c, dt)) { this.kill(c); return; } // fell off the bottom: lost with its coins
+      c.onScreen = this.inside(c);
+      if (time < c.flashUntil) c.setTintFill(0xffffff); else c.clearTint();
+    });
+  }
+
+  enemyShoot(e) {
+    const f = e.fire, n = f.shots;
+    const base = f.aim === 'player' ? Math.atan2(this.ship.y - (e.y + 14), this.ship.x - e.x) : Math.PI / 2;
+    const hit = C.enemyBullet.hitSize;
+    for (let i = 0; i < n; i++) {
+      const b = this.spawn(this.enemyBullets, 'ebullet', e.x, e.y + 14);
+      if (!b) return;
+      b.body.setSize(hit, hit); // only the bright core hurts
+      const a = base + (i - (n - 1) / 2) * Phaser.Math.DegToRad(f.spread || 0), v = f.spd || C.enemyBullet.speed;
+      b.body.setVelocity(Math.cos(a) * v, Math.sin(a) * v);
+    }
+  }
+
+  dropCoin(x, y, vx) {
+    const m = C.ship.margin;
+    const c = this.spawn(this.coins, 'coin', Phaser.Math.Clamp(x, m, W - m), y);
+    if (!c) return;
+    const hb = 2 * C.coin.pickupRadius / PX; // generous pickup area
+    c.body.setSize(hb, hb);
+    c.body.setVelocity(vx, C.coin.fallSpeed);
+    c.body.setDragX(Math.abs(vx) / C.crate.coinFadeSec); // sideways speed fades to 0 in coinFadeSec
+    this.coinsSpawned++;
   }
 
   cullOffscreen() {
@@ -241,12 +270,11 @@ export class PlayScene extends Phaser.Scene {
     this.enemyBullets.children.iterate(b => {
       if (b && b.active && (b.y > H + 20 || b.y < -20 || b.x < -20 || b.x > W + 20)) this.kill(b);
     });
-    this.enemies.children.iterate(e => { if (e && e.active && e.y > H + 30) this.kill(e); });
     this.coins.children.iterate(c => { if (c && c.active && c.y > H + 20) this.kill(c); });
   }
 
   bulletHitsEnemy(b, e) {
-    if (!b.active || !e.active) return;
+    if (!b.active || !e.active || !e.onScreen) return;
     this.kill(b);
     this.damageEnemy(e, C.bullet.damage, true);
   }
@@ -255,27 +283,35 @@ export class PlayScene extends Phaser.Scene {
     if (!e.active) return;
     e.hp -= dmg;
     if (e.hp > 0) { if (flash) e.flashUntil = this.time.now + C.enemies.hitFlashMs; return; }
-    const cfg = C.enemies[e.kind];
     this.explode(e.x, e.y);
-    if (Math.random() < cfg.coinChance) {
-      const c = this.spawn(this.coins, 'coin', e.x, e.y);
-      if (c) c.body.setVelocity(0, C.coin.fallSpeed);
-    }
-    this.addScore(cfg.score);
-    this.kill(e);
+    if (e.coin) this.dropCoin(e.x, e.y, 0);
+    this.addScore(C.enemies[e.kind].score);
+    this.enemiesKilled++;
+    this.removeEnemy(e);
+  }
+
+  // Crates are not enemies: no score, no kill count. Opening one spills its coins.
+  bulletHitsCrate(b, c) {
+    if (!b.active || !c.active || !c.onScreen) return;
+    this.kill(b);
+    c.hp -= C.bullet.damage;
+    if (c.hp > 0) { c.flashUntil = this.time.now + C.enemies.hitFlashMs; return; }
+    this.explode(c.x, c.y);
+    for (let i = 0; i < c.coins; i++) this.dropCoin(c.x, c.y, (i - (c.coins - 1) / 2) * C.crate.coinSpread);
+    this.kill(c);
   }
 
   crashEnemy(e) {
     if (!e.active) return;
     this.explode(e.x, e.y);
-    this.kill(e); // no score, no coin
+    this.removeEnemy(e); // no score, no coin, not a kill
   }
 
   // returns true only if a heart was really lost
   hurtPlayer() {
     if (this.over || this.time.now < this.invulnUntil) return false;
-    this.hearts--;
-    this.refreshHearts();
+    this.hitsTaken++;
+    if (!this.god) { this.hearts--; this.refreshHearts(); }
     this.invulnUntil = this.time.now + C.ship.invulnMs;
     this.cameras.main.shake(C.ship.hitShakeMs, C.ship.hitShakeAmount);
     this.explode(this.ship.x, this.ship.y);
@@ -305,18 +341,32 @@ export class PlayScene extends Phaser.Scene {
   }
 
   gameOver() {
+    this.endScreen('GAME OVER', '#ff5a5a', false);
+    this.ship.setVisible(false).setAlpha(1);
+  }
+
+  stageClear() { this.endScreen('STAGE CLEAR', '#8dff6a', true); this.ship.setAlpha(1); }
+
+  // Shared end screen (game over / stage clear). A tap after the delay restarts the stage.
+  endScreen(title, col, stats) {
     this.over = true;
     this.restartAt = this.time.now + C.ship.restartDelayMs;
-    this.ship.setVisible(false).setAlpha(1);
     this.ship.body.enable = false;
     this.enemies.children.iterate(e => { if (e && e.active) e.body.setVelocity(0, 0); });
     this.enemyBullets.children.iterate(b => { if (b && b.active) this.kill(b); });
     this.bullets.children.iterate(b => { if (b && b.active) this.kill(b); });
     this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.55).setDepth(60);
-    const t = (y, s, size, col) => this.add.text(W / 2, y, s, { ...FONT, fontSize: z(size) + 'px', color: col, stroke: '#1b1b2b', strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(61);
-    t(H / 2 - z(70), 'GAME OVER', 36, '#ff5a5a');
-    t(H / 2 - z(10), 'SCORE ' + this.score, 26, '#ffe14d');
-    const tap = t(H / 2 + z(60), 'TAP TO PLAY AGAIN', 18, '#ffffff');
+    const t = (y, s, size, c) => this.add.text(W / 2, y, s, { ...FONT, fontSize: z(size) + 'px', color: c, stroke: '#1b1b2b', strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(61);
+    const dy = stats ? 50 : 0;
+    t(H / 2 - z(70 + dy), title, 36, col);
+    t(H / 2 - z(10 + dy), 'SCORE ' + this.score, 26, '#ffe14d');
+    if (stats) {
+      const V = C.coin.value, small = (y, s) => t(H / 2 + z(y), s, 16, '#ffffff');
+      small(-12, 'KILLS ' + this.enemiesKilled + '/' + this.enemiesSpawned);
+      small(10, 'COINS ' + this.coinsCollected * V + '/' + this.coinsSpawned * V);
+      small(32, 'HITS ' + this.hitsTaken);
+    }
+    const tap = t(H / 2 + z(60 + dy), 'TAP TO PLAY AGAIN', 18, '#ffffff');
     this.tweens.add({ targets: tap, alpha: 0.3, yoyo: true, repeat: -1, duration: 600 });
   }
 }

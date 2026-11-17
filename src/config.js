@@ -5,7 +5,7 @@ const ZOOM = 1.5;
 export const z = n => Math.round(n / ZOOM);
 
 export const CONFIG = {
-  version: "0.1.4", // bump on every push so the player/Omri can see the build
+  version: "0.2.1", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3 }, // pixelScale: size of one art pixel in game units
@@ -27,7 +27,7 @@ export const CONFIG = {
     restartDelayMs: 700, // wait after game over before a tap restarts
     hitShakeMs: 120,     // screen shake when hit
     hitShakeAmount: 0.01,
-    hitbox: 5           // hit box size in art pixels (smaller than the sprite = fairer)
+    hitRadius: 3        // the ship can only be hit in a tiny square this far (logical px) around its centre. Sprite is much bigger = fair
   },
 
   bullet: {
@@ -44,31 +44,29 @@ export const CONFIG = {
     farCount: 14, nearCount: 7
   },
 
+  // Enemy hp/score. Their movement, shooting and coins come from the wave data in src/waves.js.
   enemies: {
-    grunt:   { hp: 3, speed: z(110), score: 10, coinChance: 0.25 },
-    zigzag:  { hp: 4, speed: z(90), swayAmp: z(70), swayFreq: 2.2, score: 20, coinChance: 0.35 },
-    shooter: { hp: 7, speed: z(100), stopY: z(110), stayMs: 4500, fireMs: 1400, bulletSpeed: z(150), firstShotMs: 500, hoverMs: 700, hoverAmp: z(20), leaveSpeedMul: 1.5, score: 50, coinChance: 0.7 },
-    poolSize: 24,
+    grunt:   { hp: 3, score: 10 },
+    zigzag:  { hp: 4, score: 20 },
+    shooter: { hp: 7, score: 50 },
+    poolSize: 40,
     hitFlashMs: 70
   },
 
-  enemyBullet: { poolSize: 30 },
+  // Enemy shots: slow red orbs. speed is the default; the wave data may set its own. hitSize = art pixels of the orb core.
+  enemyBullet: { poolSize: 30, speed: 100, hitSize: 3 },
 
-  coin: { fallSpeed: z(90), value: 5, poolSize: 20 },
+  // pickupRadius: how close the ship must be to grab a coin (logical px). Bigger than the ship hitbox on purpose.
+  coin: { fallSpeed: z(90), value: 5, poolSize: 40, pickupRadius: 10 },
 
-  particles: { poolSize: 60, perExplosion: 8, speed: z(140), lifeMs: 450 },
+  // Crates: hp, coins and speed are set per crate in src/waves.js. coinSpread = sideways speed between coins.
+  // coinFadeSec: the sideways burst fades to 0 in this many seconds. poolSize: max crates at once.
+  crate: { coinSpread: 4, coinFadeSec: 0.4, poolSize: 4 },
 
-  // Wave timeline: at time t (seconds) spawn `count` enemies of `type`, `gap` seconds apart.
-  // x is 0..1 across the screen (-1 = random). It loops when finished.
-  waves: [
-    { t: 1.0,  type: 'grunt',   count: 4, gap: 0.6, x: 0.25 },
-    { t: 4.5,  type: 'grunt',   count: 4, gap: 0.6, x: 0.75 },
-    { t: 8.0,  type: 'zigzag',  count: 3, gap: 0.9, x: 0.5 },
-    { t: 12.0, type: 'grunt',   count: 6, gap: 0.4, x: -1 },
-    { t: 14.0, type: 'shooter', count: 1, gap: 0,   x: 0.3 },
-    { t: 15.5, type: 'shooter', count: 1, gap: 0,   x: 0.7 },
-    { t: 19.0, type: 'zigzag',  count: 5, gap: 0.7, x: 0.5 },
-    { t: 24.0, type: 'grunt',   count: 8, gap: 0.35, x: -1 }
-  ],
-  loopLength: 30 // seconds, then the timeline starts again
+  stage: {
+    firstWaveDelay: 1.5, // seconds before the first wave starts
+    endDelayMs: 1500     // after the last enemy is gone, wait this long (coins can still be caught), then show STAGE CLEAR
+  },
+
+  particles: { poolSize: 60, perExplosion: 8, speed: z(140), lifeMs: 450 }
 };
