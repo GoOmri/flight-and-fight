@@ -6,7 +6,7 @@ import { Hud, FONT } from '../hud.js';
 import { Medals, MEDAL_KEYS, saveMedals } from '../medals.js';
 
 const W = C.game.width, H = C.game.height, DEG = Math.PI / 180, TAU = Math.PI * 2;
-const FIRE_TINTS = [0xffe14d, 0xff7a1c], GREEN_TINTS = [0x2ee86a, 0xffffff], COIN_TINTS = [0xe6b8ff, 0xffffff];
+const FIRE_TINTS = [0xffffff, 0xc8ccd6, 0xff7a3a], GREEN_TINTS = [0x2ee86a, 0xffffff], COIN_TINTS = [0xfff2a0, 0xffc928]; // explosions: no yellow/gold (gold = coins only)
 
 export class PlayScene extends Phaser.Scene {
   constructor() { super('Play'); }
@@ -111,8 +111,8 @@ export class PlayScene extends Phaser.Scene {
     this.enemies = mk('grunt', C.enemies.poolSize);
     this.coins = mk('coin', C.coin.poolSize);
     this.crates = mk('crate', C.crate.poolSize);
-    this.weaponUps = mk('weaponUp', 4);
-    this.heartUps = mk('heartUp', 4);
+    this.weaponUps = mk('weaponUp', C.pickup.weaponPoolSize);
+    this.heartUps = mk('heartUp', C.pickup.heartPoolSize);
     this.sparks = this.add.group({ defaultKey: 'square', maxSize: C.particles.poolSize });
     this.halos = this.add.group({ defaultKey: 'square', maxSize: C.pickup.haloPoolSize }); // glowing outlines of carriers
     // muzzle flash: two small white pixels at the nose, shown for a few ms on every volley
@@ -448,10 +448,10 @@ export class PlayScene extends Phaser.Scene {
     let tapY = H / 2 + z(60);
     if (!stats) {
       t(H / 2 - z(70), title, 36, col);
-      t(H / 2 - z(10), 'SCORE ' + this.score, 26, '#ffe14d');
+      t(H / 2 - z(10), 'SCORE ' + this.score, 26, '#ffffff');
     } else {
       t(100, title, 36, col);
-      t(138, 'SCORE ' + this.score, 26, '#ffe14d');
+      t(138, 'SCORE ' + this.score, 26, '#ffffff');
       MEDAL_KEYS.forEach((k, i) => { // the 4 medals, big; NEW under a medal earned for the first time
         const x = W / 2 + (i - 1.5) * 46;
         this.add.image(x, 185, 'medal_' + k + '_' + this.medals.state[k]).setScale(3).setDepth(61);

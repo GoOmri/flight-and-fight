@@ -21,19 +21,20 @@ export class Hud {
     this.medalImgs = MEDAL_KEYS.map((k, i) =>
       scene.add.image(H.margin + i * (H.medalSize + H.medalGap), H.margin, 'medal_' + k + '_pending').setOrigin(0, 0).setDepth(depth));
     this.medalLook = MEDAL_KEYS.map(() => 'pending');
-    this.versionText = scene.add.text(H.margin, H.margin + H.medalSize + 3, 'v' + C.version, { ...FONT, fontSize: z(11) + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: 1 }).setAlpha(0.6).setDepth(depth);
+    this.versionText = scene.add.text(H.margin, H.margin + H.medalSize + H.versionGap, 'v' + C.version, { ...FONT, resolution: 3, fontSize: H.versionSize + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: H.versionStroke }).setAlpha(H.versionAlpha).setDepth(depth);
 
     // CENTRE: score, weapon bars under it
-    this.scoreText = scene.add.text(W / 2, H.margin, 'SCORE 0', { ...FONT, fontSize: z(18) + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: z(4) }).setOrigin(0.5, 0).setDepth(depth);
+    this.scoreText = scene.add.text(W / 2, H.margin, 'SCORE 0', { ...FONT, fontSize: z(18) + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: z(4) }).setOrigin(0.5, 0.5).setDepth(depth);
+    this.scoreText.y = H.margin + this.scoreText.height / 2; // anchored at its middle so the pop grows in place
     this.pop = 0; // 1 right after the score changed, falls to 0
-    this.rowY = H.margin + 18; // the bars and the pips share this line
+    this.rowY = H.margin + H.rowOffset; // the bars and the pips share this line
     this.bars = scene.add.graphics().setDepth(depth);
     this.barLevel = -1;
 
     // RIGHT: hearts, wave pips under them
     this.heartIcons = [];
     for (let i = 0; i < C.ship.hearts; i++) {
-      this.heartIcons.push(scene.add.image(W - H.margin - i * z(26), H.margin + 6, 'heart').setScale(PX / C.game.zoom).setOrigin(1, 0.5).setDepth(depth));
+      this.heartIcons.push(scene.add.image(W - H.margin - i * H.heartStep, H.margin + H.heartY, 'heart').setScale(PX / C.game.zoom).setOrigin(1, 0.5).setDepth(depth));
     }
     this.pips = scene.add.graphics().setDepth(depth);
     this.pipLook = this.total.map(() => -1);

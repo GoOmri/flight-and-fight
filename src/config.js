@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.3.2", // bump on every push so the player/Omri can see the build
+  version: "0.3.3", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3 }, // pixelScale: size of one art pixel in game units
@@ -91,7 +91,8 @@ export const CONFIG = {
   // Pickup grab radius is coin.pickupRadius. heartScoreIfFull: score given for a heart when already at full hearts.
   pickup: {
     weaponFallSpeed: z(130), heartFallSpeed: z(55), heartScoreIfFull: 50, maxLevel: 10,
-    haloPoolSize: 12,   // glowing outlines around carriers alive at once
+    weaponPoolSize: 4, heartPoolSize: 4, // pickups on screen at once
+    haloPoolSize: 12,  // glowing outlines around carriers alive at once
     haloPulseMs: 500    // one pulse of the carrier glow
   },
 
@@ -117,6 +118,9 @@ export const CONFIG = {
   hud: {
     margin: 4,
     medalSize: 10, medalGap: 2,
+    versionSize: 10, versionAlpha: 0.9, versionStroke: 3, versionGap: 2, // version text under the medals (px, 0..1, outline px, gap under medals)
+    rowOffset: 22,                  // bars (and wave dots) start this far below the top margin; below the score text even when it pops
+    heartStep: z(26), heartY: 6,    // distance between hearts; heart centre below the top margin
     barW: 4, barH: 7, barGap: 2,
     showWaveIndicator: false, // the 10 wave dots under the hearts: false = hidden (Omri, v0.3.2). true brings them back
     pip: 5, pipGap: 2, pipBlinkMs: 350

@@ -9,17 +9,17 @@ const PAL = {
   n: 0x3bb54a, p: 0xb15bd6, m: 0x7a2fa0,
   // COLOUR RULE (what each colour is reserved for, never mix):
   //  RED (e,h,q)           = danger: enemy shots only (hero flame and hearts use red too, they are small).
-  //  PURPLE/VIOLET (V,L,D) = coins only.
+  //  GOLD (Q,A,U,K)        = coins only (also the coin sparkle and the 'all coins' medal icon). Violet is now unused/free.
   //  CYAN-WHITE (c,w)      = player shots (and the hero's nose).
   //  Enemies use ONLY dark / earth / military tones: steel grey (S,s), olive/dark green (O,F,l), brown/black-grey (N,Z)
   //   with a dark outline (k). Lime (M) is the shooter gun. No red, pink, orange, yellow, gold, purple or cyan on enemies.
   //  Crate = wood: brown/tan (T,B,Y) with a dark outline (X). No yellow/gold.
   //  BRIGHT GREEN (E,H)    = weapon upgrade only: the pickup badge, the pulsing outline of a weapon carrier and the filled bars in the HUD.
   //  PINK-WHITE (P)        = pulsing outline of a heart carrier. The heart pickup has a white outline.
-  //  HUD medal icons: bone-white skulls, blue shield, violet gem (coin colour). Never red or purple except the gem.
-  // (Explosion sparks are tinted yellow/orange in code: small squares, OK.)
+  //  HUD medal icons: bone-white skulls, blue shield, gold coin (coin colour). Never red or gold except the coin.
+  // (Explosion sparks are tinted white / light grey / red-orange in code: never yellow or gold, so they never look like coins.)
   e: 0x7a0a0a, h: 0xff2a2a, q: 0xff7a7a, // enemy shot: dark red outline, bright red, lighter red core
-  V: 0xb24bf3, L: 0xe6b8ff, D: 0x2a0a4a, // coin: violet fill, light highlight, dark outline
+  Q: 0xffc928, A: 0xfff2a0, U: 0xb36b00, K: 0x5a3200, // coin: gold body, light shine, brown rim, dark outline
   S: 0x6a7a92, s: 0x3a4558, G: 0x3fa34d, // grunt: steel grey, dark steel, green canopy
   O: 0x6b7a2e, F: 0x34562a, l: 0x8fc45a, // zigzag: olive, dark green, light green accent
   N: 0x5a3f2c, Z: 0x2b2b32, M: 0xa6ff3c, // shooter: brown, black-grey, lime gun/eye
@@ -99,15 +99,15 @@ const CRATE = [
 const EBULLET = ['.eee.', 'ehqhe', 'ehqhe', 'ehhhe', '.eee.']; // round red orb, dark red outline
 // Player bolt size lives here: 2 x 5 art pixels (white head, cyan tail). Hitbox = texture size.
 const PBULLET = ['ww', 'ww', 'ww', 'cc', 'cc'];
-// coin: bigger diamond gem (7x7), violet with outline and highlight
+// coin: round gold coin (7x7): gold body, light shine top-left, brown rim, dark outline
 const COIN = [
-  '...D...',
-  '..DLD..',
-  '.DLVVD.',
-  'DLVVVVD',
-  '.DVVVD.',
-  '..DVD..',
-  '...D...'
+  '..KKK..',
+  '.KAAQK.',
+  'KAAQQUK',
+  'KAQQQUK',
+  'KQQQQUK',
+  '.KUUUK.',
+  '..KKK..'
 ];
 const HEART = ['.rr.rr.', 'rrrrrrr', 'rrrrrrr', '.rrrrr.', '..rrr..', '...r...'];
 const HEART_EMPTY = ['.dd.dd.', 'd..d..d', 'd.....d', '.d...d.', '..d.d..', '...d...'];
@@ -151,7 +151,7 @@ const SKULL = [
 const MEDAL_ART = {
   kill70: SKULL.map(r => r.slice(0, 5) + r.slice(5).replace(/J/g, 'j')), // half skull: right half is shaded
   killAll: SKULL,
-  allCoins: ['..........', '..DDDDDD..', '.DLLVVVVD.', 'DLLVVVVVVD', 'DDDDDDDDDD', '.DVVVVVVD.', '..DVVVVD..', '...DVVD...', '....DD....', '..........'],
+  allCoins: ['...KKKK...', '..KAAQQK..', '.KAAQQQUK.', 'KAAQQQQQUK', 'KAQQQQQQUK', 'KQQQQQQQUK', 'KQQQQQQUUK', '.KQQQUUUK.', '..KUUUUK..', '...KKKK...'],
   noHit: ['kkkkkkkkkk', 'kbbbbbbbbk', 'kbwwbbwwbk', 'kbwwwwwwbk', 'kbwwwwwwbk', '.kbwwwwbk.', '.kbbwwbbk.', '..kbbbbk..', '...kbbk...', '....kk....']
 };
 function makeMedalIcons(scene) {
