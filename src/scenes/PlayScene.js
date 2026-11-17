@@ -6,7 +6,15 @@ import { Hud, FONT } from '../hud.js';
 import { Medals, MEDAL_KEYS, saveMedals } from '../medals.js';
 
 const W = C.game.width, H = C.game.height, DEG = Math.PI / 180, TAU = Math.PI * 2;
-const FIRE_TINTS = [0xffffff, 0xc8ccd6, 0xff7a3a], GREEN_TINTS = [0x2ee86a, 0xffffff], COIN_TINTS = [0xfff2a0, 0xffc928]; // explosions: no yellow/gold (gold = coins only)
+// Spark colours. Death pops match the creature; no red and no gold on anything that is not a shot / coin.
+const DEATH_TINTS = {
+  grunt: [0x3c3a8c, 0x8f86d8, 0xffffff],   // bat: indigo
+  zigzag: [0xc9c3e8, 0xffffff, 0xd98fb8],  // ghost: lavender
+  shooter: [0x1f6b5a, 0x3fb59a, 0xffffff], // imp: teal
+  crate: [0xc58f4f, 0x8a5a2b, 0x8a93a6]    // chest: wood + steel
+};
+const WITCH_TINTS = [0xff7ad9, 0xb15bd6, 0xffffff], SHOT_TINTS = [0xffffff, 0x7fe0ff], TRAIL_TINTS = [0xff7ad9, 0xc89cff, 0xffffff];
+const GREEN_TINTS = [0x2ee86a, 0xffffff], COIN_TINTS = [0xfff2a0, 0xffc928]; // coin sparkle is gold (coins only)
 
 export class PlayScene extends Phaser.Scene {
   constructor() { super('Play'); }
@@ -16,6 +24,7 @@ export class PlayScene extends Phaser.Scene {
     this.score = 0;
     this.freezeMs = 0;    // hit-stop: game is frozen while > 0
     this.shipFlashUntil = 0; this.muzzleUntil = 0;
+    this.recoil = 0; this.trailT = 0; this.vx = 0; this.vy = 0; this.cloudMul = 1; // feel state
     this.hearts = C.ship.hearts;
     this.over = false;
     this.invulnUntil = 0;
@@ -71,6 +80,7 @@ export class PlayScene extends Phaser.Scene {
     this.physics.add.overlap(this.ship, this.enemies, (s, e) => { if (e.onScreen && this.hurtPlayer() && C.ship.ramKillsEnemy) this.crashEnemy(e); });
     this.physics.add.overlap(this.ship, this.coins, (s, c) => {
       this.kill(c); this.coinsCollected++; this.addScore(C.coin.value);
+      this.pop(c.x, c.y, '+' + C.coin.value);
       this.burst(c.x, c.y, C.feel.coinSparkCount, COIN_TINTS, C.feel.coinSparkSpeedMul, 3); // coin pop
     });
     this.physics.add.overlap(this.ship, this.weaponUps, (s, p) => { this.kill(p); this.weaponUp(); });
@@ -115,13 +125,25 @@ export class PlayScene extends Phaser.Scene {
     this.heartUps = mk('heartUp', C.pickup.heartPoolSize);
     this.sparks = this.add.group({ defaultKey: 'square', maxSize: C.particles.poolSize });
     this.halos = this.add.group({ defaultKey: 'square', maxSize: C.pickup.haloPoolSize }); // glowing outlines of carriers
+    this.trail = this.add.group({ defaultKey: 'square', maxSize: C.feel.trailPoolSize }); // broom sparkles (own pool so bursts never starve it)
+    this.fxGroups = [this.sparks, this.trail];
+    // screen flash: one reused rectangle, below the enemy shots so it never hides them
+    this.flash = this.add.rectangle(W / 2, H / 2, W, H, C.feel.flashColor, 1).setDepth(C.feel.flashDepth).setAlpha(0);
+    this.flashT = 0;
+    this.rings = this.add.group({ defaultKey: 'fxRing', maxSize: C.feel.ringPoolSize });  // expanding ring puffs
+    this.pops = []; // floating score texts, made once and reused
+    for (let i = 0; i < C.feel.popPoolSize; i++) {
+      this.pops.push(this.add.text(0, 0, '', { ...FONT, fontSize: C.feel.popTextSize + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: 3 })
+        .setOrigin(0.5).setDepth(30).setVisible(false));
+    }
     // muzzle flash: two small white pixels at the nose, shown for a few ms on every volley
     this.muzzle = [0, 1].map(() => this.add.image(0, 0, 'square').setScale(C.feel.muzzleSize).setDepth(11).setVisible(false));
   }
 
   makeShip() {
-    this.ship = this.physics.add.image(W / 2, C.ship.startY, 'hero').setScale(PX).setDepth(10);
-    const hb = 2 * C.ship.hitRadius / PX; // body size is in art pixels; centred on the sprite
+    const SS = C.ship.spriteScale;
+    this.ship = this.physics.add.image(W / 2, C.ship.startY, 'hero').setScale(SS).setDepth(10);
+    const hb = 2 * C.ship.hitRadius / SS; // body size is in art pixels; centred on the sprite (hitbox stays tiny whatever the sprite size)
     this.ship.body.setSize(hb, hb);
     this.target = new Phaser.Math.Vector2(this.ship.x, this.ship.y); // where the finger wants the ship
   }
@@ -130,12 +152,13 @@ export class PlayScene extends Phaser.Scene {
   moveShip(dt) {
     const S = C.ship, s = this.ship;
     const k = 1 - Math.exp(-S.followRate * dt);
-    const px = s.x;
+    const px = s.x, py = s.y;
     s.x += (this.target.x - s.x) * k;
     s.y += (this.target.y - s.y) * k;
     if (Math.abs(this.target.x - s.x) < 0.25) s.x = this.target.x;
     if (Math.abs(this.target.y - s.y) < 0.25) s.y = this.target.y;
     const vx = dt > 0 ? (s.x - px) / dt : 0;
+    this.vx = vx; this.vy = dt > 0 ? (s.y - py) / dt : 0;
     const want = Phaser.Math.Clamp(vx / S.bankSpeed, -1, 1) * Phaser.Math.DegToRad(S.bankDeg);
     s.rotation += (want - s.rotation) * (1 - Math.exp(-S.bankEase * dt));
   }
@@ -145,6 +168,7 @@ export class PlayScene extends Phaser.Scene {
     const o = group.get(x, y, key);
     if (!o) return null; // pool full: skip, never create more
     o.setTexture(key).setActive(true).setVisible(true).setScale(PX).clearTint().setAlpha(1);
+    o.kick = 0; o.ox = 0; o.oy = 0; // hit knock-back state
     o.body.enable = true;
     o.body.reset(x, y);
     o.body.setSize(o.width, o.height);
@@ -170,17 +194,19 @@ export class PlayScene extends Phaser.Scene {
     const dt = Math.min(delta, 50) / 1000;
     this.scrollBackground(dt);
     this.hud.update(dt, time);
-    if (this.over) { this.updateSparks(dt); return; }
+    if (this.over) { this.updateFx(dt); return; }
 
     this.moveShip(dt);
+    this.updateShipFeel(dt);
     this.autoFire(time);
     this.runner.update(dt, this.enemyCount, this.hooks);
     this.updateEnemies(time, dt);
     this.updateCrates(time, dt);
-    this.cullOffscreen();
+    this.updateCoins(dt);
+    this.cullOffscreen(time);
     if (!this.clearAt && this.runner.finished && this.enemyCount === 0 && this.crates.countActive(true) === 0 && this.coins.countActive(true) === 0 && this.weaponUps.countActive(true) === 0 && this.heartUps.countActive(true) === 0) this.clearAt = time + C.stage.endDelayMs;
     if (this.clearAt && time >= this.clearAt) { this.stageClear(); return; }
-    this.updateSparks(dt);
+    this.updateFx(dt);
 
     // invulnerability blink
     if (time < this.invulnUntil) {
@@ -191,10 +217,43 @@ export class PlayScene extends Phaser.Scene {
   }
 
   scrollBackground(dt) {
+    const F = C.feel; // clouds rush by faster when the witch flies up
+    const want = 1 + F.cloudBoost * Phaser.Math.Clamp(-this.vy / C.ship.bankSpeed, 0, 1);
+    this.cloudMul += (want - this.cloudMul) * (1 - Math.exp(-F.cloudEase * dt));
     for (const L of this.layers) for (const s of L.items) {
-      s.y += L.speed * dt;
+      s.y += L.speed * this.cloudMul * dt;
       if (s.y > H + 40) { s.y = -40; s.x = Phaser.Math.Between(0, W); }
     }
+  }
+
+  // Broom sparkle trail (more sparks when moving) and the small recoil squash.
+  updateShipFeel(dt) {
+    const F = C.feel, S = C.ship, SS = S.spriteScale, sh = this.ship;
+    if (F.recoilPx > 0) {
+      this.recoil = Math.max(0, this.recoil - dt * 1000 / F.recoilMs);
+      const k = F.recoilPx / (this.ship.height * SS) * this.recoil; // ship.height = witch art height in art px; k = fraction of the height
+      sh.setScale(SS * (1 + k * 0.7), SS * (1 - k));
+    }
+    if (!F.trail) return;
+    this.trailT -= dt;
+    if (this.trailT > 0) return;
+    const speed = Phaser.Math.Clamp(Math.hypot(this.vx, this.vy) / S.bankSpeed, 0, 1);
+    this.trailT = Phaser.Math.Linear(F.trailIdleMs, F.trailMoveMs, speed) / 1000;
+    this.emit(this.trail, sh.x + Phaser.Math.Between(-F.trailSpreadX, F.trailSpreadX), sh.y + F.trailY, -this.vx * F.trailCarry + Phaser.Math.Between(-F.trailJitter, F.trailJitter), F.trailSpeed - this.vy * F.trailCarry,
+      F.trailLifeMs / 1000, Phaser.Math.Between(1, 2) * SS, TRAIL_TINTS[(Math.random() * TRAIL_TINTS.length) | 0], 9, true);
+  }
+
+  // Coins close to the witch fly to her (magnet).
+  updateCoins(dt) {
+    const F = C.feel, R = F.magnetRadius;
+    if (R <= 0) return;
+    const sh = this.ship;
+    this.coins.children.iterate(c => {
+      if (!c || !c.active) return;
+      const dx = sh.x - c.x, dy = sh.y - c.y, d = Math.hypot(dx, dy);
+      if (!c.mag && d < R) { c.mag = true; c.body.setDragX(0); }
+      if (c.mag && d > 0.5) c.body.setVelocity(dx / d * F.magnetSpeed, dy / d * F.magnetSpeed);
+    });
   }
 
   // Fire one volley of the current weapon level (see weaponLevels in config.js).
@@ -203,7 +262,7 @@ export class PlayScene extends Phaser.Scene {
     const lv = C.weaponLevels[this.weaponLevel], sp = C.bullet.speed;
     this.nextShot = time + lv.fireRateMs;
     for (const sh of lv.pattern) {
-      const b = this.spawn(this.bullets, 'pbullet', this.ship.x + sh.dx, this.ship.y - 18);
+      const b = this.spawn(this.bullets, 'pbullet', this.ship.x + sh.dx, this.ship.y - C.ship.shotY);
       if (!b) continue;
       const a = sh.deg * DEG;
       b.setRotation(a);
@@ -211,8 +270,9 @@ export class PlayScene extends Phaser.Scene {
       b.body.setVelocity(Math.sin(a) * sp, -Math.cos(a) * sp);
     }
     const F = C.feel;
-    this.muzzle.forEach((m, i) => m.setPosition(this.ship.x + (i ? F.muzzleSpread : -F.muzzleSpread), this.ship.y - 21).setVisible(true));
+    this.muzzle.forEach((m, i) => m.setPosition(this.ship.x + (i ? F.muzzleSpread : -F.muzzleSpread), this.ship.y - C.ship.muzzleY).setVisible(true));
     this.muzzleUntil = time + F.muzzleMs;
+    this.recoil = 1;
   }
 
   spawnEnemy(cg, i) {
@@ -261,7 +321,7 @@ export class PlayScene extends Phaser.Scene {
   updateEnemies(time, dt) {
     this.enemies.children.iterate(e => {
       if (!e || !e.active) return;
-      if (!followPath(e, dt)) { this.enemyLost(e); return; } // flew away
+      if (!this.kickMove(e, dt)) { this.enemyLost(e); return; } // flew away
       e.onScreen = this.inside(e);
       if (e.fire && e.wait > 0 && e.onScreen) { // shooters fire only while stopped
         if (!e.armed) { e.armed = true; e.fireT = e.fire.first; }
@@ -273,10 +333,23 @@ export class PlayScene extends Phaser.Scene {
     });
   }
 
+  // followPath plus the little knock-back / shake after a hit. The offset is taken off first, so it never builds up.
+  kickMove(o, dt) {
+    const F = C.feel;
+    o.x -= o.ox; o.y -= o.oy;
+    const ok = followPath(o, dt);
+    if (o.kick > 0 && ok) {
+      o.kick = Math.max(0, o.kick - dt * 1000 / F.hitKickMs);
+      o.ox = (Math.random() - 0.5) * F.hitKickPx * o.kick; o.oy = -F.hitKickPx * o.kick;
+    } else { o.ox = 0; o.oy = 0; }
+    o.x += o.ox; o.y += o.oy;
+    return ok;
+  }
+
   updateCrates(time, dt) {
     this.crates.children.iterate(c => {
       if (!c || !c.active) return;
-      if (!followPath(c, dt)) { this.kill(c); this.coinLost(); return; } // fell off the bottom: lost with its coins
+      if (!this.kickMove(c, dt)) { this.kill(c); this.coinLost(); return; } // fell off the bottom: lost with its coins
       c.onScreen = this.inside(c);
       if (time < c.flashUntil) c.setTintFill(0xffffff); else c.clearTint();
     });
@@ -286,9 +359,11 @@ export class PlayScene extends Phaser.Scene {
     const f = e.fire, n = f.shots;
     const base = f.aim === 'player' ? Math.atan2(this.ship.y - (e.y + 14), this.ship.x - e.x) : Math.PI / 2;
     const hit = C.enemyBullet.hitSize;
+    if (C.feel.fireFlashScale > 0) this.ring(e.x, e.y + 14, 0xffffff, C.feel.fireFlashScale, C.feel.fireFlashMs, C.feel.fireFlashAlpha); // telegraph
     for (let i = 0; i < n; i++) {
       const b = this.spawn(this.enemyBullets, 'ebullet', e.x, e.y + 14);
       if (!b) return;
+      b.setDepth(C.enemyBullet.depth); // above all play effects, below the HUD
       b.body.setSize(hit, hit); // only the bright core hurts
       const a = base + (i - (n - 1) / 2) * Phaser.Math.DegToRad(f.spread || 0), v = f.spd || C.enemyBullet.speed;
       b.body.setVelocity(Math.cos(a) * v, Math.sin(a) * v);
@@ -302,6 +377,7 @@ export class PlayScene extends Phaser.Scene {
     const hb = 2 * C.coin.pickupRadius / PX; // generous pickup area
     c.body.setSize(hb, hb);
     c.body.setVelocity(vx, C.coin.fallSpeed);
+    c.mag = false;
     c.body.setDragX(Math.abs(vx) / C.crate.coinFadeSec); // sideways speed fades to 0 in coinFadeSec
     this.coinsSpawned++;
   }
@@ -323,15 +399,19 @@ export class PlayScene extends Phaser.Scene {
     this.hud.setLevel(this.weaponLevel);
     this.shipFlashUntil = this.time.now + C.feel.levelFlashMs;
     this.burst(this.ship.x, this.ship.y, C.feel.levelSparkCount, GREEN_TINTS, 1, 3);
+    if (C.feel.deathRing) this.ring(this.ship.x, this.ship.y, 0x2ee86a, C.feel.bigDeathRingScale, C.feel.deathRingMs + C.feel.pickupRingExtraMs);
   }
 
   heartUp() {
-    if (this.hearts < C.ship.hearts) { this.hearts++; this.hud.setHearts(this.hearts); } else this.addScore(C.pickup.heartScoreIfFull);
+    if (this.hearts < C.ship.hearts) { this.hearts++; this.hud.setHearts(this.hearts); } else { this.addScore(C.pickup.heartScoreIfFull); this.pop(this.ship.x, this.ship.y - C.feel.popTextOffsetY, '+' + C.pickup.heartScoreIfFull); }
+    if (C.feel.deathRing) this.ring(this.ship.x, this.ship.y, 0xffc9e3, C.feel.bigDeathRingScale, C.feel.deathRingMs + C.feel.pickupRingExtraMs);
   }
 
-  cullOffscreen() {
+  cullOffscreen(time) {
     this.bullets.children.iterate(b => { if (b && b.active && b.y < -20) this.kill(b); });
+    const pulse = C.feel.enemyShotPulse, pm = C.feel.enemyShotPulseMs;
     this.enemyBullets.children.iterate(b => {
+      if (b && b.active && pulse > 0) b.setScale(PX * (1 + pulse * Math.sin(time * TAU / pm + b.x * 0.2))); // gentle swell
       if (b && b.active && (b.y > H + 20 || b.y < -20 || b.x < -20 || b.x > W + 20)) this.kill(b);
     });
     this.coins.children.iterate(c => { if (c && c.active && c.y > H + 20) { this.kill(c); this.coinLost(); } });
@@ -340,6 +420,7 @@ export class PlayScene extends Phaser.Scene {
 
   bulletHitsEnemy(b, e) {
     if (!b.active || !e.active || !e.onScreen) return;
+    this.impact(b.x, b.y);
     this.kill(b);
     this.damageEnemy(e, b.dmg, true);
   }
@@ -347,9 +428,10 @@ export class PlayScene extends Phaser.Scene {
   damageEnemy(e, dmg, flash) {
     if (!e.active) return;
     e.hp -= dmg;
-    if (e.hp > 0) { if (flash) e.flashUntil = this.time.now + C.enemies.hitFlashMs; return; }
+    if (e.hp > 0) { if (flash) e.flashUntil = this.time.now + C.enemies.hitFlashMs; if (C.feel.hitKickPx > 0) e.kick = 1; return; }
     const big = e.kind === 'shooter';
-    this.explode(e.x, e.y, big);
+    this.explode(e.x, e.y, big, DEATH_TINTS[e.kind]);
+    this.pop(e.x, e.y - 6, '+' + C.enemies[e.kind].score);
     if (big) this.bigShake();
     if (e.coin) this.dropCoin(e.x, e.y, 0);
     if (e.drop === 'weapon') this.dropPickup(this.weaponUps, 'weaponUp', C.pickup.weaponFallSpeed, e.x, e.y);
@@ -363,10 +445,11 @@ export class PlayScene extends Phaser.Scene {
   // Crates are not enemies: no score, no kill count. Opening one spills its coins.
   bulletHitsCrate(b, c) {
     if (!b.active || !c.active || !c.onScreen) return;
+    this.impact(b.x, b.y);
     this.kill(b);
     c.hp -= b.dmg;
-    if (c.hp > 0) { c.flashUntil = this.time.now + C.enemies.hitFlashMs; return; }
-    this.explode(c.x, c.y, true);
+    if (c.hp > 0) { c.flashUntil = this.time.now + C.enemies.hitFlashMs; if (C.feel.hitKickPx > 0) c.kick = 1; return; }
+    this.explode(c.x, c.y, true, DEATH_TINTS.crate);
     this.bigShake();
     for (let i = 0; i < c.coins; i++) this.dropCoin(c.x, c.y, (i - (c.coins - 1) / 2) * C.crate.coinSpread);
     this.kill(c);
@@ -374,7 +457,7 @@ export class PlayScene extends Phaser.Scene {
 
   crashEnemy(e) {
     if (!e.active) return;
-    this.explode(e.x, e.y);
+    this.explode(e.x, e.y, false, DEATH_TINTS[e.kind]);
     this.enemyLost(e); // no score, no coin, not a kill
   }
 
@@ -386,7 +469,8 @@ export class PlayScene extends Phaser.Scene {
     if (!this.god) { this.hearts--; this.hud.setHearts(this.hearts); }
     this.invulnUntil = this.time.now + C.ship.invulnMs;
     this.cameras.main.shake(C.ship.hitShakeMs, C.ship.hitShakeAmount);
-    this.explode(this.ship.x, this.ship.y);
+    this.explode(this.ship.x, this.ship.y, false, WITCH_TINTS);
+    if (C.feel.hitFlashMs > 0) this.flashT = 1; // white-pink screen flash (own rectangle, fades out in updateFx)
     if (this.hearts <= 0) this.gameOver();
     else { this.freezeMs = C.feel.hitStopMs; this.physics.world.pause(); } // hit-stop
     return true;
@@ -394,39 +478,90 @@ export class PlayScene extends Phaser.Scene {
 
   bigShake() { this.cameras.main.shake(C.feel.bigShakeMs, C.feel.bigShakeAmount); }
 
-  explode(x, y, big = false) {
+  // Pop in the creature's colours plus a ring puff. big = imp / chest (more sparks, bigger ring).
+  explode(x, y, big, tints) {
     const F = C.feel;
-    this.burst(x, y, big ? F.bigExplosionCount : C.particles.perExplosion, FIRE_TINTS, big ? F.bigExplosionSpeedMul : 1, big ? 5 : 4);
+    this.burst(x, y, big ? F.bigExplosionCount : C.particles.perExplosion, tints, big ? F.bigExplosionSpeedMul : 1, big ? 5 : 4);
+    if (F.deathRing) this.ring(x, y, tints[1], big ? F.bigDeathRingScale : F.deathRingScale, F.deathRingMs);
+  }
+
+  // Cyan-white sparks where a player shot lands.
+  impact(x, y) {
+    if (C.feel.impactSparks > 0) this.burst(x, y, C.feel.impactSparks, SHOT_TINTS, C.feel.impactSpeedMul, C.feel.impactSize, C.feel.impactLifeMul);
   }
 
   // n little squares flying out of (x, y); they come from a pool and fade out.
-  burst(x, y, n, tints, speedMul, maxScale) {
+  burst(x, y, n, tints, speedMul, maxScale, lifeMul = 1) {
     const P = C.particles;
     for (let i = 0; i < n; i++) {
-      const s = this.sparks.get(x, y, 'square');
-      if (!s) return;
       const a = Math.random() * TAU, v = P.speed * speedMul * (0.4 + Math.random() * 0.6);
-      s.setActive(true).setVisible(true).setScale(Phaser.Math.Between(2, maxScale)).setPosition(x, y);
-      s.setTint(tints[(Math.random() * tints.length) | 0]).setAlpha(1).setDepth(20);
-      s.vx = Math.cos(a) * v; s.vy = Math.sin(a) * v; s.life = P.lifeMs / 1000; s.max = s.life;
+      this.emit(this.sparks, x, y, Math.cos(a) * v, Math.sin(a) * v, P.lifeMs / 1000 * lifeMul, Phaser.Math.Between(2, maxScale),
+        tints[(Math.random() * tints.length) | 0], 20, false);
     }
   }
 
-  updateSparks(dt) {
-    this.sparks.children.iterate(s => {
+  updateFx(dt) {
+    for (const grp of this.fxGroups) grp.children.iterate(s => {
       if (!s || !s.active) return;
       s.life -= dt;
       if (s.life <= 0) { s.setActive(false).setVisible(false); return; }
-      s.x += s.vx * dt; s.y += s.vy * dt; s.setAlpha(s.life / s.max);
+      const f = s.life / s.max;
+      s.x += s.vx * dt; s.y += s.vy * dt; s.setAlpha(f);
+      if (s.shrink) s.setScale(s.s0 * (0.35 + 0.65 * f));
     });
+    this.rings.children.iterate(r => {
+      if (!r || !r.active) return;
+      r.life -= dt;
+      if (r.life <= 0) { r.setActive(false).setVisible(false); return; }
+      const f = 1 - r.life / r.max, e = 1 - (1 - f) * (1 - f); // grows fast, then slows
+      r.setScale(r.s1 * (0.25 + 0.75 * e)).setAlpha(r.a0 * (1 - f));
+    });
+    if (this.flashT > 0) {
+      this.flashT = Math.max(0, this.flashT - dt * 1000 / C.feel.hitFlashMs);
+      this.flash.setAlpha(C.feel.hitFlashStrength * this.flashT);
+    }
+    const F = C.feel, speed = F.popTextRise / (F.popTextMs / 1000);
+    for (const p of this.pops) {
+      if (!p.visible) continue;
+      p.life -= dt;
+      if (p.life <= 0) { p.setVisible(false); continue; }
+      p.y -= speed * dt; p.setAlpha(Math.min(1, p.life / (F.popTextMs / 3000)));
+    }
+  }
+
+  // A tiny square particle from a pool. shrink = it shrinks as it fades.
+  emit(group, x, y, vx, vy, life, scale, tint, depth, shrink) {
+    const s = group.get(x, y, 'square');
+    if (!s) return;
+    s.setActive(true).setVisible(true).setScale(scale).setPosition(x, y).setTint(tint).setAlpha(1).setDepth(depth);
+    s.vx = vx; s.vy = vy; s.life = s.max = life; s.s0 = scale; s.shrink = shrink;
+  }
+
+  // An expanding, fading ring. size = final scale in art pixels (PX each).
+  ring(x, y, tint, size, ms, alpha = 0.9) {
+    const r = this.rings.get(x, y, 'fxRing');
+    if (!r) return;
+    r.setActive(true).setVisible(true).setPosition(x, y).setTint(tint).setDepth(C.feel.ringDepth).setAlpha(alpha);
+    r.s1 = size * PX; r.a0 = alpha; r.life = r.max = ms / 1000;
+  }
+
+  // Floating text that drifts up and fades.
+  pop(x, y, str) {
+    if (!C.feel.popText) return;
+    const p = this.pops.find(t => !t.visible);
+    if (!p) return;
+    p.setText(str).setPosition(Phaser.Math.Clamp(x, C.feel.popTextEdge, W - C.feel.popTextEdge), y).setAlpha(1).setVisible(true);
+    p.life = C.feel.popTextMs / 1000;
   }
 
   gameOver() {
+    this.vx = this.vy = 0; // clouds stop boosting
     this.endScreen('GAME OVER', '#ff5a5a', false);
     this.ship.setVisible(false).setAlpha(1);
   }
 
   stageClear() {
+    this.vx = this.vy = 0;
     this.medals.finish(this.enemiesKilled);
     this.syncMedals();
     const isNew = this.debug ? null : saveMedals(this.medals.state); // debug runs are not saved
@@ -443,8 +578,12 @@ export class PlayScene extends Phaser.Scene {
     this.enemyBullets.children.iterate(b => { if (b && b.active) this.kill(b); });
     this.bullets.children.iterate(b => { if (b && b.active) this.kill(b); });
     this.muzzle.forEach(m => m.setVisible(false));
-    this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.55).setDepth(60);
-    const t = (y, s, size, c, stroke = z(5)) => this.add.text(W / 2, y, s, { ...FONT, fontSize: z(size) + 'px', color: c, stroke: '#1b1b2b', strokeThickness: stroke, align: 'center' }).setOrigin(0.5).setDepth(61);
+    const ease = C.feel.endEaseMs, fade = []; // everything on the end screen fades in
+    const veil = this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.55).setDepth(60);
+    const t = (y, s, size, c, stroke = z(5)) => {
+      const o = this.add.text(W / 2, y, s, { ...FONT, fontSize: z(size) + 'px', color: c, stroke: '#1b1b2b', strokeThickness: stroke, align: 'center' }).setOrigin(0.5).setDepth(61);
+      fade.push(o); return o;
+    };
     let tapY = H / 2 + z(60);
     if (!stats) {
       t(H / 2 - z(70), title, 36, col);
@@ -454,7 +593,7 @@ export class PlayScene extends Phaser.Scene {
       t(138, 'SCORE ' + this.score, 26, '#ffffff');
       MEDAL_KEYS.forEach((k, i) => { // the 4 medals, big; NEW under a medal earned for the first time
         const x = W / 2 + (i - 1.5) * 46;
-        this.add.image(x, 185, 'medal_' + k + '_' + this.medals.state[k]).setScale(3).setDepth(61);
+        fade.push(this.add.image(x, 185, 'medal_' + k + '_' + this.medals.state[k]).setScale(3).setDepth(61));
         if (isNew && isNew[k]) t(206, 'NEW', 12, '#8dff6a', 2).setX(x);
       });
       const V = C.coin.value;
@@ -464,6 +603,12 @@ export class PlayScene extends Phaser.Scene {
       tapY = 300;
     }
     const tap = t(tapY, 'TAP TO PLAY AGAIN', 18, '#ffffff');
-    this.tweens.add({ targets: tap, alpha: 0.3, yoyo: true, repeat: -1, duration: 600 });
+    fade.pop(); // the tap text blinks on its own
+    if (ease > 0) {
+      veil.setAlpha(0); fade.forEach(o => o.setAlpha(0)); tap.setAlpha(0);
+      this.tweens.add({ targets: veil, alpha: 0.55, duration: ease });
+      this.tweens.add({ targets: fade, alpha: 1, duration: ease, delay: ease / 3, ease: 'Quad.easeOut' });
+    }
+    this.tweens.add({ targets: tap, alpha: { from: 1, to: 0.3 }, yoyo: true, repeat: -1, duration: 600, delay: ease });
   }
 }

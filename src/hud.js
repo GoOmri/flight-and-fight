@@ -34,7 +34,9 @@ export class Hud {
     // RIGHT: hearts, wave pips under them
     this.heartIcons = [];
     for (let i = 0; i < C.ship.hearts; i++) {
-      this.heartIcons.push(scene.add.image(W - H.margin - i * H.heartStep, H.margin + H.heartY, 'heart').setScale(PX / C.game.zoom).setOrigin(1, 0.5).setDepth(depth));
+      const ic = scene.add.image(W - H.margin - i * H.heartStep, H.margin + H.heartY, 'heart').setScale(PX / C.game.zoom).setOrigin(1, 0.5).setDepth(depth);
+      ic.baseX = ic.x; ic.baseScale = ic.scaleX; ic.pop = 0; // pop = 1 when the heart was just lost, falls to 0
+      this.heartIcons.push(ic);
     }
     this.pips = scene.add.graphics().setDepth(depth);
     this.pipLook = this.total.map(() => -1);
@@ -49,7 +51,12 @@ export class Hud {
   setHearts(n) {
     // icon 0 is the rightmost; hearts are lost from the right
     const max = C.ship.hearts;
-    this.heartIcons.forEach((ic, i) => ic.setTexture(max - 1 - i < n ? 'heart' : 'heartEmpty'));
+    this.heartIcons.forEach((ic, i) => {
+      const full = max - 1 - i < n, key = full ? 'heart' : 'heartEmpty';
+      if (ic.texture.key === key) return;
+      ic.setTexture(key);
+      if (!full && C.feel.heartPopMs > 0) ic.pop = 1; // a heart was just lost: pop and shake
+    });
   }
 
   // state = { kill70: 'pending'|'earned'|'failed', ... }
@@ -106,6 +113,13 @@ export class Hud {
     if (this.pop > 0) {
       this.pop = Math.max(0, this.pop - dt * 1000 / C.feel.scorePopMs);
       this.scoreText.setScale(1 + C.feel.scorePopScale * this.pop);
+    }
+    const F = C.feel;
+    for (const ic of this.heartIcons) {
+      if (ic.pop <= 0) continue;
+      ic.pop = Math.max(0, ic.pop - dt * 1000 / F.heartPopMs);
+      ic.setScale(ic.baseScale * (1 + F.heartPopScale * ic.pop));
+      ic.x = ic.baseX + (Math.random() - 0.5) * 2 * F.heartShakePx * ic.pop;
     }
     if (!C.hud.showWaveIndicator) return; // wave dots are switched off in config (hud.showWaveIndicator)
     // redraw the pips only when one of them changed its look

@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.4.0", // bump on every push so the player/Omri can see the build
+  version: "0.5.0", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3 }, // pixelScale: size of one art pixel in game units
@@ -38,7 +38,10 @@ export const CONFIG = {
     bankDeg: 8,          // max tilt in degrees when moving sideways (0 = no tilt)
     bankSpeed: z(400),   // sideways speed (units/s) that gives the full tilt
     bankEase: 14,        // how fast the tilt comes and goes (higher = snappier)
-    margin: 18,         // keep this far from screen edges
+    spriteScale: 2,     // size of one witch art pixel (sprite is 18x22 art px = 36x44 px, about 15% of the screen width). 3 = bigger. Hitbox does not change
+    shotY: 20,          // player shots start this far above the ship centre (at the hat tip)
+    muzzleY: 22,        // muzzle flash height above the centre
+    margin: 20,         // keep the ship centre this far from screen edges
     hearts: 3,
     invulnMs: 1500,
     ramKillsEnemy: true, // crashing into an enemy: it also dies (no score, no coin). false = it survives
@@ -78,7 +81,7 @@ export const CONFIG = {
   },
 
   // Enemy shots: slow red orbs. speed is the default; the wave data may set its own. hitSize = art pixels of the orb core.
-  enemyBullet: { poolSize: 30, speed: 100, hitSize: 3 },
+  enemyBullet: { poolSize: 30, speed: 100, hitSize: 3, depth: 35 } // depth 35: above all effects (sparks 20, texts 30), below the HUD (50),
 
   // pickupRadius: how close the ship must be to grab a coin (logical px). Bigger than the ship hitbox on purpose.
   coin: { fallSpeed: z(90), value: 5, poolSize: 40, pickupRadius: 10 },
@@ -101,9 +104,9 @@ export const CONFIG = {
     endDelayMs: 1500     // after the last enemy is gone, wait this long (coins can still be caught), then show STAGE CLEAR
   },
 
-  particles: { poolSize: 90, perExplosion: 8, speed: z(140), lifeMs: 450 },
+  particles: { poolSize: 140, perExplosion: 8, speed: z(140), lifeMs: 450 },
 
-  // Game feel
+  // Game feel (no sound). Every number is a knob; 0 turns most things off.
   feel: {
     hitStopMs: 60,                          // freeze when the player loses a heart
     bigExplosionCount: 16, bigExplosionSpeedMul: 1.3, // shooter / crate dies
@@ -111,7 +114,37 @@ export const CONFIG = {
     coinSparkCount: 4, coinSparkSpeedMul: 0.5,
     scorePopScale: 0.3, scorePopMs: 160,    // score text grows by this much and settles back
     muzzleMs: 45, muzzleSize: 2, muzzleSpread: 3, // flash at the nose on each volley
-    levelFlashMs: 160, levelSparkCount: 8   // green flash on the ship at a weapon upgrade
+    levelFlashMs: 160, levelSparkCount: 8,  // green flash on the ship at a weapon upgrade
+
+    // Sparkle trail behind the broom
+    trail: true, trailPoolSize: 40, trailY: 20,   // trailY = how far below the ship centre the sparks start
+    trailIdleMs: 140, trailMoveMs: 35,            // time between sparks when still / at full speed (lower = more sparks)
+    trailLifeMs: 420, trailSpeed: z(40),
+    trailSpreadX: 4, trailJitter: 8, trailCarry: 0.12, // sideways start spread (px), random sideways speed, share of the witch's speed the sparks keep
+
+    recoilPx: 1,                            // witch squashes by about this many px on each volley (0 = off)
+    recoilMs: 90,
+
+    hitKickPx: 2, hitKickMs: 90,            // enemy is pushed back / shaken this much when hit (0 = off)
+    impactSparks: 3,                        // cyan-white sparks where a shot lands (0 = off)
+    impactSpeedMul: 0.45, impactSize: 2, impactLifeMul: 0.5,
+
+    ringPoolSize: 16, ringDepth: 19, pickupRingExtraMs: 100, // rings at once; draw depth; pickup rings last this much longer
+    deathRing: true, deathRingMs: 280,      // ring puff when something dies / is picked up
+    deathRingScale: 1.2, bigDeathRingScale: 2, // final ring size in art pixels x PX (small enemies / imp, crate, pickups)
+
+    popText: true, popTextMs: 650, popTextRise: z(26), popTextSize: 12, popPoolSize: 10, popTextEdge: 14, popTextOffsetY: 24, // floating "+10" at kills and coins
+    magnetRadius: 34, magnetSpeed: z(300),  // coins fly to the witch from this far (0 = off)
+
+    hitFlashMs: 140,                        // white-pink screen flash when the witch is hit (0 = off)
+    hitFlashStrength: 0.3, flashColor: 0xffcdd7, flashDepth: 25, // start strength 0..1 (low so shots stay visible); depth must stay below enemyBullet.depth
+    heartPopMs: 350, heartPopScale: 0.7, heartShakePx: 2, // lost heart pops and shakes in the HUD
+
+    enemyShotPulse: 0.08, enemyShotPulseMs: 360, // enemy shots swell and shrink a little (0 = off)
+    fireFlashScale: 0.9, fireFlashMs: 220, fireFlashAlpha: 0.7,                    // small white ring at an enemy when it fires (0 = off)
+
+    endEaseMs: 300,                         // fade-in of the game over / stage clear screen (0 = instant)
+    cloudBoost: 1.2, cloudEase: 4                         // clouds scroll this much faster (extra x) when the witch flies up fast (0 = off)
   },
 
   // HUD layout (logical px on the 240-wide screen)

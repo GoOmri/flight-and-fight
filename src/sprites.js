@@ -13,7 +13,7 @@ const PAL = {
   //  CYAN-WHITE (c,w)      = player shots (thin bolt, keep exactly). White is also used for small shines/eyes.
   //  BRIGHT GREEN (E,H)    = weapon upgrade only: the potion, the pulsing outline of a weapon carrier, the HUD bars.
   //  PINK-WHITE (P)        = pulsing outline of a heart carrier. The heart pickup has a white outline.
-  //  VIOLET is FREE: the witch (hat V, band v, cloak i), the bat (I, belly u), the ghost (L), sparkles (y, p).
+  //  VIOLET is FREE: the witch (hat plum V, band v, cloak magenta-violet m, face f, hair B), the bat (I, belly u), the ghost (L), sparkles (y, p).
   //  Creatures (dark/mid tones + dark outline k so they read on the light sky): BAT = indigo, GHOST = pale lavender-grey,
   //   IMP = dark teal-green with tan horns and a lime wand tip (M). Never red, orange, gold or cyan-white on enemies.
   //  Chest = brown wood (T,B) with grey steel bands (g,d), outline X. No gold/yellow, so it is never mistaken for coins.
@@ -21,7 +21,7 @@ const PAL = {
   // (Explosion sparks are tinted white / light grey / red-orange in code: never yellow or gold, so they never look like coins.)
   e: 0x7a0a0a, h: 0xff2a2a, q: 0xff7a7a, // enemy shot: dark red outline, bright red, lighter red core
   Q: 0xffc928, A: 0xfff2a0, U: 0xb36b00, K: 0x5a3200, // coin: gold body, light shine, brown rim, dark outline
-  V: 0x4a2a8c, v: 0xa07ae6, f: 0xf6cfa6, i: 0x2a1a55, y: 0xff7ad9, // witch: hat, hat band, skin, cloak/hair, pink sparkle
+  V: 0x5a2184, v: 0xc89cff, f: 0xf6cfa6, i: 0x2a1a55, y: 0xff7ad9, // witch: hat, hat band, skin, cloak/hair, pink sparkle
   I: 0x3c3a8c, u: 0x8f86d8,                                       // bat: indigo body, lighter belly
   L: 0xc9c3e8, z: 0xd98fb8,                                       // ghost: pale lavender-grey, blush
   t: 0x1f6b5a, M: 0xa6ff3c,                                       // imp: dark teal-green skin, lime wand tip
@@ -43,19 +43,32 @@ function makeTexture(scene, key, rows) {
   g.destroy();
 }
 
-// Hero: cute witch on a broom (11x11): violet hat, skin face, dark cloak, brown broom, straw tail with pink/violet sparkles.
+// Hero: cute witch on a broom (18x22 art px, drawn at ship.spriteScale): plum hat with a light band and white buckle,
+// brown hair, skin face with eyes, smile and blush, magenta-violet cloak with a clasp, a small hand on the broom,
+// tan broom bar with straw bristles at the back, pink/violet sparkles. Hitbox is NOT the sprite (see ship.hitRadius).
 const HERO_ART = [
-  '.....V.....',
-  '....VVV....',
-  '....VvV....',
-  '...VVVVV...',
-  '.VVVVVVVVV.',
-  '...fkfkf...',
-  '....fff....',
-  '..iiiiiii..',
-  '.BBiiiiiBB.',
-  '...TTBTT...',
-  '..y.TTT.p..'
+  '........kk........',
+  '.......kVVk.......',
+  '......kVVVVk......',
+  '......kvVVVk......',
+  '.....kVVVVVVk.....',
+  '.....kVVVVVVk.....',
+  '....kvvvwwvvvk....',
+  '....kvvvvvvvvk....',
+  '.kVVVVVVVVVVVVVVk.',
+  '.kkkkkkkkkkkkkkkk.',
+  '....kBffffffBk....',
+  '....kBfkffkfBk....',
+  '....kBfkffkfBk....',
+  '....kBzfkkfzBk....',
+  '.....kkffffkk.....',
+  '....kmmmvvmmmk....',
+  '...kmmmmmmmmmmk...',
+  '..kmmmmmmmmmffmk..',
+  '.XTTTTTTTTTTffTTX.',
+  '.XBBBBBBBBBBBBBBX.',
+  '..y.XTBTBTBTBX.p..',
+  '.p.XTBTTBTBTTBX.y.'
 ];
 export function drawHero(scene) { makeTexture(scene, 'hero', HERO_ART); }
 
@@ -207,6 +220,7 @@ export function makeAllTextures(scene) {
   makeMedalIcons(scene);
   makeTexture(scene, 'cloudFar', ['..www...', '.wwwww..', 'wwwwwwww', '.wwwwww.']);
   makeTexture(scene, 'star', ['w']);
+  makeTexture(scene, 'fxRing', ['..wwwww..', '.ww...ww.', 'ww.....ww', 'w.......w', 'w.......w', 'w.......w', 'ww.....ww', '.ww...ww.', '..wwwww..']); // puff ring, tinted + scaled in code
   makeTexture(scene, 'cloudNear', ['...wwww....', '..wwwwwww..', '.wwwwwwwwww', 'wwwwwwwwwww', '.wwwwwwwww.']);
 }
 
