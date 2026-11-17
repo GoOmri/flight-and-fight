@@ -7,7 +7,7 @@
 - Goal number one: it must be FUN. Game feel first (movement, shooting, hits, sound), features second.
 
 ## Rules
-- Work on a branch, never main. Never push, merge to main or tag unless Omri says so.
+- Work on a branch. Omri's standing permission (2026-11-17): in THIS repo only (flight-and-fight), Claude may merge a finished, committed branch into main and push main and branches, without asking each time. Still never force-push, delete branches/repos, tag, or change repo settings without asking. This permission does NOT cover SCRiTCH, Game Night or anything else.
 - No secrets in git: no keystores (.jks, .keystore), no passwords or keys. The repo may become public.
 - Plain JavaScript (ES modules) + Phaser 3. No build step for now. Keep the game small and readable.
 - Balance numbers (speed, health, fire rate, spawn times) live in one file (e.g. src/config.js) so they are easy to tune.
