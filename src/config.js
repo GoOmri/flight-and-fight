@@ -4,7 +4,7 @@ export const CONFIG = {
 
   ship: {
     startY: 520,
-    fingerOffsetY: 70,   // ship hovers this far ABOVE the finger
+    fingerOffsetY: 28,   // ship hovers this far ABOVE the finger (just over the thumb tip)
     followSmoothing: 16, // higher = snappier (1 = very floaty, 30 = almost glued)
     maxSpeed: 900,       // px per second, limit for the follow
     margin: 18,          // keep this far from screen edges
@@ -33,9 +33,9 @@ export const CONFIG = {
   },
 
   enemies: {
-    grunt:   { hp: 2, speed: 110, score: 10, coinChance: 0.25 },
-    zigzag:  { hp: 3, speed: 90, swayAmp: 70, swayFreq: 2.2, score: 20, coinChance: 0.35 },
-    shooter: { hp: 6, speed: 100, stopY: 110, stayMs: 4500, fireMs: 1400, bulletSpeed: 150, firstShotMs: 500, hoverMs: 700, hoverAmp: 20, leaveSpeedMul: 1.5, score: 50, coinChance: 0.7 },
+    grunt:   { hp: 3, speed: 110, score: 10, coinChance: 0.25 },
+    zigzag:  { hp: 4, speed: 90, swayAmp: 70, swayFreq: 2.2, score: 20, coinChance: 0.35 },
+    shooter: { hp: 7, speed: 100, stopY: 110, stayMs: 4500, fireMs: 1400, bulletSpeed: 150, firstShotMs: 500, hoverMs: 700, hoverAmp: 20, leaveSpeedMul: 1.5, score: 50, coinChance: 0.7 },
     poolSize: 24,
     hitFlashMs: 70
   },

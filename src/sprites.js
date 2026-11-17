@@ -6,7 +6,10 @@ const PAL = {
   '.': null,
   w: 0xffffff, k: 0x1b1b2b, g: 0x8a93a6, d: 0x555d73,
   r: 0xe63946, o: 0xff9f1c, y: 0xffe14d, b: 0x3a86ff, c: 0x7fe0ff,
-  n: 0x3bb54a, p: 0xb15bd6, m: 0x7a2fa0
+  n: 0x3bb54a, p: 0xb15bd6, m: 0x7a2fa0,
+  // COLOUR RULE: coins are the ONLY purple/violet pickups (V, L, D below).
+  // Enemy bullets are warm red/orange. Player bullets are yellow/white. Never mix these.
+  V: 0xb24bf3, L: 0xe6b8ff, D: 0x2a0a4a // coin: violet fill, light highlight, dark outline
 };
 
 function makeTexture(scene, key, rows) {
@@ -66,9 +69,18 @@ const SHOOTER = [
   '.mpp.o.ppm.',
   '..m..o..m..'
 ];
-const EBULLET = ['.oo.', 'oyyo', 'oyyo', '.oo.'];
+const EBULLET = ['.rr.', 'roor', 'roor', '.rr.']; // small round, red/orange
 const PBULLET = ['y', 'y', 'w', 'y'];
-const COIN = ['.yy.', 'yoOy', 'yooy', '.yy.'].map(r => r.replace('O', 'y'));
+// coin: bigger diamond gem (7x7), violet with outline and highlight
+const COIN = [
+  '...D...',
+  '..DLD..',
+  '.DLVVD.',
+  'DLVVVVD',
+  '.DVVVD.',
+  '..DVD..',
+  '...D...'
+];
 const HEART = ['.rr.rr.', 'rrrrrrr', 'rrrrrrr', '.rrrrr.', '..rrr..', '...r...'];
 const HEART_EMPTY = ['.dd.dd.', 'd..d..d', 'd.....d', '.d...d.', '..d.d..', '...d...'];
 const SQUARE = ['w'];
