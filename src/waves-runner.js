@@ -61,9 +61,9 @@ export function followPath(o, dt) {
 // Schedules the waves. All spawn events of a wave are made when its start time is known, then fired by the clock.
 export class WaveRunner {
   constructor(waves, startIndex, firstDelay) {
-    this.cw = waves.map(def => ({
+    this.cw = waves.map((def, w) => ({
       def,
-      groups: def.groups.map(g => ({ g, p: compile(g.path, g.mirror) })),
+      groups: def.groups.map(g => ({ g, w, p: compile(g.path, g.mirror) })), // w = wave number (0-based), for the wave pips
       crate: def.crate ? { c: def.crate, p: compile(def.crate.path, false) } : null
     }));
     this.next = startIndex; // next wave to schedule

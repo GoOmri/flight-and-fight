@@ -2,7 +2,9 @@
 // The code that runs this data is src/waves-runner.js. Change numbers here to tune the stage.
 //
 // Wave:  { start:{after:'clear'|'spawnEnd', delay:s}, groups:[...], crate? }
-// Group: { type, n, gap, at, spd, path, mirror?, coinEvery?, fire? }
+// Group: { type, n, gap, at, spd, path, mirror?, coinEvery?, fire?, drop? }
+// drop: 'weapon' | 'heart' marks the LAST enemy of the group as a carrier (it glows and drops a pickup when killed).
+//   Each wave has exactly one 'weapon' carrier (the last enemy that spawns in it). Move the flag to move the carrier.
 // Path steps (first step = spawn point, enemy is removed after the last step):
 //   ['L', x, y, {stop:s}?]            straight line to (x,y), optional stop-and-fire time
 //   ['A', cx, cy, r, a0, a1]          arc (degrees, 0 = right, 90 = down; a1 < a0 turns the other way)
@@ -24,21 +26,21 @@ export const STAGE1 = [
     start: { after: 'clear', delay: 2 },
     groups: [
       { type: 'grunt', n: 5, gap: 0.5, at: 0, spd: 80, path: DOWN(180), coinEvery: 2 },
-      { type: 'grunt', n: 5, gap: 0.5, at: 3.5, spd: 80, path: DOWN(60), coinEvery: 2 }
+      { type: 'grunt', n: 5, gap: 0.5, at: 3.5, spd: 80, path: DOWN(60), coinEvery: 2, drop: 'weapon' }
     ]
   },
   { // 2 Crossing Slides
     start: { after: 'spawnEnd', delay: 5 },
     groups: [
       { type: 'grunt', n: 5, gap: 0.45, at: 0, spd: 90, path: [['L', -20, 50], ['L', 260, 210]], coinEvery: 2 },
-      { type: 'grunt', n: 5, gap: 0.45, at: 2.5, spd: 90, mirror: true, path: [['L', -20, 100], ['L', 260, 260]], coinEvery: 2 }
+      { type: 'grunt', n: 5, gap: 0.45, at: 2.5, spd: 90, mirror: true, path: [['L', -20, 100], ['L', 260, 260]], coinEvery: 2, drop: 'weapon' }
     ]
   },
   { // 3 Sway Pair + crate 1
     start: { after: 'spawnEnd', delay: 4 },
     groups: [
       { type: 'zigzag', n: 3, gap: 1.0, at: 0, spd: 70, path: sway(70, 40, 200), coinEvery: 2 },
-      { type: 'zigzag', n: 3, gap: 1.0, at: 0, spd: 70, path: sway(170, 40, 200), coinEvery: 2 }
+      { type: 'zigzag', n: 3, gap: 1.0, at: 0, spd: 70, path: sway(170, 40, 200), coinEvery: 2, drop: 'weapon' }
     ],
     crate: { at: 2.0, spd: 45, path: DOWN(120), hp: 6, coins: 6 }
   },
@@ -47,13 +49,13 @@ export const STAGE1 = [
     groups: [
       gunner(50, 0, 4, FIRE(0.6, 1.8, 'down'), 75),
       gunner(190, 1.5, 4, FIRE(0.6, 1.8, 'down'), 75),
-      { type: 'grunt', n: 5, gap: 0.5, at: 3.0, spd: 85, path: DOWN(120), coinEvery: 2 }
+      { type: 'grunt', n: 5, gap: 0.5, at: 3.0, spd: 85, path: DOWN(120), coinEvery: 2, drop: 'weapon' }
     ]
   },
   { // 5 Horseshoe
     start: { after: 'spawnEnd', delay: 4 },
     groups: [
-      { type: 'grunt', n: 7, gap: 0.45, at: 0, spd: 100, path: HORSESHOE, coinEvery: 3 },
+      { type: 'grunt', n: 7, gap: 0.45, at: 0, spd: 100, path: HORSESHOE, coinEvery: 3, drop: 'weapon' },
       gunner(120, 1.0, 5, FIRE(0.8, 1.6, 'player'), 55)
     ]
   },
@@ -62,8 +64,8 @@ export const STAGE1 = [
     groups: [
       { type: 'zigzag', n: 3, gap: 1.0, at: 0, spd: 70, path: sway(120, 65, 220, 0), coinEvery: 2 },
       { type: 'zigzag', n: 3, gap: 1.0, at: 0, spd: 70, path: sway(120, 65, 220, 180), coinEvery: 2 },
-      gunner(25, 1.5, 4.5, FIRE(0.8, 1.8, 'player'), 60),
-      gunner(215, 3.0, 4.5, FIRE(0.8, 1.8, 'player'), 60)
+      { ...gunner(25, 1.5, 4.5, FIRE(0.8, 1.8, 'player'), 60), drop: 'heart' },
+      { ...gunner(215, 3.0, 4.5, FIRE(0.8, 1.8, 'player'), 60), drop: 'weapon' }
     ],
     crate: { at: 0.5, spd: 40, path: DOWN(215), hp: 6, coins: 6 }
   },
@@ -73,14 +75,14 @@ export const STAGE1 = [
       gunner(40, 0, 4.5, FIRE(0.6, 2.0, 'down')),
       gunner(120, 0.8, 4.5, FIRE(0.6, 1.6, 'player')),
       gunner(200, 1.6, 4.5, FIRE(0.6, 2.0, 'down')),
-      { type: 'zigzag', n: 6, gap: 0.8, at: 2.0, spd: 75, path: sway(120, 50, 200), coinEvery: 2 }
+      { type: 'zigzag', n: 6, gap: 0.8, at: 2.0, spd: 75, path: sway(120, 50, 200), coinEvery: 2, drop: 'weapon' }
     ]
   },
   { // 8 Loop-de-loop
     start: { after: 'spawnEnd', delay: 5 },
     groups: [
       { type: 'grunt', n: 6, gap: 0.6, at: 0, spd: 100, path: LOOP, coinEvery: 3 },
-      { type: 'grunt', n: 6, gap: 0.6, at: 3.0, spd: 100, mirror: true, path: LOOP, coinEvery: 3 }
+      { type: 'grunt', n: 6, gap: 0.6, at: 3.0, spd: 100, mirror: true, path: LOOP, coinEvery: 3, drop: 'weapon' }
     ]
   },
   { // 9 Gauntlet
@@ -89,9 +91,9 @@ export const STAGE1 = [
       { type: 'grunt', n: 5, gap: 0.5, at: 0, spd: 110, mirror: true, path: HORSESHOE, coinEvery: 3 },
       { type: 'zigzag', n: 3, gap: 0.8, at: 2.0, spd: 80, path: sway(120, 65, 220, 0), coinEvery: 2 },
       { type: 'zigzag', n: 3, gap: 0.8, at: 2.0, spd: 80, path: sway(120, 65, 220, 180), coinEvery: 2 },
-      gunner(70, 3.0, 5, FIRE(0.8, 1.4, 'player'), 60),
+      { ...gunner(70, 3.0, 5, FIRE(0.8, 1.4, 'player'), 60), drop: 'heart' },
       gunner(170, 3.0, 5, FIRE(0.8, 1.4, 'player'), 60),
-      { type: 'grunt', n: 6, gap: 0.35, at: 7.0, spd: 130, path: [['L', -20, 100], ['L', 260, 300]], coinEvery: 3 }
+      { type: 'grunt', n: 6, gap: 0.35, at: 7.0, spd: 130, path: [['L', -20, 100], ['L', 260, 300]], coinEvery: 3, drop: 'weapon' }
     ]
   },
   { // 10 Last Rush (crate 3 falls during the calm before it)
@@ -105,7 +107,7 @@ export const STAGE1 = [
       { type: 'grunt', n: 6, gap: 0.5, at: 5.0, spd: 110, path: LOOP, coinEvery: 3 },
       { type: 'grunt', n: 6, gap: 0.5, at: 8.0, spd: 110, mirror: true, path: LOOP, coinEvery: 3 },
       { type: 'grunt', n: 5, gap: 0.3, at: 12.0, spd: 150, path: DOWN(45), coinEvery: 2 },
-      { type: 'grunt', n: 5, gap: 0.3, at: 12.0, spd: 150, path: DOWN(195), coinEvery: 2 }
+      { type: 'grunt', n: 5, gap: 0.3, at: 12.0, spd: 150, path: DOWN(195), coinEvery: 2, drop: 'weapon' }
     ],
     crate: { at: 'clear', spd: 40, path: DOWN(120), hp: 10, coins: 10 }
   }
