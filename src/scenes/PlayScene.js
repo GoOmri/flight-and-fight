@@ -35,13 +35,14 @@ export class PlayScene extends Phaser.Scene {
       if (this.dragId !== null) return;
       this.dragId = p.id;
       this.dragFrom.set(p.x, p.y);
-      this.shipFrom.set(this.ship.x, this.ship.y);
+      this.shipFrom.set(this.target.x, this.target.y); // from the target, so no jump while the ship is still catching up
     });
     this.input.on('pointermove', p => {
       if (p.id !== this.dragId || !p.isDown || this.over) return;
       const S = C.ship;
-      this.ship.x = Phaser.Math.Clamp(this.shipFrom.x + (p.x - this.dragFrom.x) * S.dragSensitivity, S.margin, W - S.margin);
-      this.ship.y = Phaser.Math.Clamp(this.shipFrom.y + (p.y - this.dragFrom.y) * S.dragSensitivity, S.margin, H - S.margin);
+      // The finger sets the TARGET (1:1). The ship eases toward it in update().
+      this.target.x = Phaser.Math.Clamp(this.shipFrom.x + (p.x - this.dragFrom.x) * S.dragSensitivity, S.margin, W - S.margin);
+      this.target.y = Phaser.Math.Clamp(this.shipFrom.y + (p.y - this.dragFrom.y) * S.dragSensitivity, S.margin, H - S.margin);
     });
     const release = p => { if (p.id === this.dragId) this.dragId = null; };
     this.input.on('pointerup', release);
@@ -92,6 +93,21 @@ export class PlayScene extends Phaser.Scene {
   makeShip() {
     this.ship = this.physics.add.image(W / 2, C.ship.startY, 'hero').setScale(PX).setDepth(10);
     this.ship.body.setSize(C.ship.hitbox, C.ship.hitbox);
+    this.target = new Phaser.Math.Vector2(this.ship.x, this.ship.y); // where the finger wants the ship
+  }
+
+  // Ease the ship toward the target (light inertia, no overshoot) and bank it a little.
+  moveShip(dt) {
+    const S = C.ship, s = this.ship;
+    const k = 1 - Math.exp(-S.followRate * dt);
+    const px = s.x;
+    s.x += (this.target.x - s.x) * k;
+    s.y += (this.target.y - s.y) * k;
+    if (Math.abs(this.target.x - s.x) < 0.25) s.x = this.target.x;
+    if (Math.abs(this.target.y - s.y) < 0.25) s.y = this.target.y;
+    const vx = dt > 0 ? (s.x - px) / dt : 0;
+    const want = Phaser.Math.Clamp(vx / S.bankSpeed, -1, 1) * Phaser.Math.DegToRad(S.bankDeg);
+    s.rotation += (want - s.rotation) * (1 - Math.exp(-S.bankEase * dt));
   }
 
   makeHud() {
@@ -135,6 +151,7 @@ export class PlayScene extends Phaser.Scene {
     this.scrollBackground(dt);
     if (this.over) { this.updateSparks(dt); return; }
 
+    this.moveShip(dt);
     this.autoFire(time);
     this.runWaves(dt);
     this.updateEnemies(time, dt);

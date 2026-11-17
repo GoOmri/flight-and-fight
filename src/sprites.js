@@ -8,9 +8,9 @@ const PAL = {
   r: 0xe63946, o: 0xff9f1c, b: 0x3a86ff, c: 0x7fe0ff,
   n: 0x3bb54a, p: 0xb15bd6, m: 0x7a2fa0,
   // COLOUR RULE: no yellow/gold anywhere except nothing; coins purple only (V, L, D below).
-  // Player bullets: thin cyan-white bolts (c, w). Enemy bullets: round pink-red orbs (e, h, q).
-  // Never mix these. (Explosion sparks are tinted yellow/orange in code: small squares, OK.)
-  e: 0x5a0a1f, h: 0xff3d8b, q: 0xffc2dc, // enemy bullet: dark outline, hot pink, light pink core
+  // Enemy shots: RED only. Coins: PURPLE only. Player shots: CYAN-WHITE (c, w). Never mix these.
+  // (Explosion sparks are tinted yellow/orange in code: small squares, OK.)
+  e: 0x7a0a0a, h: 0xff2a2a, q: 0xff7a7a, // enemy shot: dark red outline, bright red, lighter red core
   V: 0xb24bf3, L: 0xe6b8ff, D: 0x2a0a4a // coin: violet fill, light highlight, dark outline
 };
 
@@ -71,8 +71,9 @@ const SHOOTER = [
   '.mpp.o.ppm.',
   '..m..o..m..'
 ];
-const EBULLET = ['.eee.', 'ehqhe', 'ehqhe', 'ehhhe', '.eee.']; // round pink orb, dark outline
-const PBULLET = ['.w.', 'cwc', 'cwc', 'cwc', 'cwc', 'cwc', '.c.']; // thin cyan-white bolt
+const EBULLET = ['.eee.', 'ehqhe', 'ehqhe', 'ehhhe', '.eee.']; // round red orb, dark red outline
+// Player bolt size lives here: 2 x 5 art pixels (white head, cyan tail). Hitbox = texture size.
+const PBULLET = ['ww', 'ww', 'ww', 'cc', 'cc'];
 // coin: bigger diamond gem (7x7), violet with outline and highlight
 const COIN = [
   '...D...',

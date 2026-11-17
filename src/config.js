@@ -5,7 +5,7 @@ const ZOOM = 1.5;
 export const z = n => Math.round(n / ZOOM);
 
 export const CONFIG = {
-  version: "0.1.3", // bump on every push so the player/Omri can see the build
+  version: "0.1.4", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3 }, // pixelScale: size of one art pixel in game units
@@ -13,7 +13,13 @@ export const CONFIG = {
   ship: {
     startY: z(520),
     dragSensitivity: 1.0, // ship moves this many times the finger movement (1 = 1:1, 1.5 = faster)
-    margin: 18,          // keep this far from screen edges
+    // Weight: the ship eases toward the finger. Lag is about 1000/followRate ms (20 = 50 ms).
+    // LOWER number = heavier, slower to catch up. HIGHER = lighter, closer to glued. 60+ is almost no weight.
+    followRate: 20,
+    bankDeg: 8,          // max tilt in degrees when moving sideways (0 = no tilt)
+    bankSpeed: z(400),   // sideways speed (units/s) that gives the full tilt
+    bankEase: 14,        // how fast the tilt comes and goes (higher = snappier)
+    margin: 18,         // keep this far from screen edges
     hearts: 3,
     invulnMs: 1500,
     ramKillsEnemy: true, // crashing into an enemy: it also dies (no score, no coin). false = it survives
@@ -29,7 +35,7 @@ export const CONFIG = {
     speed: z(620),
     poolSize: 40,
     damage: 1,
-    twinOffset: 6        // two guns, side distance
+    twinOffset: 5        // two guns, side distance (bullet art is 2 px wide: see PBULLET in src/sprites.js; hitbox follows the art)
   },
 
   background: {
