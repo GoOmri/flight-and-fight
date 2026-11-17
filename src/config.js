@@ -7,30 +7,24 @@ export const z = n => Math.round(n / ZOOM);
 // One shot of a pattern: dx offset, angle in degrees, optional own damage.
 const S = (dx, deg = 0, dmg) => ({ dx, deg, dmg });
 const TWIN = [S(-5), S(5)];
-const TRI = [S(-5), S(0), S(5)];
-const TRI_C2 = [S(-5), S(0, 0, 2), S(5)];                                           // centre shot hits for 2
-const FAN5 = [S(-6, -8), S(-3, -4), S(0, 0, 2), S(3, 4), S(6, 8)];                  // narrow fan
-const FAN7 = [S(-9, -12), ...FAN5.slice(0, 2), S(0, 0, 2), ...FAN5.slice(3), S(9, 12)]; // narrow fan + side shots at 12 deg
-const WIDE7 = [-21, -14, -7, 0, 7, 14, 21].map(a => S(a / 2, a, 2));                // wide 7-shot fan
+// Weapon upgrades are ONLY fire rate and damage (same twin shot at every level).
+// Special shots (spread, lasers...) will come later from bought power-ups / hangar upgrades.
+// Level 10 does about 2.2x the damage per second of level 0. Tune the two steps below.
+const WEAPON = { baseFireRateMs: 170, fireRateStep: 6, damageStep: 0.04 }; // each level: shoots 6 ms sooner, hits 4% harder
 function weaponLevels() {
-  const L = (fireRateMs, pattern, damage = 1) => ({ fireRateMs, pattern, damage });
-  return [
-    L(170, TWIN),        // 0 today's gun
-    L(160, TWIN),        // 1 faster
-    L(160, TRI),         // 2 third (centre) shot
-    L(155, TRI),         // 3 faster
-    L(155, TRI_C2),      // 4 centre shot does 2
-    L(155, FAN5),        // 5 five-shot narrow fan
-    L(150, FAN5),        // 6 faster
-    L(150, FAN7),        // 7 side shots at 12 deg
-    L(150, FAN7, 2),     // 8 every shot does 2
-    L(145, FAN7, 2),     // 9 faster
-    L(145, WIDE7, 2)     // 10 wide 7-shot fan
-  ];
+  const out = [];
+  for (let i = 0; i <= 10; i++) {
+    out.push({
+      fireRateMs: WEAPON.baseFireRateMs - WEAPON.fireRateStep * i,
+      pattern: TWIN,
+      damage: Math.round((1 + WEAPON.damageStep * i) * 100) / 100
+    });
+  }
+  return out;
 }
 
 export const CONFIG = {
-  version: "0.3.0", // bump on every push so the player/Omri can see the build
+  version: "0.3.1", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3 }, // pixelScale: size of one art pixel in game units
