@@ -3,7 +3,300 @@
 Screen: 240 wide x 427 tall (x 0 = left, y 0 = top). The ship sits near y 347. Pixel art, one art pixel = 3 screen units.
 Colour rules (already in src/sprites.js): player bullets are a cyan-white bolt, enemy bullets are a pink orb with a dark outline, coins are violet gems, no yellow or gold on bullets. Players never see technical text.
 
+## World guide (theme: a cute witch on a broom)
+
+Status: PROPOSAL from the designer. The theme is Omri's decision. Numbers are suggestions. Where this section and the intro above disagree about colours (violet coins, pink enemy shots), THIS section wins. The title is still open (see 8).
+
+### 1. The world and the art rules
+
+**World in one paragraph.** A small, brave young witch flies her broom over a storybook night. The moon is out, the pumpkins are awake, and the creatures of the night are grumpy and bouncy, not evil. Stray cats are stuck on rocks, boats and rooftops. She hovers over each cat to save it, flies home to her hut, and brews better magic in her cauldron with what she collects. At the end of each place a big guardian waits.
+
+**Cute art rules**
+- Tone: cosy Halloween storybook. Nothing bloody, no skulls, no real fear. Enemies look grumpy or silly, never cruel.
+- Shapes: round and chunky. Big head, big eyes (2 white pixels with 1 dark pixel), tiny body. Simple silhouettes that read at phone size.
+- Outline: every sprite has a 1 art pixel dark outline (very dark purple-navy, not pure black). One light shine pixel at the top-left.
+- Light comes from the top-left. Shadows are one darker step, no gradients.
+- Palette: max 4 colours + outline per sprite. One shared palette of about 32 colours for the whole game.
+- Sizes (1 art pixel = 3 units): witch with broom 13x11 art px. Her real hitbox is tiny: 3x3 art px at her body (be kind). Coin 5x5. Spell bolt 2x4. Enemy shot orb 4x4. Small enemy 9-11 art px, tank 15-17, guardian 30-40 (90-120 units wide).
+- Backgrounds are darker and calmer than sprites. Sprites are brighter and have outlines. Backgrounds never use bright red, gold or cyan-white.
+
+**Reserved colours (must stay)**
+
+| Colour | Means | Never used for |
+|---|---|---|
+| Bright red | Enemy shots and danger only | enemy bodies, decorations, buttons |
+| Cyan-white | Witch spell bolts | enemy glow or effects |
+| Green | Upgrade potions, good bars | enemy bodies (use teal-grey for swamp things) |
+| Gold | Coins only | pumpkin skin, lamps, stars, menu trim |
+| Pink-white outline | Heart pickup | enemies |
+| Violet | Free: the witch's hat and magic, cauldron glow, menus | |
+
+Enemy colours: dark purple, brown, stone grey, bone, teal-grey, dusty blue. Accents: dull rust (pumpkins), pale lilac (ghosts). Accents are never bright red, bright yellow or cyan.
+
+**Mood palettes (ideas)**
+
+| Mood | Sky | Ground / shapes |
+|---|---|---|
+| Night forest | deep blue to indigo | dark green trees, silver moon |
+| Swamp | teal-navy, green mist | murky green water, brown reeds |
+| Dusk sea | purple to dusty pink | deep blue sea, brown boats |
+| Pumpkin fields | plum | dark brown earth, rust pumpkins |
+| Snowy village | pale slate-blue | white snow, brown roofs |
+| Graveyard | grey-violet | grey stones, dark purple grass |
+| Stormy castle | charcoal-blue | grey stone towers, rare white lightning |
+| Floating islands | soft light blue | cloud white, green island tops |
+| Ember mountain | dark maroon-purple | black rock, dull orange cracks |
+
+Lightning and glowing cracks stay dull so they never look like red shots or coins.
+
+**How every existing thing maps to the theme**
+
+| Now | In the world | Look |
+|---|---|---|
+| Ship | Witch on a broom | violet hat, teal scarf, brown broom with a twig tail; tilts when she moves |
+| Cyan-white bolts | Spell bolts | small sparkly cyan-white stars, twin shot |
+| Enemy shots | Curse orbs | bright RED orb, dark outline, white core |
+| Coins | Gold coins | small round gold coin with shine, spins |
+| Green weapon upgrade | Potion bottle | green potion with a cork and bubbles (fire rate / damage) |
+| Hearts | Hearts | pink-white outlined heart (kept) |
+| Crates | Treasure chests | brown wood, light lid, shine; open and spill coins |
+| Medals | Medals | round badge with a small picture, grey until won |
+| Wave pips | Tiny moons | hollow = coming, full = done; the last one is a big moon |
+| Boss | Guardian | see 4 |
+| Result screen | "Back at the hut" | the witch sits with her cats; medals pop onto a shelf |
+| Hangar | Hut + cauldron | cosy room, cauldron in the middle, shelves |
+| Stage select | Map | old parchment map, a broom trail joins the places |
+
+### 2. Glossary (words players see)
+
+| Word | Means |
+|---|---|
+| Witch | the hero (give her a short name later) |
+| Broom | her ship; upgrades change the broom |
+| Spell bolts | her shots |
+| Coins | gold money |
+| Potion | green pickup in a place; stronger bolts for that run |
+| Heart | extra life during a place |
+| Chest | spills coins when shot open |
+| Ingredients | rare drops used in recipes (5 kinds) |
+| Hut | the home menu |
+| Cauldron | where she brews upgrades |
+| Recipes | the list of upgrades |
+| Brew | buy / make a recipe |
+| Cats | the friends she saves; they live in the hut |
+| Rescue ring | the circle bar around a cat |
+| Places | stages, each with a name |
+| Map | stage select |
+| Medals | goals per place, up to 8 |
+| Hard moon | hard mode of a place (a dark moon icon) |
+| Guardian | boss |
+| Spell | special attack (e.g. star burst) |
+
+Never show players: hp, wave numbers, cooldowns, spawn, pool, "Lv 3/5" as text. Use filled pips, icons and bars. A small number next to an icon (coins) is fine.
+
+### 3. Enemy families (13)
+
+HP ideas as now: grunt 3, sway 4, shooter 7. All enemy shots are red orbs.
+
+| # | Creature | Role | Look | HP | Moods |
+|---|---|---|---|---|---|
+| 1 | Bat | grunt | round purple bat, big eyes, small flappy wings | 3 | forest, castle, graveyard (current grunt) |
+| 2 | Ghost | sway | pale lilac blob, wobbly hem, sleepy eyes | 4 | forest, graveyard, swamp (current zigzag) |
+| 3 | Imp | shooter | little dark-teal imp, horns, grin, wand that spits orbs | 7 | forest onward (current shooter) |
+| 4 | Crow | swarm | small round black bird, grey beak, flies fast in flocks | 2 | forest, snow, fields |
+| 5 | Spider | light shooter | round brown spider drops on a thread, stops, spits 1 orb | 4 | swamp, castle, graveyard |
+| 6 | Pumpkin | tank | big dull-rust pumpkin, dark carved face, rolls slowly | 10 | fields, village |
+| 7 | Gargoyle | tank | stone-grey winged blob, stops high, fires a 3-orb fan | 12 | castle, graveyard |
+| 8 | Scarecrow | sway | straw-brown, floppy hat, swings arms side to side | 6 | fields, village |
+| 9 | Wisp | swarm | small teal flame with a face, drifts in loops | 2 | swamp, graveyard |
+| 10 | Sea sprite | sway | dusty-blue bubble creature that bobs | 4 | sea, islands |
+| 11 | Harpy chick | grunt | fluffy blue-grey chick, dives and swerves | 3 | islands, snow |
+| 12 | Baby dragon | shooter | purple-teal round dragon, tiny wings, hiccups orbs | 8 | mountain, castle |
+| 13 | Sack bat | carrier | slow fat bat with a sack; drops an ingredient or coins | 6 | any, rare |
+
+**Existing three:** grunt = Bat, zigzag = Ghost, shooter = Imp.
+
+**How players tell things apart**
+- Red + small + round + fast down = danger. Nothing else is bright red.
+- Gold + small + spinning + slow fall = coin. Gold never appears on enemies or backgrounds.
+- Enemies are at least 9 art px and have eyes. Coins and shots have no eyes.
+- Enemy outline is dark purple. Shots have a white core. Coins have a shine and spin.
+- Enemy shots are drawn on top of everything.
+
+### 4. Stages (10 places)
+
+Each place has the shape of Stage 1: 10 waves, 3 chests, then a guardian. 1-3 cats per place. Medals: see 7.
+
+| # | Place | Mood | New enemies | Guardian (cute attack) | Cats sit on | Twist |
+|---|---|---|---|---|---|---|
+| 1 | Moonlit Forest | night forest | Bat, Ghost, Imp | Old Hoot, a grumpy small owl: swoops side to side, drops feathers | 2 treetops | none (tutorial) |
+| 2 | Foggy Swamp | swamp | Wisp, Spider | Sir Gulp, a big toad: burps 3 slow bubbles | 2 mossy rocks, 1 log | fog patches hide the far top for a moment |
+| 3 | Dusk Sea | dusk sea | Sea sprite, Crow | Squidge, a shy octopus: waves arms, ink orbs | 3 drifting boats | cats on moving boats |
+| 4 | Pumpkin Fields | pumpkin fields | Pumpkin, Scarecrow | Pumpkin King with a crown: rolls, splits into small pumpkins | 2 haystacks, 1 barn roof | pumpkins wake up as you pass |
+| 5 | Snowy Village | snowy village | Harpy chick, snow Crows | Frostwing, a fluffy ice dragon: icicle fan | 3 rooftops | snow gusts push the witch softly |
+| 6 | Whispering Graveyard | graveyard | Ghost packs, Gargoyle | Lady Boo, a big ghost in a bonnet: hides, pops up | 2 tombstones | blue lanterns light the cat spots |
+| 7 | Stormy Castle | stormy castle | Gargoyle, Baby dragon | Gargoyle King: stone fists, 3-orb fans | 2 towers | lightning warns, then a slow sweep |
+| 8 | Floating Islands | floating islands | Harpy, Sea sprite | Great Hoot-Hoot, a giant owl: spins feathers in a ring | 3 islands | wind lanes push sideways |
+| 9 | Ember Mountain | ember mountain | Baby dragon packs | Smolder, a young dragon: puffs smoke rings of orbs | 2 ledges | falling rocks show a dull shadow first |
+| 10 | Moon Castle | midnight, big moon | all, mixed | Duchess Dragon, a queen dragon with a tiny crown, 3 phases | 3 cats in cages (the ring opens the cage) | longest place, the finale |
+
+**Stage 1 dress-up (Moonlit Forest).** Sprites only, waves stay as written. W1-2 bats. W3 ghosts + chest. W4 two imps + bats. W5 bats + an imp. W6 ghosts + imps + chest. W7 three imps + ghosts. W8 looping bats. W9-10 as written. Chests are wooden. Old Hoot comes after wave 10 later (build step 4). Cat 1 sits on a treetop around wave 3-4 (calm part), cat 2 around wave 7.
+
+### 5. Cat rescue (spec for the coder)
+
+**Rules**
+- A cat sits on a spot in the background. The spot scrolls down with the ground (about 40 px/s; boats may drift sideways a little). Visible about 10 s.
+- Around the cat is a rescue ring, radius 24 units. The witch is "above the cat" when her centre is inside the ring.
+- Inside: the ring fills clockwise in 8 segments. Fill time 2.0 s on normal (try 1.5-2.5). Hard 2.5 s.
+- Outside: the ring drains at half the fill speed, never instantly, never below empty. The cat is only lost when it scrolls off the bottom.
+- Hit while inside: the ring loses 25% at once. She is NOT thrown out.
+- Full: happy hop, small meow, sparkle, the cat flies in an arc to the top-left (the hut) and vanishes. A cat icon row on the top bar turns from grey to colour.
+- A cat that scrolls off the bottom is lost for this run.
+- Auto-fire keeps working. Only one cat spot at a time.
+- Wave design rule: at most about 6 enemies alive while a cat is in the hover zone. Cats appear between waves 2-9, in calmer moments.
+
+**Ring look**
+- Pixel ring 17x17 art px (about 51 units) around the cat. Empty ring = dark outline only.
+- Colour steps by fill: 0-25% dark muted red-brown (clearly duller than the bright red of enemy shots), 25-50% pink, 50-75% light green, 75-100% bright green with a light outline.
+- No gold, no bright red. It is a big still circle, so it cannot be mistaken for a small moving orb.
+- When she leaves, the segments fade backwards one by one so the drain is visible.
+- Cat sprite: round, big eyes, ears down and worried; turns happy at half full.
+
+**Tension with auto-fire.** To hover she must stay still, often low on the screen, while enemies come. That is the point. The player chooses: kill the gunners first, or dash into the ring between waves. No new button. She stays where the finger holds her.
+
+**Reward**
+- Each cat gives 1 ingredient (the type of that place) and lives in the hut as a decoration (it sleeps or chases a mouse, no gameplay at first).
+- Cats count for a medal (see 7) and unlock recipes (see 6).
+
+**Difficulty options**
+- Easy / normal / hard change: fill time, the number of enemies near the cat, and the drain speed (hard: full speed instead of half).
+- Hard only: moving spots, or a cat that wanders a little while the witch hovers.
+
+**Cats and "no hit".** Getting hit while rescuing is likely. So the "no hit" medal moves to hard mode (see 7). QUESTION for Omri.
+
+### 6. Hut and cauldron loop
+
+**Collect**
+- Coins (gold): from enemies (coinEvery rule as now) and chests. Spent in the cauldron.
+- Ingredients, 5 kinds, one for each pair of moods: Moon petal (forest, snow), Bog slime (swamp, sea), Pumpkin seed (fields, village), Ghost dust (graveyard, castle), Dragon scale (mountain, moon castle).
+- Drops: sack bats, guardians (1-2 always), cats (1 each). Not from normal enemies, so the screen stays clean. About 2-4 per place.
+- Coins about 400 per place at the start.
+
+**Recipes (12 ideas)**
+
+| Recipe | Does | Levels | Cost idea | Unlock |
+|---|---|---|---|---|
+| Spell speed | base fire rate | 5 | 100, 200, 350, 550, 800 coins | start |
+| Spell power | base damage | 5 | 100, 200, 350, 550, 800 coins | start |
+| Heart jar | +1 start heart | 3 | 300 coins + 1 moon petal each | place 2 |
+| Coin magnet | bigger pull radius | 3 | 150, 300 coins + 1 seed | place 2 |
+| Broom boots | broom speed | 3 | 200, 400, 600 coins | place 2 |
+| Lucky clover | more coins from chests | 3 | 250 coins + 1 ingredient | 3 medals total |
+| Shield bubble | one shield at place start | 1 | 400 coins + 2 bog slime | place 3 |
+| Star burst | clears red orbs once per place | 1 | 500 coins + 2 ingredients | place 4 |
+| Triple fan | special shot, bought per run | per run | 80 coins per use | place 3 |
+| Homing sparks | special shot, bought per run | per run | 120 coins per use | place 5 |
+| Cat treats | cat ring fills faster | 2 | 300 coins + 1 ingredient | 3 cats saved |
+| Cozy cushion | hut decoration for the cats | 5 | ingredients | cats saved |
+
+Potions picked up in a place only give fire rate + damage (as now). Special shots come from the cauldron.
+
+**Unlocks by medals and cats:** 3 total medals opens Lucky clover. Every 3 cats saved opens a hut item. A full set of one place's cats opens a hat or broom skin (looks only). 8 total medals opens the next level tier of a recipe.
+
+**First 5 places (suggestion)**
+
+| Place | Coins gained (about) | Player can afford |
+|---|---|---|
+| 1 | 400 | speed L1+L2, power L1 |
+| 2 | 450 | power L2, heart jar, magnet |
+| 3 | 500 | shield, boots, triple fan per run |
+| 4 | 550 | star burst, power L3 |
+| 5 | 600 | homing sparks, speed L4, hearts L2 |
+
+Rule: the player can afford something new every 1-2 plays. Hard mode pays 1.5x coins.
+
+### 7. Hard mode
+
+**What changes** (a modifier on the same place, NOT new waves)
+- Enemies +25% HP, shots 20% faster, about +3 enemies per wave, some gunners fire 3 orbs.
+- Fewer hearts: chests give no hearts, only the start hearts from the cauldron.
+- Cats: moving spots, faster drain.
+- The guardian gets one extra pattern.
+- Coins pay 1.5x.
+
+| Normal medals (4) | Rule |
+|---|---|
+| Hunter | kill 70% |
+| Sweeper | kill all |
+| Collector | collect all coins |
+| Rescuer | save all cats |
+
+| Hard medals (4) | Rule |
+|---|---|
+| Untouchable | no hit (moved here from normal) |
+| Hard sweeper | kill all on hard |
+| Hard rescuer | save all cats on hard |
+| Guardian buster | beat the guardian in under 30 s |
+
+Optional swap: a "Speedy" medal (finish in under N minutes).
+
+**Unlocking**
+- Place N+1 opens with 2 normal medals from place N.
+- The hard moon of a place opens with 3 normal medals of that place.
+- Hut items and skins ask for total medals (normal + hard), e.g. 8, 16, 24.
+- The story is never gated behind hard mode.
+- The map shows 8 badge slots per place, grey until won.
+
+**Why replay:** badge shelves to fill, hard pays more coins and rare ingredients, cats to collect, and each place has small clear goals.
+
+### 8. Title ideas
+
+| # | Title | Feel |
+|---|---|---|
+| 1 | Moonbroom | short, magical, good app icon |
+| 2 | Whisker Wings | cats and flying, very cute |
+| 3 | Midnight Mews | cat pun, cosy night |
+| 4 | Broom Blitz | action, easy to say |
+| 5 | Spellbound Skies | storybook, a bit long |
+| 6 | Little Witch Flight | clear and plain |
+| 7 | Cauldron Skies | hut and flying together |
+| 8 | Hexy Skies | playful |
+| 9 | Pumpkin Patrol | Halloween, silly |
+| 10 | Purr and Spell | cats and magic |
+| 11 | Wisp and Whisker | gentle, a little long |
+| 12 | Nightbroom | short, less cute |
+| 13 | Cat Cauldron Dash | game-like, goofy |
+| 14 | Broomstick Brigade | silly team pun |
+| 15 | Witch Way Home | joke on the cat goal |
+
+Top 3: (1) **Whisker Wings**: cats and flying in two words, cute, fits an icon. (2) **Moonbroom**: shortest, easy to remember, looks good on a phone. (3) **Midnight Mews**: cat pun, cosy, but it does not say "shooter". "Flight and Fight" still works as a fallback working name.
+
+### 9. Risks and conflicts
+
+- Red = enemy shots only, but the cat ring should start red. Solved with a dark muted red. Check on the phone that it is not confused with shots.
+- Hovering still while gunners shoot can feel unfair. Keep cat zones in calm moments and drain slowly. Test this first: it is the new fun.
+- "No hit" and cats pull in opposite directions. Proposal: move "no hit" to hard.
+- 10 places x backgrounds, enemies, guardian and cats is a LOT of art. Reuse and recolour creatures. Make 3 places well before the rest.
+- Hard mode must be a modifier, not new waves, or the work doubles.
+- Medal gates can annoy. 2 medals to move on is enough.
+- Ingredients add a second currency. Start with coins only, add the first ingredient at place 2.
+- A spell button would need a second finger. Make spells automatic, or use double-tap.
+- Rust pumpkins and glowing cracks can look like coins or shots. Keep them dull and big, with dark faces.
+- The colour line in the intro (violet coins, pink enemy shots) is out of date. The coder should update sprites.js to this guide.
+
+### Build order (small steps)
+
+1. Re-skin what exists: witch on a broom, bolts, bat / ghost / imp, gold coins, red shots, potion, chest. No new rules. Check readability on the phone.
+2. Sound and feel pass (shoot, hit, coin, hurt).
+3. Result screen as "back at the hut" with the 4 normal medals; the place ends after wave 10.
+4. Guardian prototype: Old Hoot (3 attack patterns, a health bar).
+5. Cat rescue prototype in place 1: ring, fill and drain, 2 cats, cat icons on the top bar.
+6. Hut screen with the cauldron and 3 recipes (spell speed, spell power, heart jar), coins saved.
+7. Map screen with places 1-3 and unlocking by medals.
+8. Hard mode modifier + 4 hard medals, then add places 2 and 3 one by one.
+
 ---
+
 
 ## Stage 1 waves
 
