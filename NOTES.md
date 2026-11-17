@@ -60,3 +60,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
   - UNVERIFIED: only node --check; NOT run in a browser or on a phone. The enemy-shot swell and the recoil squash change the scale a little, so those hitboxes move by about 2 to 8 percent (tiny).
   - Check on phone: does the witch read well and look cute at 36 px (try spriteScale 3 if too small)? Hitbox still feels tiny and fair? Shots come from the hat? Trail not too busy? Impact sparks and rings not hiding enemy shots? Coin magnet too strong or weak? Performance at ?wave=10&god=1. White-pink hit flash: too strong?
   - Review fixes (same entry): enemy shots now draw at depth 35 (config enemyBullet.depth), above all effects and below the HUD. The hit flash is now our own reused rectangle (feel.hitFlashStrength 0.3, flashDepth 25, below the shots) instead of the camera flash. Hard-coded feel numbers moved to config.feel (pool sizes, ring depth, trail spread/carry, impact sparks, text edge/offset, fire flash, cloud ease). Recoil uses the real texture height. Clouds stop boosting at game over / stage clear. Still UNVERIFIED in a browser: check the flash is soft and the red shots stay visible on top of everything.
+
+## 2026-11-18 v0.5.1: black screen fix
+- v0.5.0 showed a black screen: a comma in src/config.js (enemyBullet line) sat inside a comment, so the file did not load. Fixed.
+- Lesson: `node --check` did NOT catch it (ES modules). Check with the new-Function test or load the page in the browser pane and read the console BEFORE pushing.
+- Verified: page loads in the browser pane, no console errors. Unverified: on the phone.

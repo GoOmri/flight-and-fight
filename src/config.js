@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.5.0", // bump on every push so the player/Omri can see the build
+  version: "0.5.1", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3 }, // pixelScale: size of one art pixel in game units
@@ -81,7 +81,7 @@ export const CONFIG = {
   },
 
   // Enemy shots: slow red orbs. speed is the default; the wave data may set its own. hitSize = art pixels of the orb core.
-  enemyBullet: { poolSize: 30, speed: 100, hitSize: 3, depth: 35 } // depth 35: above all effects (sparks 20, texts 30), below the HUD (50),
+  enemyBullet: { poolSize: 30, speed: 100, hitSize: 3, depth: 35 }, // depth 35: above all effects (sparks 20, texts 30), below the HUD (50)
 
   // pickupRadius: how close the ship must be to grab a coin (logical px). Bigger than the ship hitbox on purpose.
   coin: { fallSpeed: z(90), value: 5, poolSize: 40, pickupRadius: 10 },
