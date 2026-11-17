@@ -1,8 +1,9 @@
-import { CONFIG as C } from '../config.js';
+import { CONFIG as C, z } from '../config.js';
 import { makeAllTextures, PX } from '../sprites.js';
 
 const W = C.game.width, H = C.game.height;
-const FONT = { fontFamily: '"Courier New", monospace', fontStyle: 'bold' };
+const FONT = { fontFamily: '"Courier New", monospace', fontStyle: 'bold', resolution: 2 }; // resolution 2 = crisper text
+// HUD sizes were written for 360x640; z() keeps them the same size on the phone screen.
 
 export class PlayScene extends Phaser.Scene {
   constructor() { super('Play'); }
@@ -78,11 +79,11 @@ export class PlayScene extends Phaser.Scene {
   }
 
   makeHud() {
-    this.scoreText = this.add.text(8, 6, 'SCORE 0', { ...FONT, fontSize: '18px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: 4 }).setDepth(50);
-    this.versionText = this.add.text(8, 30, 'v' + C.version, { ...FONT, fontSize: '9px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: 2 }).setAlpha(0.6).setDepth(50);
+    this.scoreText = this.add.text(z(8), z(6), 'SCORE 0', { ...FONT, fontSize: z(18) + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: z(4) }).setDepth(50);
+    this.versionText = this.add.text(z(8), z(30), 'v' + C.version, { ...FONT, fontSize: z(11) + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: 1 }).setAlpha(0.6).setDepth(50);
     this.heartIcons = [];
     for (let i = 0; i < C.ship.hearts; i++) {
-      this.heartIcons.push(this.add.image(W - 12 - i * 26, 16, 'heart').setScale(3).setOrigin(1, 0.5).setDepth(50));
+      this.heartIcons.push(this.add.image(W - z(12) - i * z(26), z(16), 'heart').setScale(PX / C.game.zoom).setOrigin(1, 0.5).setDepth(50));
     }
     this.refreshHearts();
   }
@@ -289,10 +290,10 @@ export class PlayScene extends Phaser.Scene {
     this.enemyBullets.children.iterate(b => { if (b && b.active) this.kill(b); });
     this.bullets.children.iterate(b => { if (b && b.active) this.kill(b); });
     this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.55).setDepth(60);
-    const t = (y, s, size, col) => this.add.text(W / 2, y, s, { ...FONT, fontSize: size + 'px', color: col, stroke: '#1b1b2b', strokeThickness: 5, align: 'center' }).setOrigin(0.5).setDepth(61);
-    t(H / 2 - 70, 'GAME OVER', 36, '#ff5a5a');
-    t(H / 2 - 10, 'SCORE ' + this.score, 26, '#ffe14d');
-    const tap = t(H / 2 + 60, 'TAP TO PLAY AGAIN', 18, '#ffffff');
+    const t = (y, s, size, col) => this.add.text(W / 2, y, s, { ...FONT, fontSize: z(size) + 'px', color: col, stroke: '#1b1b2b', strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(61);
+    t(H / 2 - z(70), 'GAME OVER', 36, '#ff5a5a');
+    t(H / 2 - z(10), 'SCORE ' + this.score, 26, '#ffe14d');
+    const tap = t(H / 2 + z(60), 'TAP TO PLAY AGAIN', 18, '#ffffff');
     this.tweens.add({ targets: tap, alpha: 0.3, yoyo: true, repeat: -1, duration: 600 });
   }
 }

@@ -5,10 +5,12 @@ import { CONFIG } from './config.js';
 const PAL = {
   '.': null,
   w: 0xffffff, k: 0x1b1b2b, g: 0x8a93a6, d: 0x555d73,
-  r: 0xe63946, o: 0xff9f1c, y: 0xffe14d, b: 0x3a86ff, c: 0x7fe0ff,
+  r: 0xe63946, o: 0xff9f1c, b: 0x3a86ff, c: 0x7fe0ff,
   n: 0x3bb54a, p: 0xb15bd6, m: 0x7a2fa0,
-  // COLOUR RULE: coins are the ONLY purple/violet pickups (V, L, D below).
-  // Enemy bullets are warm red/orange. Player bullets are yellow/white. Never mix these.
+  // COLOUR RULE: no yellow/gold anywhere except nothing; coins purple only (V, L, D below).
+  // Player bullets: thin cyan-white bolts (c, w). Enemy bullets: round pink-red orbs (e, h, q).
+  // Never mix these. (Explosion sparks are tinted yellow/orange in code: small squares, OK.)
+  e: 0x5a0a1f, h: 0xff3d8b, q: 0xffc2dc, // enemy bullet: dark outline, hot pink, light pink core
   V: 0xb24bf3, L: 0xe6b8ff, D: 0x2a0a4a // coin: violet fill, light highlight, dark outline
 };
 
@@ -37,7 +39,7 @@ const HERO_ART = [
   'ggggbbbgggg',
   'g.dgbbbgd.g',
   '..d.rrr.d..',
-  '....oyo....'
+  '....oro....'
 ];
 export function drawHero(scene) { makeTexture(scene, 'hero', HERO_ART); }
 
@@ -69,8 +71,8 @@ const SHOOTER = [
   '.mpp.o.ppm.',
   '..m..o..m..'
 ];
-const EBULLET = ['.rr.', 'roor', 'roor', '.rr.']; // small round, red/orange
-const PBULLET = ['y', 'y', 'w', 'y'];
+const EBULLET = ['.eee.', 'ehqhe', 'ehqhe', 'ehhhe', '.eee.']; // round pink orb, dark outline
+const PBULLET = ['.w.', 'cwc', 'cwc', 'cwc', 'cwc', 'cwc', '.c.']; // thin cyan-white bolt
 // coin: bigger diamond gem (7x7), violet with outline and highlight
 const COIN = [
   '...D...',
