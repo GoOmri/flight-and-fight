@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.3.3", // bump on every push so the player/Omri can see the build
+  version: "0.4.0", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3 }, // pixelScale: size of one art pixel in game units

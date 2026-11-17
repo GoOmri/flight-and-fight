@@ -7,24 +7,26 @@ const PAL = {
   w: 0xffffff, k: 0x1b1b2b, g: 0x8a93a6, d: 0x555d73,
   r: 0xe63946, o: 0xff9f1c, b: 0x3a86ff, c: 0x7fe0ff,
   n: 0x3bb54a, p: 0xb15bd6, m: 0x7a2fa0,
-  // COLOUR RULE (what each colour is reserved for, never mix):
-  //  RED (e,h,q)           = danger: enemy shots only (hero flame and hearts use red too, they are small).
-  //  GOLD (Q,A,U,K)        = coins only (also the coin sparkle and the 'all coins' medal icon). Violet is now unused/free.
-  //  CYAN-WHITE (c,w)      = player shots (and the hero's nose).
-  //  Enemies use ONLY dark / earth / military tones: steel grey (S,s), olive/dark green (O,F,l), brown/black-grey (N,Z)
-  //   with a dark outline (k). Lime (M) is the shooter gun. No red, pink, orange, yellow, gold, purple or cyan on enemies.
-  //  Crate = wood: brown/tan (T,B,Y) with a dark outline (X). No yellow/gold.
-  //  BRIGHT GREEN (E,H)    = weapon upgrade only: the pickup badge, the pulsing outline of a weapon carrier and the filled bars in the HUD.
+  // COLOUR RULE (witch theme; what each colour is reserved for, never mix):
+  //  RED (e,h,q)           = danger: enemy shots only (and the small heart icons). Nothing else red/orange.
+  //  GOLD (Q,A,U,K)        = coins only (also the coin sparkle and the 'all coins' medal icon).
+  //  CYAN-WHITE (c,w)      = player shots (thin bolt, keep exactly). White is also used for small shines/eyes.
+  //  BRIGHT GREEN (E,H)    = weapon upgrade only: the potion, the pulsing outline of a weapon carrier, the HUD bars.
   //  PINK-WHITE (P)        = pulsing outline of a heart carrier. The heart pickup has a white outline.
+  //  VIOLET is FREE: the witch (hat V, band v, cloak i), the bat (I, belly u), the ghost (L), sparkles (y, p).
+  //  Creatures (dark/mid tones + dark outline k so they read on the light sky): BAT = indigo, GHOST = pale lavender-grey,
+  //   IMP = dark teal-green with tan horns and a lime wand tip (M). Never red, orange, gold or cyan-white on enemies.
+  //  Chest = brown wood (T,B) with grey steel bands (g,d), outline X. No gold/yellow, so it is never mistaken for coins.
   //  HUD medal icons: bone-white skulls, blue shield, gold coin (coin colour). Never red or gold except the coin.
   // (Explosion sparks are tinted white / light grey / red-orange in code: never yellow or gold, so they never look like coins.)
   e: 0x7a0a0a, h: 0xff2a2a, q: 0xff7a7a, // enemy shot: dark red outline, bright red, lighter red core
   Q: 0xffc928, A: 0xfff2a0, U: 0xb36b00, K: 0x5a3200, // coin: gold body, light shine, brown rim, dark outline
-  S: 0x6a7a92, s: 0x3a4558, G: 0x3fa34d, // grunt: steel grey, dark steel, green canopy
-  O: 0x6b7a2e, F: 0x34562a, l: 0x8fc45a, // zigzag: olive, dark green, light green accent
-  N: 0x5a3f2c, Z: 0x2b2b32, M: 0xa6ff3c, // shooter: brown, black-grey, lime gun/eye
-  T: 0xc58f4f, B: 0x8a5a2b, X: 0x3b2412, Y: 0xe8cf9a, // crate: tan, brown, dark outline, light lid
-  E: 0x2ee86a, H: 0x0b7d3a, P: 0xffc9e3,              // upgrade green, its shade, carrier pink-white
+  V: 0x4a2a8c, v: 0xa07ae6, f: 0xf6cfa6, i: 0x2a1a55, y: 0xff7ad9, // witch: hat, hat band, skin, cloak/hair, pink sparkle
+  I: 0x3c3a8c, u: 0x8f86d8,                                       // bat: indigo body, lighter belly
+  L: 0xc9c3e8, z: 0xd98fb8,                                       // ghost: pale lavender-grey, blush
+  t: 0x1f6b5a, M: 0xa6ff3c,                                       // imp: dark teal-green skin, lime wand tip
+  T: 0xc58f4f, B: 0x8a5a2b, X: 0x3b2412,                          // wood: tan, brown, dark outline (chest, broom, horns)
+  E: 0x2ee86a, H: 0x0b7d3a, P: 0xffc9e3,                          // upgrade green, its shade, carrier pink-white
   J: 0xeceef5, j: 0x8a90a6                            // skull bone, bone shade (medal icons)
 };
 
@@ -41,59 +43,61 @@ function makeTexture(scene, key, rows) {
   g.destroy();
 }
 
-// Neutral placeholder plane (hero not decided yet). Swap this function's art later.
+// Hero: cute witch on a broom (11x11): violet hat, skin face, dark cloak, brown broom, straw tail with pink/violet sparkles.
 const HERO_ART = [
-  '.....o.....',
-  '.....w.....',
-  '....cwc....',
-  '....bwb....',
-  '...bbwbb...',
-  '..gbbbbbg..',
-  '.ggbbbbbgg.',
-  'ggggbbbgggg',
-  'g.dgbbbgd.g',
-  '..d.rrr.d..',
-  '....oro....'
+  '.....V.....',
+  '....VVV....',
+  '....VvV....',
+  '...VVVVV...',
+  '.VVVVVVVVV.',
+  '...fkfkf...',
+  '....fff....',
+  '..iiiiiii..',
+  '.BBiiiiiBB.',
+  '...TTBTT...',
+  '..y.TTT.p..'
 ];
 export function drawHero(scene) { makeTexture(scene, 'hero', HERO_ART); }
 
+// grunt = BAT
 const GRUNT = [
-  '.k.....k.',
-  'kSk...kSk',
-  'kSSkkkSSk',
-  'kSsGGGsSk',
-  '.kSGGGSk.',
-  '..kSSSk..',
-  '...kkk...'
-];
-const ZIGZAG = [
   '..k...k..',
-  '.kOk.kOk.',
-  'kOOOkOOOk',
-  'kOlOFOlOk',
-  'kOOFFFOOk',
-  '.kOk.kOk.',
-  '.k.....k.'
+  '.kIkkkIk.',
+  'kIIwIwIIk',
+  'kIIkukIIk',
+  'kIkIuIkIk',
+  '.k.kuk.k.',
+  '.k..k..k.'
 ];
-// the biggest enemy: dark body, bright lime gun/eye
+// zigzag = GHOST
+const ZIGZAG = [
+  '..kkkkk..',
+  '.kLLLLLk.',
+  'kLLLLLLLk',
+  'kLkLLLkLk',
+  'kzkLLLkzk',
+  'kLLLkLLLk',
+  'k.kLk.kLk'
+];
+// shooter = IMP, the biggest enemy: dark teal-green skin, tan horns, wand with a lime glowing tip
 const SHOOTER = [
   '.k.......k.',
-  'kNk.....kNk',
-  'kNNkkkkkNNk',
-  'kNZZZZZZZNk',
-  'kNZMMMMMZNk',
-  'kNZZMMMZZNk',
-  '.kNZZMZZNk.',
-  '..kk.M.kk..'
+  'kTk.....kTk',
+  'kTTktttkTTk',
+  'kttwwtwwttk',
+  'kttwktkwttk',
+  'kkttkkkttkk',
+  '.kttttttk.B',
+  '..kk...kk.M'
 ];
-// crate: wooden box, light lid with a tiny shine, dark outline. 7x7 art px = 21 px on screen (also its hitbox).
+// crate = small wooden TREASURE CHEST with grey steel bands and clasp (not gold). 7x7 art px = 21 px on screen (also its hitbox).
 const CRATE = [
-  'XXXXXXX',
-  'XYwYYYX',
-  'XXXXXXX',
-  'XTTBTTX',
-  'XBBBBBX',
-  'XTTBTTX',
+  '.XXXXX.',
+  'XgTTTgX',
+  'XgggggX',
+  'XgBdBgX',
+  'XgBBBgX',
+  'XgBBBgX',
   'XXXXXXX'
 ];
 const EBULLET = ['.eee.', 'ehqhe', 'ehqhe', 'ehhhe', '.eee.']; // round red orb, dark red outline
@@ -112,14 +116,14 @@ const COIN = [
 const HEART = ['.rr.rr.', 'rrrrrrr', 'rrrrrrr', '.rrrrr.', '..rrr..', '...r...'];
 const HEART_EMPTY = ['.dd.dd.', 'd..d..d', 'd.....d', '.d...d.', '..d.d..', '...d...'];
 const SQUARE = ['w'];
-// weapon upgrade: round green badge, white up-arrow, dark outline (9x9)
+// weapon upgrade = green POTION bottle, cork, white shine and up-arrow, dark outline (9x9)
 const WEAPON_UP = [
-  '..kkkkk..',
-  '.kEEEEEk.',
-  'kEEEwEEEk',
-  'kEEwwwEEk',
-  'kEwwwwwEk',
-  'kEEEwEEEk',
+  '...kkk...',
+  '...kBk...',
+  '...kwk...',
+  '..kEEEk..',
+  '.kEEwEEk.',
+  'kwEwwwEEk',
   'kEEEwEEEk',
   '.kHHHHHk.',
   '..kkkkk..'
