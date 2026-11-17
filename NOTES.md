@@ -1,0 +1,23 @@
+# Notes
+
+## Mission
+A fun Android shoot-'em-up like Sky Force: you fly up the screen, auto-fire, dodge, collect coins, upgrade your ship between levels, fight a boss.
+
+## Decisions so far
+- Prototype in the browser: JavaScript + Phaser 3 (changed from Godot on 2026-11-17; may move to Godot later). Platform: Android only.
+- Code on GitHub. Plan: GitHub Pages gives a link to play on the phone; later Capacitor wraps it into an Android app (UNVERIFIED, not set up yet).
+- Style: maybe pixel art (undecided). Hero: maybe a cat, maybe a kite (undecided).
+- Success = fun.
+- Library: lib/phaser.min.js = Phaser 3.80.1, about 1.18 MB, downloaded from https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js on 2026-11-17 with Omri's OK.
+
+## Prototype goal (first milestone)
+Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score. Then Omri plays it and we tune the feel.
+
+## Log
+- 2026-11-17: Added manifest.webmanifest + icon.svg + meta tags so the game can be added to an Android home screen (full-screen). UNVERIFIED: whether Chrome on the phone shows the icon / opens full-screen; check after the GitHub Pages link is live. Plan: public repo flight-and-fight on GitHub, Pages from main root (not set up yet, needs Omri's "push").
+- 2026-11-17: Project created. Agents added: flight-coder, flight-reviewer, flight-designer. Nothing built yet. Later same day: switched plan from Godot to browser + Phaser.
+- 2026-11-17 (branch proto-ship-move): First playable slice. Files: index.html, src/config.js (all tuning), src/main.js, src/sprites.js (pixel art in code, hero in drawHero/HERO_ART), src/scenes/PlayScene.js, .claude/launch.json (python -m http.server 8123). Ship follows finger with offset, auto-fires twin bullets (pooled), 3 enemy types on a looping wave timeline, coins, 3 hearts, game over + tap to restart. No boss, no sound.
+  - UNVERIFIED: syntax checked with node only; run in the built-in browser on 2026-11-17 with no console errors and the ship, fire and kills work; still never run on a phone. Touch feel, follow smoothness, finger offset, difficulty, speed on the phone.
+  - Check on phone: does the ship feel glued to the finger (tune ship.followSmoothing, fingerOffsetY)? Is firing/hit flash readable? Too hard or too easy (waves, enemy hp)?
+  - Follow-up fixes (same day): shooter timings, hit shake and restart delay moved to src/config.js; shooter sway now starts from where it stopped (no sideways jump). Check on phone: shooter hover looks smooth.
+  - 2026-11-17: Crash rule (Omri's answer): hitting an enemy body costs a heart; while blinking nothing happens. After a real hit the enemy also dies, with no score and no coin (config ship.ramKillsEnemy, false = enemy survives). Changed src/scenes/PlayScene.js, src/config.js. UNVERIFIED: feel on phone.

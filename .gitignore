@@ -1,0 +1,8 @@
+node_modules/
+.godot/
+
+# Android signing: never commit
+*.jks
+*.keystore
+*.apk
+*.aab
