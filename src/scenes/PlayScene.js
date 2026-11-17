@@ -25,11 +25,27 @@ export class PlayScene extends Phaser.Scene {
     this.makeShip();
     this.makeHud();
 
-    // Input: ship target follows the pointer (finger or mouse).
-    this.target = new Phaser.Math.Vector2(this.ship.x, this.ship.y);
-    const move = p => { this.target.set(p.x, p.y - C.ship.fingerOffsetY); };
-    this.input.on('pointerdown', p => { move(p); if (this.over && this.time.now > this.restartAt) this.scene.restart(); });
-    this.input.on('pointermove', move);
+    // Input: relative drag. The ship moves by the same amount as the finger (or held mouse) moves.
+    // Touching somewhere else does not move the ship. Only one pointer steers; others are ignored.
+    this.dragId = null;
+    this.dragFrom = new Phaser.Math.Vector2();  // finger position at touch start
+    this.shipFrom = new Phaser.Math.Vector2();  // ship position at touch start
+    this.input.on('pointerdown', p => {
+      if (this.over) { if (this.time.now > this.restartAt) this.scene.restart(); return; }
+      if (this.dragId !== null) return;
+      this.dragId = p.id;
+      this.dragFrom.set(p.x, p.y);
+      this.shipFrom.set(this.ship.x, this.ship.y);
+    });
+    this.input.on('pointermove', p => {
+      if (p.id !== this.dragId || !p.isDown || this.over) return;
+      const S = C.ship;
+      this.ship.x = Phaser.Math.Clamp(this.shipFrom.x + (p.x - this.dragFrom.x) * S.dragSensitivity, S.margin, W - S.margin);
+      this.ship.y = Phaser.Math.Clamp(this.shipFrom.y + (p.y - this.dragFrom.y) * S.dragSensitivity, S.margin, H - S.margin);
+    });
+    const release = p => { if (p.id === this.dragId) this.dragId = null; };
+    this.input.on('pointerup', release);
+    this.input.on('pointerupoutside', release);
 
     // Collisions
     this.physics.add.overlap(this.bullets, this.enemies, (b, e) => this.bulletHitsEnemy(b, e));
@@ -119,7 +135,6 @@ export class PlayScene extends Phaser.Scene {
     this.scrollBackground(dt);
     if (this.over) { this.updateSparks(dt); return; }
 
-    this.moveShip(dt);
     this.autoFire(time);
     this.runWaves(dt);
     this.updateEnemies(time, dt);
@@ -137,15 +152,6 @@ export class PlayScene extends Phaser.Scene {
       s.y += L.speed * dt;
       if (s.y > H + 40) { s.y = -40; s.x = Phaser.Math.Between(0, W); }
     }
-  }
-
-  moveShip(dt) {
-    const S = C.ship, k = 1 - Math.exp(-S.followSmoothing * dt);
-    let dx = (this.target.x - this.ship.x) * k, dy = (this.target.y - this.ship.y) * k;
-    const maxStep = S.maxSpeed * dt, len = Math.hypot(dx, dy);
-    if (len > maxStep) { dx *= maxStep / len; dy *= maxStep / len; }
-    this.ship.x = Phaser.Math.Clamp(this.ship.x + dx, S.margin, W - S.margin);
-    this.ship.y = Phaser.Math.Clamp(this.ship.y + dy, S.margin, H - S.margin);
   }
 
   autoFire(time) {

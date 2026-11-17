@@ -5,16 +5,14 @@ const ZOOM = 1.5;
 export const z = n => Math.round(n / ZOOM);
 
 export const CONFIG = {
-  version: "0.1.2", // bump on every push so the player/Omri can see the build
+  version: "0.1.3", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3 }, // pixelScale: size of one art pixel in game units
 
   ship: {
     startY: z(520),
-    fingerOffsetY: z(28),   // ship hovers this far ABOVE the finger (just over the thumb tip)
-    followSmoothing: 16, // higher = snappier (1 = very floaty, 30 = almost glued)
-    maxSpeed: z(900),       // px per second, limit for the follow
+    dragSensitivity: 1.0, // ship moves this many times the finger movement (1 = 1:1, 1.5 = faster)
     margin: 18,          // keep this far from screen edges
     hearts: 3,
     invulnMs: 1500,
@@ -27,7 +25,7 @@ export const CONFIG = {
   },
 
   bullet: {
-    fireRateMs: 130,     // time between shots
+    fireRateMs: 170,    // time between shots
     speed: z(620),
     poolSize: 40,
     damage: 1,
