@@ -57,19 +57,19 @@ export class PlayScene extends Phaser.Scene {
     this.dragId = null;
     this.dragFrom = new Phaser.Math.Vector2();  // finger position at touch start
     this.shipFrom = new Phaser.Math.Vector2();  // ship position at touch start
+    this.finger = new Phaser.Math.Vector2();    // finger position now
     this.input.on('pointerdown', p => {
       if (this.over) { if (this.time.now > this.restartAt) this.scene.restart(); return; }
       if (this.dragId !== null) return;
       this.dragId = p.id;
       this.dragFrom.set(p.x / R, p.y / R); // pointer is in canvas pixels, the game is R times smaller
+      this.finger.copy(this.dragFrom);
       this.shipFrom.set(this.target.x, this.target.y); // from the target, so no jump while the ship is still catching up
     });
     this.input.on('pointermove', p => {
       if (p.id !== this.dragId || !p.isDown || this.over) return;
-      const S = C.ship;
-      // The finger sets the TARGET (1:1). The ship eases toward it in update().
-      this.target.x = Phaser.Math.Clamp(this.shipFrom.x + (p.x / R - this.dragFrom.x) * S.dragSensitivity, S.margin, W - S.margin);
-      this.target.y = Phaser.Math.Clamp(this.shipFrom.y + (p.y / R - this.dragFrom.y) * S.dragSensitivity, S.margin, H - S.margin);
+      this.finger.set(p.x / R, p.y / R);
+      this.aimTarget();
     });
     const release = p => { if (p.id === this.dragId) this.dragId = null; };
     this.input.on('pointerup', release);
@@ -151,8 +151,23 @@ export class PlayScene extends Phaser.Scene {
   }
 
   // Ease the ship toward the target (light inertia, no overshoot) and bank it a little.
+  // The finger sets the TARGET: ship start + finger movement x sensitivity. The ship eases toward it in moveShip().
+  aimTarget() {
+    const S = C.ship;
+    this.target.x = Phaser.Math.Clamp(this.shipFrom.x + (this.finger.x - this.dragFrom.x) * S.dragSensitivity, S.margin, W - S.margin);
+    this.target.y = Phaser.Math.Clamp(this.shipFrom.y + (this.finger.y - this.dragFrom.y) * S.dragSensitivity, S.margin, H - S.margin);
+  }
+
   moveShip(dt) {
     const S = C.ship, s = this.ship;
+    if (this.dragId !== null && !this.over && S.glueRate > 0) {
+      // Slowly slide the start point so the target settles just above the finger: the drift (finger far from the ship) heals itself.
+      const g = 1 - Math.exp(-S.glueRate * dt);
+      const ix = Phaser.Math.Clamp(this.finger.x, S.margin, W - S.margin), iy = Phaser.Math.Clamp(this.finger.y - S.fingerOffsetY, S.margin, H - S.margin);
+      this.shipFrom.x += (ix - this.target.x) * g;
+      this.shipFrom.y += (iy - this.target.y) * g;
+      this.aimTarget();
+    }
     const k = 1 - Math.exp(-S.followRate * dt);
     const px = s.x, py = s.y;
     s.x += (this.target.x - s.x) * k;

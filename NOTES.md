@@ -76,3 +76,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-18 v0.5.3: faster witch
 - Omri: thumb and witch drift apart with 1:1 drag. Now config.ship.dragSensitivity 1.0 -> 1.5 (witch moves 1.5x the finger) and followRate 20 -> 28 (a bit less lag).
 - Unverified: feel on the phone. If too twitchy go back toward 1.2 / 22. Other ideas if still odd: a thumb circle (virtual stick), or the old "witch glued above the finger" way.
+
+## 2026-11-18 v0.5.4: witch settles above the thumb (drift fix)
+- Omri: with drag x1.5 the witch drifted away from the thumb near the top of the screen. Now the drag stays relative (no jump at touch), but while the thumb is down the witch slowly slides to a spot fingerOffsetY (z(45)) above the thumb. config.ship: glueRate 2.5 (0 = old pure relative drag), fingerOffsetY, dragSensitivity 1.2 (was 1.5), followRate 28.
+- Verified in the browser pane by simulating a far-away thumb: the witch slid to the spot above it. UNVERIFIED: real thumb feel. If it feels like it pulls against you, lower glueRate (1.5) or raise sensitivity; if still drifting, raise glueRate (4).

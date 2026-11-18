@@ -24,17 +24,19 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.5.3", // bump on every push so the player/Omri can see the build
+  version: "0.5.4", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units
 
   ship: {
     startY: z(520),
-    dragSensitivity: 1.5, // ship moves this many times the finger movement (1 = 1:1, 1.5 = faster)
+    dragSensitivity: 1.2, // ship moves this many times the finger movement (1 = 1:1, 1.5 = faster)
     // Weight: the ship eases toward the finger. Lag is about 1000/followRate ms (20 = 50 ms).
     // LOWER number = heavier, slower to catch up. HIGHER = lighter, closer to glued. 60+ is almost no weight.
     followRate: 28,
+    glueRate: 2.5,        // per second: how fast the witch settles to the spot just above the finger (0 = pure relative drag, drift stays). Higher = stricter
+    fingerOffsetY: z(45), // that spot is this far above the finger
     bankDeg: 8,          // max tilt in degrees when moving sideways (0 = no tilt)
     bankSpeed: z(400),   // sideways speed (units/s) that gives the full tilt
     bankEase: 14,        // how fast the tilt comes and goes (higher = snappier)
