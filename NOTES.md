@@ -72,3 +72,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Debug: window.__game exposes the Phaser game (e.g. __game.scene.scenes[0].stageClear()).
 - Verified in the browser pane: HUD, "+10" texts and the STAGE CLEAR screen are crisp; drag moves the witch 1:1 as before; no console errors.
 - UNVERIFIED on the phone: sharpness, speed (the canvas has 9x the pixels; if it stutters set game.render to 2), pixel-art edges after the last small browser stretch.
+
+## 2026-11-18 v0.5.3: faster witch
+- Omri: thumb and witch drift apart with 1:1 drag. Now config.ship.dragSensitivity 1.0 -> 1.5 (witch moves 1.5x the finger) and followRate 20 -> 28 (a bit less lag).
+- Unverified: feel on the phone. If too twitchy go back toward 1.2 / 22. Other ideas if still odd: a thumb circle (virtual stick), or the old "witch glued above the finger" way.
