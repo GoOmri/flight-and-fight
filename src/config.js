@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.8.0", // bump on every push so the player/Omri can see the build
+  version: "0.8.1", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units
@@ -185,7 +185,7 @@ export const CONFIG = {
     fireFlashScale: 0.9, fireFlashMs: 220, fireFlashAlpha: 0.7,                    // small white ring at an enemy when it fires (0 = off)
 
     endEaseMs: 300,                         // fade-in of the game over / stage clear screen (0 = instant)
-    cloudBoost: 1.2, cloudEase: 4                         // clouds scroll this much faster (extra x) when the witch flies up fast (0 = off)
+    cloudBoost: 0.25, cloudEase: 4                        // clouds scroll this much faster (extra x) when the witch flies up fast (0 = off)
   },
 
   // HUD layout (logical px on the 240-wide screen)

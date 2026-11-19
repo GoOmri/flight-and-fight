@@ -146,3 +146,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Soft leaf shadows (7 on screen, 4 shapes drawn in code, alpha 0.13) drift over the forest floor, scrolling 1.3x faster than the floor and 4 px/s sideways (looks like a canopy high above). 3 pale light shafts (tilted 18 degrees) fade in and out and drift 3 px/s. All at depth -6: above the forest, BELOW the witch, enemies, shots and coins, so nothing gameplay is darkened or hidden. config.background.forest.light has every number; light.on = false switches it all off.
 - Cost: 10 extra sprites, no per-frame allocation. Verified in the browser pane (shadows and a shaft visible, no errors). UNVERIFIED on the phone: how strong the effect looks and frame rate. Too strong: lower shadowAlpha / shaftAlpha.
 - Ideas for later: soft glows on player shots, coins and explosions; a dusk stage with a darkness layer.
+
+## 2026-11-19 v0.8.1: even speed feel
+- Omri: the witch feels faster flying up than sideways. Cause: feel.cloudBoost 1.2 made the whole forest (and leaf shadows) scroll up to 2.2x faster when she flew up, which looks like extra speed. Now cloudBoost 0.25 (a small rush). Her real stick speed was already the same in every direction (240 px/s at full push).
+- UNVERIFIED on the phone. If up still feels faster, set cloudBoost 0; if sideways feels slower than up in real speed, add a sideways multiplier to stick.speed.
