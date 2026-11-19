@@ -2,6 +2,7 @@ import { CONFIG as C } from '../config.js';
 import { makeAllTextures } from '../sprites.js';
 import { FONT } from '../hud.js';
 import { MEDAL_KEYS, loadMedals, loadBest } from '../medals.js';
+import { latestVersion, refreshFiles } from '../update.js';
 
 const W = C.game.width, H = C.game.height, R = C.game.render;
 const M = C.menu;
@@ -51,8 +52,31 @@ export class MenuScene extends Phaser.Scene {
       return card;
     });
 
+    // UPDATE button: gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser or the installed app).
+    // When the menu opens it asks the server for the newest version number; if it is newer the button lights up green.
+    const bx = (W - M.updateW) / 2, by = M.updateTop;
+    const btn = { btn: true, x: bx, y: by, w: M.updateW, h: M.updateH, g: this.add.graphics(), down: false, hot: false, busy: false };
+    btn.label = this.add.text(W / 2, by + M.updateH / 2, 'UPDATE', { ...FONT, fontSize: M.updateSize + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: 3 }).setOrigin(0.5);
+    btn.draw = () => {
+      const k = btn.down ? M.pressBrighten : 0, fill = btn.hot ? M.updateHotColor : M.updateColor;
+      btn.g.clear().fillStyle(mix(fill, k), 1).fillRoundedRect(bx, by, M.updateW, M.updateH, 8)
+        .lineStyle(3, mix(M.borderColor, k), 1).strokeRoundedRect(bx, by, M.updateW, M.updateH, 8);
+    };
+    btn.draw();
+    btn.action = async () => {
+      if (btn.busy) return;
+      btn.busy = true; btn.label.setText('UPDATING...');
+      try { await refreshFiles(); window.location.reload(); }
+      catch (e) { btn.label.setText('NO INTERNET'); this.time.delayedCall(2200, () => { btn.busy = false; btn.label.setText(btn.hot ? 'NEW VERSION' : 'UPDATE'); }); }
+    };
+    latestVersion().then(v => {
+      if (!v || v === C.version || !btn.label.active) return; // same version, offline, or the menu was already left
+      btn.hot = true; btn.label.setText('NEW VERSION'); btn.draw();
+    });
+    this.buttons = [...this.cards, btn];
+
     // Input: remember which card was pressed; release on the same card starts it. Handlers are removed on shutdown.
-    const hit = p => this.cards.find(c => { const px = p.x / R, py = p.y / R; return px >= c.x && px <= c.x + M.cardW && py >= c.y && py <= c.y + M.cardH; });
+    const hit = p => this.buttons.find(c => { const px = p.x / R, py = p.y / R; return px >= c.x && px <= c.x + (c.w || M.cardW) && py >= c.y && py <= c.y + (c.h || M.cardH); });
     this.pressed = null;
     const setPressed = c => { if (this.pressed) { this.pressed.down = false; this.pressed.draw(); } this.pressed = c; if (c) { c.down = true; c.draw(); } };
     const onDown = p => setPressed(hit(p) || null);
@@ -60,7 +84,7 @@ export class MenuScene extends Phaser.Scene {
     const onUp = p => {
       const c = this.pressed, same = c && hit(p) === c;
       setPressed(null);
-      if (same) this.scene.start('Play', { theme: c.st.theme });
+      if (same) { if (c.btn) c.action(); else this.scene.start('Play', { theme: c.st.theme }); }
     };
     this.input.on('pointerdown', onDown);
     this.input.on('pointermove', onMove);

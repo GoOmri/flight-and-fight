@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.1.0", // bump on every push so the player/Omri can see the build
+  version: "1.1.1", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4,
@@ -32,6 +32,7 @@ export const CONFIG = {
     cardRadius: 12, borderW: 5, borderColor: 0xe8ecf5, pressBrighten: 0.3, // pressed: fill and border mixed this much towards white
     numberSize: 34, nameSize: 22, bestSize: 11,
     medalScale: 2, medalGap: 8,   // medal icons in the row (scale of the art, px between icons)
+    updateW: 120, updateH: 26, updateTop: 362, updateSize: 13, updateColor: 0x2a2f45, updateHotColor: 0x2e9e5b, // UPDATE button: size, top edge, text size, colour, colour when a newer version is waiting
     versionSize: 10, versionAlpha: 0.9, versionBottom: 12 // version text: distance of its middle from the bottom edge
   },
   endMenuBtn: { w: 96, h: 30, bottom: 36, size: 20, color: 0x2a2f45, border: 0xe8ecf5 }, // MENU button on the end screen (bottom = its middle's distance from the bottom edge)
