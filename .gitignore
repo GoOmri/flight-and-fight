@@ -10,3 +10,7 @@ node_modules/
 *.zip
 
 Resurrected RPG 1.1/
+
+# Local art packs (never publish: licences forbid redistribution). Catalogue: art-packs/CATALOG.md
+art-packs/
+catalog/

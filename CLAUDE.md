@@ -12,6 +12,7 @@
 - Plain JavaScript (ES modules) + Phaser 3. No build step for now. Keep the game small and readable.
 - Balance numbers (speed, health, fire rate, spawn times) live in one file (e.g. src/config.js) so they are easy to tune.
 - Do not download libraries or assets without asking Omri (state file, source, size).
+- Art packs live LOCAL in art-packs/ (git-ignored; most licences forbid redistribution and the repo is public). The catalogue with source, licence and status of every pack is art-packs/CATALOG.md: read it before using a pack, and update it when Omri adds one. Never git add art-packs. Copy only the pictures the game really uses into assets/<theme>/ and credit them in CREDITS.md (ask Omri before pushing files from a paid pack).
 - Tests must never use the network.
 - The game can be played in the built-in browser here. Anything that needs a real phone (touch feel, speed, sound) is UNVERIFIED: say so.
 - After any change, add a short dated entry to NOTES.md (what changed, what is unverified, what to check on the phone).
