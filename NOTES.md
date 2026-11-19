@@ -102,3 +102,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-19 v0.6.1 licence note (forest sheets)
 - Source: https://immunitys.itch.io/resurected-rpg-tile (Immunity). Licence: personal and commercial use, edits allowed, credit appreciated, NO repackaging/redistribution/resale. Omri chose (19 Nov) to keep only the used files in the public repo (assets/forest/plants.png, grass.png) and credit Immunity in CREDITS.md. The full pack folder "Resurrected RPG 1.1" stays untracked: never git add it (it is in .gitignore).
 - Optional: ask the author in a comment on the itch page whether this is OK.
+
+## 2026-11-19 v0.6.2: calmer stick
+- Omri: the witch is too sensitive. stick: radius z(45) -> z(55) (more thumb travel for the same push), speed z(600) -> z(480), curve 0.8 -> 1.4 (small pushes move her gently, a full push still gives top speed), deadZone 0.1, response 60 -> 40 (a hair smoother).
+- UNVERIFIED on the phone. Still too twitchy: curve 1.7 or speed z(400). Too sluggish: curve 1.1 or speed z(540).
