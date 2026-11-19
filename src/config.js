@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.3.0", // bump on every push so the player/Omri can see the build
+  version: "1.3.1", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4,
@@ -33,7 +33,18 @@ export const CONFIG = {
     numberSize: 34, nameSize: 22, bestSize: 11,
     medalScale: 2, medalGap: 8,   // medal icons in the row (scale of the art, px between icons)
     updateW: 120, updateH: 26, updateTop: 362, updateSize: 13, updateColor: 0x2a2f45, updateHotColor: 0x2e9e5b, // UPDATE button: size, top edge, text size, colour, colour when a newer version is waiting
-    versionSize: 10, versionAlpha: 0.9, versionBottom: 12 // version text: distance of its middle from the bottom edge
+    versionSize: 10, versionAlpha: 0.9, versionBottom: 12, // version text: distance of its middle from the bottom edge
+    // Halloween menu art (assets/menu, Spooktober set). Sky = animated background (cells in a grid of `cols`), scaled to cover the screen width.
+    sky: { file: 'menu/sky.png', frameW: 202, frameH: 360, frames: 18, cols: 6, fps: 5 },
+    // Decorations around the cards (never over cards, medals, UPDATE or version; they take no input). file in assets/, frameW/frameH = one cell,
+    // x/y = the point of the picture that sits at (x,y) (originX/originY 0..1), scale (multiples of 1/3 keep the pixels even), fps, bob = up-down swing in px (0 = still), bobMs = swing period, flipX.
+    decor: [
+      { key: 'witch',  file: 'menu/witch.png',  frameW: 61, frameH: 55, frames: 4, fps: 8, x: 40,  y: 78,  originX: 0.5, originY: 0.5, scale: 0.667, bob: 1, bobMs: 2200 },
+      { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 204, y: 78,  originX: 0.5, originY: 0.5, scale: 1,     bob: 2, bobMs: 1800 },
+      { key: 'bat',    file: 'menu/bat.png',    frameW: 32, frameH: 28, frames: 4, fps: 5, x: 196, y: 0,   originX: 0.5, originY: 0,   scale: 1,     bob: 0, bobMs: 1000 },
+      { key: 'cat',    file: 'menu/cat.png',    frameW: 21, frameH: 25, frames: 5, fps: 4, x: 32,  y: 392, originX: 0.5, originY: 1,   scale: 1.333, bob: 0, bobMs: 1000 },
+      { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 205, y: 422, originX: 0.5, originY: 1,   scale: 1.333, bob: 0, bobMs: 1000 }
+    ]
   },
   endMenuBtn: { w: 96, h: 30, bottom: 36, size: 20, color: 0x2a2f45, border: 0xe8ecf5 }, // MENU button on the end screen (bottom = its middle's distance from the bottom edge)
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
@@ -172,6 +183,8 @@ export const CONFIG = {
     // Death puff under the sparks: 30 frames of the pack's "poof" (white pop, smoke balls, thinning; the thin tail was left out) played once.
     // scale = size, bigMul = extra size for the shooter and the chest, poolSize = puffs at once, depth = under the sparks (20) and rings (19).
     poof: { file: 'fx/poof.png', frameW: 82, frameH: 72, frames: 30, fps: 60, scale: 0.6, bigMul: 1.5, poolSize: 8, depth: 18 },
+    // Weapon-upgrade pickup = green gem (4 frames of 16x16, loops, random start frame). scale 1 = 16 px (3 screen pixels per art pixel; stays even). The grab radius stays coin.pickupRadius on screen.
+    weaponGem: { file: 'pickups/gem-green.png', frameW: 16, frameH: 16, frames: 4, fps: 8, scale: 1 },
     fxPoolSize: 8 // chest-break and heart-collect animations playing at once
   },
 

@@ -44,6 +44,7 @@ export class PlayScene extends Phaser.Scene {
     if (K.heartPickup) for (const n of ['idle', 'drop', 'collect']) strip('sp_heart_' + n, K.heartPickup[n]);
     if (K.crate) { strip('sp_crate_idle', K.crate.idle); strip('sp_crate_break', K.crate.break); }
     if (K.poof) strip('sp_poof', K.poof);
+    if (K.weaponGem) strip('sp_gem', K.weaponGem);
     if (this.bg === 'swamp') { // swamp pictures (assets/swamp, pack "Murky Swamp", see CREDITS.md): only the ones listed in config are loaded
       const A = C.background.swamp.files;
       new Set([...A.trees, ...A.bushes, ...A.smalls, ...A.rocks, ...A.bigRocks]).forEach(n => this.load.image('sw-' + n, 'assets/swamp/' + n + '.png'));
@@ -67,6 +68,7 @@ export class PlayScene extends Phaser.Scene {
     if (K.heartPickup) { mkAnim('heart_idle', 'sp_heart_idle', K.heartPickup.idle, -1); mkAnim('heart_drop', 'sp_heart_drop', K.heartPickup.drop, 0); mkAnim('heart_collect', 'sp_heart_collect', K.heartPickup.collect, 0); }
     if (K.crate) { mkAnim('crate_idle', 'sp_crate_idle', K.crate.idle, -1); mkAnim('crate_break', 'sp_crate_break', K.crate.break, 0); }
     if (K.poof) mkAnim('poof', 'sp_poof', K.poof, 0);
+    if (K.weaponGem) mkAnim('gem_spin', 'sp_gem', K.weaponGem, -1);
     // The canvas is R times bigger than the game (sharp text); the camera zooms back so all numbers stay logical.
     this.cameras.main.setZoom(R).centerOn(W / 2, H / 2);
     this.score = 0;
@@ -879,13 +881,15 @@ export class PlayScene extends Phaser.Scene {
   // A pickup (weapon badge / heart) that falls like a coin. Same generous grab radius.
   dropPickup(group, key, fallSpeed, x, y) {
     const m = C.ship.margin;
-    const sp = group === this.heartUps ? C.sprites.heartPickup : null; // animated heart (Drop, then Idle) or the code-drawn picture
-    const p = this.spawn(group, sp ? 'sp_heart_drop' : key, Phaser.Math.Clamp(x, m, W - m), y, sp ? sp.scale : PX);
+    const gem = group === this.weaponUps ? C.sprites.weaponGem : null; // animated green gem (weapon upgrade) or the code-drawn potion
+    const sp = group === this.heartUps ? C.sprites.heartPickup : gem; // animated heart (Drop, then Idle), gem, or the code-drawn picture
+    const p = this.spawn(group, gem ? 'sp_gem' : sp ? 'sp_heart_drop' : key, Phaser.Math.Clamp(x, m, W - m), y, sp ? sp.scale : PX);
     if (!p) return;
     const hb = 2 * C.coin.pickupRadius / (sp ? sp.scale : PX);
     p.body.setSize(hb, hb);
-    p.dropping = !!sp;
-    if (sp) p.play('heart_drop'); else p.anims.stop();
+    p.dropping = !!sp && !gem;
+    if (gem) { p.play('gem_spin'); p.anims.setCurrentFrame(p.anims.currentAnim.frames[Phaser.Math.Between(0, gem.frames - 1)]); } // loops, random start frame
+    else if (sp) p.play('heart_drop'); else p.anims.stop();
     p.body.setVelocity(0, fallSpeed);
   }
 

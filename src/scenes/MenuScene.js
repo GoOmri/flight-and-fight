@@ -20,11 +20,19 @@ const mix = (c, k) => { // mix colour c towards white by k (0..1)
 export class MenuScene extends Phaser.Scene {
   constructor() { super('Menu'); }
 
+  // The menu is the first scene, so it loads its own Halloween pictures (assets/menu, see CREDITS.md).
+  preload() {
+    const sky = M.sky;
+    this.load.spritesheet('menu_sky', 'assets/' + sky.file, { frameWidth: sky.frameW, frameHeight: sky.frameH });
+    for (const d of M.decor) this.load.spritesheet('menu_' + d.key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
+  }
+
   create() {
     const q = new URLSearchParams(window.location.search);
     if (DEBUG_PARAMS.some(k => q.has(k))) { this.scene.start('Play'); return; }
     makeAllTextures(this); // medal pictures (made once, skipped when they exist)
     this.cameras.main.setZoom(R).centerOn(W / 2, H / 2).setBackgroundColor(M.bgColor);
+    this.addArt();
     const txt = (x, y, s, size, stroke, align = 0.5) => this.add.text(x, y, s, { ...FONT, fontSize: size + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: stroke }).setOrigin(align, 0.5);
     txt(W / 2, M.titleY, 'Flight and Fight', M.titleSize, M.titleStroke);
     txt(W / 2, H - M.versionBottom, 'v' + C.version, M.versionSize, 2).setAlpha(M.versionAlpha);
@@ -95,5 +103,20 @@ export class MenuScene extends Phaser.Scene {
       this.input.off('pointerup', onUp); this.input.off('pointerupoutside');
       this.pressed = null;
     });
+  }
+
+  // Animated sky and the little Halloween friends. They sit around the cards and take no input. Animations are made once.
+  addArt() {
+    const mk = (key, tex, fps, frames) => { if (!this.anims.exists(key)) this.anims.create({ key, frames: this.anims.generateFrameNumbers(tex, { start: 0, end: frames - 1 }), frameRate: fps, repeat: -1 }); };
+    const sky = M.sky;
+    mk('menu_sky', 'menu_sky', sky.fps, sky.frames);
+    this.add.sprite(0, 0, 'menu_sky').setOrigin(0, 0).setScale(W / sky.frameW).setDepth(-10).play('menu_sky');
+    for (const d of M.decor) {
+      mk('menu_' + d.key, 'menu_' + d.key, d.fps, d.frames);
+      const s = this.add.sprite(d.x, d.y, 'menu_' + d.key).setOrigin(d.originX, d.originY).setScale(d.scale).setFlipX(!!d.flipX).setDepth(-5);
+      s.play('menu_' + d.key);
+      s.anims.setCurrentFrame(s.anims.currentAnim.frames[Phaser.Math.Between(0, d.frames - 1)]);
+      if (d.bob) this.tweens.add({ targets: s, y: d.y + d.bob, duration: d.bobMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: Phaser.Math.Between(0, 600) });
+    }
   }
 }
