@@ -116,3 +116,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri liked the lighter ground patches but wanted random blob shapes, not strips. Now drawn in code (PlayScene.makeBlobTextures): 6 wobbly oval variants with a grainy edge, a few lighter specks. config.background.forest: patchCount 6, blobVariants, blobSize [16,34] texels, blobCell 2 (game px per texel), blobColor / blobColor2.
 - assets/forest/grass.png is no longer used and was removed from the repo (fewer files of the pack in a public repo).
 - Verified in the browser pane. UNVERIFIED on the phone: whether the blobs are visible enough / too visible; raise or lower the colour difference with blobColor.
+
+## 2026-11-19 v0.6.5: slower stick
+- Omri: the witch is still too quick. stick.speed z(480) -> z(360) (full push = 240 px/s, crossing the screen in about a second). Curve 1.4, radius, deadZone unchanged.
+- UNVERIFIED on the phone. Still quick: z(300). Now sluggish: z(420).
