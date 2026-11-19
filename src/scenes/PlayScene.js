@@ -7,6 +7,9 @@ import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
 import { Medals, MEDAL_KEYS, saveMedals } from '../medals.js';
 
+// Which background is shown: ?bg=forest | swamp | sky in the web address, else config.background.mode.
+const bgName = () => new URLSearchParams(window.location.search).get('bg') || C.background.mode;
+const ANIM_FRAMES = ['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10', 'a11']; // frame names of an animated strip (made once, so nothing is built per frame)
 const W = C.game.width, H = C.game.height, R = C.game.render, DEG = Math.PI / 180, TAU = Math.PI * 2;
 // Spark colours. Death pops match the creature; no red and no gold on anything that is not a shot / coin.
 const DEATH_TINTS = {
@@ -25,9 +28,14 @@ export class PlayScene extends Phaser.Scene {
   preload() {
     const w = new URLSearchParams(window.location.search).get('witch') === '1' ? 1 : (new URLSearchParams(window.location.search).get('witch') === '2' ? 2 : C.ship.witch);
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
-    // Forest background sheets (assets/forest, licence UNKNOWN for now, see NOTES.md)
-    this.load.image('forestPlants', 'assets/forest/plants.png');
-    this.load.image('forestRocks', 'assets/forest/rocks.png');
+    if (bgName() === 'swamp') { // swamp pictures (assets/swamp, pack "Murky Swamp", see CREDITS.md): only the ones listed in config are loaded
+      const A = C.background.swamp.files;
+      new Set([...A.trees, ...A.bushes, ...A.smalls, ...A.rocks, ...A.bigRocks]).forEach(n => this.load.image('sw-' + n, 'assets/swamp/' + n + '.png'));
+    } else {
+      // Forest background sheets (assets/forest, licence UNKNOWN for now, see NOTES.md)
+      this.load.image('forestPlants', 'assets/forest/plants.png');
+      this.load.image('forestRocks', 'assets/forest/rocks.png');
+    }
   }
 
   create() {
@@ -111,8 +119,8 @@ export class PlayScene extends Phaser.Scene {
   // ---------- setup ----------
   makeBackground() {
     const B = C.background;
-    const bg = new URLSearchParams(window.location.search).get('bg') || B.mode;
-    if (bg !== 'sky') { this.makeForest(); return; }
+    const bg = bgName();
+    if (bg !== 'sky') { this.makeForest(bg === 'swamp' ? 'swamp' : 'forest'); return; }
     const sky = this.add.graphics().setDepth(-10);
     const steps = 32;
     for (let i = 0; i < steps; i++) {
@@ -139,7 +147,7 @@ export class PlayScene extends Phaser.Scene {
   // Lighter grass blobs for the forest floor: random roundish shapes with a grainy edge, drawn once as small pixel textures
   // (one texel = F.blobCell game px). Several variants, each a wobbly oval; the edge cells are dropped at random so it looks like grass, not a stamp.
   makeBlobTextures() {
-    const F = C.background.forest;
+    const F = this.bgF;
     for (let v = 0; v < F.blobVariants; v++) {
       const key = 'blob-' + v;
       if (this.textures.exists(key)) continue;
@@ -161,10 +169,30 @@ export class PlayScene extends Phaser.Scene {
   }
 
   // Forest seen from above: a plain green floor with props (patches, bushes, stumps, trees) that scroll down and are reused.
-  makeForest() {
-    const F = C.background.forest;
+  // theme = 'forest' or 'swamp': the numbers come from config.background[theme]. The swamp has F.files (its own pictures, some animated).
+  makeForest(theme) {
+    const F = C.background[theme];
+    this.bgF = F;
     this.add.rectangle(0, 0, W, H, F.groundColor).setOrigin(0, 0).setDepth(-10);
-    // Cut the sheet into pictures once (the sheet is 1024 x 1024: trees on the left, bushes/stumps/firs on the right).
+    // The kit hands out pictures: kit.tree() / bush() / small() / rock() / bigRock() each return {key, frame, sway (forest tree), n (frames of an animation)}.
+    let kit;
+    const pick = a => a[Math.floor(Math.random() * a.length)];
+    if (F.files) kit = this.makeSwampKit(F, pick);
+    else kit = this.makeForestKit(F, pick);
+    this.makeBlobTextures();
+    const range = r => r[0] + Math.random() * (r[1] - r[0]);
+    // scaleRange (swamp props) = multiplier of the picture size; else the picture is scaled to this width on screen
+    const sized = (s, wRange, scaleRange) => s.setScale(scaleRange ? range(scaleRange) : range(wRange) / s.width);
+    // Gives the sprite a picture of the kit (and tells the scroll code whether it sways / animates).
+    const use = (s, e) => {
+      s.setTexture(e.key, e.frame); s.treeName = e.sway || null; s.animN = e.n || 0;
+      if (s.swayPh === undefined) s.swayPh = Math.random() * 8;
+    };
+    this.makeBackgroundLayers(F, kit, use, sized, range, pick);
+  }
+
+  // Forest pictures: cut the sheet once, build the tree sway atlas, return the kit.
+  makeForestKit(F, pick) {
     const tex = this.textures.get('forestPlants');
     if (!tex.has('tree-0-0')) {
       const img = tex.getSourceImage();
@@ -175,24 +203,49 @@ export class PlayScene extends Phaser.Scene {
       findSprites(d, cv.width, cv.height, 0, 690).forEach((row, r) => row.forEach((b, i) => add('tree-' + r + '-' + i, b)));
       findSprites(d, cv.width, cv.height, 690, cv.width).forEach((row, k) => row.forEach((b, i) => add((k % 2 === 0 ? 'bush-' : 'small-') + (k >> 1) + '-' + i, b)));
     }
-    this.makeBlobTextures();
     const rows = F.treeRows, wts = F.treeRowWeights, wsum = wts.reduce((a, b) => a + b, 0);
     const pickRow = () => { let n = Math.random() * wsum; for (let i = 0; i < rows.length; i++) { n -= wts[i]; if (n < 0) return rows[i]; } return rows[0]; };
     const frames = (key, prefix) => this.textures.get(key).getFrameNames().filter(n => n.startsWith(prefix));
     const treeNames = frames('forestPlants', 'tree-'), bushNames = frames('forestPlants', 'bush-'), smallNames = frames('forestPlants', 'small-');
-    const inRows = (names, r) => names.filter(n => +n.split('-')[1] === r);
-    const pick = a => a[Math.floor(Math.random() * a.length)];
-    const range = r => r[0] + Math.random() * (r[1] - r[0]);
-    const sized = (s, wRange) => s.setScale(range(wRange) / s.width); // scale so the picture is this wide on screen
     // Tree sway: every tree picture has 3 versions (leaning left, straight, leaning right) made by shifting whole pixel rows (top the most).
     // The trees step between them a few times a second, each with its own timing, so the sway stays pixel-sharp (no smooth rotation).
     this.makeTreeSwayAtlas(treeNames.filter(n => rows.includes(+n.split('-')[1])));
-    const setTree = (s, base) => { s.treeName = base; if (s.swayPh === undefined) s.swayPh = Math.random() * 4; s.setFrame(base + '|1'); };
+    const rockTex = this.textures.get('forestRocks');
+    if (!rockTex.has('big-0')) {
+      ROCKS.big.forEach((r, i) => rockTex.add('big-' + i, 0, r[0], r[1], r[2], r[3]));
+      ROCKS.small.forEach((r, i) => rockTex.add('small-' + i, 0, r[0], r[1], r[2], r[3]));
+    }
+    // Entries are made once here, so picking one later allocates nothing. By colour row: {0: [...], 2: [...], 4: [...]}.
+    const byRow = (names, mk) => { const o = {}; rows.forEach(r => { o[r] = names.filter(n => +n.split('-')[1] === r).map(mk); }); return o; };
+    const treeE = byRow(treeNames, n => ({ key: 'treeSway', frame: n + '|1', sway: n }));
+    const bushE = byRow(bushNames, n => ({ key: 'forestPlants', frame: n })), smallE = byRow(smallNames, n => ({ key: 'forestPlants', frame: n }));
+    const rockE = ROCKS.small.map((r, i) => ({ key: 'forestRocks', frame: 'small-' + i })), bigE = ROCKS.big.map((r, i) => ({ key: 'forestRocks', frame: 'big-' + i }));
+    return { tree: () => pick(treeE[pickRow()]), bush: () => pick(bushE[pickRow()]), small: () => pick(smallE[pickRow()]), rock: () => pick(rockE), bigRock: () => pick(bigE) };
+  }
 
+  // Swamp pictures: every file of config.background.swamp.files is a texture 'sw-<name>'. A name ending in _anim is a strip of
+  // animFrames pictures side by side: cut it into frames a0, a1, ... (the strip is as high as one picture).
+  makeSwampKit(F, pick) {
+    const made = {};
+    const ent = n => {
+      if (made[n]) return made[n];
+      const key = 'sw-' + n, tex = this.textures.get(key);
+      if (!n.endsWith('_anim')) return (made[n] = { key, frame: '__BASE', n: 0 });
+      const img = tex.getSourceImage(), fw = img.width / F.animFrames;
+      if (!tex.has('a0')) for (let i = 0; i < F.animFrames; i++) tex.add('a' + i, 0, i * fw, 0, fw, img.height);
+      return (made[n] = { key, frame: 'a0', n: F.animFrames });
+    };
+    const list = names => names.map(ent);
+    const treeE = list(F.files.trees), bushE = list(F.files.bushes), smallE = list(F.files.smalls), rockE = list(F.files.rocks), bigE = list(F.files.bigRocks);
+    return { tree: () => pick(treeE), bush: () => pick(bushE), small: () => pick(smallE), rock: () => pick(rockE), bigRock: () => pick(bigE) };
+  }
+
+  // The scrolling background itself (floor, pools, edge walls, path props, rocks, light), the same for every theme.
+  makeBackgroundLayers(F, kit, use, sized, range, pick) {
     // EDGE WALLS: tree tops on the left (side -1) and right (side +1). The tree centre is off screen, only the canopy reaches in.
     const edgeItems = [];
     const placeEdge = (s, first, i) => {
-      setTree(s, pick(inRows(treeNames, pickRow())));
+      use(s, kit.tree());
       sized(s, F.edgeWidth);
       const inset = range(F.edgeInset);
       s.x = s.side < 0 ? inset - s.displayWidth / 2 : W - inset + s.displayWidth / 2;
@@ -203,7 +256,8 @@ export class PlayScene extends Phaser.Scene {
       s.y = Math.min(top - range(F.edgeStepY), -s.displayHeight / 2);
     };
     for (const side of [-1, 1]) for (let i = 0; i < F.edgeCount; i++) {
-      const s = this.add.image(0, 0, 'treeSway', treeNames[0] + '|1').setDepth(-8);
+      const e0 = kit.tree();
+      const s = this.add.image(0, 0, e0.key, e0.frame).setDepth(-8);
       s.side = side;
       placeEdge(s, true, i);
       this.addTreeShadow(s);
@@ -244,11 +298,12 @@ export class PlayScene extends Phaser.Scene {
       lastSide = side; s.x = x; s.y = y;
     };
     const placeMid = (s, first) => placeFree(s, first, F.midGapY);
-    const mid = (count, names, wRange, depth, kind) => {
+    const mid = (count, next, wRange, scaleRange, depth, kind) => { // next() = the kit function that gives a picture
       const items = [];
-      const choose = s => { const base = pick(inRows(names, pickRow())); if (kind === 'tree') setTree(s, base); else s.setFrame(base); sized(s, wRange); s.setFlipX(Math.random() < 0.5); };
+      const choose = s => { use(s, next()); sized(s, wRange, scaleRange); s.setFlipX(Math.random() < 0.5); };
       for (let i = 0; i < count; i++) {
-        const s = kind === 'tree' ? this.add.image(0, 0, 'treeSway', names[0] + '|1').setDepth(depth) : this.add.image(0, 0, 'forestPlants', names[0]).setDepth(depth);
+        const e0 = next();
+        const s = this.add.image(0, 0, e0.key, e0.frame).setDepth(depth);
         s.kind = kind; placed.push(s);
         choose(s); placeMid(s, true);
         if (kind === 'tree') this.addTreeShadow(s);
@@ -263,20 +318,16 @@ export class PlayScene extends Phaser.Scene {
       patches.push(s);
     }
     // ROCKS on the path floor: a few small ones, kept apart from each other, and a big one only now and then (cats will sit on the big ones).
-    const rockTex = this.textures.get('forestRocks');
-    if (!rockTex.has('big-0')) {
-      ROCKS.big.forEach((r, i) => rockTex.add('big-' + i, 0, r[0], r[1], r[2], r[3]));
-      ROCKS.small.forEach((r, i) => rockTex.add('small-' + i, 0, r[0], r[1], r[2], r[3]));
-    }
     const rocks = [];
     const chooseRock = s => {
-      s.setFrame((s.big ? 'big-' : 'small-') + Math.floor(Math.random() * (s.big ? ROCKS.big.length : ROCKS.small.length)));
+      use(s, s.big ? kit.bigRock() : kit.rock());
       s.setScale(s.big ? F.bigRockScale : range(F.rockScale)).setFlipX(Math.random() < 0.5);
     };
     const placeRock = (s, first) => placeFree(s, first, s.big ? F.bigRockGapY : F.rockGapY);
     const addRocks = (count, big) => {
       for (let i = 0; i < count; i++) {
-        const s = this.add.image(0, 0, 'forestRocks', big ? 'big-0' : 'small-0').setDepth(big ? -9.1 : -9.2);
+        const e0 = big ? kit.bigRock() : kit.rock();
+        const s = this.add.image(0, 0, e0.key, e0.frame).setDepth(big ? -9.1 : -9.2);
         s.big = big; s.kind = big ? 'bigrock' : 'rock'; chooseRock(s);
         rocks.push(s); placed.push(s);
         if (big) placeFree(s, false, F.bigRockGapY * 0.5); // the first big rock comes soon, later ones are rarer
@@ -288,9 +339,9 @@ export class PlayScene extends Phaser.Scene {
     this.layers = [
       { items: rocks, speed: F.scroll, respawn: s => { chooseRock(s); placeRock(s, false); } },
       { items: patches, speed: F.scroll, respawn: s => { s.setFrame(patch()).setFlipX(Math.random() < 0.5); s.x = Phaser.Math.Between(0, W); s.y = -s.displayHeight / 2 - Math.random() * 140; } },
-      mid(F.midSmallCount, smallNames, F.midSmallWidth, -9, "small"),
-      mid(F.midBushCount, bushNames, F.midBushWidth, -8.5, "bush"),
-      mid(F.midTreeCount, treeNames, F.midTreeWidth, -7.5, "tree"),
+      mid(F.midSmallCount, kit.small, F.midSmallWidth, F.midSmallScale, -9, "small"),
+      mid(F.midBushCount, kit.bush, F.midBushWidth, F.midBushScale, -8.5, "bush"),
+      mid(F.midTreeCount, kit.tree, F.midTreeWidth, null, -7.5, "tree"),
       { items: edgeItems, speed: F.scroll, respawn: s => placeEdge(s, false), depth: -8, depthK: 0.0003 } // depthK: lower on screen = drawn in front
     ];
 
@@ -320,7 +371,7 @@ export class PlayScene extends Phaser.Scene {
   // Textures for the light effects, drawn once in code. Cloud shadow = overlapping big soft discs (one texel = shadowCell game px).
   // Shaft = a narrow soft-edged pale stripe that fades out at both ends.
   makeLightTextures() {
-    const Lt = C.background.forest.light;
+    const Lt = this.bgF.light;
     for (let v = 0; v < Lt.shadowVariants; v++) {
       const key = 'cloud-' + v;
       if (this.textures.exists(key)) continue;
@@ -354,7 +405,7 @@ export class PlayScene extends Phaser.Scene {
   // One atlas with 3 versions of every tree picture we use: leaning left (-), straight, leaning right (+). Row y of the picture is shifted
   // sideways by a whole number of pixels: px x ((1 - y/height) ^ curve), so the top moves most and the foot stays put. Made once.
   makeTreeSwayAtlas(names) {
-    const S = C.background.forest.sway;
+    const S = this.bgF.sway;
     if (this.textures.exists('treeSway')) return;
     const src = this.textures.get('forestPlants'), img = src.getSourceImage();
     const fr = names.map(n => { const f = src.get(n); return { n, x: f.cutX, y: f.cutY, w: f.cutWidth, h: f.cutHeight }; });
@@ -377,7 +428,12 @@ export class PlayScene extends Phaser.Scene {
 
   // The tree steps through left - straight - right - straight - left ...; every tree has its own start (swayPh).
   swayTree(s) {
-    const S = C.background.forest.sway;
+    const S = this.bgF.sway;
+    if (s.animN) { // animated strip: all frames in a loop, each sprite with its own start
+      const f = ANIM_FRAMES[Math.floor(this.time.now / 1000 * this.bgF.animFps + s.swayPh) % s.animN];
+      if (s.frame.name !== f) s.setFrame(f);
+      return;
+    }
     if (!S.on) return;
     const name = s.treeName + '|' + [1, 2, 1, 0][Math.floor(this.time.now / 1000 * S.fps + s.swayPh) & 3];
     if (s.frame.name !== name) s.setFrame(name);
@@ -386,23 +442,24 @@ export class PlayScene extends Phaser.Scene {
   // Tree shadows: the tree's own picture, filled dark, flattened and tipped over from its base so it lies up and to the side (the sun is
   // low in the lower left). It follows the tree, so it moves down with the scroll. Below the trees, above the floor.
   addTreeShadow(tree) {
-    const TS = C.background.forest.treeShadow;
+    const TS = this.bgF.treeShadow;
     if (!TS.on) return;
-    tree.shadow = this.add.image(0, 0, 'treeSway', tree.frame.name).setOrigin(0.5, 1).setTintFill(TS.color).setAlpha(TS.alpha).setDepth(TS.depth);
+    tree.shadow = this.add.image(0, 0, tree.texture.key, tree.frame.name).setOrigin(0.5, 1).setTintFill(TS.color).setAlpha(TS.alpha).setDepth(TS.depth);
     this.syncTreeShadow(tree);
   }
 
   syncTreeShadow(tree) {
-    const TS = C.background.forest.treeShadow, sh = tree.shadow;
+    const TS = this.bgF.treeShadow, sh = tree.shadow;
     if (!sh) return;
-    if (sh.frame.name !== tree.frame.name) sh.setFrame(tree.frame.name);
+    if (sh.texture !== tree.texture) sh.setTexture(tree.texture.key, tree.frame.name);
+    else if (sh.frame.name !== tree.frame.name) sh.setFrame(tree.frame.name);
     sh.setFlipX(tree.flipX).setScale(tree.scaleX, tree.scaleY * TS.lenMul).setRotation(Phaser.Math.DegToRad(TS.angleDeg))
       .setPosition(tree.x, tree.y + tree.displayHeight / 2); // pivot = the bottom centre of the tree picture
   }
 
   // Light shafts fade in and out slowly and drift sideways.
   updateShafts(dt) {
-    const Lt = C.background.forest.light;
+    const Lt = this.bgF.light;
     for (const s of this.shafts) {
       s.phase += dt * s.rate;
       s.setAlpha(Lt.shaftAlpha[0] + (Math.sin(s.phase) + 1) / 2 * (Lt.shaftAlpha[1] - Lt.shaftAlpha[0]));
@@ -580,7 +637,7 @@ export class PlayScene extends Phaser.Scene {
       if (L.dx) { s.x += L.dx * dt; if (s.x > W + 40) s.x = -40; } // slow sideways drift (leaf shadows)
       if (L.depthK) s.setDepth(L.depth + s.y * L.depthK);
       if (L.respawn) { if (s.y - s.displayHeight / 2 > H) L.respawn(s); } // forest: reuse the picture at the top
-      if (s.treeName) this.swayTree(s);
+      if (s.treeName || s.animN) this.swayTree(s);
       if (s.shadow) this.syncTreeShadow(s);
       else if (s.y > H + 40) { s.y = -40; s.x = Phaser.Math.Between(0, W); }
     }
