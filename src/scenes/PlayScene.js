@@ -3,6 +3,7 @@ import { makeAllTextures, PX } from '../sprites.js';
 import { STAGE1 } from '../waves.js';
 import { WaveRunner, initPath, followPath } from '../waves-runner.js';
 import { Hud, FONT } from '../hud.js';
+import { findSprites } from '../forestArt.js';
 import { Medals, MEDAL_KEYS, saveMedals } from '../medals.js';
 
 const W = C.game.width, H = C.game.height, R = C.game.render, DEG = Math.PI / 180, TAU = Math.PI * 2;
@@ -23,6 +24,9 @@ export class PlayScene extends Phaser.Scene {
   preload() {
     const w = new URLSearchParams(window.location.search).get('witch') === '1' ? 1 : (new URLSearchParams(window.location.search).get('witch') === '2' ? 2 : C.ship.witch);
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
+    // Forest background sheets (assets/forest, licence UNKNOWN for now, see NOTES.md)
+    this.load.image('forestPlants', 'assets/forest/plants.png');
+    this.load.image('forestGrass', 'assets/forest/grass.png');
   }
 
   create() {
@@ -106,6 +110,8 @@ export class PlayScene extends Phaser.Scene {
   // ---------- setup ----------
   makeBackground() {
     const B = C.background;
+    const bg = new URLSearchParams(window.location.search).get('bg') || B.mode;
+    if (bg !== 'sky') { this.makeForest(); return; }
     const sky = this.add.graphics().setDepth(-10);
     const steps = 32;
     for (let i = 0; i < steps; i++) {
@@ -126,6 +132,57 @@ export class PlayScene extends Phaser.Scene {
     this.layers = [
       layer('cloudFar', B.farCount, 4, 0.35, B.farScroll, -9),
       layer('cloudNear', B.nearCount, 6, 0.6, B.nearScroll, -8)
+    ];
+  }
+
+  // Forest seen from above: a plain green floor with props (patches, bushes, stumps, trees) that scroll down and are reused.
+  makeForest() {
+    const F = C.background.forest;
+    this.add.rectangle(0, 0, W, H, F.groundColor).setOrigin(0, 0).setDepth(-10);
+    // Cut the sheet into pictures once (the sheet is 1024 x 1024: trees on the left, bushes/stumps/firs on the right).
+    const tex = this.textures.get('forestPlants');
+    if (!tex.has('tree-0-0')) {
+      const img = tex.getSourceImage();
+      const cv = document.createElement('canvas'); cv.width = img.width; cv.height = img.height;
+      const cx = cv.getContext('2d'); cx.drawImage(img, 0, 0);
+      const d = cx.getImageData(0, 0, cv.width, cv.height).data;
+      const add = (name, b) => tex.add(name, 0, b.x, b.y, b.w, b.h);
+      findSprites(d, cv.width, cv.height, 0, 690).forEach((row, r) => row.forEach((b, i) => add('tree-' + r + '-' + i, b)));
+      findSprites(d, cv.width, cv.height, 690, cv.width).forEach((row, k) => row.forEach((b, i) => add((k % 2 === 0 ? 'bush-' : 'small-') + (k >> 1) + '-' + i, b)));
+      const g = this.textures.get('forestGrass'); // two lighter grass patches on the plain green (their edges are the floor colour)
+      g.add('patch-0', 0, 43, 8, 43, 43); g.add('patch-1', 0, 96, 10, 94, 44);
+    }
+    const rows = F.treeRows, wts = F.treeRowWeights, wsum = wts.reduce((a, b) => a + b, 0);
+    const pickRow = () => { let n = Math.random() * wsum; for (let i = 0; i < rows.length; i++) { n -= wts[i]; if (n < 0) return rows[i]; } return rows[0]; };
+    const frames = (key, prefix) => this.textures.get(key).getFrameNames().filter(n => n.startsWith(prefix));
+    const treeNames = frames('forestPlants', 'tree-'), bushNames = frames('forestPlants', 'bush-'), smallNames = frames('forestPlants', 'small-');
+    const inRows = (names, r) => names.filter(n => +n.split('-')[1] === r);
+    const pick = a => a[Math.floor(Math.random() * a.length)];
+    const place = (s, top) => { // choose a new picture, size and spot; top = false for the first fill of the screen
+      const hh = s.displayHeight;
+      let x = Phaser.Math.Between(0, W);
+      if (Math.abs(x - W / 2) < F.laneHalf && Math.random() < F.laneKeep) x = W / 2 + (Math.random() < 0.5 ? -1 : 1) * Phaser.Math.Between(F.laneHalf, W / 2);
+      s.x = x; s.y = top ? -hh / 2 - Math.random() * F.gapY : Phaser.Math.Between(0, H);
+    };
+    const layer = (count, key, depth, chooser, flip) => {
+      const items = [];
+      for (let i = 0; i < count; i++) {
+        const s = this.add.image(0, 0, key, chooser()).setScale(F.scale).setDepth(depth);
+        place(s, false);
+        items.push(s);
+      }
+      const respawn = s => {
+        s.setFrame(chooser());
+        if (flip) s.setFlipX(Math.random() < 0.5);
+        place(s, true);
+      };
+      return { items, speed: F.scroll, respawn, depth };
+    };
+    this.layers = [
+      layer(F.patchCount, 'forestGrass', -9.5, () => 'patch-' + Math.floor(Math.random() * 2), true),
+      layer(F.smallCount, 'forestPlants', -9, () => pick(inRows(smallNames, pickRow())), true),
+      layer(F.bushCount, 'forestPlants', -8.5, () => pick(inRows(bushNames, pickRow())), true),
+      layer(F.treeCount, 'forestPlants', -8, () => pick(inRows(treeNames, pickRow())), true)
     ];
   }
 
@@ -295,7 +352,8 @@ export class PlayScene extends Phaser.Scene {
     this.cloudMul += (want - this.cloudMul) * (1 - Math.exp(-F.cloudEase * dt));
     for (const L of this.layers) for (const s of L.items) {
       s.y += L.speed * this.cloudMul * dt;
-      if (s.y > H + 40) { s.y = -40; s.x = Phaser.Math.Between(0, W); }
+      if (L.respawn) { if (s.y - s.displayHeight / 2 > H) L.respawn(s); } // forest: reuse the picture at the top
+      else if (s.y > H + 40) { s.y = -40; s.x = Phaser.Math.Between(0, W); }
     }
   }
 

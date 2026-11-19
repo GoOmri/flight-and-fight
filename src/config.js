@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.6.0", // bump on every push so the player/Omri can see the build
+  version: "0.6.1", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units
@@ -77,7 +77,23 @@ export const CONFIG = {
   background: {
     skyTop: 0x2a6fdb, skyBottom: 0x8fd3ff,
     farScroll: z(25), nearScroll: z(70), // px per second
-    farCount: 14, nearCount: 7
+    farCount: 14, nearCount: 7,
+    // Which background: "forest" (pixel forest seen from above, default) | "sky" (the old sky and clouds). Try with ?bg=forest / ?bg=sky
+    mode: "forest",
+    forest: {
+      groundColor: 0x768f5d, // the plain grass colour taken from the sheet (muted green, so red shots and gold coins stay easy to see)
+      scale: 0.5,            // size of one art pixel for trees, bushes and stumps: a big tree (about 110 px on the sheet) becomes about 55 px
+      scroll: z(60),         // px per second (the same for everything, so it feels like flat ground). Faster when the witch flies up (feel.cloudBoost)
+      treeCount: 7,          // big trees alive at once (screen is 240 x 427)
+      bushCount: 5,          // bushes
+      smallCount: 3,         // stumps and small fir trees
+      patchCount: 8,         // lighter grass patches on the ground (flat, only for variety)
+      treeRows: [0, 2, 4],   // colour rows of the sheet used for trees and bushes: 0 = green, 2 = dark green, 4 = olive green (1 = khaki, 3 = autumn are not used)
+      treeRowWeights: [4, 4, 1], // how often each of those rows is picked
+      laneHalf: 38,          // the middle lane (this many px each side of the centre) is kept clearer...
+      laneKeep: 0.75,        // ...this fraction of props are moved out of it (0 = no clear lane, 1 = lane always empty)
+      gapY: 140              // a prop that left the bottom comes back this far above the top at most (random 0..gapY)
+    }
   },
 
   // Enemy hp/score. Their movement, shooting and coins come from the wave data in src/waves.js.
