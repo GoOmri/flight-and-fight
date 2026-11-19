@@ -58,6 +58,11 @@ export class PlayScene extends Phaser.Scene {
     this.dragFrom = new Phaser.Math.Vector2();  // finger position at touch start
     this.shipFrom = new Phaser.Math.Vector2();  // ship position at touch start
     this.finger = new Phaser.Math.Vector2();    // finger position now
+    // Controls: 'stick' = virtual stick (the ring appears where the thumb lands, the witch flies where you push),
+    // 'drag' = the code above. Choose in config.ship.controls or with ?ctl=stick / ?ctl=drag.
+    this.stickMode = (q.get('ctl') || C.ship.controls) === 'stick';
+    this.stickC = new Phaser.Math.Vector2(W / 2, C.stick.restY); // ring centre
+    this.makeStickArt();
     this.input.on('pointerdown', p => {
       if (this.over) { if (this.time.now > this.restartAt) this.scene.restart(); return; }
       if (this.dragId !== null) return;
@@ -65,13 +70,14 @@ export class PlayScene extends Phaser.Scene {
       this.dragFrom.set(p.x / R, p.y / R); // pointer is in canvas pixels, the game is R times smaller
       this.finger.copy(this.dragFrom);
       this.shipFrom.set(this.target.x, this.target.y); // from the target, so no jump while the ship is still catching up
+      if (this.stickMode) this.stickC.copy(this.finger); // the ring appears under the thumb
     });
     this.input.on('pointermove', p => {
       if (p.id !== this.dragId || !p.isDown || this.over) return;
       this.finger.set(p.x / R, p.y / R);
-      this.aimTarget();
+      if (!this.stickMode) this.aimTarget();
     });
-    const release = p => { if (p.id === this.dragId) this.dragId = null; };
+    const release = p => { if (p.id === this.dragId) { this.dragId = null; if (this.stickMode) this.stickC.set(W / 2, C.stick.restY); } };
     this.input.on('pointerup', release);
     this.input.on('pointerupoutside', release);
 
@@ -158,9 +164,36 @@ export class PlayScene extends Phaser.Scene {
     this.target.y = Phaser.Math.Clamp(this.shipFrom.y + (this.finger.y - this.dragFrom.y) * S.dragSensitivity, S.margin, H - S.margin);
   }
 
+  // Virtual stick art: a faint ring and a knob, above the game, below the end screen.
+  makeStickArt() {
+    const T = C.stick;
+    this.stickRing = this.add.graphics().setDepth(T.depth);
+    this.stickRing.lineStyle(1.5, 0xffffff, 1).strokeCircle(0, 0, T.radius);
+    this.stickKnob = this.add.graphics().setDepth(T.depth);
+    this.stickKnob.fillStyle(0xffffff, 1).fillCircle(0, 0, T.knobRadius);
+    this.stickRing.setVisible(this.stickMode); this.stickKnob.setVisible(this.stickMode);
+  }
+
+  // Stick: pushing the knob away from the ring centre sets a speed. The ship's easing and tilt below still apply.
+  stickTarget(dt) {
+    const T = C.stick, S = C.ship, held = this.dragId !== null && !this.over;
+    let dx = 0, dy = 0, len = 0;
+    if (held) { dx = this.finger.x - this.stickC.x; dy = this.finger.y - this.stickC.y; len = Math.hypot(dx, dy); }
+    const push = Math.min(len / T.radius, 1);
+    if (held && push > T.deadZone) {
+      const m = (push - T.deadZone) / (1 - T.deadZone); // 0..1 after the dead zone
+      this.target.x = Phaser.Math.Clamp(this.target.x + dx / len * m * T.speed * dt, S.margin, W - S.margin);
+      this.target.y = Phaser.Math.Clamp(this.target.y + dy / len * m * T.speed * dt, S.margin, H - S.margin);
+    }
+    const k = len > T.radius ? T.radius / len : 1; // knob stays inside the ring
+    this.stickRing.setPosition(this.stickC.x, this.stickC.y).setAlpha(held ? T.ringAlpha : T.restAlpha);
+    this.stickKnob.setPosition(this.stickC.x + dx * k, this.stickC.y + dy * k).setAlpha(held ? T.ringAlpha + 0.1 : T.restAlpha);
+  }
+
   moveShip(dt) {
     const S = C.ship, s = this.ship;
-    if (this.dragId !== null && !this.over && S.glueRate > 0) {
+    if (this.stickMode) this.stickTarget(dt);
+    else if (this.dragId !== null && !this.over && S.glueRate > 0) {
       // Slowly slide the start point so the target settles just above the finger: the drift (finger far from the ship) heals itself.
       const g = 1 - Math.exp(-S.glueRate * dt);
       const ix = Phaser.Math.Clamp(this.finger.x, S.margin, W - S.margin), iy = Phaser.Math.Clamp(this.finger.y - S.fingerOffsetY, S.margin, H - S.margin);

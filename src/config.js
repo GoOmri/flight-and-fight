@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.5.4", // bump on every push so the player/Omri can see the build
+  version: "0.5.5", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units
@@ -37,6 +37,7 @@ export const CONFIG = {
     followRate: 28,
     glueRate: 2.5,        // per second: how fast the witch settles to the spot just above the finger (0 = pure relative drag, drift stays). Higher = stricter
     fingerOffsetY: z(45), // that spot is this far above the finger
+    controls: "stick",    // "stick" = virtual stick (ring on screen, witch flies where you push) | "drag" = move by finger movement. Try both with ?ctl=stick / ?ctl=drag after the web address
     bankDeg: 8,          // max tilt in degrees when moving sideways (0 = no tilt)
     bankSpeed: z(400),   // sideways speed (units/s) that gives the full tilt
     bankEase: 14,        // how fast the tilt comes and goes (higher = snappier)
@@ -53,6 +54,9 @@ export const CONFIG = {
     hitShakeAmount: 0.01,
     hitRadius: 3        // the ship can only be hit in a tiny square this far (logical px) around its centre. Sprite is much bigger = fair
   },
+
+  // Virtual stick (controls "stick"). The ring appears where the thumb lands. Sizes in logical px.
+  stick: { radius: z(55), knobRadius: z(22), deadZone: 0.12, speed: z(380), restY: z(590), ringAlpha: 0.28, restAlpha: 0.14, depth: 55 }, // speed = witch speed at full push (px/s)
 
   // Player shots. Which shots, how fast and how hard come from weaponLevels below.
   bullet: {

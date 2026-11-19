@@ -80,3 +80,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-18 v0.5.4: witch settles above the thumb (drift fix)
 - Omri: with drag x1.5 the witch drifted away from the thumb near the top of the screen. Now the drag stays relative (no jump at touch), but while the thumb is down the witch slowly slides to a spot fingerOffsetY (z(45)) above the thumb. config.ship: glueRate 2.5 (0 = old pure relative drag), fingerOffsetY, dragSensitivity 1.2 (was 1.5), followRate 28.
 - Verified in the browser pane by simulating a far-away thumb: the witch slid to the spot above it. UNVERIFIED: real thumb feel. If it feels like it pulls against you, lower glueRate (1.5) or raise sensitivity; if still drifting, raise glueRate (4).
+
+## 2026-11-19 v0.5.5: virtual stick (new default) + ?ctl= switch
+- Omri asked to try a virtual stick. A faint ring appears where the thumb lands (rests at the bottom when idle); the witch flies where you push, speed grows with the push (config.stick: radius, deadZone 0.12, speed z(380) at full push). The old drag mode is still there. Switch without a new version: add ?ctl=stick or ?ctl=drag after the web address. Default is config.ship.controls = "stick".
+- Verified in the browser pane by simulating a held stick: push right/up moves the witch that way and she stops on release; no console errors. UNVERIFIED: real thumb feel, ring size, speed.
+- Tune on the phone: stick.speed (faster/slower), radius (bigger ring = finer control), deadZone, ringAlpha (how visible).
