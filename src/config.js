@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.7.2", // bump on every push so the player/Omri can see the build
+  version: "0.7.3", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units
@@ -59,7 +59,7 @@ export const CONFIG = {
   },
 
   // Virtual stick (controls "stick"). The ring appears where the thumb lands. Sizes in logical px.
-  stick: { radius: z(55), knobRadius: z(22), deadZone: 0.1, curve: 1.4, response: 40, speed: z(360), restY: z(590), ringAlpha: 0.28, restAlpha: 0.14, depth: 55 }, // speed = witch speed at full push (px/s)
+  stick: { show: false, radius: z(55), knobRadius: z(22), deadZone: 0.1, curve: 1.4, response: 40, speed: z(360), restY: z(590), ringAlpha: 0.28, restAlpha: 0.14, depth: 55 }, // speed = witch speed at full push (px/s)
 
   // Player shots. Which shots, how fast and how hard come from weaponLevels below.
   bullet: {

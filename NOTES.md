@@ -137,3 +137,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-19 v0.7.2: big trees always to the sides
 - Omri: no big trees straight in the middle. Middle trees now have their centre at least treeLaneHalf (45 px) from the middle line and treeEdge (40 px) from the screen edge, so they stand left or right of the path and the centre stays open. Bushes, stumps and rocks keep the old placement.
 - Verified: 4 respawns gave tree x = 188, 45, 177, 58 (middle line = 120). UNVERIFIED on the phone: the path may look emptier in the middle, that is on purpose. Knobs: config.background.forest treeLaneHalf, treeEdge.
+
+## 2026-11-19 v0.7.3: invisible stick
+- Omri: make the finger wheel invisible. config.stick.show = false hides the ring and knob (the stick works exactly the same). Set show: true to see it again (useful to tune the size).
+- Verified in the browser pane: nothing drawn, a simulated push still moves the witch. Note: with no ring the player cannot see the stick centre; the stick centre is always where the thumb lands.

@@ -344,7 +344,7 @@ export class PlayScene extends Phaser.Scene {
     this.stickRing.lineStyle(1.5, 0xffffff, 1).strokeCircle(0, 0, T.radius);
     this.stickKnob = this.add.graphics().setDepth(T.depth);
     this.stickKnob.fillStyle(0xffffff, 1).fillCircle(0, 0, T.knobRadius);
-    this.stickRing.setVisible(this.stickMode); this.stickKnob.setVisible(this.stickMode);
+    this.stickRing.setVisible(this.stickMode && T.show); this.stickKnob.setVisible(this.stickMode && T.show); // T.show false = invisible stick (it still works)
   }
 
   // Stick: pushing the knob away from the ring centre sets a speed. The ship's easing and tilt below still apply.
