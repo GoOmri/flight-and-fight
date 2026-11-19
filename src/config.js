@@ -3,6 +3,8 @@
 // so it looks the same fraction of the screen. (Sprite sizes are not shrunk: that is what makes them bigger.)
 const ZOOM = 1.5;
 export const z = n => Math.round(n / ZOOM);
+export const hex = n => '#' + n.toString(16).padStart(6, '0'); // 0xff5ac8 -> '#ff5ac8' (for text colours)
+export const snap4 = n => Math.max(8, Math.round(n / 4) * 4); // pixel font looks best at 8, 12, 16, 20, 24...
 
 // One shot of a pattern: dx offset, angle in degrees, optional own damage.
 const S = (dx, deg = 0, dmg) => ({ dx, deg, dmg });
@@ -24,17 +26,21 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.4.0", // bump on every push so the player/Omri can see the build
+  version: "1.5.0", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
+    // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
+    pal: { purple: 0x3b1478, pink: 0xff5ac8, dark: 0x1a0830, cream: 0xfff3c4, orange: 0xff9a2e, cyan: 0x3df2ff, shadow: 0x12062e },
+    plateDrop: 4, plateDownShift: 2, plateBorderW: 3, plateRadius: 10, tabW: 6, // chunky button plate: bottom edge height, how far a pressed plate sinks, border, corner, stage colour tab
+    tabColors: { forest: 0xff9a2e, swamp: 0x3df2ff },
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4, // titleY..titleStroke: the old plain-text title (used only if the logo picture is missing)
     logo: { file: 'menu/logo.png', x: 120, y: 4, scale: 1 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
     cardW: 200, cardH: 110, cardGap: 18, cardTop: 100, // first card top edge; the second sits cardGap below it
-    cardRadius: 12, borderW: 5, borderColor: 0xe8ecf5, pressBrighten: 0.3, // pressed: fill and border mixed this much towards white
-    numberSize: 34, nameSize: 22, bestSize: 11,
+    cardRadius: 10, pressBrighten: 0.15, // pressed: plate fill mixed this much towards white
+    numberSize: 32, nameSize: 20, bestSize: 12, // text sizes (px): pixel font looks best at multiples of 4
     medalScale: 2, medalGap: 8,   // medal icons in the row (scale of the art, px between icons)
-    updateW: 120, updateH: 26, updateTop: 362, updateSize: 13, updateColor: 0x2a2f45, updateHotColor: 0x2e9e5b, // UPDATE button: size, top edge, text size, colour, colour when a newer version is waiting
-    versionSize: 10, versionAlpha: 0.9, versionBottom: 12, // version text: distance of its middle from the bottom edge
+    updateW: 120, updateH: 26, updateTop: 362, updateSize: 12, updateColor: 0x3b1478, updateHotColor: 0xff9a2e, updateHotBorder: 0x1a0830, // UPDATE button: size, top edge, text size, plate colour, plate colour + border when a newer version is waiting
+    versionSize: 8, versionAlpha: 0.9, versionBottom: 12, // version text: distance of its middle from the bottom edge
     // Halloween menu art (assets/menu, Spooktober set). Sky = animated background (cells in a grid of `cols`), scaled to cover the screen width.
     sky: { file: 'menu/sky.png', frameW: 202, frameH: 360, frames: 18, cols: 6, fps: 5 },
     // Decorations around the cards (never over cards, medals, UPDATE or version; they take no input). file in assets/, frameW/frameH = one cell,
@@ -47,7 +53,7 @@ export const CONFIG = {
       { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 205, y: 422, originX: 0.5, originY: 1,   scale: 1.333, bob: 0, bobMs: 1000 }
     ]
   },
-  endMenuBtn: { w: 96, h: 30, bottom: 36, size: 20, color: 0x2a2f45, border: 0xe8ecf5 }, // MENU button on the end screen (bottom = its middle's distance from the bottom edge)
+  endMenuBtn: { w: 96, h: 30, bottom: 36, size: 16, color: 0x3b1478, border: 0xff5ac8 }, // MENU button on the end screen (bottom = its middle's distance from the bottom edge)
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units
@@ -261,7 +267,7 @@ export const CONFIG = {
   hud: {
     margin: 4,
     medalSize: 10, medalGap: 2,
-    versionSize: 10, versionAlpha: 0.9, versionStroke: 3, versionGap: 2, // version text under the medals (px, 0..1, outline px, gap under medals)
+    versionSize: 8, versionAlpha: 0.9, versionStroke: 3, versionGap: 2, // version text under the medals (px, 0..1, outline px, gap under medals)
     rowOffset: 22,                  // bars (and wave dots) start this far below the top margin; below the score text even when it pops
     heartStep: z(26), heartY: 6,    // distance between hearts; heart centre below the top margin
     barW: 4, barH: 7, barGap: 2,

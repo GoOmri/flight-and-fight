@@ -1,8 +1,8 @@
-import { CONFIG as C, z } from '../config.js';
+import { CONFIG as C, z, hex, snap4 } from '../config.js';
 import { makeAllTextures, PX } from '../sprites.js';
 import { STAGE1 } from '../waves.js';
 import { WaveRunner, initPath, followPath } from '../waves-runner.js';
-import { Hud, FONT } from '../hud.js';
+import { Hud, FONT, drawPlate } from '../hud.js';
 import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
 import { Medals, MEDAL_KEYS, saveMedals, saveBest } from '../medals.js';
@@ -529,7 +529,7 @@ export class PlayScene extends Phaser.Scene {
     this.fxPool = K.crate || K.heartPickup ? mkFx(K.fxPoolSize, K.crate ? 'sp_crate_break' : 'sp_heart_collect') : [];
     this.pops = []; // floating score texts, made once and reused
     for (let i = 0; i < C.feel.popPoolSize; i++) {
-      this.pops.push(this.add.text(0, 0, '', { ...FONT, fontSize: C.feel.popTextSize + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: 3 })
+      this.pops.push(this.add.text(0, 0, '', { ...FONT, fontSize: C.feel.popTextSize + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: 3 })
         .setOrigin(0.5).setDepth(30).setVisible(false));
     }
     // muzzle flash: two small white pixels at the nose, shown for a few ms on every volley
@@ -1064,7 +1064,7 @@ export class PlayScene extends Phaser.Scene {
 
   gameOver() {
     this.vx = this.vy = 0; // clouds stop boosting
-    this.endScreen('GAME OVER', '#ff5a5a', false);
+    this.endScreen('GAME OVER', hex(C.menu.pal.pink), false);
     this.ship.setVisible(false).setAlpha(1);
   }
 
@@ -1074,7 +1074,7 @@ export class PlayScene extends Phaser.Scene {
     this.syncMedals();
     const isNew = this.debug ? null : saveMedals(this.medals.state, this.stageTheme); // debug runs are not saved
     if (!this.debug) saveBest(this.score, this.stageTheme);
-    this.endScreen('STAGE CLEAR', '#8dff6a', true, isNew);
+    this.endScreen('STAGE CLEAR', hex(C.menu.pal.cyan), true, isNew);
     this.ship.setAlpha(1);
   }
 
@@ -1089,34 +1089,37 @@ export class PlayScene extends Phaser.Scene {
     this.muzzle.forEach(m => m.setVisible(false));
     const ease = C.feel.endEaseMs, fade = []; // everything on the end screen fades in
     const veil = this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.55).setDepth(60);
+    const P = C.menu.pal, CR = hex(P.cream);
     const t = (y, s, size, c, stroke = z(5)) => {
-      const o = this.add.text(W / 2, y, s, { ...FONT, fontSize: z(size) + 'px', color: c, stroke: '#1b1b2b', strokeThickness: stroke, align: 'center' }).setOrigin(0.5).setDepth(61);
+      const o = this.add.text(W / 2, y, s, { ...FONT, fontSize: snap4(z(size)) + 'px', color: c, stroke: hex(P.shadow), strokeThickness: stroke, align: 'center' }).setOrigin(0.5).setDepth(61);
       fade.push(o); return o;
     };
     let tapY = H / 2 + z(60);
     if (!stats) {
       t(H / 2 - z(70), title, 36, col);
-      t(H / 2 - z(10), 'SCORE ' + this.score, 26, '#ffffff');
+      t(H / 2 - z(10), 'SCORE ' + this.score, 26, CR);
     } else {
       t(100, title, 36, col);
-      t(138, 'SCORE ' + this.score, 26, '#ffffff');
+      t(138, 'SCORE ' + this.score, 26, CR);
       MEDAL_KEYS.forEach((k, i) => { // the 4 medals, big; NEW under a medal earned for the first time
         const x = W / 2 + (i - 1.5) * 46;
         fade.push(this.add.image(x, 185, 'medal_' + k + '_' + this.medals.state[k]).setScale(3).setDepth(61));
-        if (isNew && isNew[k]) t(206, 'NEW', 12, '#8dff6a', 2).setX(x);
+        if (isNew && isNew[k]) t(206, 'NEW', 12, hex(P.orange), 2).setX(x);
       });
       const V = C.coin.value;
-      t(228, 'KILLS ' + this.enemiesKilled + '/' + this.enemiesSpawned, 16, '#ffffff');
-      t(243, 'COINS ' + this.coinsCollected * V + '/' + this.coinsSpawned * V, 16, '#ffffff');
-      t(258, 'HITS ' + this.hitsTaken, 16, '#ffffff');
+      t(228, 'KILLS ' + this.enemiesKilled + '/' + this.enemiesSpawned, 16, CR);
+      t(243, 'COINS ' + this.coinsCollected * V + '/' + this.coinsSpawned * V, 16, CR);
+      t(258, 'HITS ' + this.hitsTaken, 16, CR);
       tapY = 300;
     }
-    const tap = t(tapY, 'TAP TO PLAY AGAIN', 18, '#ffffff');
+    const tap = t(tapY, 'TAP TO PLAY AGAIN', 18, hex(P.pink));
     fade.pop(); // the tap text blinks on its own
     const M = C.endMenuBtn, my = H - M.bottom; // MENU button: back to the stage menu
     this.menuBtn = { x: W / 2, y: my, w: M.w, h: M.h };
-    fade.push(this.add.rectangle(W / 2, my, M.w, M.h, M.color).setStrokeStyle(2, M.border).setDepth(61));
-    t(my, 'MENU', M.size, '#ffffff', 2);
+    const plate = this.add.graphics().setDepth(61); // same purple plate with pink border and dark bottom edge as the menu buttons
+    drawPlate(plate, W / 2 - M.w / 2, my - M.h / 2, M.w, M.h, { fill: M.color, border: M.border, down: false });
+    fade.push(plate);
+    t(my - C.menu.plateDrop / 2, 'MENU', M.size, CR, 2);
     if (ease > 0) {
       veil.setAlpha(0); fade.forEach(o => o.setAlpha(0)); tap.setAlpha(0);
       this.tweens.add({ targets: veil, alpha: 0.55, duration: ease });

@@ -3,7 +3,7 @@
 // replaces the saved copy), then the menu reloads the page. Add every NEW source file to FILES (a file that was never saved is
 // always fetched fresh, so a missing name only matters for files that already exist and change).
 const FILES = [
-  './', 'index.html', 'manifest.webmanifest', 'icon.svg',
+  './', 'index.html', 'manifest.webmanifest', 'icon.svg', 'assets/fonts/PixelifySans-latin.woff2', 'assets/fonts/Jersey10-latin.woff2',
   'src/main.js', 'src/config.js', 'src/hud.js', 'src/medals.js', 'src/sprites.js', 'src/forestArt.js', 'src/rocks.js',
   'src/waves.js', 'src/waves-runner.js', 'src/update.js', 'src/scenes/MenuScene.js', 'src/scenes/PlayScene.js'
 ];

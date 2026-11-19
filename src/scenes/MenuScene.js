@@ -1,20 +1,17 @@
-import { CONFIG as C } from '../config.js';
+import { CONFIG as C, hex } from '../config.js';
 import { makeAllTextures } from '../sprites.js';
-import { FONT } from '../hud.js';
+import { FONT, drawPlate } from '../hud.js';
 import { MEDAL_KEYS, loadMedals, loadBest } from '../medals.js';
 import { latestVersion, refreshFiles } from '../update.js';
 
 const W = C.game.width, H = C.game.height, R = C.game.render;
 const M = C.menu;
 const DEBUG_PARAMS = ['wave', 'god', 'bg', 'ctl']; // any of these in the web address: skip the menu (old behaviour)
+const P = M.pal;
 const STAGES = [
-  { theme: 'forest', name: 'FOREST', num: '1', color: C.background.forest.groundColor },
-  { theme: 'swamp', name: 'SWAMP', num: '2', color: C.background.swamp.groundColor }
+  { theme: 'forest', name: 'FOREST', num: '1', tab: M.tabColors.forest },
+  { theme: 'swamp', name: 'SWAMP', num: '2', tab: M.tabColors.swamp }
 ];
-const mix = (c, k) => { // mix colour c towards white by k (0..1)
-  const ch = s => Math.round(((c >> s) & 255) + (255 - ((c >> s) & 255)) * k);
-  return (ch(16) << 16) | (ch(8) << 8) | ch(0);
-};
 
 // Start menu: two big cards (Forest, Swamp). Press = brighter, release on the same card = start that stage.
 export class MenuScene extends Phaser.Scene {
@@ -34,7 +31,7 @@ export class MenuScene extends Phaser.Scene {
     makeAllTextures(this); // medal pictures (made once, skipped when they exist)
     this.cameras.main.setZoom(R).centerOn(W / 2, H / 2).setBackgroundColor(M.bgColor);
     this.addArt();
-    const txt = (x, y, s, size, stroke, align = 0.5) => this.add.text(x, y, s, { ...FONT, fontSize: size + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: stroke }).setOrigin(align, 0.5);
+    const txt = (x, y, s, size, stroke, align = 0.5, color = P.cream) => this.add.text(x, y, s, { ...FONT, fontSize: size + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: stroke }).setOrigin(align, 0.5);
     if (this.textures.exists('menu_logo')) this.add.image(M.logo.x, M.logo.y, 'menu_logo').setOrigin(0.5, 0).setScale(M.logo.scale); // pixel logo: "Fight & Flight", tilted up in perspective
     else txt(W / 2, M.titleY, 'Flight and Fight', M.titleSize, M.titleStroke);
     txt(W / 2, H - M.versionBottom, 'v' + C.version, M.versionSize, 2).setAlpha(M.versionAlpha);
@@ -42,35 +39,38 @@ export class MenuScene extends Phaser.Scene {
     this.cards = STAGES.map((st, i) => {
       const x = (W - M.cardW) / 2, y = M.cardTop + i * (M.cardH + M.cardGap);
       const g = this.add.graphics();
-      const card = { st, x, y, g, down: false };
+      const card = { st, x, y, g, down: false, items: [] };
+      const add = (o, oy) => { card.items.push({ o, oy }); return o; }; // texts and medals sink with the plate when pressed
       card.draw = () => {
-        const k = card.down ? M.pressBrighten : 0;
         g.clear();
-        g.fillStyle(mix(st.color, k), 1).fillRoundedRect(x, y, M.cardW, M.cardH, M.cardRadius);
-        g.lineStyle(M.borderW, mix(M.borderColor, k), 1).strokeRoundedRect(x, y, M.cardW, M.cardH, M.cardRadius);
+        const sink = drawPlate(g, x, y, M.cardW, M.cardH, { fill: P.purple, border: P.pink, down: card.down, radius: M.cardRadius });
+        const b = M.plateBorderW, ph = M.cardH - M.plateDrop;
+        g.fillStyle(st.tab, 1).fillRect(x + b, y + sink + M.cardRadius, M.tabW, ph - 2 * M.cardRadius); // colour tab inside the left border
+        card.items.forEach(i => i.o.setY(i.oy + sink));
       };
-      card.draw();
-      txt(x + 24, y + 28, st.num, M.numberSize, 4);
-      txt(x + 48, y + 28, st.name, M.nameSize, 4, 0);
+      add(txt(x + 24, y + 28, st.num, M.numberSize, 3, 0.5, P.orange), y + 28);
+      add(txt(x + 48, y + 28, st.name, M.nameSize, 3, 0), y + 28);
       const medals = loadMedals(st.theme), best = loadBest(st.theme);
-      const n = MEDAL_KEYS.length, sz = 12 * M.medalScale; // medal art is about 12 px wide
+      const n = MEDAL_KEYS.length;
       MEDAL_KEYS.forEach((k, j) => {
-        const img = this.add.image(0, y + 66, 'medal_' + k + '_' + (medals[k] ? 'earned' : 'pending')).setScale(M.medalScale);
+        const img = add(this.add.image(0, y + 66, 'medal_' + k + '_' + (medals[k] ? 'earned' : 'pending')).setScale(M.medalScale), y + 66);
         img.x = W / 2 + (j - (n - 1) / 2) * (img.displayWidth + M.medalGap);
       });
-      if (best > 0) txt(W / 2, y + M.cardH - 16, 'BEST ' + best, M.bestSize, 2);
+      if (best > 0) add(txt(W / 2, y + M.cardH - 16, 'BEST ' + best, M.bestSize, 2, 0.5, P.cyan), y + M.cardH - 16);
+      card.draw();
       return card;
     });
 
     // UPDATE button: gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser or the installed app).
-    // When the menu opens it asks the server for the newest version number; if it is newer the button lights up green.
+    // When the menu opens it asks the server for the newest version number; if it is newer the button turns orange.
     const bx = (W - M.updateW) / 2, by = M.updateTop;
     const btn = { btn: true, x: bx, y: by, w: M.updateW, h: M.updateH, g: this.add.graphics(), down: false, hot: false, busy: false };
-    btn.label = this.add.text(W / 2, by + M.updateH / 2, 'UPDATE', { ...FONT, fontSize: M.updateSize + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: 3 }).setOrigin(0.5);
+    btn.label = this.add.text(W / 2, by + M.updateH / 2, 'UPDATE', { ...FONT, fontSize: M.updateSize + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5);
     btn.draw = () => {
-      const k = btn.down ? M.pressBrighten : 0, fill = btn.hot ? M.updateHotColor : M.updateColor;
-      btn.g.clear().fillStyle(mix(fill, k), 1).fillRoundedRect(bx, by, M.updateW, M.updateH, 8)
-        .lineStyle(3, mix(M.borderColor, k), 1).strokeRoundedRect(bx, by, M.updateW, M.updateH, 8);
+      btn.g.clear();
+      const sink = drawPlate(btn.g, bx, by, M.updateW, M.updateH, { fill: btn.hot ? M.updateHotColor : M.updateColor, border: btn.hot ? M.updateHotBorder : P.pink, down: btn.down, radius: 8 });
+      btn.label.setColor(btn.hot ? hex(P.dark) : hex(P.cream)).setStroke(hex(P.shadow), btn.hot ? 0 : 3); // dark text on the orange plate
+      btn.label.setY(by + (M.updateH - M.plateDrop) / 2 + sink + 1);
     };
     btn.draw();
     btn.action = async () => {
