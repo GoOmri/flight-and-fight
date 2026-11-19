@@ -206,15 +206,38 @@ export class PlayScene extends Phaser.Scene {
     }
 
     // MIDDLE PATH: a few single props that come back from above after a random gap.
-    const placeMid = (s, first) => {
-      s.x = Phaser.Math.Between(F.midMargin, W - F.midMargin);
-      s.y = first ? Phaser.Math.Between(0, H) : -s.displayHeight / 2 - Math.random() * F.midGapY;
+    // One function places every single prop of the path (rocks, trees, bushes, stumps, firs) so that they do not sit on top of
+    // each other (only a bush under a tree now and then, F.bushUnderTreeChance) and so that neighbours zigzag left and right
+    // (diagonal look, F.zigzag = chance that the next prop goes to the other side of the path than the last one).
+    const placed = [];
+    let lastSide = 1;
+    const isRock = o => o.kind === 'rock' || o.kind === 'bigrock';
+    const placeFree = (s, first, gap) => {
+      const under = Math.random() < F.bushUnderTreeChance;
+      const clash = (x, y) => placed.some(o => {
+        if (o === s) return false;
+        if (under && ((s.kind === 'bush' && o.kind === 'tree') || (s.kind === 'tree' && o.kind === 'bush'))) return false;
+        if (isRock(s) && isRock(o) && Math.hypot(o.x - x, o.y - y) < Math.max(s.kind === 'bigrock' ? F.bigRockMinDist : F.rockMinDist, o.kind === 'bigrock' ? F.bigRockMinDist : F.rockMinDist)) return true;
+        return Math.abs(o.x - x) < (s.displayWidth + o.displayWidth) / 2 + F.propGap && Math.abs(o.y - y) < (s.displayHeight + o.displayHeight) / 2 + F.propGap;
+      });
+      const x0 = F.midMargin + s.displayWidth / 2, x1 = W - F.midMargin - s.displayWidth / 2;
+      let x = 0, y = 0, side = 1;
+      for (let t = 0; t < 30; t++) {
+        side = Math.random() < F.zigzag ? -lastSide : (Math.random() < 0.5 ? -1 : 1);
+        x = side < 0 ? Phaser.Math.Between(x0, Math.max(x0, W * 0.44)) : Phaser.Math.Between(Math.min(x1, W * 0.56), x1); // left third / right third, the middle is left free
+        y = first ? Phaser.Math.Between(-20, H) : -s.displayHeight / 2 - Math.random() * gap;
+        if (!clash(x, y)) break;
+        if (t === 29) y -= 200; // no free spot found: wait a bit longer above the screen
+      }
+      lastSide = side; s.x = x; s.y = y;
     };
-    const mid = (count, names, wRange, depth) => {
+    const placeMid = (s, first) => placeFree(s, first, F.midGapY);
+    const mid = (count, names, wRange, depth, kind) => {
       const items = [];
       const choose = s => { s.setFrame(pick(inRows(names, pickRow()))); sized(s, wRange); s.setFlipX(Math.random() < 0.5); };
       for (let i = 0; i < count; i++) {
         const s = this.add.image(0, 0, 'forestPlants', names[0]).setDepth(depth);
+        s.kind = kind; placed.push(s);
         choose(s); placeMid(s, true);
         items.push(s);
       }
@@ -237,24 +260,14 @@ export class PlayScene extends Phaser.Scene {
       s.setFrame((s.big ? 'big-' : 'small-') + Math.floor(Math.random() * (s.big ? ROCKS.big.length : ROCKS.small.length)));
       s.setScale(s.big ? F.bigRockScale : range(F.rockScale)).setFlipX(Math.random() < 0.5);
     };
-    const placeRock = (s, first) => {
-      const gap = s.big ? F.bigRockGapY : F.rockGapY, minD = s.big ? F.bigRockMinDist : F.rockMinDist;
-      let x = 0, y = 0;
-      for (let t = 0; t < 12; t++) { // try a few spots, take the first that is far enough from every other rock (the last one if none)
-        x = Phaser.Math.Between(F.midMargin + s.displayWidth / 2, W - F.midMargin - s.displayWidth / 2);
-        y = first ? Phaser.Math.Between(-20, H) : -s.displayHeight / 2 - Math.random() * gap;
-        if (rocks.every(o => o === s || Math.hypot(o.x - x, o.y - y) >= minD)) break;
-      }
-      s.x = x; s.y = y;
-    };
+    const placeRock = (s, first) => placeFree(s, first, s.big ? F.bigRockGapY : F.rockGapY);
     const addRocks = (count, big) => {
       for (let i = 0; i < count; i++) {
         const s = this.add.image(0, 0, 'forestRocks', big ? 'big-0' : 'small-0').setDepth(big ? -9.1 : -9.2);
-        s.big = big; chooseRock(s);
-        if (big) s.y = -999; // not placed yet: it must not push the small rocks away
-        rocks.push(s);
-        placeRock(s, !big);
-        if (big) s.y = -s.displayHeight / 2 - Math.random() * F.bigRockGapY * 0.5; // the first big rock comes soon, later ones are rarer
+        s.big = big; s.kind = big ? 'bigrock' : 'rock'; chooseRock(s);
+        rocks.push(s); placed.push(s);
+        if (big) placeFree(s, false, F.bigRockGapY * 0.5); // the first big rock comes soon, later ones are rarer
+        else placeRock(s, true);
       }
     };
     addRocks(F.rockCount, false);
@@ -262,9 +275,9 @@ export class PlayScene extends Phaser.Scene {
     this.layers = [
       { items: rocks, speed: F.scroll, respawn: s => { chooseRock(s); placeRock(s, false); } },
       { items: patches, speed: F.scroll, respawn: s => { s.setFrame(patch()).setFlipX(Math.random() < 0.5); s.x = Phaser.Math.Between(0, W); s.y = -s.displayHeight / 2 - Math.random() * 140; } },
-      mid(F.midSmallCount, smallNames, F.midSmallWidth, -9),
-      mid(F.midBushCount, bushNames, F.midBushWidth, -8.5),
-      mid(F.midTreeCount, treeNames, F.midTreeWidth, -7.5),
+      mid(F.midSmallCount, smallNames, F.midSmallWidth, -9, "small"),
+      mid(F.midBushCount, bushNames, F.midBushWidth, -8.5, "bush"),
+      mid(F.midTreeCount, treeNames, F.midTreeWidth, -7.5, "tree"),
       { items: edgeItems, speed: F.scroll, respawn: s => placeEdge(s, false), depth: -8, depthK: 0.0003 } // depthK: lower on screen = drawn in front
     ];
   }

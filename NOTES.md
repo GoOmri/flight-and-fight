@@ -126,3 +126,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Art: assets/forest/rocks.png = a 227x136 crop of the Props sheet with ONLY the rocks (the rest of the Props sheet is not in the repo). Frame positions in src/rocks.js. config.background.forest: rockCount, rockScale, rockGapY, rockMinDist, bigRockCount, bigRockScale, bigRockGapY, bigRockMinDist.
 - Big rocks are the future cat spots. For that they will need to be drawn above the trees and have a known position (item.big = true marks them).
 - Verified in the browser pane (small rocks spread out, big rock shown by moving it on screen). UNVERIFIED on the phone: rock density and size.
+
+## 2026-11-19 v0.7.1: natural prop placement
+- Omri: avoid putting items in front of each other, more diagonal, a bush under a tree now and then is fine.
+- All single path props (rocks, big rocks, trees, bushes, stumps/firs) are now placed by one function (placeFree in PlayScene.makeForest): a new prop only lands where its picture box does not overlap another prop (propGap 8 px), except a bush may sit under a tree (bushUnderTreeChance 0.25). Zigzag: the next prop goes to the other side of the path with chance zigzag 0.8 (left third / right third; the middle is left free). If no free spot is found in 30 tries it waits 200 px longer above the screen.
+- Also: rocks fewer and smaller (rockCount 3, rockScale 0.9-1.4, rockMinDist 100) because 5 big ones looked crowded.
+- Edge canopies are NOT changed (they are the walls and may overlap each other).
+- Verified in the browser pane: no overlaps after respawn, zigzag spread, no errors. UNVERIFIED on the phone: density. Knobs in config.background.forest.
