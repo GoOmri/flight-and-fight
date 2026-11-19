@@ -224,7 +224,12 @@ export class PlayScene extends Phaser.Scene {
       let x = 0, y = 0, side = 1;
       for (let t = 0; t < 30; t++) {
         side = Math.random() < F.zigzag ? -lastSide : (Math.random() < 0.5 ? -1 : 1);
-        x = side < 0 ? Phaser.Math.Between(x0, Math.max(x0, W * 0.44)) : Phaser.Math.Between(Math.min(x1, W * 0.56), x1); // left third / right third, the middle is left free
+        // left third / right third, the middle is left free. Big trees keep their whole picture out of the centre lane (F.treeLaneHalf).
+        if (s.kind === 'tree') { // the tree's centre is at least treeLaneHalf from the middle line and at least treeEdge from the screen edge
+          x = side < 0 ? Phaser.Math.Between(F.treeEdge, W / 2 - F.treeLaneHalf) : Phaser.Math.Between(W / 2 + F.treeLaneHalf, W - F.treeEdge);
+        } else {
+          x = side < 0 ? Phaser.Math.Between(x0, Math.max(x0, W * 0.44)) : Phaser.Math.Between(Math.min(x1, W * 0.56), x1);
+        }
         y = first ? Phaser.Math.Between(-20, H) : -s.displayHeight / 2 - Math.random() * gap;
         if (!clash(x, y)) break;
         if (t === 29) y -= 200; // no free spot found: wait a bit longer above the screen

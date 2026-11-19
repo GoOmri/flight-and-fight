@@ -133,3 +133,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Also: rocks fewer and smaller (rockCount 3, rockScale 0.9-1.4, rockMinDist 100) because 5 big ones looked crowded.
 - Edge canopies are NOT changed (they are the walls and may overlap each other).
 - Verified in the browser pane: no overlaps after respawn, zigzag spread, no errors. UNVERIFIED on the phone: density. Knobs in config.background.forest.
+
+## 2026-11-19 v0.7.2: big trees always to the sides
+- Omri: no big trees straight in the middle. Middle trees now have their centre at least treeLaneHalf (45 px) from the middle line and treeEdge (40 px) from the screen edge, so they stand left or right of the path and the centre stays open. Bushes, stumps and rocks keep the old placement.
+- Verified: 4 respawns gave tree x = 188, 45, 177, 58 (middle line = 120). UNVERIFIED on the phone: the path may look emptier in the middle, that is on purpose. Knobs: config.background.forest treeLaneHalf, treeEdge.

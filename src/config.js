@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.7.1", // bump on every push so the player/Omri can see the build
+  version: "0.7.2", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units
@@ -83,6 +83,7 @@ export const CONFIG = {
     forest: {
       groundColor: 0x768f5d, // the plain grass colour taken from the sheet (muted green, so red shots and gold coins stay easy to see)
       scroll: z(60),         // px per second (the same for everything, so it feels like flat ground). Faster when the witch flies up (feel.cloudBoost)
+      treeLaneHalf: 45, treeEdge: 40, // big trees: the tree centre stays at least treeLaneHalf px from the middle line (always to the sides) and at least treeEdge px from the screen edge
       propGap: 8, zigzag: 0.8, bushUnderTreeChance: 0.25, // path props: min gap between pictures (px), chance the next prop goes to the other side (zigzag/diagonal), chance a bush may sit under a tree
       rockCount: 3, rockScale: [0.9, 1.4], rockGapY: 300, rockMinDist: 100, // small rocks: how many, size multiplier (min, max), how far above the screen they come back, minimum distance between any two rocks (px)
       bigRockCount: 1, bigRockScale: 1.1, bigRockGapY: 1100, bigRockMinDist: 130, // big rocks: rare (comes back after up to bigRockGapY px of scrolling), cats will sit on them
