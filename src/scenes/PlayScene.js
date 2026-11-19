@@ -184,11 +184,15 @@ export class PlayScene extends Phaser.Scene {
     const pick = a => a[Math.floor(Math.random() * a.length)];
     const range = r => r[0] + Math.random() * (r[1] - r[0]);
     const sized = (s, wRange) => s.setScale(range(wRange) / s.width); // scale so the picture is this wide on screen
+    // Tree sway: every tree picture has 3 versions (leaning left, straight, leaning right) made by shifting whole pixel rows (top the most).
+    // The trees step between them a few times a second, each with its own timing, so the sway stays pixel-sharp (no smooth rotation).
+    this.makeTreeSwayAtlas(treeNames.filter(n => rows.includes(+n.split('-')[1])));
+    const setTree = (s, base) => { s.treeName = base; if (s.swayPh === undefined) s.swayPh = Math.random() * 4; s.setFrame(base + '|1'); };
 
     // EDGE WALLS: tree tops on the left (side -1) and right (side +1). The tree centre is off screen, only the canopy reaches in.
     const edgeItems = [];
     const placeEdge = (s, first, i) => {
-      s.setFrame(pick(inRows(treeNames, pickRow())));
+      setTree(s, pick(inRows(treeNames, pickRow())));
       sized(s, F.edgeWidth);
       const inset = range(F.edgeInset);
       s.x = s.side < 0 ? inset - s.displayWidth / 2 : W - inset + s.displayWidth / 2;
@@ -199,7 +203,7 @@ export class PlayScene extends Phaser.Scene {
       s.y = Math.min(top - range(F.edgeStepY), -s.displayHeight / 2);
     };
     for (const side of [-1, 1]) for (let i = 0; i < F.edgeCount; i++) {
-      const s = this.add.image(0, 0, 'forestPlants', treeNames[0]).setDepth(-8);
+      const s = this.add.image(0, 0, 'treeSway', treeNames[0] + '|1').setDepth(-8);
       s.side = side;
       placeEdge(s, true, i);
       this.addTreeShadow(s);
@@ -242,9 +246,9 @@ export class PlayScene extends Phaser.Scene {
     const placeMid = (s, first) => placeFree(s, first, F.midGapY);
     const mid = (count, names, wRange, depth, kind) => {
       const items = [];
-      const choose = s => { s.setFrame(pick(inRows(names, pickRow()))); sized(s, wRange); s.setFlipX(Math.random() < 0.5); };
+      const choose = s => { const base = pick(inRows(names, pickRow())); if (kind === 'tree') setTree(s, base); else s.setFrame(base); sized(s, wRange); s.setFlipX(Math.random() < 0.5); };
       for (let i = 0; i < count; i++) {
-        const s = this.add.image(0, 0, 'forestPlants', names[0]).setDepth(depth);
+        const s = kind === 'tree' ? this.add.image(0, 0, 'treeSway', names[0] + '|1').setDepth(depth) : this.add.image(0, 0, 'forestPlants', names[0]).setDepth(depth);
         s.kind = kind; placed.push(s);
         choose(s); placeMid(s, true);
         if (kind === 'tree') this.addTreeShadow(s);
@@ -347,12 +351,44 @@ export class PlayScene extends Phaser.Scene {
     }
   }
 
+  // One atlas with 3 versions of every tree picture we use: leaning left (-), straight, leaning right (+). Row y of the picture is shifted
+  // sideways by a whole number of pixels: px x ((1 - y/height) ^ curve), so the top moves most and the foot stays put. Made once.
+  makeTreeSwayAtlas(names) {
+    const S = C.background.forest.sway;
+    if (this.textures.exists('treeSway')) return;
+    const src = this.textures.get('forestPlants'), img = src.getSourceImage();
+    const fr = names.map(n => { const f = src.get(n); return { n, x: f.cutX, y: f.cutY, w: f.cutWidth, h: f.cutHeight }; });
+    const pad = S.px, cw = Math.max(...fr.map(f => f.w)) + 2 * pad, ch = Math.max(...fr.map(f => f.h)) + 2;
+    const per = Math.floor(2048 / cw), rowsN = Math.ceil(fr.length * 3 / per);
+    const cv = this.textures.createCanvas('treeSway', per * cw, rowsN * ch), ctx = cv.getContext('2d');
+    const cuts = [];
+    let k = 0;
+    fr.forEach(f => [-1, 0, 1].forEach((dir, v) => {
+      const ox = (k % per) * cw, oy = Math.floor(k / per) * ch; k++;
+      for (let y = 0; y < f.h; y++) {
+        const shift = Math.round(dir * S.px * Math.pow(1 - y / f.h, S.curve));
+        ctx.drawImage(img, f.x, f.y + y, f.w, 1, ox + pad + shift, oy + y, f.w, 1);
+      }
+      cuts.push([f.n + '|' + v, ox, oy, f.w + 2 * pad, f.h]);
+    }));
+    cv.refresh();
+    cuts.forEach(c => cv.add(c[0], 0, c[1], c[2], c[3], c[4]));
+  }
+
+  // The tree steps through left - straight - right - straight - left ...; every tree has its own start (swayPh).
+  swayTree(s) {
+    const S = C.background.forest.sway;
+    if (!S.on) return;
+    const name = s.treeName + '|' + [1, 2, 1, 0][Math.floor(this.time.now / 1000 * S.fps + s.swayPh) & 3];
+    if (s.frame.name !== name) s.setFrame(name);
+  }
+
   // Tree shadows: the tree's own picture, filled dark, flattened and tipped over from its base so it lies up and to the side (the sun is
   // low in the lower left). It follows the tree, so it moves down with the scroll. Below the trees, above the floor.
   addTreeShadow(tree) {
     const TS = C.background.forest.treeShadow;
     if (!TS.on) return;
-    tree.shadow = this.add.image(0, 0, 'forestPlants', tree.frame.name).setOrigin(0.5, 1).setTintFill(TS.color).setAlpha(TS.alpha).setDepth(TS.depth);
+    tree.shadow = this.add.image(0, 0, 'treeSway', tree.frame.name).setOrigin(0.5, 1).setTintFill(TS.color).setAlpha(TS.alpha).setDepth(TS.depth);
     this.syncTreeShadow(tree);
   }
 
@@ -544,6 +580,7 @@ export class PlayScene extends Phaser.Scene {
       if (L.dx) { s.x += L.dx * dt; if (s.x > W + 40) s.x = -40; } // slow sideways drift (leaf shadows)
       if (L.depthK) s.setDepth(L.depth + s.y * L.depthK);
       if (L.respawn) { if (s.y - s.displayHeight / 2 > H) L.respawn(s); } // forest: reuse the picture at the top
+      if (s.treeName) this.swayTree(s);
       if (s.shadow) this.syncTreeShadow(s);
       else if (s.y > H + 40) { s.y = -40; s.x = Phaser.Math.Between(0, W); }
     }

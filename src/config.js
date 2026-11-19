@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.9.1", // bump on every push so the player/Omri can see the build
+  version: "0.9.2", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units
@@ -87,6 +87,7 @@ export const CONFIG = {
         shadowCount: 3, shadowVariants: 3, shadowSize: 64, shadowCell: 3, shadowGapY: 300, shadowSpeedMul: 1.6, shadowDrift: 6, shadowAlpha: 0.12, shadowColor: 0x0d1f12, // shadows: how many, shapes, size in texels, game px per texel, gap above the screen, scroll speed vs floor, sideways px/s, strength, colour
         shaftCount: 3, shaftScale: [1.5, 1.8], shaftAngleDeg: 18, shaftAlpha: [0.02, 0.09], shaftPulse: 0.5, shaftDrift: 3 }, // shafts: how many, size, tilt, faintest and strongest, fade speed, sideways px/s
       treeLaneHalf: 55, treeEdge: 40, rockLaneHalf: 35, rockEdge: 52, // rocks like trees: centre at least rockLaneHalf px from the middle line, at least rockEdge px from the screen edge
+      sway: { on: true, px: 4, curve: 1.6, fps: 3 }, // tree sway: top of the tree shifts up to px source-pixels left/right (whole pixels, rows shifted by (1-y/h)^curve); steps per second
       treeShadow: { on: true, angleDeg: 55, lenMul: 0.6, alpha: 0.18, color: 0x0d1f12, depth: -9 }, // tree shadows: tipped over from the base by this angle (clockwise = up and to the right), length as a share of the tree height, strength, colour
       // big trees: the tree centre stays at least treeLaneHalf px from the middle line (always to the sides) and at least treeEdge px from the screen edge
       propGap: 8, zigzag: 0.8, bushUnderTreeChance: 0.25, // path props: min gap between pictures (px), chance the next prop goes to the other side (zigzag/diagonal), chance a bush may sit under a tree
