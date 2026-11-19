@@ -26,7 +26,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.5.0", // bump on every push so the player/Omri can see the build
+  version: "1.5.1", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -88,7 +88,7 @@ export const CONFIG = {
   },
 
   // Virtual stick (controls "stick"). The ring appears where the thumb lands. Sizes in logical px.
-  stick: { show: false, radius: z(55), knobRadius: z(22), deadZone: 0.1, curve: 1.4, response: 40, speed: z(360), restY: z(590), ringAlpha: 0.28, restAlpha: 0.14, depth: 55 }, // speed = witch speed at full push (px/s)
+  stick: { show: false, radius: z(55), knobRadius: z(22), deadZone: 0.1, curve: 1.4, response: 40, speed: z(360), stopGlide: 0.12, stopOmega: 16, stopDamping: 0.3, restY: z(590), ringAlpha: 0.28, restAlpha: 0.14, depth: 55 }, // speed = witch speed at full push (px/s)
 
   // Player shots. Which shots, how fast and how hard come from weaponLevels below.
   bullet: {

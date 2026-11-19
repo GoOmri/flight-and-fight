@@ -111,6 +111,7 @@ export class PlayScene extends Phaser.Scene {
     this.stickMode = (q.get('ctl') || C.ship.controls) === 'stick';
     this.stickC = new Phaser.Math.Vector2(W / 2, C.stick.restY); // ring centre
     this.stickV = new Phaser.Math.Vector2();                     // witch speed from the stick
+    this.stopT = new Phaser.Math.Vector2(); this.stopping = false; // soft stop: where she settles after the thumb is lifted
     this.makeStickArt();
     this.input.on('pointerdown', p => {
       if (this.over) {
@@ -582,9 +583,23 @@ export class PlayScene extends Phaser.Scene {
       const m = Math.pow((push - T.deadZone) / (1 - T.deadZone), T.curve); // 0..1 after the dead zone
       wx = dx / len * m * T.speed; wy = dy / len * m * T.speed;
     }
-    const a = 1 - Math.exp(-T.response * dt);
-    this.stickV.x += (wx - this.stickV.x) * a; this.stickV.y += (wy - this.stickV.y) * a;
     const s = this.ship;
+    if (wx || wy) {
+      this.stopping = false;
+      const a = 1 - Math.exp(-T.response * dt);
+      this.stickV.x += (wx - this.stickV.x) * a; this.stickV.y += (wy - this.stickV.y) * a;
+    } else {
+      // Thumb lifted (or resting in the dead zone): she glides a little further and settles with a small overshoot, like a soft spring,
+      // instead of stopping dead. The rest point is where she would be after stopGlide seconds; a damped spring (stopOmega, stopDamping) pulls her there.
+      if (!this.stopping) {
+        this.stopping = true;
+        this.stopT.set(Phaser.Math.Clamp(s.x + this.stickV.x * T.stopGlide, S.margin, W - S.margin), Phaser.Math.Clamp(s.y + this.stickV.y * T.stopGlide, S.margin, H - S.margin));
+      }
+      const sd = Math.min(dt, 0.04), w2 = T.stopOmega * T.stopOmega, c = 2 * T.stopDamping * T.stopOmega;
+      this.stickV.x += (w2 * (this.stopT.x - s.x) - c * this.stickV.x) * sd;
+      this.stickV.y += (w2 * (this.stopT.y - s.y) - c * this.stickV.y) * sd;
+      if (Math.abs(this.stickV.x) < 1 && Math.abs(this.stickV.y) < 1 && Math.hypot(this.stopT.x - s.x, this.stopT.y - s.y) < 0.5) this.stickV.set(0, 0);
+    }
     this.target.x = Phaser.Math.Clamp(s.x + this.stickV.x * dt, S.margin, W - S.margin);
     this.target.y = Phaser.Math.Clamp(s.y + this.stickV.y * dt, S.margin, H - S.margin);
     const k = len > T.radius ? T.radius / len : 1; // knob stays inside the ring

@@ -239,3 +239,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - UNVERIFIED on the phone: how the font and sizes look, text overflow (stage names in the cards, score at the top, end-screen lines), pressed feel of the plates, orange UPDATE contrast.
 - v1.5.0 addendum (lead, 2026-11-20): Pixelify Sans draws the digit 5 like S and 2 like 8, so scores read "SO". Fix: one font family "GameFont" made of two files with unicode-range: Pixelify Sans for letters, Jersey 10 (assets/fonts/Jersey10-latin.woff2, OFL, 13 KB) for the digits 0-9 only, with size-adjust 125% so digits are as tall as the letters (index.html). FONT in hud.js uses "GameFont". Checked on a snapshot of the end screen: digits are clear. Tune digit size with size-adjust in index.html.
 - Pane note: the built-in browser pane turns its picture black after ~20 s of play (also on v1.4.0, so it is not the game). Use renderer.snapshot posted to a local file to inspect screens; this is only a test-tool problem. If a phone ever goes black after a while, tell Claude.
+
+## 2026-11-20 v1.5.1: soft stop (overshoot) for the witch
+- When the thumb lifts, she glides a little further (about 0.12 s of her speed) and settles with a small bounce back (damped spring) instead of stopping dead.
+- Knobs in src/config.js `stick`: `stopGlide` (0 = off), `stopOmega` (speed of the settle), `stopDamping` (1 = no bounce, 0.3 = small bounce).
+- Tested in the browser by simulation: glide ~29 px, overshoot ~7 px, settles with no jitter.
+- UNVERIFIED: how it feels on a real thumb. Check: lift the thumb while moving fast and slow; too floaty = lower stopGlide; too bouncy = raise stopDamping.
