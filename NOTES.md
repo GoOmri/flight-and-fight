@@ -245,3 +245,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Knobs in src/config.js `stick`: `stopGlide` (0 = off), `stopOmega` (speed of the settle), `stopDamping` (1 = no bounce, 0.3 = small bounce).
 - Tested in the browser by simulation: glide ~29 px, overshoot ~7 px, settles with no jitter.
 - UNVERIFIED: how it feels on a real thumb. Check: lift the thumb while moving fast and slow; too floaty = lower stopGlide; too bouncy = raise stopDamping.
+
+## 2026-11-20 v1.5.2: bigger bats
+- Omri: bats larger. Grunt (bat) scale 0.8 -> 1.1 and hitbox 20x16 -> 27x22 in config.enemies.sprites.grunt.
+- UNVERIFIED on phone: size next to the witch and shots, waves not too crowded. Open question to Omri: which sprite he chose for the shooter (now still the pink dino).
