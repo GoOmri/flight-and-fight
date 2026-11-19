@@ -106,3 +106,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-19 v0.6.2: calmer stick
 - Omri: the witch is too sensitive. stick: radius z(45) -> z(55) (more thumb travel for the same push), speed z(600) -> z(480), curve 0.8 -> 1.4 (small pushes move her gently, a full push still gives top speed), deadZone 0.1, response 60 -> 40 (a hair smoother).
 - UNVERIFIED on the phone. Still too twitchy: curve 1.7 or speed z(400). Too sluggish: curve 1.1 or speed z(540).
+
+## 2026-11-19 v0.6.3: forest edge walls and bigger trees
+- Left and right edges are now walls of big tree tops (trunks off screen), so the middle is a path. 14 tops per side, drawn in order by height (lower = in front), recycled off the bottom. Middle has only 1 tree, 1 bush, 1 stump/fir at a time, with random gaps. Patches 8 -> 4. Total about 36 sprites. Still below the witch, enemies, shots, coins. ?bg=sky and the speed boost unchanged.
+- Knobs (config.background.forest): edgeCount, edgeWidth [90,130], edgeInset [35,55], edgeStepY [40,52], midMargin, midTreeCount/midBushCount/midSmallCount, midTreeWidth/midBushWidth/midSmallWidth, midGapY, patchCount, treeRows/treeRowWeights. Removed: scale, treeCount, bushCount, smallCount, laneHalf, laneKeep, gapY.
+- UNVERIFIED: not looked at in the browser or on the phone. Check: no floor gaps at the edges, wavy path edge, path wide enough to fly, middle props not looking like enemies, frame rate.

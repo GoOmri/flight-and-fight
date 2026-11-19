@@ -158,31 +158,56 @@ export class PlayScene extends Phaser.Scene {
     const treeNames = frames('forestPlants', 'tree-'), bushNames = frames('forestPlants', 'bush-'), smallNames = frames('forestPlants', 'small-');
     const inRows = (names, r) => names.filter(n => +n.split('-')[1] === r);
     const pick = a => a[Math.floor(Math.random() * a.length)];
-    const place = (s, top) => { // choose a new picture, size and spot; top = false for the first fill of the screen
-      const hh = s.displayHeight;
-      let x = Phaser.Math.Between(0, W);
-      if (Math.abs(x - W / 2) < F.laneHalf && Math.random() < F.laneKeep) x = W / 2 + (Math.random() < 0.5 ? -1 : 1) * Phaser.Math.Between(F.laneHalf, W / 2);
-      s.x = x; s.y = top ? -hh / 2 - Math.random() * F.gapY : Phaser.Math.Between(0, H);
+    const range = r => r[0] + Math.random() * (r[1] - r[0]);
+    const sized = (s, wRange) => s.setScale(range(wRange) / s.width); // scale so the picture is this wide on screen
+
+    // EDGE WALLS: tree tops on the left (side -1) and right (side +1). The tree centre is off screen, only the canopy reaches in.
+    const edgeItems = [];
+    const placeEdge = (s, first, i) => {
+      s.setFrame(pick(inRows(treeNames, pickRow())));
+      sized(s, F.edgeWidth);
+      const inset = range(F.edgeInset);
+      s.x = s.side < 0 ? inset - s.displayWidth / 2 : W - inset + s.displayWidth / 2;
+      s.setFlipX(Math.random() < 0.5);
+      if (first) { s.y = H + 60 - i * (F.edgeStepY[0] + F.edgeStepY[1]) / 2 + Phaser.Math.Between(-6, 6); return; }
+      let top = Infinity; // the highest tree top of this side: the new one goes above it (and fully above the screen)
+      for (const o of edgeItems) if (o !== s && o.side === s.side && o.y < top) top = o.y;
+      s.y = Math.min(top - range(F.edgeStepY), -s.displayHeight / 2);
     };
-    const layer = (count, key, depth, chooser, flip) => {
+    for (const side of [-1, 1]) for (let i = 0; i < F.edgeCount; i++) {
+      const s = this.add.image(0, 0, 'forestPlants', treeNames[0]).setDepth(-8);
+      s.side = side;
+      placeEdge(s, true, i);
+      edgeItems.push(s);
+    }
+
+    // MIDDLE PATH: a few single props that come back from above after a random gap.
+    const placeMid = (s, first) => {
+      s.x = Phaser.Math.Between(F.midMargin, W - F.midMargin);
+      s.y = first ? Phaser.Math.Between(0, H) : -s.displayHeight / 2 - Math.random() * F.midGapY;
+    };
+    const mid = (count, names, wRange, depth) => {
       const items = [];
+      const choose = s => { s.setFrame(pick(inRows(names, pickRow()))); sized(s, wRange); s.setFlipX(Math.random() < 0.5); };
       for (let i = 0; i < count; i++) {
-        const s = this.add.image(0, 0, key, chooser()).setScale(F.scale).setDepth(depth);
-        place(s, false);
+        const s = this.add.image(0, 0, 'forestPlants', names[0]).setDepth(depth);
+        choose(s); placeMid(s, true);
         items.push(s);
       }
-      const respawn = s => {
-        s.setFrame(chooser());
-        if (flip) s.setFlipX(Math.random() < 0.5);
-        place(s, true);
-      };
-      return { items, speed: F.scroll, respawn, depth };
+      return { items, speed: F.scroll, respawn: s => { choose(s); placeMid(s, false); }, depth };
     };
+    const patch = () => 'patch-' + Math.floor(Math.random() * 2);
+    const patches = [];
+    for (let i = 0; i < F.patchCount; i++) {
+      const s = this.add.image(Phaser.Math.Between(0, W), Phaser.Math.Between(0, H), 'forestGrass', patch()).setScale(0.5).setDepth(-9.5);
+      patches.push(s);
+    }
     this.layers = [
-      layer(F.patchCount, 'forestGrass', -9.5, () => 'patch-' + Math.floor(Math.random() * 2), true),
-      layer(F.smallCount, 'forestPlants', -9, () => pick(inRows(smallNames, pickRow())), true),
-      layer(F.bushCount, 'forestPlants', -8.5, () => pick(inRows(bushNames, pickRow())), true),
-      layer(F.treeCount, 'forestPlants', -8, () => pick(inRows(treeNames, pickRow())), true)
+      { items: patches, speed: F.scroll, respawn: s => { s.setFrame(patch()).setFlipX(Math.random() < 0.5); s.x = Phaser.Math.Between(0, W); s.y = -s.displayHeight / 2 - Math.random() * 140; } },
+      mid(F.midSmallCount, smallNames, F.midSmallWidth, -9),
+      mid(F.midBushCount, bushNames, F.midBushWidth, -8.5),
+      mid(F.midTreeCount, treeNames, F.midTreeWidth, -7.5),
+      { items: edgeItems, speed: F.scroll, respawn: s => placeEdge(s, false), depth: -8, depthK: 0.0003 } // depthK: lower on screen = drawn in front
     ];
   }
 
@@ -352,6 +377,7 @@ export class PlayScene extends Phaser.Scene {
     this.cloudMul += (want - this.cloudMul) * (1 - Math.exp(-F.cloudEase * dt));
     for (const L of this.layers) for (const s of L.items) {
       s.y += L.speed * this.cloudMul * dt;
+      if (L.depthK) s.setDepth(L.depth + s.y * L.depthK);
       if (L.respawn) { if (s.y - s.displayHeight / 2 > H) L.respawn(s); } // forest: reuse the picture at the top
       else if (s.y > H + 40) { s.y = -40; s.x = Phaser.Math.Between(0, W); }
     }
