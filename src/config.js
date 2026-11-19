@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.2.0", // bump on every push so the player/Omri can see the build
+  version: "1.3.0", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4,
@@ -147,6 +147,32 @@ export const CONFIG = {
       vulture: { file: 'vulture.png', frameW: 39, frameH: 39, frames: [1, 3, 2, 3], fps: 8, scale: 0.8, hitW: 22, hitH: 22, faceVelocity: true }
     },
     haloTint: { weapon: 0x2ee86a, heart: 0xffc9e3 }, haloScaleSprite: 1.3
+  },
+
+  // Animated pictures for coins, hearts, chests and the death puff (strips cut from the packs, see CREDITS.md). Every entry is optional:
+  // a thing WITHOUT an entry keeps its code-drawn picture (src/sprites.js). A strip is a row of equal cells: file (in assets/), frameW/frameH = one cell
+  // (sheet pixels), frames = number of cells, fps = speed, scale = size multiplier (1 = sheet pixels = logical px). All strips of one thing share the same
+  // cell size and centre, so switching animations never jumps. hitW/hitH = hitbox in sheet pixels (times scale on screen). Pickup grab radius stays coin.pickupRadius.
+  sprites: {
+    // Gold coin, 24 frames = one full spin, loops while it falls. Each coin starts at a random frame.
+    coin: { file: 'pickups/coin.png', frameW: 18, frameH: 18, frames: 24, fps: 30, scale: 1 },
+    // Falling heart (carrier drop): Drop plays once when it appears, then Idle loops while it falls; Collect plays once at the witch when she grabs it.
+    heartPickup: { scale: 1, collectDepth: 12, // collectDepth: drawn over the witch (10)
+      idle:    { file: 'pickups/heart-idle.png',    frameW: 26, frameH: 62, frames: 24, fps: 12 },
+      drop:    { file: 'pickups/heart-drop.png',    frameW: 26, frameH: 62, frames: 11, fps: 14 },
+      collect: { file: 'pickups/heart-collect.png', frameW: 26, frameH: 62, frames: 12, fps: 14 } },
+    // Hearts in the top bar: the same Idle loop, scale = size (the old code-drawn heart was 14 px wide), desync = frames between neighbouring hearts.
+    // A lost heart = the first Idle frame as a flat dark-grey shape (emptyTint) with emptyAlpha.
+    heartHud: { scale: 0.6, desync: 8, emptyTint: 0x4a4f63, emptyAlpha: 0.6 },
+    // Chest: Idle loops while it falls; Break plays once at its place when it is destroyed (coins burst at the same moment).
+    // tint: the pack chest is yellow-orange, which looks like a coin, so it is multiplied toward muted brown (0xffffff = untouched, null = no tint). hit = trimmed body.
+    crate: { scale: 0.75, tint: 0x9a98a8, hitW: 24, hitH: 28, breakDepth: -0.2, // breakDepth: the bursting chest is drawn just under the coins and enemies (0)
+      idle:  { file: 'pickups/crate-idle.png',  frameW: 88, frameH: 40, frames: 18, fps: 12 },
+      break: { file: 'pickups/crate-break.png', frameW: 88, frameH: 40, frames: 15, fps: 20 } },
+    // Death puff under the sparks: 30 frames of the pack's "poof" (white pop, smoke balls, thinning; the thin tail was left out) played once.
+    // scale = size, bigMul = extra size for the shooter and the chest, poolSize = puffs at once, depth = under the sparks (20) and rings (19).
+    poof: { file: 'fx/poof.png', frameW: 82, frameH: 72, frames: 30, fps: 60, scale: 0.6, bigMul: 1.5, poolSize: 8, depth: 18 },
+    fxPoolSize: 8 // chest-break and heart-collect animations playing at once
   },
 
   // Enemy shots: slow red orbs. speed is the default; the wave data may set its own. hitSize = art pixels of the orb core.

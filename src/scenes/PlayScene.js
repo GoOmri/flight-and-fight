@@ -38,6 +38,12 @@ export class PlayScene extends Phaser.Scene {
     const SP = C.enemies.sprites; // animated enemy sheets (assets/enemies); types without an entry keep the code-drawn picture
     for (const t in SP) this.load.spritesheet('en_' + t, 'assets/enemies/' + SP[t].file, { frameWidth: SP[t].frameW, frameHeight: SP[t].frameH });
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
+    const K = C.sprites; // coin / heart / chest / puff strips (assets/pickups, assets/fx); a thing without an entry keeps its code-drawn picture
+    const strip = (key, d) => this.load.spritesheet(key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
+    if (K.coin) strip('sp_coin', K.coin);
+    if (K.heartPickup) for (const n of ['idle', 'drop', 'collect']) strip('sp_heart_' + n, K.heartPickup[n]);
+    if (K.crate) { strip('sp_crate_idle', K.crate.idle); strip('sp_crate_break', K.crate.break); }
+    if (K.poof) strip('sp_poof', K.poof);
     if (this.bg === 'swamp') { // swamp pictures (assets/swamp, pack "Murky Swamp", see CREDITS.md): only the ones listed in config are loaded
       const A = C.background.swamp.files;
       new Set([...A.trees, ...A.bushes, ...A.smalls, ...A.rocks, ...A.bigRocks]).forEach(n => this.load.image('sw-' + n, 'assets/swamp/' + n + '.png'));
@@ -54,6 +60,13 @@ export class PlayScene extends Phaser.Scene {
       const d = C.enemies.sprites[t], key = 'en_' + t + '_loop';
       if (!this.anims.exists(key)) this.anims.create({ key, frames: d.frames.map(f => ({ key: 'en_' + t, frame: f })), frameRate: d.fps, repeat: -1 });
     }
+    const K = C.sprites, mkAnim = (key, tex, d, repeat) => { // pickup / fx animations, made once
+      if (!this.anims.exists(key)) this.anims.create({ key, frames: this.anims.generateFrameNumbers(tex, { start: 0, end: d.frames - 1 }), frameRate: d.fps, repeat });
+    };
+    if (K.coin) mkAnim('coin_spin', 'sp_coin', K.coin, -1);
+    if (K.heartPickup) { mkAnim('heart_idle', 'sp_heart_idle', K.heartPickup.idle, -1); mkAnim('heart_drop', 'sp_heart_drop', K.heartPickup.drop, 0); mkAnim('heart_collect', 'sp_heart_collect', K.heartPickup.collect, 0); }
+    if (K.crate) { mkAnim('crate_idle', 'sp_crate_idle', K.crate.idle, -1); mkAnim('crate_break', 'sp_crate_break', K.crate.break, 0); }
+    if (K.poof) mkAnim('poof', 'sp_poof', K.poof, 0);
     // The canvas is R times bigger than the game (sharp text); the camera zooms back so all numbers stay logical.
     this.cameras.main.setZoom(R).centerOn(W / 2, H / 2);
     this.score = 0;
@@ -132,7 +145,7 @@ export class PlayScene extends Phaser.Scene {
       this.burst(c.x, c.y, C.feel.coinSparkCount, COIN_TINTS, C.feel.coinSparkSpeedMul, 3); // coin pop
     });
     this.physics.add.overlap(this.ship, this.weaponUps, (s, p) => { this.kill(p); this.weaponUp(); });
-    this.physics.add.overlap(this.ship, this.heartUps, (s, p) => { this.kill(p); this.heartUp(); });
+    this.physics.add.overlap(this.ship, this.heartUps, (s, p) => { this.kill(p); this.heartUp(p.x, p.y); });
     // (crates are in no ship overlap: the ship flies through them)
   }
 
@@ -505,6 +518,13 @@ export class PlayScene extends Phaser.Scene {
     this.flash = this.add.rectangle(W / 2, H / 2, W, H, C.feel.flashColor, 1).setDepth(C.feel.flashDepth).setAlpha(0);
     this.flashT = 0;
     this.rings = this.add.group({ defaultKey: 'fxRing', maxSize: C.feel.ringPoolSize });  // expanding ring puffs
+    const K = C.sprites, mkFx = (n, tex) => { // one-shot animation sprites, made once; each hides itself when its animation ends
+      const a = [];
+      for (let i = 0; i < n; i++) a.push(this.add.sprite(0, 0, tex, 0).setActive(false).setVisible(false).on('animationcomplete', function () { this.setActive(false).setVisible(false); }));
+      return a;
+    };
+    this.poofPool = K.poof ? mkFx(K.poof.poolSize, 'sp_poof') : [];
+    this.fxPool = K.crate || K.heartPickup ? mkFx(K.fxPoolSize, K.crate ? 'sp_crate_break' : 'sp_heart_collect') : [];
     this.pops = []; // floating score texts, made once and reused
     for (let i = 0; i < C.feel.popPoolSize; i++) {
       this.pops.push(this.add.text(0, 0, '', { ...FONT, fontSize: C.feel.popTextSize + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: 3 })
@@ -596,10 +616,10 @@ export class PlayScene extends Phaser.Scene {
   }
 
   // ---------- helpers ----------
-  spawn(group, key, x, y) {
+  spawn(group, key, x, y, scale = PX) {
     const o = group.get(x, y, key);
     if (!o) return null; // pool full: skip, never create more
-    o.setTexture(key).setActive(true).setVisible(true).setScale(PX).clearTint().setAlpha(1);
+    o.setTexture(key).setActive(true).setVisible(true).setScale(scale).clearTint().setAlpha(1);
     o.kick = 0; o.ox = 0; o.oy = 0; // hit knock-back state
     o.body.enable = true;
     o.body.reset(x, y);
@@ -611,6 +631,19 @@ export class PlayScene extends Phaser.Scene {
     o.setActive(false).setVisible(false);
     o.body.enable = false;
     o.body.setVelocity(0, 0);
+  }
+
+  // Start a one-shot animation sprite from a pool (no new objects). Returns it, or null when the pool is busy.
+  playFx(pool, tex, anim, x, y, scale, depth, tint) {
+    for (let i = 0; i < pool.length; i++) {
+      const s = pool[i];
+      if (s.active) continue;
+      s.setTexture(tex).setPosition(x, y).setScale(scale).setDepth(depth).setAlpha(1).setActive(true).setVisible(true);
+      if (tint === null || tint === undefined) s.clearTint(); else s.setTint(tint);
+      s.play(anim);
+      return s;
+    }
+    return null;
   }
 
   addScore(n) { this.score += n; this.hud.setScore(this.score, true); }
@@ -745,8 +778,10 @@ export class PlayScene extends Phaser.Scene {
   }
 
   spawnCrate(cc) {
-    const c = this.spawn(this.crates, 'crate', cc.p.sx, cc.p.sy);
+    const sp = C.sprites.crate;
+    const c = this.spawn(this.crates, sp ? 'sp_crate_idle' : 'crate', cc.p.sx, cc.p.sy, sp ? sp.scale : PX);
     if (!c) return;
+    if (sp) { c.body.setSize(sp.hitW, sp.hitH); c.play('crate_idle'); c.anims.setCurrentFrame(c.anims.currentAnim.frames[Phaser.Math.Between(0, sp.idle.frames - 1)]); } else c.anims.stop();
     initPath(c, cc.p, cc.c.spd);
     c.hp = cc.c.hp; c.coins = cc.c.coins; c.flashUntil = 0; c.onScreen = false;
   }
@@ -800,11 +835,13 @@ export class PlayScene extends Phaser.Scene {
   }
 
   updateCrates(time, dt) {
+    const tint = C.sprites.crate ? C.sprites.crate.tint : null;
     this.crates.children.iterate(c => {
       if (!c || !c.active) return;
       if (!this.kickMove(c, dt)) { this.kill(c); this.coinLost(); return; } // fell off the bottom: lost with its coins
       c.onScreen = this.inside(c);
-      if (time < c.flashUntil) c.setTintFill(0xffffff); else c.clearTint();
+      if (time < c.flashUntil) c.setTintFill(0xffffff);
+      else if (tint !== null && tint !== undefined) c.setTint(tint); else c.clearTint();
     });
   }
 
@@ -825,9 +862,11 @@ export class PlayScene extends Phaser.Scene {
 
   dropCoin(x, y, vx) {
     const m = C.ship.margin;
-    const c = this.spawn(this.coins, 'coin', Phaser.Math.Clamp(x, m, W - m), y);
+    const sp = C.sprites.coin;
+    const c = this.spawn(this.coins, sp ? 'sp_coin' : 'coin', Phaser.Math.Clamp(x, m, W - m), y, sp ? sp.scale : PX);
     if (!c) return;
-    const hb = 2 * C.coin.pickupRadius / PX; // generous pickup area
+    if (sp) { c.play('coin_spin'); c.anims.setCurrentFrame(c.anims.currentAnim.frames[Phaser.Math.Between(0, sp.frames - 1)]); } else c.anims.stop(); // each coin starts at a random frame
+    const hb = 2 * C.coin.pickupRadius / (sp ? sp.scale : PX); // generous pickup area (same size on screen whatever the picture)
     c.body.setSize(hb, hb);
     c.body.setVelocity(vx, C.coin.fallSpeed);
     c.mag = false;
@@ -840,10 +879,13 @@ export class PlayScene extends Phaser.Scene {
   // A pickup (weapon badge / heart) that falls like a coin. Same generous grab radius.
   dropPickup(group, key, fallSpeed, x, y) {
     const m = C.ship.margin;
-    const p = this.spawn(group, key, Phaser.Math.Clamp(x, m, W - m), y);
+    const sp = group === this.heartUps ? C.sprites.heartPickup : null; // animated heart (Drop, then Idle) or the code-drawn picture
+    const p = this.spawn(group, sp ? 'sp_heart_drop' : key, Phaser.Math.Clamp(x, m, W - m), y, sp ? sp.scale : PX);
     if (!p) return;
-    const hb = 2 * C.coin.pickupRadius / PX;
+    const hb = 2 * C.coin.pickupRadius / (sp ? sp.scale : PX);
     p.body.setSize(hb, hb);
+    p.dropping = !!sp;
+    if (sp) p.play('heart_drop'); else p.anims.stop();
     p.body.setVelocity(0, fallSpeed);
   }
 
@@ -855,9 +897,11 @@ export class PlayScene extends Phaser.Scene {
     if (C.feel.deathRing) this.ring(this.ship.x, this.ship.y, 0x2ee86a, C.feel.bigDeathRingScale, C.feel.deathRingMs + C.feel.pickupRingExtraMs);
   }
 
-  heartUp() {
+  heartUp(px, py) {
+    const sp = C.sprites.heartPickup;
     if (this.hearts < C.ship.hearts) { this.hearts++; this.hud.setHearts(this.hearts); } else { this.addScore(C.pickup.heartScoreIfFull); this.pop(this.ship.x, this.ship.y - C.feel.popTextOffsetY, '+' + C.pickup.heartScoreIfFull); }
-    if (C.feel.deathRing) this.ring(this.ship.x, this.ship.y, 0xffc9e3, C.feel.bigDeathRingScale, C.feel.deathRingMs + C.feel.pickupRingExtraMs);
+    if (sp) this.playFx(this.fxPool, 'sp_heart_collect', 'heart_collect', px, py, sp.scale, sp.collectDepth, null); // the heart jumps and bursts where it was grabbed (replaces the pink ring)
+    else if (C.feel.deathRing) this.ring(this.ship.x, this.ship.y, 0xffc9e3, C.feel.bigDeathRingScale, C.feel.deathRingMs + C.feel.pickupRingExtraMs);
   }
 
   cullOffscreen(time) {
@@ -868,7 +912,11 @@ export class PlayScene extends Phaser.Scene {
       if (b && b.active && (b.y > H + 20 || b.y < -20 || b.x < -20 || b.x > W + 20)) this.kill(b);
     });
     this.coins.children.iterate(c => { if (c && c.active && c.y > H + 20) { this.kill(c); this.coinLost(); } });
-    for (const grp of [this.weaponUps, this.heartUps]) grp.children.iterate(p => { if (p && p.active && p.y > H + 20) this.kill(p); });
+    for (const grp of [this.weaponUps, this.heartUps]) grp.children.iterate(p => {
+      if (!p || !p.active) return;
+      if (p.y > H + 20) this.kill(p);
+      else if (p.dropping && !p.anims.isPlaying) { p.dropping = false; p.play('heart_idle'); } // the Drop animation ended: loop Idle while it keeps falling
+    });
   }
 
   bulletHitsEnemy(b, e) {
@@ -903,6 +951,8 @@ export class PlayScene extends Phaser.Scene {
     c.hp -= b.dmg;
     if (c.hp > 0) { c.flashUntil = this.time.now + C.enemies.hitFlashMs; if (C.feel.hitKickPx > 0) c.kick = 1; return; }
     this.explode(c.x, c.y, true, DEATH_TINTS.crate);
+    const cs = C.sprites.crate;
+    if (cs) this.playFx(this.fxPool, 'sp_crate_break', 'crate_break', c.x, c.y, cs.scale, cs.breakDepth, cs.tint); // chest bursts at the same moment as the coins
     this.bigShake();
     for (let i = 0; i < c.coins; i++) this.dropCoin(c.x, c.y, (i - (c.coins - 1) / 2) * C.crate.coinSpread);
     this.kill(c);
@@ -922,7 +972,7 @@ export class PlayScene extends Phaser.Scene {
     if (!this.god) { this.hearts--; this.hud.setHearts(this.hearts); }
     this.invulnUntil = this.time.now + C.ship.invulnMs;
     this.cameras.main.shake(C.ship.hitShakeMs, C.ship.hitShakeAmount);
-    this.explode(this.ship.x, this.ship.y, false, WITCH_TINTS);
+    this.explode(this.ship.x, this.ship.y, false, WITCH_TINTS, false); // no smoke puff for the witch
     if (C.feel.hitFlashMs > 0) this.flashT = 1; // white-pink screen flash (own rectangle, fades out in updateFx)
     if (this.hearts <= 0) this.gameOver();
     else { this.freezeMs = C.feel.hitStopMs; this.physics.world.pause(); } // hit-stop
@@ -932,8 +982,9 @@ export class PlayScene extends Phaser.Scene {
   bigShake() { this.cameras.main.shake(C.feel.bigShakeMs, C.feel.bigShakeAmount); }
 
   // Pop in the creature's colours plus a ring puff. big = imp / chest (more sparks, bigger ring).
-  explode(x, y, big, tints) {
-    const F = C.feel;
+  explode(x, y, big, tints, puff = true) {
+    const F = C.feel, P = C.sprites.poof;
+    if (P && puff) this.playFx(this.poofPool, 'sp_poof', 'poof', x, y, P.scale * (big ? P.bigMul : 1), P.depth, null); // smoke puff under the sparks
     this.burst(x, y, big ? F.bigExplosionCount : C.particles.perExplosion, tints, big ? F.bigExplosionSpeedMul : 1, big ? 5 : 4);
     if (F.deathRing) this.ring(x, y, tints[1], big ? F.bigDeathRingScale : F.deathRingScale, F.deathRingMs);
   }

@@ -33,8 +33,13 @@ export class Hud {
 
     // RIGHT: hearts, wave pips under them
     this.heartIcons = [];
+    this.hs = C.sprites.heartPickup && C.sprites.heartHud ? C.sprites.heartHud : null; // animated hearts (the beating Idle loop) or the old code-drawn ones
     for (let i = 0; i < C.ship.hearts; i++) {
-      const ic = scene.add.image(W - H.margin - i * H.heartStep, H.margin + H.heartY, 'heart').setScale(PX / C.game.zoom).setOrigin(1, 0.5).setDepth(depth);
+      const x = W - H.margin - i * H.heartStep, y = H.margin + H.heartY;
+      const ic = this.hs ? scene.add.sprite(x, y, 'sp_heart_idle', 0).setScale(this.hs.scale) : scene.add.image(x, y, 'heart').setScale(PX / C.game.zoom);
+      ic.setOrigin(1, 0.5).setDepth(depth);
+      if (this.hs) { ic.play('heart_idle'); ic.anims.setCurrentFrame(ic.anims.currentAnim.frames[(i * this.hs.desync) % C.sprites.heartPickup.idle.frames]); } // each heart beats a little out of step
+      ic.full = true;
       ic.baseX = ic.x; ic.baseScale = ic.scaleX; ic.pop = 0; // pop = 1 when the heart was just lost, falls to 0
       this.heartIcons.push(ic);
     }
@@ -53,8 +58,14 @@ export class Hud {
     const max = C.ship.hearts;
     this.heartIcons.forEach((ic, i) => {
       const full = max - 1 - i < n, key = full ? 'heart' : 'heartEmpty';
-      if (ic.texture.key === key) return;
-      ic.setTexture(key);
+      if (this.hs) { // animated heart: full = beating loop, empty = first frame as a dark flat shape
+        if (ic.full === full) return;
+        ic.full = full;
+        if (full) { ic.clearTint().setAlpha(1); ic.play('heart_idle'); } else { ic.anims.stop(); ic.setFrame(0).setTintFill(this.hs.emptyTint).setAlpha(this.hs.emptyAlpha); }
+      } else {
+        if (ic.texture.key === key) return;
+        ic.setTexture(key);
+      }
       if (!full && C.feel.heartPopMs > 0) ic.pop = 1; // a heart was just lost: pop and shake
     });
   }
