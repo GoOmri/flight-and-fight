@@ -150,3 +150,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-19 v0.8.1: even speed feel
 - Omri: the witch feels faster flying up than sideways. Cause: feel.cloudBoost 1.2 made the whole forest (and leaf shadows) scroll up to 2.2x faster when she flew up, which looks like extra speed. Now cloudBoost 0.25 (a small rush). Her real stick speed was already the same in every direction (240 px/s at full push).
 - UNVERIFIED on the phone. If up still feels faster, set cloudBoost 0; if sideways feels slower than up in real speed, add a sideways multiplier to stick.speed.
+
+## 2026-11-19 v0.9.0: colourful broom trail
+- Omri: colourful particles at the end of the broom, not short, not long. The existing sparkle trail is now longer (life 420 -> 900 ms, speed z(40) -> z(75): about 45 px behind her), bigger (trailSize 2.2-4 art px, was 1-2), denser (trailIdleMs 90, trailMoveMs 26, pool 110) and colourful: colours go round in order pink, lilac, blue, mint, violet, white (config.feel.trailColors). No red or gold on purpose (red = enemy shots, gold = coins).
+- Verified in the browser pane by stepping the game by hand (a stream of coloured specks, no errors). UNVERIFIED on the phone: length and density at 60 fps; blue and mint specks near the cyan player shots. If too long: trailLifeMs 700. Too busy: trailMoveMs 40. Want rainbow with orange/yellow: add colours to trailColors (breaks the gold-for-coins rule).

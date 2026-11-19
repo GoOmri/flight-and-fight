@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.8.1", // bump on every push so the player/Omri can see the build
+  version: "0.9.0", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units
@@ -158,9 +158,10 @@ export const CONFIG = {
     levelFlashMs: 160, levelSparkCount: 8,  // green flash on the ship at a weapon upgrade
 
     // Sparkle trail behind the broom
-    trail: true, trailPoolSize: 40, trailY: 22,   // trailY = how far below the ship centre the sparks start
-    trailIdleMs: 140, trailMoveMs: 35,            // time between sparks when still / at full speed (lower = more sparks)
-    trailLifeMs: 420, trailSpeed: z(40),
+    trail: true, trailPoolSize: 110, trailY: 22,   // trailY = how far below the ship centre the sparks start
+    trailIdleMs: 90, trailMoveMs: 26,            // time between sparks when still / at full speed (lower = more sparks)
+    trailLifeMs: 900, trailSpeed: z(75), // medium length: about speed x life = 45 px behind the witch
+    trailSize: [2.2, 4], trailColors: [0xff7ad9, 0xc89cff, 0x8fb4ff, 0x5fe6d0, 0xb15bd6, 0xffffff], // spark size (art px, min..max); colours in order: pink, lilac, blue, mint, violet, white (no red or gold: those are for enemy shots and coins)
     trailSpreadX: 4, trailJitter: 8, trailCarry: 0.12, // sideways start spread (px), random sideways speed, share of the witch's speed the sparks keep
 
     recoilPx: 1,                            // witch squashes by about this many px on each volley (0 = off)

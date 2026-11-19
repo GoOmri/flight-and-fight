@@ -37,7 +37,7 @@ export class PlayScene extends Phaser.Scene {
     this.score = 0;
     this.freezeMs = 0;    // hit-stop: game is frozen while > 0
     this.shipFlashUntil = 0; this.muzzleUntil = 0;
-    this.recoil = 0; this.trailT = 0; this.vx = 0; this.vy = 0; this.cloudMul = 1; // feel state
+    this.recoil = 0; this.trailT = 0; this.trailN = 0; this.vx = 0; this.vy = 0; this.cloudMul = 1; // feel state
     this.hearts = C.ship.hearts;
     this.over = false;
     this.invulnUntil = 0;
@@ -538,7 +538,7 @@ export class PlayScene extends Phaser.Scene {
     const speed = Phaser.Math.Clamp(Math.hypot(this.vx, this.vy) / S.bankSpeed, 0, 1);
     this.trailT = Phaser.Math.Linear(F.trailIdleMs, F.trailMoveMs, speed) / 1000;
     this.emit(this.trail, sh.x + Phaser.Math.Between(-F.trailSpreadX, F.trailSpreadX), sh.y + F.trailY, -this.vx * F.trailCarry + Phaser.Math.Between(-F.trailJitter, F.trailJitter), F.trailSpeed - this.vy * F.trailCarry,
-      F.trailLifeMs / 1000, Phaser.Math.Between(1, 2) * SS, TRAIL_TINTS[(Math.random() * TRAIL_TINTS.length) | 0], 9, true);
+      F.trailLifeMs / 1000, Phaser.Math.FloatBetween(F.trailSize[0], F.trailSize[1]) * SS, F.trailColors[this.trailN++ % F.trailColors.length], 9, true); // colours go round in order, so the stream looks striped and colourful
   }
 
   // Coins close to the witch fly to her (magnet).
