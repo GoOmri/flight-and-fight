@@ -1,7 +1,9 @@
 // Medals of a stage: live state while playing + saving the best result in localStorage.
 // No Phaser in here. States: 'pending' (not decided yet), 'earned', 'failed'.
 export const MEDAL_KEYS = ['kill70', 'killAll', 'allCoins', 'noHit']; // HUD order
-const SAVE_KEY = 'ff_medals_stage1';
+// Save key per stage. The forest keeps the old key so earlier saved medals are not lost.
+const SAVE_KEYS = { forest: 'ff_medals_stage1', swamp: 'ff_medals_swamp' };
+const keyOf = theme => SAVE_KEYS[theme] || SAVE_KEYS.forest;
 
 export class Medals {
   // total = number of enemies in this run (crates are not enemies)
@@ -31,23 +33,32 @@ export class Medals {
 const empty = () => ({ kill70: false, killAll: false, allCoins: false, noHit: false });
 
 // Saved best result. Never throws: the game works without localStorage.
-export function loadMedals() {
+export function loadMedals(theme = 'forest') {
   const out = empty();
   try {
-    const d = JSON.parse(window.localStorage.getItem(SAVE_KEY));
+    const d = JSON.parse(window.localStorage.getItem(keyOf(theme)));
     if (d) for (const k of MEDAL_KEYS) out[k] = d[k] === true;
   } catch (e) { /* no storage: play on */ }
   return out;
 }
 
 // Merge a finished result into the save (once earned stays earned). Returns which medals are new.
-export function saveMedals(state) {
-  const old = loadMedals(), merged = empty(), isNew = empty();
+export function saveMedals(state, theme = 'forest') {
+  const old = loadMedals(theme), merged = empty(), isNew = empty();
   for (const k of MEDAL_KEYS) {
     const earned = state[k] === 'earned';
     merged[k] = old[k] || earned;
     isNew[k] = earned && !old[k];
   }
-  try { window.localStorage.setItem(SAVE_KEY, JSON.stringify(merged)); } catch (e) { /* ignore */ }
+  try { window.localStorage.setItem(keyOf(theme), JSON.stringify(merged)); } catch (e) { /* ignore */ }
   return isNew;
+}
+
+// Best score of a stage (own key next to the medals). Never throws.
+export function loadBest(theme = 'forest') {
+  try { return parseInt(window.localStorage.getItem(keyOf(theme) + '_best'), 10) || 0; } catch (e) { return 0; }
+}
+export function saveBest(score, theme = 'forest') {
+  if (score <= loadBest(theme)) return;
+  try { window.localStorage.setItem(keyOf(theme) + '_best', String(score)); } catch (e) { /* ignore */ }
 }

@@ -24,7 +24,17 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.0.0", // bump on every push so the player/Omri can see the build
+  version: "1.1.0", // bump on every push so the player/Omri can see the build
+  // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
+  menu: {
+    bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4,
+    cardW: 200, cardH: 110, cardGap: 18, cardTop: 100, // first card top edge; the second sits cardGap below it
+    cardRadius: 12, borderW: 5, borderColor: 0xe8ecf5, pressBrighten: 0.3, // pressed: fill and border mixed this much towards white
+    numberSize: 34, nameSize: 22, bestSize: 11,
+    medalScale: 2, medalGap: 8,   // medal icons in the row (scale of the art, px between icons)
+    versionSize: 10, versionAlpha: 0.9, versionBottom: 12 // version text: distance of its middle from the bottom edge
+  },
+  endMenuBtn: { w: 96, h: 30, bottom: 36, size: 20, color: 0x2a2f45, border: 0xe8ecf5 }, // MENU button on the end screen (bottom = its middle's distance from the bottom edge)
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units

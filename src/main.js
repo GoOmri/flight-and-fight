@@ -1,4 +1,5 @@
 import { CONFIG } from './config.js';
+import { MenuScene } from './scenes/MenuScene.js';
 import { PlayScene } from './scenes/PlayScene.js';
 
 window.__game = new Phaser.Game({
@@ -11,5 +12,5 @@ window.__game = new Phaser.Game({
   input: { activePointers: 1 },
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   physics: { default: 'arcade', arcade: { debug: false } },
-  scene: [PlayScene]
+  scene: [MenuScene, PlayScene]
 });

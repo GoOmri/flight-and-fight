@@ -5,10 +5,11 @@ import { WaveRunner, initPath, followPath } from '../waves-runner.js';
 import { Hud, FONT } from '../hud.js';
 import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
-import { Medals, MEDAL_KEYS, saveMedals } from '../medals.js';
+import { Medals, MEDAL_KEYS, saveMedals, saveBest } from '../medals.js';
 
 // Which background is shown: ?bg=forest | swamp | sky in the web address, else config.background.mode.
-const bgName = () => new URLSearchParams(window.location.search).get('bg') || C.background.mode;
+// The menu passes data.theme ('forest' | 'swamp'); ?bg still wins, with no data config.background.mode is used.
+const bgName = theme => new URLSearchParams(window.location.search).get('bg') || theme || C.background.mode;
 const ANIM_FRAMES = ['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10', 'a11']; // frame names of an animated strip (made once, so nothing is built per frame)
 const W = C.game.width, H = C.game.height, R = C.game.render, DEG = Math.PI / 180, TAU = Math.PI * 2;
 // Spark colours. Death pops match the creature; no red and no gold on anything that is not a shot / coin.
@@ -24,11 +25,17 @@ const GREEN_TINTS = [0x2ee86a, 0xffffff], COIN_TINTS = [0xfff2a0, 0xffc928]; // 
 export class PlayScene extends Phaser.Scene {
   constructor() { super('Play'); }
 
+  init(data) {
+    this.startData = data && data.theme ? { theme: data.theme } : undefined; // passed again on restart
+    this.bg = bgName(this.startData && this.startData.theme);
+    this.stageTheme = this.bg === 'swamp' ? 'swamp' : 'forest'; // which saved medals / best score belong to this run
+  }
+
   // Loads the witch sheet (assets/witch, art by Svetlana Kushnariova and Jordan Irwin, see CREDITS.md).
   preload() {
     const w = new URLSearchParams(window.location.search).get('witch') === '1' ? 1 : (new URLSearchParams(window.location.search).get('witch') === '2' ? 2 : C.ship.witch);
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
-    if (bgName() === 'swamp') { // swamp pictures (assets/swamp, pack "Murky Swamp", see CREDITS.md): only the ones listed in config are loaded
+    if (this.bg === 'swamp') { // swamp pictures (assets/swamp, pack "Murky Swamp", see CREDITS.md): only the ones listed in config are loaded
       const A = C.background.swamp.files;
       new Set([...A.trees, ...A.bushes, ...A.smalls, ...A.rocks, ...A.bigRocks]).forEach(n => this.load.image('sw-' + n, 'assets/swamp/' + n + '.png'));
     } else {
@@ -47,7 +54,7 @@ export class PlayScene extends Phaser.Scene {
     this.shipFlashUntil = 0; this.muzzleUntil = 0;
     this.recoil = 0; this.trailT = 0; this.trailN = 0; this.vx = 0; this.vy = 0; this.cloudMul = 1; // feel state
     this.hearts = C.ship.hearts;
-    this.over = false;
+    this.over = false; this.menuBtn = null;
     this.invulnUntil = 0;
     this.nextShot = 0;
     // Debug helpers (type them after the web address): ?wave=N starts the stage at wave N (1-10); ?god=1 = no damage (hits still counted).
@@ -84,7 +91,13 @@ export class PlayScene extends Phaser.Scene {
     this.stickV = new Phaser.Math.Vector2();                     // witch speed from the stick
     this.makeStickArt();
     this.input.on('pointerdown', p => {
-      if (this.over) { if (this.time.now > this.restartAt) this.scene.restart(); return; }
+      if (this.over) {
+      if (this.time.now <= this.restartAt) return;
+      const b = this.menuBtn; // the MENU button is checked first, so it never also restarts the stage
+      if (b && Math.abs(p.x / R - b.x) <= b.w / 2 && Math.abs(p.y / R - b.y) <= b.h / 2) this.scene.start('Menu');
+      else this.scene.restart(this.startData);
+      return;
+    }
       if (this.dragId !== null) return;
       this.dragId = p.id;
       this.dragFrom.set(p.x / R, p.y / R); // pointer is in canvas pixels, the game is R times smaller
@@ -119,7 +132,7 @@ export class PlayScene extends Phaser.Scene {
   // ---------- setup ----------
   makeBackground() {
     const B = C.background;
-    const bg = bgName();
+    const bg = this.bg;
     if (bg !== 'sky') { this.makeForest(bg === 'swamp' ? 'swamp' : 'forest'); return; }
     const sky = this.add.graphics().setDepth(-10);
     const steps = 32;
@@ -982,7 +995,8 @@ export class PlayScene extends Phaser.Scene {
     this.vx = this.vy = 0;
     this.medals.finish(this.enemiesKilled);
     this.syncMedals();
-    const isNew = this.debug ? null : saveMedals(this.medals.state); // debug runs are not saved
+    const isNew = this.debug ? null : saveMedals(this.medals.state, this.stageTheme); // debug runs are not saved
+    if (!this.debug) saveBest(this.score, this.stageTheme);
     this.endScreen('STAGE CLEAR', '#8dff6a', true, isNew);
     this.ship.setAlpha(1);
   }
@@ -1022,6 +1036,10 @@ export class PlayScene extends Phaser.Scene {
     }
     const tap = t(tapY, 'TAP TO PLAY AGAIN', 18, '#ffffff');
     fade.pop(); // the tap text blinks on its own
+    const M = C.endMenuBtn, my = H - M.bottom; // MENU button: back to the stage menu
+    this.menuBtn = { x: W / 2, y: my, w: M.w, h: M.h };
+    fade.push(this.add.rectangle(W / 2, my, M.w, M.h, M.color).setStrokeStyle(2, M.border).setDepth(61));
+    t(my, 'MENU', M.size, '#ffffff', 2);
     if (ease > 0) {
       veil.setAlpha(0); fade.forEach(o => o.setAlpha(0)); tap.setAlpha(0);
       this.tweens.add({ targets: veil, alpha: 0.55, duration: ease });

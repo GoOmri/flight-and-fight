@@ -178,3 +178,12 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Art: 35 files copied to assets/swamp/ (about 240 KB): 9 big trees as walls (willow, cypress, swamp_tree, gnarled_oak), reeds, cattails, bog cotton, water hyacinth, sundew, pitcher plants, glow mushrooms (green), skunk cabbage, logs, stumps, lily pad, toad pad, stepping stones, moss lumps and boulders; big rocks = frog rock / moss boulder. Left out on purpose: swamp iris, glowing_mushrooms and skunk_cabbage_1 (they have yellow that looks like a coin), black gum (red), small trees (tupelo, birch, mangrove: too small for the 100 px wall), wisp (optional, not done).
 - Version 1.0.0. CREDITS.md has the pack line (author name unknown: ask Omri).
 - UNVERIFIED (not run): everything visual. Syntax checked only (chk.mjs). Check in the browser and on the phone: walls look right (side-view trees, canopy only), floor not too dark, fog visible but faint, nothing looks like a coin or red shot, big trees in the path stay to the sides, frame rate (about 45 animated sprites + shadows), forest and sky still unchanged.
+
+## 2026-11-19 v1.1.0: start menu (Forest / Swamp)
+- New scene src/scenes/MenuScene.js (key 'Menu'), first in the scene list. Two big cards: FOREST (1) and SWAMP (2), each with its 4 medals and a small BEST score (if saved). Press = card brighter, release on the same card = starts that stage (scene.start('Play', { theme })). Sliding the finger off cancels. Version shown at the bottom.
+- Any debug parameter in the web address (wave, god, bg, ctl) skips the menu and starts the Play scene as before.
+- PlayScene.init(data): data.theme picks the background; ?bg still wins; with no data it uses config.background.mode. Restart keeps the theme.
+- Medals per stage: forest keeps key ff_medals_stage1 (old saves stay), swamp uses ff_medals_swamp. medals.js functions take the theme. New best score per stage (key + "_best"), saved on STAGE CLEAR only, not in debug runs.
+- End screen: new small MENU button at the bottom (config.endMenuBtn); a tap on it goes to the menu and does not restart. Tap anywhere else restarts the same stage.
+- Config: config.menu (card size, gap, colours, text sizes, medal scale) and config.endMenuBtn. Version 1.1.0.
+- UNVERIFIED: thumb feel and size of the cards and the MENU button on the phone; looks in the browser (not run by the coder). Check: menu shows first; both cards start the right stage; medals of the swamp do not mix with the forest; MENU button works and does not restart.
