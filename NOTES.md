@@ -111,3 +111,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Left and right edges are now walls of big tree tops (trunks off screen), so the middle is a path. 14 tops per side, drawn in order by height (lower = in front), recycled off the bottom. Middle has only 1 tree, 1 bush, 1 stump/fir at a time, with random gaps. Patches 8 -> 4. Total about 36 sprites. Still below the witch, enemies, shots, coins. ?bg=sky and the speed boost unchanged.
 - Knobs (config.background.forest): edgeCount, edgeWidth [90,130], edgeInset [35,55], edgeStepY [40,52], midMargin, midTreeCount/midBushCount/midSmallCount, midTreeWidth/midBushWidth/midSmallWidth, midGapY, patchCount, treeRows/treeRowWeights. Removed: scale, treeCount, bushCount, smallCount, laneHalf, laneKeep, gapY.
 - UNVERIFIED: not looked at in the browser or on the phone. Check: no floor gaps at the edges, wavy path edge, path wide enough to fly, middle props not looking like enemies, frame rate.
+
+## 2026-11-19 v0.6.4: grass blobs
+- Omri liked the lighter ground patches but wanted random blob shapes, not strips. Now drawn in code (PlayScene.makeBlobTextures): 6 wobbly oval variants with a grainy edge, a few lighter specks. config.background.forest: patchCount 6, blobVariants, blobSize [16,34] texels, blobCell 2 (game px per texel), blobColor / blobColor2.
+- assets/forest/grass.png is no longer used and was removed from the repo (fewer files of the pack in a public repo).
+- Verified in the browser pane. UNVERIFIED on the phone: whether the blobs are visible enough / too visible; raise or lower the colour difference with blobColor.

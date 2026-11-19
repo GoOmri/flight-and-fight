@@ -26,7 +26,6 @@ export class PlayScene extends Phaser.Scene {
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
     // Forest background sheets (assets/forest, licence UNKNOWN for now, see NOTES.md)
     this.load.image('forestPlants', 'assets/forest/plants.png');
-    this.load.image('forestGrass', 'assets/forest/grass.png');
   }
 
   create() {
@@ -135,6 +134,30 @@ export class PlayScene extends Phaser.Scene {
     ];
   }
 
+  // Lighter grass blobs for the forest floor: random roundish shapes with a grainy edge, drawn once as small pixel textures
+  // (one texel = F.blobCell game px). Several variants, each a wobbly oval; the edge cells are dropped at random so it looks like grass, not a stamp.
+  makeBlobTextures() {
+    const F = C.background.forest;
+    for (let v = 0; v < F.blobVariants; v++) {
+      const key = 'blob-' + v;
+      if (this.textures.exists(key)) continue;
+      const wTex = Phaser.Math.Between(F.blobSize[0], F.blobSize[1]), hTex = Math.round(wTex * Phaser.Math.FloatBetween(0.55, 1.0));
+      const cv = this.textures.createCanvas(key, wTex, hTex), ctx = cv.getContext('2d');
+      const p1 = Math.random() * TAU, p2 = Math.random() * TAU, p3 = Math.random() * TAU;
+      const col = '#' + F.blobColor.toString(16).padStart(6, '0'), col2 = '#' + F.blobColor2.toString(16).padStart(6, '0');
+      for (let y = 0; y < hTex; y++) for (let x = 0; x < wTex; x++) {
+        const dx = (x + 0.5 - wTex / 2) / (wTex / 2), dy = (y + 0.5 - hTex / 2) / (hTex / 2);
+        const a = Math.atan2(dy, dx), r = Math.hypot(dx, dy);
+        const edge = 0.72 + 0.14 * Math.sin(2 * a + p1) + 0.1 * Math.sin(3 * a + p2) + 0.06 * Math.sin(5 * a + p3); // wobbly outline
+        if (r > edge) continue;
+        if (r > edge - 0.16 && Math.random() < (r - (edge - 0.16)) / 0.16 * 0.8) continue; // grainy edge
+        ctx.fillStyle = (r < edge * 0.55 && Math.random() < 0.12) ? col2 : col; // a few lighter specks inside
+        ctx.fillRect(x, y, 1, 1);
+      }
+      cv.refresh();
+    }
+  }
+
   // Forest seen from above: a plain green floor with props (patches, bushes, stumps, trees) that scroll down and are reused.
   makeForest() {
     const F = C.background.forest;
@@ -149,9 +172,8 @@ export class PlayScene extends Phaser.Scene {
       const add = (name, b) => tex.add(name, 0, b.x, b.y, b.w, b.h);
       findSprites(d, cv.width, cv.height, 0, 690).forEach((row, r) => row.forEach((b, i) => add('tree-' + r + '-' + i, b)));
       findSprites(d, cv.width, cv.height, 690, cv.width).forEach((row, k) => row.forEach((b, i) => add((k % 2 === 0 ? 'bush-' : 'small-') + (k >> 1) + '-' + i, b)));
-      const g = this.textures.get('forestGrass'); // two lighter grass patches on the plain green (their edges are the floor colour)
-      g.add('patch-0', 0, 43, 8, 43, 43); g.add('patch-1', 0, 96, 10, 94, 44);
     }
+    this.makeBlobTextures();
     const rows = F.treeRows, wts = F.treeRowWeights, wsum = wts.reduce((a, b) => a + b, 0);
     const pickRow = () => { let n = Math.random() * wsum; for (let i = 0; i < rows.length; i++) { n -= wts[i]; if (n < 0) return rows[i]; } return rows[0]; };
     const frames = (key, prefix) => this.textures.get(key).getFrameNames().filter(n => n.startsWith(prefix));
@@ -196,10 +218,10 @@ export class PlayScene extends Phaser.Scene {
       }
       return { items, speed: F.scroll, respawn: s => { choose(s); placeMid(s, false); }, depth };
     };
-    const patch = () => 'patch-' + Math.floor(Math.random() * 2);
+    const patch = () => 'blob-' + Math.floor(Math.random() * F.blobVariants);
     const patches = [];
     for (let i = 0; i < F.patchCount; i++) {
-      const s = this.add.image(Phaser.Math.Between(0, W), Phaser.Math.Between(0, H), 'forestGrass', patch()).setScale(0.5).setDepth(-9.5);
+      const s = this.add.image(Phaser.Math.Between(0, W), Phaser.Math.Between(0, H), patch()).setScale(F.blobCell).setDepth(-9.5);
       patches.push(s);
     }
     this.layers = [
