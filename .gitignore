@@ -6,3 +6,5 @@ node_modules/
 *.keystore
 *.apk
 *.aab
+
+*.zip

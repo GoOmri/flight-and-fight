@@ -19,6 +19,12 @@ const GREEN_TINTS = [0x2ee86a, 0xffffff], COIN_TINTS = [0xfff2a0, 0xffc928]; // 
 export class PlayScene extends Phaser.Scene {
   constructor() { super('Play'); }
 
+  // Loads the witch sheet (assets/witch, art by Svetlana Kushnariova and Jordan Irwin, see CREDITS.md).
+  preload() {
+    const w = new URLSearchParams(window.location.search).get('witch') === '1' ? 1 : (new URLSearchParams(window.location.search).get('witch') === '2' ? 2 : C.ship.witch);
+    this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
+  }
+
   create() {
     makeAllTextures(this);
     // The canvas is R times bigger than the game (sharp text); the camera zooms back so all numbers stay logical.
@@ -62,6 +68,7 @@ export class PlayScene extends Phaser.Scene {
     // 'drag' = the code above. Choose in config.ship.controls or with ?ctl=stick / ?ctl=drag.
     this.stickMode = (q.get('ctl') || C.ship.controls) === 'stick';
     this.stickC = new Phaser.Math.Vector2(W / 2, C.stick.restY); // ring centre
+    this.stickV = new Phaser.Math.Vector2();                     // witch speed from the stick
     this.makeStickArt();
     this.input.on('pointerdown', p => {
       if (this.over) { if (this.time.now > this.restartAt) this.scene.restart(); return; }
@@ -150,7 +157,15 @@ export class PlayScene extends Phaser.Scene {
 
   makeShip() {
     const SS = C.ship.spriteScale;
-    this.ship = this.physics.add.image(W / 2, C.ship.startY, 'hero').setScale(SS).setDepth(10);
+    // The witch is an animated sheet (3 columns x 4 rows of 24x32; rows: back view, flying right, front, flying left).
+    const A = this.anims, fps = C.ship.animFps;
+    const defs = { witch_n: [0, 1, 2, 1], witch_e: [3, 4, 5, 4], witch_w: [9, 10, 11, 10] };
+    for (const key in defs) {
+      if (!A.exists(key)) A.create({ key, frames: defs[key].map(f => ({ key: 'witch', frame: f })), frameRate: fps, repeat: -1 });
+    }
+    this.witchAnim = 'witch_n';
+    this.ship = this.physics.add.sprite(W / 2, C.ship.startY, 'witch', 1).setScale(SS).setDepth(10);
+    this.ship.play('witch_n');
     const hb = 2 * C.ship.hitRadius / SS; // body size is in art pixels; centred on the sprite (hitbox stays tiny whatever the sprite size)
     this.ship.body.setSize(hb, hb);
     this.target = new Phaser.Math.Vector2(this.ship.x, this.ship.y); // where the finger wants the ship
@@ -180,11 +195,17 @@ export class PlayScene extends Phaser.Scene {
     let dx = 0, dy = 0, len = 0;
     if (held) { dx = this.finger.x - this.stickC.x; dy = this.finger.y - this.stickC.y; len = Math.hypot(dx, dy); }
     const push = Math.min(len / T.radius, 1);
+    // Wanted speed from the push (0 inside the dead zone). The witch follows it directly: only a very short ramp, no extra easing.
+    let wx = 0, wy = 0;
     if (held && push > T.deadZone) {
-      const m = (push - T.deadZone) / (1 - T.deadZone); // 0..1 after the dead zone
-      this.target.x = Phaser.Math.Clamp(this.target.x + dx / len * m * T.speed * dt, S.margin, W - S.margin);
-      this.target.y = Phaser.Math.Clamp(this.target.y + dy / len * m * T.speed * dt, S.margin, H - S.margin);
+      const m = Math.pow((push - T.deadZone) / (1 - T.deadZone), T.curve); // 0..1 after the dead zone
+      wx = dx / len * m * T.speed; wy = dy / len * m * T.speed;
     }
+    const a = 1 - Math.exp(-T.response * dt);
+    this.stickV.x += (wx - this.stickV.x) * a; this.stickV.y += (wy - this.stickV.y) * a;
+    const s = this.ship;
+    this.target.x = Phaser.Math.Clamp(s.x + this.stickV.x * dt, S.margin, W - S.margin);
+    this.target.y = Phaser.Math.Clamp(s.y + this.stickV.y * dt, S.margin, H - S.margin);
     const k = len > T.radius ? T.radius / len : 1; // knob stays inside the ring
     this.stickRing.setPosition(this.stickC.x, this.stickC.y).setAlpha(held ? T.ringAlpha : T.restAlpha);
     this.stickKnob.setPosition(this.stickC.x + dx * k, this.stickC.y + dy * k).setAlpha(held ? T.ringAlpha + 0.1 : T.restAlpha);
@@ -201,7 +222,7 @@ export class PlayScene extends Phaser.Scene {
       this.shipFrom.y += (iy - this.target.y) * g;
       this.aimTarget();
     }
-    const k = 1 - Math.exp(-S.followRate * dt);
+    const k = this.stickMode ? 1 : 1 - Math.exp(-S.followRate * dt); // stick: no extra easing, the stick already sets the speed
     const px = s.x, py = s.y;
     s.x += (this.target.x - s.x) * k;
     s.y += (this.target.y - s.y) * k;
@@ -209,6 +230,8 @@ export class PlayScene extends Phaser.Scene {
     if (Math.abs(this.target.y - s.y) < 0.25) s.y = this.target.y;
     const vx = dt > 0 ? (s.x - px) / dt : 0;
     this.vx = vx; this.vy = dt > 0 ? (s.y - py) / dt : 0;
+    const dirKey = vx > S.sideSpeed ? 'witch_e' : (vx < -S.sideSpeed ? 'witch_w' : 'witch_n'); // side view when she flies sideways
+    if (dirKey !== this.witchAnim) { this.witchAnim = dirKey; s.play(dirKey, true); }
     const want = Phaser.Math.Clamp(vx / S.bankSpeed, -1, 1) * Phaser.Math.DegToRad(S.bankDeg);
     s.rotation += (want - s.rotation) * (1 - Math.exp(-S.bankEase * dt));
   }

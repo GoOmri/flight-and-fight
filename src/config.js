@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.5.5", // bump on every push so the player/Omri can see the build
+  version: "0.6.0", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units
@@ -41,7 +41,10 @@ export const CONFIG = {
     bankDeg: 8,          // max tilt in degrees when moving sideways (0 = no tilt)
     bankSpeed: z(400),   // sideways speed (units/s) that gives the full tilt
     bankEase: 14,        // how fast the tilt comes and goes (higher = snappier)
-    spriteScale: 2,     // size of one witch art pixel (sprite is 18x22 art px = 36x44 px, about 15% of the screen width). 3 = bigger. Hitbox does not change
+    spriteScale: 1.5,   // size of one witch art pixel. The witch sheet frame is 24x32 art px, so 1.5 = 36x48 px (about 15% of the screen width). 2 = bigger. Hitbox does not change
+    witch: 2,           // which witch sheet from assets/witch: 1 = orange hair, blue cloak; 2 = blue hat, green cloak. Try with ?witch=1 / ?witch=2
+    sideSpeed: z(110),  // sideways speed (px/s) from which the witch turns to her side-view frames (flying left or right)
+    animFps: 8,         // wing-beat... broom-wobble speed of the flight animation
     shotY: 20,          // player shots start this far above the ship centre (at the hat tip)
     muzzleY: 22,        // muzzle flash height above the centre
     margin: 20,         // keep the ship centre this far from screen edges
@@ -56,7 +59,7 @@ export const CONFIG = {
   },
 
   // Virtual stick (controls "stick"). The ring appears where the thumb lands. Sizes in logical px.
-  stick: { radius: z(55), knobRadius: z(22), deadZone: 0.12, speed: z(380), restY: z(590), ringAlpha: 0.28, restAlpha: 0.14, depth: 55 }, // speed = witch speed at full push (px/s)
+  stick: { radius: z(45), knobRadius: z(20), deadZone: 0.08, curve: 0.8, response: 60, speed: z(600), restY: z(590), ringAlpha: 0.28, restAlpha: 0.14, depth: 55 }, // speed = witch speed at full push (px/s)
 
   // Player shots. Which shots, how fast and how hard come from weaponLevels below.
   bullet: {
@@ -123,7 +126,7 @@ export const CONFIG = {
     levelFlashMs: 160, levelSparkCount: 8,  // green flash on the ship at a weapon upgrade
 
     // Sparkle trail behind the broom
-    trail: true, trailPoolSize: 40, trailY: 20,   // trailY = how far below the ship centre the sparks start
+    trail: true, trailPoolSize: 40, trailY: 22,   // trailY = how far below the ship centre the sparks start
     trailIdleMs: 140, trailMoveMs: 35,            // time between sparks when still / at full speed (lower = more sparks)
     trailLifeMs: 420, trailSpeed: z(40),
     trailSpreadX: 4, trailJitter: 8, trailCarry: 0.12, // sideways start spread (px), random sideways speed, share of the witch's speed the sparks keep
