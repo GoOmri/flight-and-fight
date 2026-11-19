@@ -193,3 +193,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Menu: a small UPDATE button under the cards. When the menu opens it checks the server's version; if it is newer than the running one the button turns green and says NEW VERSION. Offline: NO INTERNET for 2 seconds. config.menu: updateW, updateH, updateTop, updateSize, updateColor, updateHotColor.
 - IMPORTANT: new source files must be added to FILES in src/update.js (and src/update.js refreshes itself). Versions before 1.1.1 have no button, so the phone needs ONE manual refresh (close the tab and reopen, or clear the site data) to get it. After that the button works.
 - Verified in the browser pane: button shows, a tap fetches with cache reload and the page reloads to the menu, no errors. UNVERIFIED: the installed home-screen app on the phone, and the green NEW VERSION state (needs a real newer version on the server).
+
+## 2026-11-19: animated enemy sprites (v1.2.0, branch v1200-enemy-sprites)
+- Enemies can use sprite sheets from `config.enemies.sprites` (one entry per type: file, frameW/H, frames, fps, scale, hitW/H, faceVelocity). A type with no entry keeps its code-drawn picture (the ghost 'zigzag' still does).
+- Now animated: grunt = purple bat (row S, frames 0,1,2,1), shooter = pink dino (dino-idle, frames 0-3, flips left/right with its movement). 'vulture' added in config only (frames 1,3,2,3, a guess), not in any wave. Sheets are in `assets/enemies/`; credits in CREDITS.md.
+- Carrier halo for animated enemies = a solid green / pink-white bigger copy behind the enemy (`enemies.haloTint`, `haloScaleSprite`).
+- Death colours changed for shooter (magenta) and added for vulture.
+- UNVERIFIED: how it looks (sizes, hitbox honesty, halo look), whether the vulture loop is clean. Check on the phone: bat/dino size vs shots, that hits feel fair, white hit flash still shows.

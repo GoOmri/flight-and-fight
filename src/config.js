@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.1.1", // bump on every push so the player/Omri can see the build
+  version: "1.2.0", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4,
@@ -131,8 +131,22 @@ export const CONFIG = {
     grunt:   { hp: 3, score: 10 },
     zigzag:  { hp: 4, score: 20 },
     shooter: { hp: 7, score: 50 },
+    vulture: { hp: 5, score: 30 }, // not in any wave yet
     poolSize: 40,
-    hitFlashMs: 70
+    hitFlashMs: 70,
+    // Animated pictures. A type WITH an entry here uses its sheet (assets/enemies); a type WITHOUT one keeps its code-drawn picture (src/sprites.js).
+    // file = sheet name, frameW/frameH = one frame in the sheet (sheet pixels), frames = frame numbers of ONE loop (never mix animations), fps = loop speed,
+    // scale = size multiplier (1 = sheet pixels = logical px), hitW/hitH = hitbox in sheet pixels (trimmed to the body, times scale on screen),
+    // faceVelocity = flip left/right by sideways movement (art drawn facing right), haloTint = glow colour of carriers {weapon, heart}, haloScale = glow size.
+    sprites: {
+      // Bat 1.3 (purple, never the red files), row S (flying towards the player), cut out as bat-S.png (3 frames = one wing flap: up, flat, down). Ping-pong 0,1,2,1.
+      grunt:   { file: 'bat-S.png', frameW: 48, frameH: 64, frames: [0, 1, 2, 1], fps: 8, scale: 0.8, hitW: 20, hitH: 16, faceVelocity: false },
+      // Dino IDLE sheet (4 frames = one breathing/bobbing loop, side view facing right). The long dino.png is a jump (crouch, leap, land), not a loop, so it is not used.
+      shooter: { file: 'dino-idle.png', frameW: 32, frameH: 26, frames: [0, 1, 2, 3], fps: 6, scale: 1.25, hitW: 18, hitH: 20, faceVelocity: true },
+      // Vulture (not used in waves yet). Frames of vulture.png: 0 = folded, 1 = wings up, 2 = wings flat/low, 3 = half. Flap loop: up, half, low, half. (Cleanest guess; check it.)
+      vulture: { file: 'vulture.png', frameW: 39, frameH: 39, frames: [1, 3, 2, 3], fps: 8, scale: 0.8, hitW: 22, hitH: 22, faceVelocity: true }
+    },
+    haloTint: { weapon: 0x2ee86a, heart: 0xffc9e3 }, haloScaleSprite: 1.3
   },
 
   // Enemy shots: slow red orbs. speed is the default; the wave data may set its own. hitSize = art pixels of the orb core.

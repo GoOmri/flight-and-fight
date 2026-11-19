@@ -16,7 +16,8 @@ const W = C.game.width, H = C.game.height, R = C.game.render, DEG = Math.PI / 18
 const DEATH_TINTS = {
   grunt: [0x3c3a8c, 0x8f86d8, 0xffffff],   // bat: indigo
   zigzag: [0xc9c3e8, 0xffffff, 0xd98fb8],  // ghost: lavender
-  shooter: [0x1f6b5a, 0x3fb59a, 0xffffff], // imp: teal
+  shooter: [0x8a1f6b, 0xe0369e, 0xffffff], // dino: magenta
+  vulture: [0x8a5a2b, 0xc58f4f, 0xe0369e], // vulture: brown + pink
   crate: [0xc58f4f, 0x8a5a2b, 0x8a93a6]    // chest: wood + steel
 };
 const WITCH_TINTS = [0xff7ad9, 0xb15bd6, 0xffffff], SHOT_TINTS = [0xffffff, 0x7fe0ff], TRAIL_TINTS = [0xff7ad9, 0xc89cff, 0xffffff];
@@ -34,6 +35,8 @@ export class PlayScene extends Phaser.Scene {
   // Loads the witch sheet (assets/witch, art by Svetlana Kushnariova and Jordan Irwin, see CREDITS.md).
   preload() {
     const w = new URLSearchParams(window.location.search).get('witch') === '1' ? 1 : (new URLSearchParams(window.location.search).get('witch') === '2' ? 2 : C.ship.witch);
+    const SP = C.enemies.sprites; // animated enemy sheets (assets/enemies); types without an entry keep the code-drawn picture
+    for (const t in SP) this.load.spritesheet('en_' + t, 'assets/enemies/' + SP[t].file, { frameWidth: SP[t].frameW, frameHeight: SP[t].frameH });
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
     if (this.bg === 'swamp') { // swamp pictures (assets/swamp, pack "Murky Swamp", see CREDITS.md): only the ones listed in config are loaded
       const A = C.background.swamp.files;
@@ -47,6 +50,10 @@ export class PlayScene extends Phaser.Scene {
 
   create() {
     makeAllTextures(this);
+    for (const t in C.enemies.sprites) { // one flap/bob loop per sprite type, made once (textures and animations persist across restarts)
+      const d = C.enemies.sprites[t], key = 'en_' + t + '_loop';
+      if (!this.anims.exists(key)) this.anims.create({ key, frames: d.frames.map(f => ({ key: 'en_' + t, frame: f })), frameRate: d.fps, repeat: -1 });
+    }
     // The canvas is R times bigger than the game (sharp text); the camera zooms back so all numbers stay logical.
     this.cameras.main.setZoom(R).centerOn(W / 2, H / 2);
     this.score = 0;
@@ -709,8 +716,15 @@ export class PlayScene extends Phaser.Scene {
   spawnEnemy(cg, i) {
     const g = cg.g, cfg = C.enemies[g.type];
     this.hud.waveSpawned(cg.w);
-    const e = this.spawn(this.enemies, g.type, cg.p.sx, cg.p.sy);
+    const sp = C.enemies.sprites[g.type]; // animated sheet or null (code-drawn)
+    const e = this.spawn(this.enemies, sp ? 'en_' + g.type : g.type, cg.p.sx, cg.p.sy);
     if (!e) return;
+    e.sp = sp || null; e.lastX = e.x;
+    if (sp) {
+      e.setScale(sp.scale).setFlipX(false);
+      e.body.setSize(sp.hitW, sp.hitH);
+      e.play('en_' + g.type + '_loop');
+    } else e.anims.stop(); // pooled sprite may still hold an animation from an earlier life
     initPath(e, cg.p, g.spd);
     e.kind = g.type; e.hp = cfg.hp; e.flashUntil = 0; e.onScreen = false;
     e.fire = g.fire || null; e.armed = false; e.fireT = 0;
@@ -721,7 +735,10 @@ export class PlayScene extends Phaser.Scene {
     if (e.drop) {
       const key = 'ring_' + g.type + '_' + e.drop;
       e.halo = this.halos.get(e.x, e.y, key);
-      if (e.halo) e.halo.setTexture(key).setActive(true).setVisible(true).setScale(PX);
+      if (e.halo && sp) { // animated enemy: a solid-colour, bigger copy of its current frame behind it (green = weapon, pink-white = heart)
+        e.halo.setTexture('en_' + g.type, e.frame.name).setActive(true).setVisible(true).setScale(sp.scale * C.enemies.haloScaleSprite)
+          .setTintFill(C.enemies.haloTint[e.drop]).setDepth(-0.5);
+      } else if (e.halo) e.halo.setTexture(key).setActive(true).setVisible(true).setScale(PX).clearTint().setDepth(0);
     }
     this.hud.waveAlive(cg.w, 1);
     this.enemyCount++; this.enemiesSpawned++;
@@ -759,7 +776,12 @@ export class PlayScene extends Phaser.Scene {
         e.fireT -= dt;
         if (e.fireT <= 0) { this.enemyShoot(e); e.fireT += e.fire.every; }
       }
+      if (e.sp && e.sp.faceVelocity) { // side-view art faces right: flip when moving left (the hit shake is left out)
+        const bx = e.x - e.ox, dx = bx - e.lastX; e.lastX = bx;
+        if (dx > 0.05) e.setFlipX(false); else if (dx < -0.05) e.setFlipX(true);
+      }
       if (time < e.flashUntil) e.setTintFill(0xffffff); else e.clearTint();
+      if (e.halo && e.sp) e.halo.setFrame(e.frame.name).setFlipX(e.flipX);
       if (e.halo) e.halo.setPosition(e.x, e.y).setAlpha(0.45 + 0.55 * (0.5 + 0.5 * Math.sin(time * TAU / C.pickup.haloPulseMs)));
     });
   }
