@@ -24,7 +24,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "0.9.2", // bump on every push so the player/Omri can see the build
+  version: "1.0.0", // bump on every push so the player/Omri can see the build
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units
@@ -78,7 +78,7 @@ export const CONFIG = {
     skyTop: 0x2a6fdb, skyBottom: 0x8fd3ff,
     farScroll: z(25), nearScroll: z(70), // px per second
     farCount: 14, nearCount: 7,
-    // Which background: "forest" (pixel forest seen from above, default) | "sky" (the old sky and clouds). Try with ?bg=forest / ?bg=sky
+    // Which background: "forest" (pixel forest seen from above, default) | "swamp" (dark foggy swamp, stage 2) | "sky" (the old sky and clouds). Try with ?bg=forest / ?bg=swamp / ?bg=sky
     mode: "forest",
     forest: {
       groundColor: 0x768f5d, // the plain grass colour taken from the sheet (muted green, so red shots and gold coins stay easy to see)
@@ -203,4 +203,29 @@ export const CONFIG = {
     showWaveIndicator: false, // the 10 wave dots under the hearts: false = hidden (Omri, v0.3.2). true brings them back
     pip: 5, pipGap: 2, pipBlinkMs: 350
   }
+};
+
+// SWAMP (stage 2): the same engine as the forest (makeForest in PlayScene.js), so it starts as a copy of every forest number and
+// only the numbers below are different. Pictures: "Murky Swamp" pack, see CREDITS.md. A name ending in _anim is an 8-frame strip
+// (assets/swamp/<name>.png) that plays by itself; any other name is a single picture.
+CONFIG.background.swamp = {
+  ...CONFIG.background.forest,
+  groundColor: 0x444f3c, // murky green-brown from the pack palette (mid-dark, not black, so red shots and gold coins stay easy to see)
+  files: {
+    trees: ['willow_0_anim', 'willow_1_anim', 'cypress_tree_0_anim', 'cypress_tree_1_anim', 'swamp_tree_0_anim', 'swamp_tree_1_anim', 'swamp_tree_2_anim', 'gnarled_oak_0_anim', 'gnarled_oak_1_anim'], // edge walls + big trees (all drawn 100 px wide)
+    bushes: ['reeds_0_anim', 'reeds_1_anim', 'cattails_0_anim', 'cattails_1_anim', 'bog_cotton_0_anim', 'water_hyacinth_0_anim', 'sundew_0_anim', 'pitcher_plants_0_anim', 'glow_mushrooms_0_anim', 'skunk_cabbage_0'], // low plants on the path
+    smalls: ['mossy_log_0', 'mossy_log_1', 'fallen_mossy_trunk_0', 'fallen_mossy_trunk_1', 'hollow_stump_0', 'willow_stump_0_anim', 'lily_pads_0', 'toad_pad_0', 'stepping_stones_0', 'stepping_stones_1'], // logs, stumps, pads, stones
+    rocks: ['moss_lump_0', 'moss_lump_1', 'moss_boulder_0', 'moss_boulder_1'],   // small rocks
+    bigRocks: ['frog_rock_0', 'frog_rock_1', 'moss_boulder_0', 'moss_boulder_1'] // rare big rocks (cat spots)
+  },
+  animFps: 5, animFrames: 8, // animated strips: pictures per second, frames per strip (each one starts at a random frame)
+  midBushScale: [1, 1.3], midSmallScale: [1, 1.2], // swamp props keep their own size (a log stays longer than a lily pad): size multiplier (min, max) instead of a fixed width
+  midBushCount: 2, midSmallCount: 1,
+  rockScale: [1, 1.4], bigRockScale: 1.5,
+  patchCount: 8, blobVariants: 6, blobSize: [20, 40], blobCell: 2, // dark still-water pools instead of grass blobs
+  blobColor: 0x2d4745, blobColor2: 0x3a5955,                       // pool colour (dark teal) and its lighter specks
+  treeShadow: { on: true, angleDeg: 55, lenMul: 0.6, alpha: 0.28, color: 0x0a120c, depth: -9 },
+  light: { on: true, depth: -6, // fog: big, very soft, pale grey-green patches (same code as the forest cloud shadows) drifting over the floor
+    shadowCount: 5, shadowVariants: 3, shadowSize: 64, shadowCell: 4, shadowGapY: 300, shadowSpeedMul: 1.5, shadowDrift: 5, shadowAlpha: 0.12, shadowColor: 0xb4c2b0,
+    shaftCount: 0, shaftScale: [1, 1], shaftAngleDeg: 0, shaftAlpha: [0, 0], shaftPulse: 0, shaftDrift: 0 } // no light shafts in the swamp
 };
