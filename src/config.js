@@ -24,10 +24,11 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.3.1", // bump on every push so the player/Omri can see the build
+  version: "1.4.0", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
-    bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4,
+    bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4, // titleY..titleStroke: the old plain-text title (used only if the logo picture is missing)
+    logo: { file: 'menu/logo.png', x: 120, y: 4, scale: 1 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
     cardW: 200, cardH: 110, cardGap: 18, cardTop: 100, // first card top edge; the second sits cardGap below it
     cardRadius: 12, borderW: 5, borderColor: 0xe8ecf5, pressBrighten: 0.3, // pressed: fill and border mixed this much towards white
     numberSize: 34, nameSize: 22, bestSize: 11,

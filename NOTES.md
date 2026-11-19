@@ -224,3 +224,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Fonts: pixel-art fonts are a plus. Title font: an old-timey, swirly, Halloween feel; best pixel candidates are the Jacquard family (Jacquard 12 / 24, Jacquarda Bastarda 9, all OFL on Google Fonts). Text and numbers: a pixel font (Pixelify Sans, Silkscreen, Jersey 10...). Omri has not picked yet. Comparison page (local): art-packs/_tools/fonts/index.html.
 - Ideas agreed so far: medals become stars (4 per stage, pop-in animation from the Frakassets power star); weapon level as a row of green gems instead of bars; end screen as "back at the hut"; menu already has the Halloween art (v1.3.1).
 - Fonts go into the repo only after Omri picks (OFL licence text must be copied next to the font file; load before the first scene; use exact pixel sizes).
+
+## 2026-11-20 v1.4.0: the logo in the menu
+- Omri picked the first (pumpkin) logo: stacked "Fight&" over "Flight", small low "&", both lines the same colours, tilted 14 degrees up to the right with perspective (letters grow to the right), flat, no glow. Made in art-packs/_tools/logo (the "logo lab", local) from Jacquard 24 and saved as assets/menu/logo.png (116x83 art px). It replaces the plain-text title in the menu (config.menu.logo: file, x, y, scale; if the picture is missing the old text title shows).
+- Name: the logo reads "Fight & Flight". The game is still called "Flight and Fight" in code, the page title, the manifest and the repo; Omri has not decided the name. To redo the logo with another name, open the logo lab, change the words, save as PNG and replace assets/menu/logo.png.
+- Verified in the browser pane (logo shows, no errors). UNVERIFIED on the phone: size next to the witch and ghost.
+- Still to do for the new look: menu cards are green (against the new direction), font, hearts/stars/gems UI.

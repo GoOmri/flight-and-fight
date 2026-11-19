@@ -25,6 +25,7 @@ export class MenuScene extends Phaser.Scene {
     const sky = M.sky;
     this.load.spritesheet('menu_sky', 'assets/' + sky.file, { frameWidth: sky.frameW, frameHeight: sky.frameH });
     for (const d of M.decor) this.load.spritesheet('menu_' + d.key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
+    this.load.image('menu_logo', 'assets/' + M.logo.file);
   }
 
   create() {
@@ -34,7 +35,8 @@ export class MenuScene extends Phaser.Scene {
     this.cameras.main.setZoom(R).centerOn(W / 2, H / 2).setBackgroundColor(M.bgColor);
     this.addArt();
     const txt = (x, y, s, size, stroke, align = 0.5) => this.add.text(x, y, s, { ...FONT, fontSize: size + 'px', color: '#ffffff', stroke: '#1b1b2b', strokeThickness: stroke }).setOrigin(align, 0.5);
-    txt(W / 2, M.titleY, 'Flight and Fight', M.titleSize, M.titleStroke);
+    if (this.textures.exists('menu_logo')) this.add.image(M.logo.x, M.logo.y, 'menu_logo').setOrigin(0.5, 0).setScale(M.logo.scale); // pixel logo: "Fight & Flight", tilted up in perspective
+    else txt(W / 2, M.titleY, 'Flight and Fight', M.titleSize, M.titleStroke);
     txt(W / 2, H - M.versionBottom, 'v' + C.version, M.versionSize, 2).setAlpha(M.versionAlpha);
 
     this.cards = STAGES.map((st, i) => {
