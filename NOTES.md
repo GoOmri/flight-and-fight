@@ -120,3 +120,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-19 v0.6.5: slower stick
 - Omri: the witch is still too quick. stick.speed z(480) -> z(360) (full push = 240 px/s, crossing the screen in about a second). Curve 1.4, radius, deadZone unchanged.
 - UNVERIFIED on the phone. Still quick: z(300). Now sluggish: z(420).
+
+## 2026-11-19 v0.7.0: rocks on the forest floor
+- Small rocks (5 on screen, 24 shapes, scaled 1.1-1.8) and a rare big rock (1; comes back after up to 1100 px of scrolling, so about every half minute). New rocks are placed so they are at least rockMinDist (80 px; 130 px for the big one) from every other rock. They lie under trees and bushes (depth -9.2 / -9.1) and under the witch, enemies and shots. Only on the path (inside midMargin), not in the tree walls.
+- Art: assets/forest/rocks.png = a 227x136 crop of the Props sheet with ONLY the rocks (the rest of the Props sheet is not in the repo). Frame positions in src/rocks.js. config.background.forest: rockCount, rockScale, rockGapY, rockMinDist, bigRockCount, bigRockScale, bigRockGapY, bigRockMinDist.
+- Big rocks are the future cat spots. For that they will need to be drawn above the trees and have a known position (item.big = true marks them).
+- Verified in the browser pane (small rocks spread out, big rock shown by moving it on screen). UNVERIFIED on the phone: rock density and size.

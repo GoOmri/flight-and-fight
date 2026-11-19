@@ -4,6 +4,7 @@ import { STAGE1 } from '../waves.js';
 import { WaveRunner, initPath, followPath } from '../waves-runner.js';
 import { Hud, FONT } from '../hud.js';
 import { findSprites } from '../forestArt.js';
+import { ROCKS } from '../rocks.js';
 import { Medals, MEDAL_KEYS, saveMedals } from '../medals.js';
 
 const W = C.game.width, H = C.game.height, R = C.game.render, DEG = Math.PI / 180, TAU = Math.PI * 2;
@@ -26,6 +27,7 @@ export class PlayScene extends Phaser.Scene {
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
     // Forest background sheets (assets/forest, licence UNKNOWN for now, see NOTES.md)
     this.load.image('forestPlants', 'assets/forest/plants.png');
+    this.load.image('forestRocks', 'assets/forest/rocks.png');
   }
 
   create() {
@@ -224,7 +226,41 @@ export class PlayScene extends Phaser.Scene {
       const s = this.add.image(Phaser.Math.Between(0, W), Phaser.Math.Between(0, H), patch()).setScale(F.blobCell).setDepth(-9.5);
       patches.push(s);
     }
+    // ROCKS on the path floor: a few small ones, kept apart from each other, and a big one only now and then (cats will sit on the big ones).
+    const rockTex = this.textures.get('forestRocks');
+    if (!rockTex.has('big-0')) {
+      ROCKS.big.forEach((r, i) => rockTex.add('big-' + i, 0, r[0], r[1], r[2], r[3]));
+      ROCKS.small.forEach((r, i) => rockTex.add('small-' + i, 0, r[0], r[1], r[2], r[3]));
+    }
+    const rocks = [];
+    const chooseRock = s => {
+      s.setFrame((s.big ? 'big-' : 'small-') + Math.floor(Math.random() * (s.big ? ROCKS.big.length : ROCKS.small.length)));
+      s.setScale(s.big ? F.bigRockScale : range(F.rockScale)).setFlipX(Math.random() < 0.5);
+    };
+    const placeRock = (s, first) => {
+      const gap = s.big ? F.bigRockGapY : F.rockGapY, minD = s.big ? F.bigRockMinDist : F.rockMinDist;
+      let x = 0, y = 0;
+      for (let t = 0; t < 12; t++) { // try a few spots, take the first that is far enough from every other rock (the last one if none)
+        x = Phaser.Math.Between(F.midMargin + s.displayWidth / 2, W - F.midMargin - s.displayWidth / 2);
+        y = first ? Phaser.Math.Between(-20, H) : -s.displayHeight / 2 - Math.random() * gap;
+        if (rocks.every(o => o === s || Math.hypot(o.x - x, o.y - y) >= minD)) break;
+      }
+      s.x = x; s.y = y;
+    };
+    const addRocks = (count, big) => {
+      for (let i = 0; i < count; i++) {
+        const s = this.add.image(0, 0, 'forestRocks', big ? 'big-0' : 'small-0').setDepth(big ? -9.1 : -9.2);
+        s.big = big; chooseRock(s);
+        if (big) s.y = -999; // not placed yet: it must not push the small rocks away
+        rocks.push(s);
+        placeRock(s, !big);
+        if (big) s.y = -s.displayHeight / 2 - Math.random() * F.bigRockGapY * 0.5; // the first big rock comes soon, later ones are rarer
+      }
+    };
+    addRocks(F.rockCount, false);
+    addRocks(F.bigRockCount, true);
     this.layers = [
+      { items: rocks, speed: F.scroll, respawn: s => { chooseRock(s); placeRock(s, false); } },
       { items: patches, speed: F.scroll, respawn: s => { s.setFrame(patch()).setFlipX(Math.random() < 0.5); s.x = Phaser.Math.Between(0, W); s.y = -s.displayHeight / 2 - Math.random() * 140; } },
       mid(F.midSmallCount, smallNames, F.midSmallWidth, -9),
       mid(F.midBushCount, bushNames, F.midBushWidth, -8.5),
