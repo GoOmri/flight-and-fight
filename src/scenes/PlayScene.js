@@ -202,6 +202,7 @@ export class PlayScene extends Phaser.Scene {
       const s = this.add.image(0, 0, 'forestPlants', treeNames[0]).setDepth(-8);
       s.side = side;
       placeEdge(s, true, i);
+      this.addTreeShadow(s);
       edgeItems.push(s);
     }
 
@@ -227,6 +228,8 @@ export class PlayScene extends Phaser.Scene {
         // left third / right third, the middle is left free. Big trees keep their whole picture out of the centre lane (F.treeLaneHalf).
         if (s.kind === 'tree') { // the tree's centre is at least treeLaneHalf from the middle line and at least treeEdge from the screen edge
           x = side < 0 ? Phaser.Math.Between(F.treeEdge, W / 2 - F.treeLaneHalf) : Phaser.Math.Between(W / 2 + F.treeLaneHalf, W - F.treeEdge);
+        } else if (isRock(s)) { // rocks too stay to the sides: centre at least rockLaneHalf from the middle line (they may sit under the canopy edge)
+          x = side < 0 ? Phaser.Math.Between(F.rockEdge, W / 2 - F.rockLaneHalf) : Phaser.Math.Between(W / 2 + F.rockLaneHalf, W - F.rockEdge);
         } else {
           x = side < 0 ? Phaser.Math.Between(x0, Math.max(x0, W * 0.44)) : Phaser.Math.Between(Math.min(x1, W * 0.56), x1);
         }
@@ -244,6 +247,7 @@ export class PlayScene extends Phaser.Scene {
         const s = this.add.image(0, 0, 'forestPlants', names[0]).setDepth(depth);
         s.kind = kind; placed.push(s);
         choose(s); placeMid(s, true);
+        if (kind === 'tree') this.addTreeShadow(s);
         items.push(s);
       }
       return { items, speed: F.scroll, respawn: s => { choose(s); placeMid(s, false); }, depth };
@@ -286,13 +290,13 @@ export class PlayScene extends Phaser.Scene {
       { items: edgeItems, speed: F.scroll, respawn: s => placeEdge(s, false), depth: -8, depthK: 0.0003 } // depthK: lower on screen = drawn in front
     ];
 
-    // LIGHT: soft leaf shadows drifting over the floor (they scroll a bit faster than the floor, like a canopy high above) and a few
+    // LIGHT: soft cloud shadows drifting over the floor (they scroll faster than the floor, like clouds high above) and a few
     // pale light shafts that fade in and out. All below the witch, enemies and shots, so nothing gameplay is ever darkened or hidden.
     const Lt = F.light;
     this.shafts = [];
     if (Lt.on) {
       this.makeLightTextures();
-      const leaf = () => 'leaf-' + Math.floor(Math.random() * Lt.shadowVariants);
+      const leaf = () => 'cloud-' + Math.floor(Math.random() * Lt.shadowVariants);
       const placeShadow = (s, first) => { s.x = Phaser.Math.Between(0, W); s.y = first ? Phaser.Math.Between(0, H) : -s.displayHeight / 2 - Math.random() * Lt.shadowGapY; };
       const shadows = [];
       for (let i = 0; i < Lt.shadowCount; i++) {
@@ -309,21 +313,25 @@ export class PlayScene extends Phaser.Scene {
     }
   }
 
-  // Textures for the light effects, drawn once in code. Leaf shadow = a cluster of small dark discs with a grainy edge (one texel = shadowCell game px).
+  // Textures for the light effects, drawn once in code. Cloud shadow = overlapping big soft discs (one texel = shadowCell game px).
   // Shaft = a narrow soft-edged pale stripe that fades out at both ends.
   makeLightTextures() {
     const Lt = C.background.forest.light;
     for (let v = 0; v < Lt.shadowVariants; v++) {
-      const key = 'leaf-' + v;
+      const key = 'cloud-' + v;
       if (this.textures.exists(key)) continue;
+      // A cloud shadow: 4-6 overlapping big discs with soft edges (alpha falls off towards the rim), drawn in a few strength steps.
       const n = Lt.shadowSize, cv = this.textures.createCanvas(key, n, n), ctx = cv.getContext('2d');
       const discs = [];
-      for (let i = 0; i < 7; i++) discs.push({ x: n * (0.2 + Math.random() * 0.6), y: n * (0.2 + Math.random() * 0.6), r: n * (0.08 + Math.random() * 0.12) });
-      ctx.fillStyle = '#' + Lt.shadowColor.toString(16).padStart(6, '0');
+      const cnt = Phaser.Math.Between(4, 6);
+      for (let i = 0; i < cnt; i++) discs.push({ x: n * (0.3 + Math.random() * 0.4), y: n * (0.3 + Math.random() * 0.4), r: n * (0.16 + Math.random() * 0.14) });
+      const rgb = [(Lt.shadowColor >> 16) & 255, (Lt.shadowColor >> 8) & 255, Lt.shadowColor & 255].join(',');
       for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-        let d = 1e9;
-        for (const c of discs) d = Math.min(d, Math.hypot(x - c.x, y - c.y) - c.r);
-        if (d > 0 || (d > -1.5 && Math.random() < 0.5)) continue; // inside a disc; the rim is grainy
+        let a = 0;
+        for (const c of discs) a = Math.max(a, 1 - Math.hypot(x + 0.5 - c.x, y + 0.5 - c.y) / c.r); // 1 in the middle of a disc, 0 at its rim
+        if (a <= 0) continue;
+        a = Math.min(1, a * 2.2); // a wide even middle, a soft edge
+        ctx.fillStyle = 'rgba(' + rgb + ',' + (Math.round(a * 5) / 5).toFixed(2) + ')'; // 5 steps: a gentle pixel-art banding
         ctx.fillRect(x, y, 1, 1);
       }
       cv.refresh();
@@ -337,6 +345,23 @@ export class PlayScene extends Phaser.Scene {
       }
       cv.refresh();
     }
+  }
+
+  // Tree shadows: the tree's own picture, filled dark, flattened and tipped over from its base so it lies up and to the side (the sun is
+  // low in the lower left). It follows the tree, so it moves down with the scroll. Below the trees, above the floor.
+  addTreeShadow(tree) {
+    const TS = C.background.forest.treeShadow;
+    if (!TS.on) return;
+    tree.shadow = this.add.image(0, 0, 'forestPlants', tree.frame.name).setOrigin(0.5, 1).setTintFill(TS.color).setAlpha(TS.alpha).setDepth(TS.depth);
+    this.syncTreeShadow(tree);
+  }
+
+  syncTreeShadow(tree) {
+    const TS = C.background.forest.treeShadow, sh = tree.shadow;
+    if (!sh) return;
+    if (sh.frame.name !== tree.frame.name) sh.setFrame(tree.frame.name);
+    sh.setFlipX(tree.flipX).setScale(tree.scaleX, tree.scaleY * TS.lenMul).setRotation(Phaser.Math.DegToRad(TS.angleDeg))
+      .setPosition(tree.x, tree.y + tree.displayHeight / 2); // pivot = the bottom centre of the tree picture
   }
 
   // Light shafts fade in and out slowly and drift sideways.
@@ -519,6 +544,7 @@ export class PlayScene extends Phaser.Scene {
       if (L.dx) { s.x += L.dx * dt; if (s.x > W + 40) s.x = -40; } // slow sideways drift (leaf shadows)
       if (L.depthK) s.setDepth(L.depth + s.y * L.depthK);
       if (L.respawn) { if (s.y - s.displayHeight / 2 > H) L.respawn(s); } // forest: reuse the picture at the top
+      if (s.shadow) this.syncTreeShadow(s);
       else if (s.y > H + 40) { s.y = -40; s.x = Phaser.Math.Between(0, W); }
     }
     if (this.shafts && this.shafts.length) this.updateShafts(dt);
