@@ -141,3 +141,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-19 v0.7.3: invisible stick
 - Omri: make the finger wheel invisible. config.stick.show = false hides the ring and knob (the stick works exactly the same). Set show: true to see it again (useful to tune the size).
 - Verified in the browser pane: nothing drawn, a simulated push still moves the witch. Note: with no ring the player cannot see the stick centre; the stick centre is always where the thumb lands.
+
+## 2026-11-19 v0.8.0: forest light (leaf shadows + light shafts)
+- Soft leaf shadows (7 on screen, 4 shapes drawn in code, alpha 0.13) drift over the forest floor, scrolling 1.3x faster than the floor and 4 px/s sideways (looks like a canopy high above). 3 pale light shafts (tilted 18 degrees) fade in and out and drift 3 px/s. All at depth -6: above the forest, BELOW the witch, enemies, shots and coins, so nothing gameplay is darkened or hidden. config.background.forest.light has every number; light.on = false switches it all off.
+- Cost: 10 extra sprites, no per-frame allocation. Verified in the browser pane (shadows and a shaft visible, no errors). UNVERIFIED on the phone: how strong the effect looks and frame rate. Too strong: lower shadowAlpha / shaftAlpha.
+- Ideas for later: soft glows on player shots, coins and explosions; a dusk stage with a darkness layer.

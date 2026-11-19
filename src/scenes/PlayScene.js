@@ -285,6 +285,69 @@ export class PlayScene extends Phaser.Scene {
       mid(F.midTreeCount, treeNames, F.midTreeWidth, -7.5, "tree"),
       { items: edgeItems, speed: F.scroll, respawn: s => placeEdge(s, false), depth: -8, depthK: 0.0003 } // depthK: lower on screen = drawn in front
     ];
+
+    // LIGHT: soft leaf shadows drifting over the floor (they scroll a bit faster than the floor, like a canopy high above) and a few
+    // pale light shafts that fade in and out. All below the witch, enemies and shots, so nothing gameplay is ever darkened or hidden.
+    const Lt = F.light;
+    this.shafts = [];
+    if (Lt.on) {
+      this.makeLightTextures();
+      const leaf = () => 'leaf-' + Math.floor(Math.random() * Lt.shadowVariants);
+      const placeShadow = (s, first) => { s.x = Phaser.Math.Between(0, W); s.y = first ? Phaser.Math.Between(0, H) : -s.displayHeight / 2 - Math.random() * Lt.shadowGapY; };
+      const shadows = [];
+      for (let i = 0; i < Lt.shadowCount; i++) {
+        const s = this.add.image(0, 0, leaf()).setScale(Lt.shadowCell).setAlpha(Lt.shadowAlpha).setDepth(Lt.depth);
+        placeShadow(s, true); shadows.push(s);
+      }
+      this.layers.push({ items: shadows, speed: F.scroll * Lt.shadowSpeedMul, dx: Lt.shadowDrift, respawn: s => { s.setTexture(leaf()).setFlip(Math.random() < 0.5, Math.random() < 0.5); placeShadow(s, false); } });
+      for (let i = 0; i < Lt.shaftCount; i++) {
+        const s = this.add.image(Phaser.Math.Between(0, W), Phaser.Math.Between(60, H - 60), 'shaft').setScale(Lt.shaftScale[0], Lt.shaftScale[1])
+          .setRotation(Phaser.Math.DegToRad(Lt.shaftAngleDeg)).setAlpha(0).setDepth(Lt.depth + 0.1);
+        s.phase = Math.random() * TAU; s.rate = Lt.shaftPulse * (0.7 + Math.random() * 0.6);
+        this.shafts.push(s);
+      }
+    }
+  }
+
+  // Textures for the light effects, drawn once in code. Leaf shadow = a cluster of small dark discs with a grainy edge (one texel = shadowCell game px).
+  // Shaft = a narrow soft-edged pale stripe that fades out at both ends.
+  makeLightTextures() {
+    const Lt = C.background.forest.light;
+    for (let v = 0; v < Lt.shadowVariants; v++) {
+      const key = 'leaf-' + v;
+      if (this.textures.exists(key)) continue;
+      const n = Lt.shadowSize, cv = this.textures.createCanvas(key, n, n), ctx = cv.getContext('2d');
+      const discs = [];
+      for (let i = 0; i < 7; i++) discs.push({ x: n * (0.2 + Math.random() * 0.6), y: n * (0.2 + Math.random() * 0.6), r: n * (0.08 + Math.random() * 0.12) });
+      ctx.fillStyle = '#' + Lt.shadowColor.toString(16).padStart(6, '0');
+      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+        let d = 1e9;
+        for (const c of discs) d = Math.min(d, Math.hypot(x - c.x, y - c.y) - c.r);
+        if (d > 0 || (d > -1.5 && Math.random() < 0.5)) continue; // inside a disc; the rim is grainy
+        ctx.fillRect(x, y, 1, 1);
+      }
+      cv.refresh();
+    }
+    if (!this.textures.exists('shaft')) {
+      const w = 16, h = 128, cv = this.textures.createCanvas('shaft', w, h), ctx = cv.getContext('2d');
+      for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+        const a = (1 - Math.abs(x + 0.5 - w / 2) / (w / 2)) * Math.sin(Math.PI * (y + 0.5) / h); // soft in x and at both ends in y
+        ctx.fillStyle = 'rgba(255,244,200,' + Math.max(0, a).toFixed(3) + ')';
+        ctx.fillRect(x, y, 1, 1);
+      }
+      cv.refresh();
+    }
+  }
+
+  // Light shafts fade in and out slowly and drift sideways.
+  updateShafts(dt) {
+    const Lt = C.background.forest.light;
+    for (const s of this.shafts) {
+      s.phase += dt * s.rate;
+      s.setAlpha(Lt.shaftAlpha[0] + (Math.sin(s.phase) + 1) / 2 * (Lt.shaftAlpha[1] - Lt.shaftAlpha[0]));
+      s.x += Lt.shaftDrift * dt;
+      if (s.x > W + 40) s.x = -40;
+    }
   }
 
   makePools() {
@@ -453,10 +516,12 @@ export class PlayScene extends Phaser.Scene {
     this.cloudMul += (want - this.cloudMul) * (1 - Math.exp(-F.cloudEase * dt));
     for (const L of this.layers) for (const s of L.items) {
       s.y += L.speed * this.cloudMul * dt;
+      if (L.dx) { s.x += L.dx * dt; if (s.x > W + 40) s.x = -40; } // slow sideways drift (leaf shadows)
       if (L.depthK) s.setDepth(L.depth + s.y * L.depthK);
       if (L.respawn) { if (s.y - s.displayHeight / 2 > H) L.respawn(s); } // forest: reuse the picture at the top
       else if (s.y > H + 40) { s.y = -40; s.x = Phaser.Math.Between(0, W); }
     }
+    if (this.shafts && this.shafts.length) this.updateShafts(dt);
   }
 
   // Broom sparkle trail (more sparks when moving) and the small recoil squash.
