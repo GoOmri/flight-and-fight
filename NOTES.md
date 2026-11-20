@@ -299,3 +299,11 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Lightning: Omri asked for "glow and lightning"; I read it as the flickering light (done). A real lightning flash over the swamp is NOT built; ask Omri if he meant that.
 - Possible enemy noted (not built): Twilight Flying Eye "Flight.png" (art-packs/characters-and-enemies/flying-eyes). Original by LuizMelo is CC0; this edit's licence is unknown (CATALOG).
 - Verified in the browser (desktop): fire shots fly up as a stream of bolts, lanterns show with stepped green glow and bugs, no console errors. UNVERIFIED on the phone: shot size and feel (it is 8x22 px, thinner than two shots side by side), glow strength, whether lanterns hide behind the edge trees well enough, performance.
+
+## 2026-11-20 v1.8.1: lantern and chest fixes, bigger shot, ghost sprite, hit flash (branch v1800-polish-2)
+- Lanterns: scale 1.2 -> 0.75 and now drawn under the tree tops like the chests (depth -8.2). The glow now sits on the lamp itself (position found from each picture's brightest green pixels, flips with the picture), smaller (3 rings, 2 px texels, about 14 px radius); the 3 bugs circle closer (4 to 9 px).
+- Chests: they now follow the ground's real speed, including the speed-up when she flies up (before they kept a fixed speed). The opened chest (freeze + fade) keeps scrolling with the ground.
+- Witch shot scale 1 -> 1.6 (about 13x35 px; hitbox grows with it).
+- Ghost: the swaying ghost is now the Halloween set ghost from the menu (assets/menu/ghost.png, 5 frames played 1-2-3-4-5-4-3-2, config.enemies.sprites.zigzag, hitbox 18x20). Credit is already in CREDITS (menu art).
+- Hit flash: an enemy that is hit (not killed) flashes solid white for 110 ms (was 70). The flash code was already there; checked it works on the ghost.
+- Verified in the browser (swamp, wave 3): ghost shows, white flash on hit, lantern small with the glow on the lamp, big shots. UNVERIFIED on the phone: ghost size and hitbox, shot size, whether 110 ms reads as a flash at full speed.

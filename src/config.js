@@ -27,7 +27,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.8.0", // bump on every push so the player/Omri can see the build
+  version: "1.8.1", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -96,7 +96,7 @@ export const CONFIG = {
   bullet: {
     speed: z(620),
     // The witch's shot: one orange fire bolt straight up ("flight_smooth" of the SovDigital fire pack, north row, shrunk 5x and cut to 6 fire colours). Delete this entry to get the old twin code-drawn shots back (then set pattern TWIN).
-    fire: { file: 'fx/fire-shot.png', frameW: 8, frameH: 22, frames: 12, fps: 24, scale: 1, hitW: 6, hitH: 16 },
+    fire: { file: 'fx/fire-shot.png', frameW: 8, frameH: 22, frames: 12, fps: 24, scale: 1.6, hitW: 6, hitH: 16 },
     poolSize: 90         // level 10 fires 7 shots every 145 ms and they live about 1 s: about 50 alive at once
   },
 
@@ -155,7 +155,7 @@ export const CONFIG = {
     shooter: { hp: 7, score: 50 },
     vulture: { hp: 5, score: 30 }, // not in any wave yet
     poolSize: 40,
-    hitFlashMs: 70,
+    hitFlashMs: 110,    // white flash of a hit enemy (ms)
     // Animated pictures. A type WITH an entry here uses its sheet (assets/enemies); a type WITHOUT one keeps its code-drawn picture (src/sprites.js).
     // file = sheet name, frameW/frameH = one frame in the sheet (sheet pixels), frames = frame numbers of ONE loop (never mix animations), fps = loop speed,
     // scale = size multiplier (1 = sheet pixels = logical px), hitW/hitH = hitbox in sheet pixels (trimmed to the body, times scale on screen),
@@ -164,7 +164,9 @@ export const CONFIG = {
       // Bat 1.3 (purple, never the red files), row S (flying towards the player), cut out as bat-S.png (3 frames = one wing flap: up, flat, down). Ping-pong 0,1,2,1.
       grunt:   { file: 'bat-S.png', frameW: 48, frameH: 64, frames: [0, 1, 2, 1], fps: 8, scale: 1.1, hitW: 27, hitH: 22, faceVelocity: false },
       // Dino IDLE sheet (4 frames = one breathing/bobbing loop, side view facing right). The long dino.png is a jump (crouch, leap, land), not a loop, so it is not used.
-      shooter: { file: 'wisp.png', frameW: 96, frameH: 96, frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], fps: 12, scale: 0.5, hitW: 44, hitH: 52, faceVelocity: false }, // fire wisp (10 frames of 96 px, drawn at half size)
+      // Ghost = the Halloween set ghost from the start menu (assets/menu/ghost.png, 5 frames of 29x31 = one float loop), replaces the code-drawn swaying ghost.
+    zigzag:  { file: '../menu/ghost.png', frameW: 29, frameH: 31, frames: [0, 1, 2, 3, 4, 3, 2, 1], fps: 6, scale: 1.0, hitW: 18, hitH: 20, faceVelocity: false },
+    shooter: { file: 'wisp.png', frameW: 96, frameH: 96, frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], fps: 12, scale: 0.5, hitW: 44, hitH: 52, faceVelocity: false }, // fire wisp (10 frames of 96 px, drawn at half size)
       // Vulture (not used in waves yet). Frames of vulture.png: 0 = folded, 1 = wings up, 2 = wings flat/low, 3 = half. Flap loop: up, half, low, half. (Cleanest guess; check it.)
       vulture: { file: 'vulture.png', frameW: 39, frameH: 39, frames: [1, 3, 2, 3], fps: 8, scale: 0.8, hitW: 22, hitH: 22, faceVelocity: true }
     },
@@ -307,17 +309,17 @@ CONFIG.background.swamp = {
   patchCount: 8, blobVariants: 6, blobSize: [20, 40], blobCell: 2, // dark still-water pools instead of grass blobs
   blobColor: 0x2d4745, blobColor2: 0x3a5955,                       // pool colour (dark teal) and its lighter specks
   treeShadow: { on: true, angleDeg: 55, lenMul: 0.6, alpha: 0.28, color: 0x0a120c, depth: -9 },
-  // Lanterns beside the path (swamp only): file = strip in assets/swamp (8 frames), w/h = one frame, glowDy = where the lamp is (px from the picture centre, negative = up).
+  // Lanterns beside the path (swamp only; depth -8.2 = like the chests: under the tree tops, above shadows and rocks): file = strip in assets/swamp (8 frames), w/h = one frame, glowDx/glowDy = where the lamp is (art px from the picture centre, found from its brightest green pixels; dx flips with the picture).
   // Glow = flat rings, added as light (r in texels, one texel = glow.cell px) in green, flickering in steps (alpha list, stepFps per second). bugs = little lights flying around, bugSize px.
-  lanterns: { on: true, count: 3, scale: 1.2, fps: 4, stepFps: 6, depth: -7.5, laneX: [[52, 84], [156, 188]], gapY: [220, 480],
+  lanterns: { on: true, count: 3, scale: 0.75, fps: 4, stepFps: 6, depth: -8.2, laneX: [[52, 84], [156, 188]], gapY: [220, 480],
     files: [
-      { file: 'bog_lantern_post_1_anim', w: 24, h: 29, glowDy: -9 },
-      { file: 'buoy_lantern_0_anim', w: 26, h: 26, glowDy: -4 },
-      { file: 'buoy_lantern_1_anim', w: 26, h: 20, glowDy: -3 },
-      { file: 'lantern_1_anim', w: 24, h: 52, glowDy: 4 },
-      { file: 'witch_lantern_0_anim', w: 24, h: 41, glowDy: -10 }
+      { file: 'bog_lantern_post_1_anim', w: 24, h: 29, glowDx: -2.8, glowDy: -1.8 },
+      { file: 'buoy_lantern_0_anim', w: 26, h: 26, glowDx: 0, glowDy: -4.3 },
+      { file: 'buoy_lantern_1_anim', w: 26, h: 20, glowDx: 0.6, glowDy: -4.6 },
+      { file: 'lantern_1_anim', w: 24, h: 52, glowDx: 1.3, glowDy: -0.6 },
+      { file: 'witch_lantern_0_anim', w: 24, h: 41, glowDx: -1.2, glowDy: -7.3 }
     ],
-    glow: { cell: 3, rings: [{ r: 3, color: 0xb8ff90, alpha: 0.55 }, { r: 6, color: 0x4fe070, alpha: 0.34 }, { r: 10, color: 0x2fbf6a, alpha: 0.18 }], flicker: [1, 0.8, 1, 0.65, 0.9, 1, 0.75] },
+    glow: { cell: 2, rings: [{ r: 2, color: 0xb8ff90, alpha: 0.6 }, { r: 4, color: 0x4fe070, alpha: 0.36 }, { r: 7, color: 0x2fbf6a, alpha: 0.18 }], flicker: [1, 0.8, 1, 0.65, 0.9, 1, 0.75] },
     bugs: 3, bugSize: 2, bugColor: 0xe6ff8a },
   light: { on: true, depth: -6, // fog: big, very soft, pale grey-green patches (same code as the forest cloud shadows) drifting over the floor
     shadowCount: 5, shadowVariants: 3, shadowSize: 64, shadowCell: 4, shadowGapY: 300, shadowSpeedMul: 1.5, shadowDrift: 5, shadowAlpha: 0.12, shadowColor: 0xb4c2b0,

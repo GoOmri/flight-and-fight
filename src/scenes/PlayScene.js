@@ -609,7 +609,7 @@ export class PlayScene extends Phaser.Scene {
     }
     for (let i = 0; i < LN.count; i++) {
       const L = { spr: this.add.sprite(0, 0, 'lan_0', 0).setDepth(LN.depth), glow: this.add.image(0, 0, 'lanternGlow').setScale(LN.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(LN.depth - 0.05), bugs: [], ph: Math.random() * 10, side: i % 2 ? 1 : -1 };
-      for (let b = 0; b < LN.bugs; b++) L.bugs.push({ s: this.add.image(0, 0, 'square').setScale(LN.bugSize).setTint(LN.bugColor).setDepth(LN.depth + 0.1), r: 7 + Math.random() * 7, w: (0.8 + Math.random() * 1.2) * (Math.random() < 0.5 ? -1 : 1), p: Math.random() * TAU, k: 1 + Math.random() * 0.8 });
+      for (let b = 0; b < LN.bugs; b++) L.bugs.push({ s: this.add.image(0, 0, 'square').setScale(LN.bugSize).setTint(LN.bugColor).setDepth(LN.depth + 0.1), r: 4 + Math.random() * 5, w: (0.8 + Math.random() * 1.2) * (Math.random() < 0.5 ? -1 : 1), p: Math.random() * TAU, k: 1 + Math.random() * 0.8 });
       this.lanterns.push(L);
       this.placeLantern(L, true, i);
     }
@@ -631,7 +631,7 @@ export class PlayScene extends Phaser.Scene {
     for (const L of this.lanterns) {
       L.spr.y += this.bgF.scroll * this.cloudMul * dt;
       if (L.spr.y > H + L.f.h * LN.scale) this.placeLantern(L, false);
-      const x = Math.round(L.spr.x), y = Math.round(L.spr.y), gx = x, gy = y + L.f.glowDy * LN.scale;
+      const x = Math.round(L.spr.x), y = Math.round(L.spr.y), gy = Math.round(y + L.f.glowDy * LN.scale), gx = Math.round(x + L.f.glowDx * LN.scale * (L.spr.flipX ? -1 : 1));
       L.spr.setPosition(x, y);
       L.glow.setPosition(gx, gy).setAlpha(G.flicker[(step + Math.floor(L.ph)) % G.flicker.length]);
       for (const b of L.bugs) {
@@ -945,9 +945,11 @@ export class PlayScene extends Phaser.Scene {
   }
 
   updateCrates(time, dt) {
+    const ground = this.bgF.scroll * this.cloudMul; // the ground's speed right now (it rushes when she flies up)
     const tint = C.sprites.crate ? C.sprites.crate.tint : null;
     this.crates.children.iterate(c => {
       if (!c || !c.active) return;
+      if (C.crate.onGround) c.spd = ground; // stuck to the ground
       if (!this.kickMove(c, dt)) { this.kill(c); this.coinLost(); return; } // fell off the bottom: lost with its coins
       c.onScreen = this.inside(c);
       if (time < c.flashUntil) c.setTintFill(0xffffff);
@@ -1118,6 +1120,7 @@ export class PlayScene extends Phaser.Scene {
   }
 
   updateFx(dt) {
+    for (const f of this.fxPool) if (f.active && f.anims.currentAnim && f.anims.currentAnim.key === 'crate_break') f.y += this.bgF.scroll * this.cloudMul * dt; // the opened chest keeps scrolling with the ground (also while it fades)
     if (this.stunFx) { // stars over the witch's head, fading out at the end
       const left = this.stunUntil - this.time.now, on = left > 0 && !this.over;
       this.stunFx.setVisible(on);
