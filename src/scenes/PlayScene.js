@@ -734,17 +734,35 @@ export class PlayScene extends Phaser.Scene {
       if (!this.dragLive) { if (Math.hypot(this.finger.x - this.dragFrom.x, this.finger.y - this.dragFrom.y) > S.dragSlopPx) this.dragLive = true; this.lastFinger.copy(this.finger); }
       else {
         const fx = (this.finger.x - this.lastFinger.x) * S.dragSensitivity, fy = (this.finger.y - this.lastFinger.y) * S.dragSensitivity;
+        if (Math.abs(fx) + Math.abs(fy) > 0.2) this.lastMoveAt = this.time.now; // the finger is moving (the spring below catches up fast; it settles lazily when the finger rests)
         this.lastFinger.copy(this.finger);
         this.target.x = Phaser.Math.Clamp(this.target.x + fx * this.softWall(this.target.x, fx, S.margin, W - S.margin), S.margin, W - S.margin);
         this.target.y = Phaser.Math.Clamp(this.target.y + fy * this.softWall(this.target.y, fy, S.margin, H - S.margin), S.margin, H - S.margin);
       }
     }
-    const k = this.stickMode ? 1 : 1 - Math.exp(-S.followRate * dt); // stick: no extra easing, the stick already sets the speed
+    const SPR = S.spring, spring = SPR && !this.stickMode && !this.mouseMode;
     const px = s.x, py = s.y;
-    s.x += (this.target.x - s.x) * k;
-    s.y += (this.target.y - s.y) * k;
-    if (Math.abs(this.target.x - s.x) < 0.25) s.x = this.target.x;
-    if (Math.abs(this.target.y - s.y) < 0.25) s.y = this.target.y;
+    if (spring) {
+      // Spring toward the target: stiff and calm while the finger moves, soft and a little bouncy when it rests (she coasts past it, then drifts back slowly).
+      const moving = this.dragId !== null && this.time.now - (this.lastMoveAt || 0) < SPR.idleMs, w = moving ? SPR.fastW : SPR.slowW, z = moving ? SPR.fastZ : SPR.slowZ;
+      this.shipV = this.shipV || { x: 0, y: 0 };
+      const n = Math.max(1, Math.ceil(dt / 0.01)), h = dt / n;
+      for (let i = 0; i < n; i++) {
+        this.shipV.x += (w * w * (this.target.x - s.x) - 2 * z * w * this.shipV.x) * h;
+        this.shipV.y += (w * w * (this.target.y - s.y) - 2 * z * w * this.shipV.y) * h;
+        s.x += this.shipV.x * h; s.y += this.shipV.y * h;
+      }
+      if (s.x < S.margin) { s.x = S.margin; this.shipV.x = 0; } else if (s.x > W - S.margin) { s.x = W - S.margin; this.shipV.x = 0; }
+      if (s.y < S.margin) { s.y = S.margin; this.shipV.y = 0; } else if (s.y > H - S.margin) { s.y = H - S.margin; this.shipV.y = 0; }
+      if (Math.abs(this.target.x - s.x) < 0.1 && Math.abs(this.shipV.x) < 2) { s.x = this.target.x; this.shipV.x = 0; }
+      if (Math.abs(this.target.y - s.y) < 0.1 && Math.abs(this.shipV.y) < 2) { s.y = this.target.y; this.shipV.y = 0; }
+    } else {
+      const k = this.stickMode ? 1 : 1 - Math.exp(-S.followRate * dt); // stick: no extra easing, the stick already sets the speed
+      s.x += (this.target.x - s.x) * k;
+      s.y += (this.target.y - s.y) * k;
+      if (Math.abs(this.target.x - s.x) < 0.25) s.x = this.target.x;
+      if (Math.abs(this.target.y - s.y) < 0.25) s.y = this.target.y;
+    }
     const vx = dt > 0 ? (s.x - px) / dt : 0;
     this.vx = vx; this.vy = dt > 0 ? (s.y - py) / dt : 0;
     // Look (side view + tilt): during the soft stop only the forward glide counts, never the bounce back (it would turn her the other way).

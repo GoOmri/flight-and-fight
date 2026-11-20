@@ -37,7 +37,10 @@ const STICK_ROWS = [
     ['SPEED AT THE WALL (X)', 'stick.edgeSpeed', 0.05, 0.1, 1, 2]];
 const DRAG_ROWS = [
     ['FINGER TO WITCH (X)', 'ship.dragSensitivity', 0.1, 0.5, 3, 1],
-    ['WITCH WEIGHT (LAG)', 'ship.followRate', 2, 6, 80, 0],
+    ['CATCH-UP STRENGTH', 'ship.spring.fastW', 2, 10, 90, 0],
+    ['SETTLE STRENGTH', 'ship.spring.slowW', 0.5, 1, 30, 1],
+    ['BOUNCE (LOW = MORE)', 'ship.spring.slowZ', 0.05, 0.2, 1.5, 2],
+    ['REST DELAY (MS)', 'ship.spring.idleMs', 10, 10, 300, 0],
     ['TOUCH DEAD ZONE (PX)', 'ship.dragSlopPx', 1, 0, 20, 0],
     ['EDGE SLOW-DOWN ZONE', 'stick.edgeZone', 5, 0, 120, 0],
     ['SPEED AT THE WALL (X)', 'stick.edgeSpeed', 0.05, 0.1, 1, 2]];

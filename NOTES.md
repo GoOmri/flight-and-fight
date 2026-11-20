@@ -539,3 +539,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Tune panel: the first tab is now MOVE and shows the drag rows (FINGER TO WITCH X, WITCH WEIGHT (LAG), TOUCH DEAD ZONE, EDGE ZONE, SPEED AT THE WALL) when controls is drag, or the stick rows when it is stick.
 - Desktop browsers still follow the mouse automatically (unchanged).
 - UNVERIFIED on the phone: all the feel (gain 1.2, dead zone 4 px, edge zone). First things to tune: FINGER TO WITCH and the edge numbers.
+
+## 2026-11-20 v1.9.32: overshoot and slow settle (branch v1932-overshoot-settle)
+- Omri: she should overshoot his finger a bit and slowly come back, but move quickly again as soon as he moves. In drag mode the witch is now on a spring (config ship.spring). While the finger moves: stiff and calm (fastW 44, fastZ 0.9 = quick catch-up, about 3 px behind per 100 px/s of finger speed, no bounce). When the finger rests for idleMs (50 ms) or is lifted: soft and bouncy (slowW 5, slowZ 0.5): she coasts a little past the target and drifts back in about 0.75 s. Moving the finger again switches to the quick spring at once. spring: null in the config = the old easing.
+- Checked by a small simulation (not on the game): a 300 px/s swipe that stops gives about 10 px overshoot and is back within 1 px after about 0.75 s; a fast 600 px/s swipe about 20 px. Tune panel MOVE tab: CATCH-UP STRENGTH, SETTLE STRENGTH (lower = lazier), BOUNCE (lower = more overshoot), REST DELAY (MS). The old WITCH WEIGHT row is gone (the spring replaces it). The stick mode and the desktop mouse keep the old easing.
+- UNVERIFIED on the phone: whether 10 px is "a bit", and that the catch-up feels as quick as before.
