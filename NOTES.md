@@ -441,3 +441,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 v1.9.12: heart gets the pack's shine layer (branch v1912-heart-shine, includes v1.9.11)
 - The pack's "outline shine" layer (glints and highlights crossing the heart) is now drawn over the falling heart's Idle loop, frame by frame (assets/pickups/heart-shine.png, same 26x62 cut as heart-idle, which was checked to match the pack pixel for pixel; config sprites.heartPickup.shine, remove the key to hide). Every falling heart gets it (a small overlay per heart). The white twinkle cross, pink rays and bob stay.
 - UNVERIFIED: not seen running yet; check on the phone that the glints are visible and do not look messy next to the white twinkle (if so, remove the twinkle: heartShine.glintMs 0).
+
+## 2026-11-20 v1.9.13: fainter ray tips, slower witch shot (branch v1913-taper-shot-speed)
+- Ray tip opacity halved (alphaEnd 0.2 -> 0.1 on coin, potion and heart rays).
+- Witch shot 20% slower (speed z(416) -> z(333)).
+- UNVERIFIED on the phone: ray look, shot feel and spacing at the slower speed.
