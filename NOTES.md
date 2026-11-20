@@ -358,3 +358,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri: muzzle burst almost flashing. The burst is now 5x5 (was 7x7), shows 70 ms (was 90) at 80% strength (config.feel.muzzleMs / muzzleAlpha). Coin shine and stars: ok as they are.
 - Gallery: the Keeper's side-view sheet (sv_waechter) is hidden (Omri: not needed); the front / left / right / back rows now belong to the right sheet (waechter-19.png). The Fox shot sheet is a still picture of bullet shapes, so it only shows when "still pictures" is ticked (search "fox").
 - UNVERIFIED on the phone: how the smaller muzzle burst feels at full speed.
+
+## 2026-11-20 boss choices (docs only, no version change)
+- Omri chose: FOREST boss = Final boss flying strip (spr_enemy_finalboss_flying_strip6.png, liz cheong, credit needed). SWAMP boss = Necromancer sheet, starting with the idle row (CreativeKind; files must not be distributed: ask before pushing any of its pictures). Boss fights use shot patterns (spirals, walls). Building a boss comes after more polish (Omri's answer). Needs the in-game credit when built (the credits question was "not yet").
+- The Fox shot sheet is one picture of many bullet shapes in colour rows, not an animation; the gallery now cuts it into one card per shape row (about 11 cards; the ring rows are cut by a rough guess).
