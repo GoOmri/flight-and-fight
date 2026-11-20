@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.26", // bump on every push so the player/Omri can see the build
+  version: "1.9.27", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -189,10 +189,10 @@ export const CONFIG = {
     coin: { file: 'pickups/coin.png', frameW: 18, frameH: 18, frames: 24, fps: 30, scale: 1.0 },
     // Falling heart (carrier drop): Drop plays once when it appears, then Idle loops while it falls; Collect plays once at the witch when she grabs it.
     heartPickup: { scale: 1, collectDepth: 12, // collectDepth: drawn over the witch (10)
-      idle:    { file: 'pickups/heart-idle.png',    frameW: 26, frameH: 62, frames: 24, fps: 18 },
+      idle:    { file: 'pickups/heart-idle.png',    frameW: 26, frameH: 62, frames: 24, fps: 8 },
       shine:   { file: 'pickups/heart-shine.png',   frameW: 26, frameH: 62, frames: 24 }, // the pack's outline_shine layer, drawn over Idle (same frames); remove the key to hide it
-      drop:    { file: 'pickups/heart-drop.png',    frameW: 26, frameH: 62, frames: 11, fps: 21 },
-      collect: { file: 'pickups/heart-collect.png', frameW: 26, frameH: 62, frames: 12, fps: 21 } },
+      drop:    { file: 'pickups/heart-drop.png',    frameW: 26, frameH: 62, frames: 11, fps: 14 },
+      collect: { file: 'pickups/heart-collect.png', frameW: 26, frameH: 62, frames: 12, fps: 14 } },
     // Hearts in the top bar: the same Idle loop, scale = size (the old code-drawn heart was 14 px wide), desync = frames between neighbouring hearts.
     // A lost heart = the first Idle frame as a flat dark-grey shape (emptyTint) with emptyAlpha.
     heartHud: { scale: 0.6, desync: 8, emptyTint: 0x4a4f63, emptyAlpha: 0.6 },
@@ -212,7 +212,7 @@ export const CONFIG = {
     potionShine: shine({ radius: 14, glowOver: { size: 0.55 }, bobAmp: 14, bobSpeed: 5, offsetY: 3, rayColor: '#cfe4ff', glowColors: [0xb8d8ff, 0x4f8fe0, 0x2f5fbf], glintDx: 6, glintDy: -9 }),
     heartShine: shine({ radius: 14, glowOver: { size: 0.55 }, rayColor: '#ffc4e2', glowColors: [0xffe3f0, 0xff8fc0, 0xc0407a], glintDx: 6, glintDy: -8, bobAmp: 14, bobSpeed: 5 }), // bobAmp px/s fall-speed swing, bobSpeed radians/s
     stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -7, fadeMs: 300 },
-    weaponGem: { file: 'pickups/potion-flask.png', frameW: 64, frameH: 64, frames: 24, fps: 12, scale: 0.45, angle: 25 }, // the weapon potion: round blue flask of the Alchemy pack (Frakassets, 64 px, no outline, lit; 24 frames at 12 fps). scale 0.45 = about the old size. angle = tilt in degrees
+    weaponGem: { file: 'pickups/potion-flask.png', frameW: 64, frameH: 64, frames: 24, fps: 8, scale: 0.45, angle: 25 }, // the weapon potion: round blue flask of the Alchemy pack (Frakassets, 64 px, no outline, lit; 24 frames at 12 fps). scale 0.45 = about the old size. angle = tilt in degrees
     fxPoolSize: 8 // chest-break and heart-collect animations playing at once
   },
 

@@ -516,3 +516,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - The potion bobs like the heart: its fall speed swings +-14 px/s about once per 1.25 s (config sprites.potionShine bobAmp 14, bobSpeed 5; tune: DROPS > POTION > BOB AMOUNT).
 - Beams, glow and twinkle can now be moved up or down per drop (config sprites.<drop>Shine.offsetY, tune row EFFECTS MOVE DOWN on the DROPS tab). The potion's is 3 px (the flask's cap makes it look taller than its middle); coin and heart 0.
 - UNVERIFIED: never run (preview would not open): the 3 px guess may need tuning, and how the bob looks with the tilt.
+
+## 2026-11-20 v1.9.27: potion and heart animation at 8 fps (branch v1927-slower-anim)
+- Omri: the potion's first animation looked smoother; both should play at 8 fps. Potion flask 12 -> 8 fps. Heart idle loop 18 -> 8 fps (the v1.9.24 speed-up is undone; the top-bar hearts and the pack's shine layer share that loop, so they slow down too). Heart drop and collect go back to their original 14 fps.
+- UNVERIFIED on the phone: how the flask and heart look at 8 fps (config sprites.weaponGem.fps, sprites.heartPickup.idle.fps).
