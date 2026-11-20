@@ -35,10 +35,17 @@ const TABS = [
     ['MAGNET SPEED', 'feel.magnetSpeed', 10, 50, 900, 0],
     ['GRAB SIZE', 'coin.pickupRadius', 1, 4, 40, 0],
     ['HEART BOB', 'sprites.heartShine.bobAmp', 1, 0, 40, 0],
-    ['POTION TILT', 'sprites.weaponGem.angle', 5, -45, 45, 0]]]
+    ['POTION TILT', 'sprites.weaponGem.angle', 5, -45, 45, 0]]],
+  ['HARD', [
+    ['ENEMY HEALTH', 'difficulty.enemyHp', 0.25, 0.25, 4, 2],
+    ['ENEMY SPEED', 'difficulty.enemySpeed', 0.1, 0.5, 2, 1],
+    ['SHOT SPEED', 'difficulty.shotSpeed', 0.1, 0.5, 2, 1],
+    ['SHOT DELAY', 'difficulty.shotDelay', 0.1, 0.5, 3, 1],
+    ['MY DAMAGE', 'difficulty.myDamage', 0.25, 0.25, 4, 2]]]
+
 ];
 // New drops use the fall / grab / tilt numbers (things already falling keep the old ones).
-const HINTS = ['HOLD + OR - TO REPEAT', 'BEAMS = SPINNING LIGHT LINES', 'NEW DROPS ONLY (FALL, GRAB, TILT)']; // one plain line under each tab
+const HINTS = ['HOLD + OR - TO REPEAT', 'BEAMS = SPINNING LIGHT LINES', 'NEW DROPS ONLY (FALL, GRAB, TILT)', 'X1 = NORMAL. SHOT DELAY: MORE = EASIER']; // one plain line under each tab
 const ALL = TABS.flatMap(t => t[1]);
 const getp = path => path.split('.').reduce((o, k) => o[k], C);
 const setp = (path, v) => { const ks = path.split('.'), last = ks.pop(); ks.reduce((o, k) => o[k], C)[last] = v; };

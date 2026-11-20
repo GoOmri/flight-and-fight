@@ -27,7 +27,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.9.16", // bump on every push so the player/Omri can see the build
+  version: "1.9.17", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -214,6 +214,8 @@ export const CONFIG = {
   // Colour wash (easy tint): one flat colour over the play field at low strength, so pictures from different packs sit closer together. Per stage: color, alpha (0 = none, 0.2 = strong).
   // depth 33: over the play field and its effects, under the enemy shots (35), coins' pop texts are under it too, and the HUD (50). Try off with ?tint=0.
   tint: { on: true, depth: 33, forest: { color: 0x7a4fd0, alpha: 0.12 }, swamp: { color: 0x2a9a8a, alpha: 0.12 } },
+  // Difficulty dials (1 = normal). The tune panel (HARD tab) changes them. enemyHp / enemySpeed apply to enemies that spawn after the change; the rest apply at once.
+  difficulty: { enemyHp: 1, enemySpeed: 1, shotSpeed: 1, shotDelay: 1, myDamage: 1 }, // shotDelay: more = enemies shoot less often
   enemyBullet: { poolSize: 30, speed: 100, hitSize: 3, depth: 35, scale: 1.5, file: 'shots/orb-red.png' }, // the red orb of the "Shmup Shots, Explosions and Pickups 16x16" pack (16x16 drawn at 1.5x = 24 px, half of the 48 px it was shown at by mistake: the swell effect forced every shot to 3x). Remove `file` to get the code-drawn pink orb back (it then uses scale 2) // depth 35: above all effects (sparks 20, texts 30), below the HUD (50)
 
   // pickupRadius: how close the ship must be to grab a coin (logical px). Bigger than the ship hitbox on purpose.

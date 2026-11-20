@@ -885,7 +885,7 @@ export class PlayScene extends Phaser.Scene {
       if (fs) { b.body.setSize(fs.hitW, fs.hitH); b.play('fire_shot'); } else b.anims.stop();
       const a = sh.deg * DEG;
       b.setRotation(a);
-      b.dmg = sh.dmg === undefined ? lv.damage : sh.dmg;
+      b.dmg = (sh.dmg === undefined ? lv.damage : sh.dmg) * C.difficulty.myDamage;
       b.body.setVelocity(Math.sin(a) * sp, -Math.cos(a) * sp);
     }
     const F = C.feel;
@@ -906,8 +906,8 @@ export class PlayScene extends Phaser.Scene {
       e.body.setSize(sp.hitW, sp.hitH);
       e.play('en_' + g.type + '_loop');
     } else e.anims.stop(); // pooled sprite may still hold an animation from an earlier life
-    initPath(e, cg.p, g.spd);
-    e.kind = g.type; e.hp = cfg.hp; e.flashUntil = 0; e.flashSpr = null; e.onScreen = false;
+    initPath(e, cg.p, g.spd * C.difficulty.enemySpeed);
+    e.kind = g.type; e.hp = Math.max(1, Math.round(cfg.hp * C.difficulty.enemyHp)); e.flashUntil = 0; e.flashSpr = null; e.onScreen = false;
     e.fire = g.fire || null; e.armed = false; e.fireT = 0;
     e.coin = g.type === 'shooter' || (g.coinEvery > 0 && (i + 1) % g.coinEvery === 0); // shooters always drop 1 coin
     e.wave = cg.w;
@@ -1185,9 +1185,9 @@ export class PlayScene extends Phaser.Scene {
       if (!this.kickMove(e, dt)) { this.enemyLost(e); return; } // flew away
       e.onScreen = this.inside(e);
       if (e.fire && e.wait > 0 && e.onScreen) { // shooters fire only while stopped
-        if (!e.armed) { e.armed = true; e.fireT = e.fire.first; }
+        if (!e.armed) { e.armed = true; e.fireT = e.fire.first * C.difficulty.shotDelay; }
         e.fireT -= dt;
-        if (e.fireT <= 0) { this.enemyShoot(e); e.fireT += e.fire.every; }
+        if (e.fireT <= 0) { this.enemyShoot(e); e.fireT += e.fire.every * C.difficulty.shotDelay; }
       }
       if (e.sp && e.sp.faceVelocity) { // side-view art faces right: flip when moving left (the hit shake is left out)
         const bx = e.x - e.ox, dx = bx - e.lastX; e.lastX = bx;
@@ -1233,7 +1233,7 @@ export class PlayScene extends Phaser.Scene {
       if (!b) return;
       b.setDepth(C.enemyBullet.depth); // above all play effects, below the HUD
       b.body.setSize(hit, hit); // only the bright core hurts
-      const a = base + (i - (n - 1) / 2) * Phaser.Math.DegToRad(f.spread || 0), v = f.spd || C.enemyBullet.speed;
+      const a = base + (i - (n - 1) / 2) * Phaser.Math.DegToRad(f.spread || 0), v = (f.spd || C.enemyBullet.speed) * C.difficulty.shotSpeed;
       b.body.setVelocity(Math.cos(a) * v, Math.sin(a) * v);
     }
   }

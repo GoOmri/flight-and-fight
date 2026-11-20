@@ -461,3 +461,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 v1.9.16: clearer tune labels (branch v1916-clear-labels)
 - Omri asked what HEART LENGTH / COIN LENGTH meant. Renamed: COIN/HEART/POTION RAYS -> BRIGHT, LENGTH -> LONG (how far the spinning light beams reach), RAY TIP FADE -> BEAM TIP FADE, and the stick rows are now STICK SPEED, STICK SIZE, DEAD ZONE, STICK CURVE, STICK SNAP, STOP GLIDE, STOP SETTLE, STOP DAMPING. A one-line hint sits under each tab (LOOK: "BEAMS = SPINNING LIGHT LINES"; PICKUPS: "NEW DROPS ONLY").
 - UNVERIFIED: not seen on screen; check that no label touches its number and the hint fits the panel.
+
+## 2026-11-20 v1.9.17: HARD tab in the tune panel (branch v1917-difficulty-tab)
+- New 4th tab HARD with five dials, all 1.00 = normal (config.difficulty): ENEMY HEALTH (x enemy hp), ENEMY SPEED (x how fast they fly their path), SHOT SPEED (x enemy shot speed), SHOT DELAY (x time between enemy volleys; more = they shoot less), MY DAMAGE (x the witch's shot damage). Health and speed apply to enemies that appear after the change; the other three apply at once.
+- Left out on purpose: wave spawn timing (needs the wave schedule changed; say if you want it) and "jump to wave / god mode" (idea 4, not built).
+- Normal play is unchanged (all dials 1). COPY lists changed values, e.g. `difficulty.enemyHp = 1.5`.
+- Checked: 30 tune paths exist; syntax checks pass. UNVERIFIED: not seen on screen or played; check the 4 tabs fit in the panel, and that each dial changes the game the right way.
