@@ -367,3 +367,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri: use Twinkling_Violet_Potion.png for weapon upgrades. The falling weapon pickup is now that 32x32 potion (assets/pickups/potion-violet.png, scale 0.9, one picture with its sparkles drawn in) instead of the green gem strip (still in assets, unused). The green outline on weapon CARRIER enemies stays green. Licence: none stated in the pack; Omri confirmed; credit in CREDITS.md.
 - UNVERIFIED on the phone: potion size (29 px) and whether violet reads as "weapon" next to the green carrier outline and the green HUD bars.
 - Gallery redesign (local tool, not in git): one card per creature / shape; dropdowns for animation (direction) and colour / style; tight crops; compact header. Details in art-packs/CATALOG.md.
+
+## 2026-11-20 v1.9.1: green weapon potion with glow and rays (branch v1910-green-potion)
+- Omri: tint the violet potion green, add a glow and light rays like the coins. The potion's violet colours (hue 225-335 degrees) are turned to green (-150 degrees) once at start in a recoloured copy (makeHueSheet), so it also works in CANVAS; the cork and ribbon keep their own colour (a first try shifted everything and made the cork blue). Config: sprites.weaponGem.hueShift / hueRange.
+- Shine: a soft green glow of 3 flat rings (added as light, flickers in steps) and 8 spinning rays (3 pictures swapped 6 per second) behind the falling potion; config sprites.potionShine. One potion at a time has it (the first on screen).
+- Verified in the browser: the potion shows green with glow and rays. UNVERIFIED on the phone: glow and ray strength, and that it stands out from the green carrier outline.

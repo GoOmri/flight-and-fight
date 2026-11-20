@@ -70,6 +70,8 @@ export class PlayScene extends Phaser.Scene {
       }
     }
     this.makeShineTextures(); // muzzle flash and coin shine pictures (pixel patterns drawn once)
+    const WG = C.sprites.weaponGem; // the weapon potion is turned green by shifting every colour's hue once (a recoloured copy, so it works in WebGL and CANVAS)
+    if (WG && WG.hueShift) this.makeHueSheet('sp_gem', 'sp_gem_g', WG.hueShift, WG.hueRange);
     for (const t in C.enemies.sprites) this.makeWhiteSheet('en_' + t); // white copies of the enemy sheets for the hit flash (works in WebGL and in the older CANVAS mode)
     for (const t in C.enemies.sprites) { // one flap/bob loop per sprite type, made once (textures and animations persist across restarts)
       const d = C.enemies.sprites[t], key = 'en_' + t + '_loop';
@@ -84,7 +86,7 @@ export class PlayScene extends Phaser.Scene {
     if (K.heartPickup) { mkAnim('heart_idle', 'sp_heart_idle', K.heartPickup.idle, -1); mkAnim('heart_drop', 'sp_heart_drop', K.heartPickup.drop, 0); mkAnim('heart_collect', 'sp_heart_collect', K.heartPickup.collect, 0); }
     if (K.crate) { mkAnim('crate_idle', 'sp_crate_idle', K.crate.idle, -1); mkAnim('crate_break', 'sp_crate_break', K.crate.break, 0); }
     if (K.poof) mkAnim('poof', 'sp_poof', K.poof, 0);
-    if (K.weaponGem) mkAnim('gem_spin', 'sp_gem', K.weaponGem, -1);
+    if (K.weaponGem) mkAnim('gem_spin', this.textures.exists('sp_gem_g') ? 'sp_gem_g' : 'sp_gem', K.weaponGem, -1);
     // The canvas is R times bigger than the game (sharp text); the camera zooms back so all numbers stay logical.
     this.cameras.main.setZoom(R).centerOn(W / 2, H / 2);
     this.score = 0;
@@ -546,6 +548,9 @@ export class PlayScene extends Phaser.Scene {
     this.coins = mk('coin', C.coin.poolSize);
     this.shineTarget = null; // the one coin that has the shine
     this.shineRays = C.sprites.coinShine ? this.add.image(0, 0, 'rays0').setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.05).setVisible(false) : null;
+    this.potionTarget = null;
+    this.potionGlow = C.sprites.potionShine ? this.add.image(0, 0, 'potionGlow').setScale(C.sprites.potionShine.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.07).setVisible(false) : null;
+    this.potionRays = C.sprites.potionShine ? this.add.image(0, 0, 'praysg0').setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.05).setVisible(false) : null;
     this.shineGlint = C.sprites.coinShine ? this.add.image(0, 0, 'glint0').setDepth(0.05).setVisible(false) : null;
     this.crates = mk('crate', C.crate.poolSize);
     this.weaponUps = mk('weaponUp', C.pickup.weaponPoolSize);
@@ -798,6 +803,7 @@ export class PlayScene extends Phaser.Scene {
     this.updateCrates(time, dt);
     this.updateCoins(dt);
     this.updateShine(time);
+    this.updatePotionShine(time);
     this.cullOffscreen(time);
     if (!this.clearAt && this.runner.finished && this.enemyCount === 0 && this.crates.countActive(true) === 0 && this.coins.countActive(true) === 0 && this.weaponUps.countActive(true) === 0 && this.heartUps.countActive(true) === 0) this.clearAt = time + C.stage.endDelayMs;
     if (this.clearAt && time >= this.clearAt) { this.stageClear(); return; }
@@ -932,6 +938,26 @@ export class PlayScene extends Phaser.Scene {
     src.getFrameNames().forEach(n => { const f = src.get(n); cv.add(n, 0, f.cutX, f.cutY, f.cutWidth, f.cutHeight); });
   }
 
+  // A copy of a sheet with every colour's hue turned by `deg` degrees (same frames, same brightness and see-through parts).
+  makeHueSheet(key, newKey, deg, range = null) { // range = [from, to] degrees: only colours with a hue inside it are turned (the cork and ribbon keep their colour)
+    if (this.textures.exists(newKey)) return;
+    const src = this.textures.get(key), img = src.getSourceImage(), cv = this.textures.createCanvas(newKey, img.width, img.height), ctx = cv.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(img, 0, 0);
+    const d = ctx.getImageData(0, 0, img.width, img.height), p = d.data;
+    for (let i = 0; i < p.length; i += 4) {
+      const r = p[i] / 255, g = p[i + 1] / 255, b = p[i + 2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), c = mx - mn;
+      if (c === 0) continue; // grey stays grey
+      let h = mx === r ? ((g - b) / c) % 6 : (mx === g ? (b - r) / c + 2 : (r - g) / c + 4); h = (h * 60 + 360) % 360;
+      if (range && (h < range[0] || h > range[1])) continue;
+      h = ((h + deg) % 360 + 360) % 360;
+      const v = mx, sat = c / mx, c2 = v * sat, x = c2 * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c2;
+      const [rr, gg, bb] = h < 60 ? [c2, x, 0] : h < 120 ? [x, c2, 0] : h < 180 ? [0, c2, x] : h < 240 ? [0, x, c2] : h < 300 ? [x, 0, c2] : [c2, 0, x];
+      p[i] = Math.round((rr + m) * 255); p[i + 1] = Math.round((gg + m) * 255); p[i + 2] = Math.round((bb + m) * 255);
+    }
+    ctx.putImageData(d, 0, 0); cv.refresh();
+    src.getFrameNames().forEach(n => { const f = src.get(n); cv.add(n, 0, f.cutX, f.cutY, f.cutWidth, f.cutHeight); });
+  }
+
   // Small pixel-art pictures made in code (no files): the muzzle flash at the wand and the shine behind a coin.
   makeShineTextures() {
     const pix = (key, rows, pal) => { // rows of characters, '.' = empty
@@ -957,6 +983,24 @@ export class PlayScene extends Phaser.Scene {
       pix('glint0', ['..w..', '..w..', 'wwwww', '..w..', '..w..'], { w: '#ffffff' });
       pix('glint1', ['.w.', 'www', '.w.'], { w: '#ffffff' });
     }
+    const PS = C.sprites.potionShine; // the same kind of shine for the weapon potion, in green, plus a soft glow made of flat rings
+    if (PS && !this.textures.exists('praysg0')) {
+      const n = PS.radius * 2 + 1;
+      for (let f = 0; f < 3; f++) {
+        const cv = this.textures.createCanvas('praysg' + f, n, n), ctx = cv.getContext('2d');
+        for (let k = 0; k < 8; k++) for (let r = PS.inner; r <= PS.radius; r += 0.5) {
+          const a = k * Math.PI / 4 + f * Math.PI / 12, x = Math.round(PS.radius + Math.cos(a) * r), y = Math.round(PS.radius + Math.sin(a) * r);
+          ctx.globalAlpha = 0.9 - 0.6 * (r - PS.inner) / (PS.radius - PS.inner + 0.01); ctx.fillStyle = '#d6ffb8'; ctx.fillRect(x, y, 1, 1);
+        }
+        cv.refresh();
+      }
+      const gn = PS.glow.rings[PS.glow.rings.length - 1].r * 2 + 1, gc = this.textures.createCanvas('potionGlow', gn, gn), gx = gc.getContext('2d');
+      for (let y = 0; y < gn; y++) for (let x = 0; x < gn; x++) {
+        const dd = Math.hypot(x - (gn - 1) / 2, y - (gn - 1) / 2), ring = PS.glow.rings.find(r => dd <= r.r);
+        if (ring) { gx.fillStyle = hex(ring.color); gx.globalAlpha = ring.alpha; gx.fillRect(x, y, 1, 1); }
+      }
+      gc.refresh();
+    }
   }
 
   // ONE coin at a time gets the shine (soft spinning rays behind it and a little twinkle): the first coin on screen; when it is gone the next one takes over.
@@ -974,6 +1018,19 @@ export class PlayScene extends Phaser.Scene {
     this.shineRays.setTexture('rays' + (Math.floor(time / 1000 * S.fps) % 3)).setPosition(x, y).setAlpha(S.alpha);
     const t = time % S.glintEveryMs; // the twinkle: bigger for a moment, then smaller, then gone
     if (t < S.glintMs) this.shineGlint.setTexture(t < S.glintMs / 2 ? 'glint0' : 'glint1').setPosition(x + S.glintDx, y + S.glintDy).setVisible(true);
+  }
+
+  // The falling weapon potion gets a soft green glow and spinning green rays (one potion at a time is the norm, so one shine is enough).
+  updatePotionShine(time) {
+    const PS = C.sprites.potionShine;
+    if (!PS || !this.potionRays) return;
+    if (!this.potionTarget || !this.potionTarget.active || this.potionTarget.y > H + 20) this.potionTarget = this.weaponUps.getChildren().find(p => p.active && p.y > -10 && p.y < H) || null;
+    const c = this.potionTarget;
+    this.potionRays.setVisible(!!c); this.potionGlow.setVisible(!!c);
+    if (!c) return;
+    const x = Math.round(c.x), y = Math.round(c.y);
+    this.potionGlow.setPosition(x, y).setAlpha(PS.glow.flicker[Math.floor(time / 1000 * PS.glow.stepFps) % PS.glow.flicker.length]);
+    this.potionRays.setTexture('praysg' + (Math.floor(time / 1000 * PS.fps) % 3)).setPosition(x, y).setAlpha(PS.alpha);
   }
 
   // The main colour of a sprite sheet: average of its solid pixels, favouring colourful ones over grey outlines, then brightened so smoke stays readable.
@@ -1118,7 +1175,7 @@ export class PlayScene extends Phaser.Scene {
     const m = C.ship.margin;
     const gem = group === this.weaponUps ? C.sprites.weaponGem : null; // animated green gem (weapon upgrade) or the code-drawn potion
     const sp = group === this.heartUps ? C.sprites.heartPickup : gem; // animated heart (Drop, then Idle), gem, or the code-drawn picture
-    const p = this.spawn(group, gem ? 'sp_gem' : sp ? 'sp_heart_drop' : key, Phaser.Math.Clamp(x, m, W - m), y, sp ? sp.scale : PX);
+    const p = this.spawn(group, gem ? (this.textures.exists('sp_gem_g') ? 'sp_gem_g' : 'sp_gem') : sp ? 'sp_heart_drop' : key, Phaser.Math.Clamp(x, m, W - m), y, sp ? sp.scale : PX);
     if (!p) return;
     const hb = 2 * C.coin.pickupRadius / (sp ? sp.scale : PX);
     p.body.setSize(hb, hb);
