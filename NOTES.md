@@ -450,3 +450,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 v1.9.14: rays half as bright (branch v1914-ray-opacity)
 - Omri meant the WHOLE ray, not only the tip: ray opacity 0.8 -> 0.4 on coin, potion and heart (config alpha in coinShine / potionShine / heartShine). The tip fade is back to alphaEnd 0.2 (v1.9.13 had halved it to 0.1; that is undone). Potion glow rings unchanged.
 - UNVERIFIED on the phone: whether 0.4 is the right strength.
+
+## 2026-11-20 v1.9.15: tune panel gets tabs, Look and Pickups (branch v1915-tune-tabs)
+- Tune panel (?tune=1, or tap the menu version 5 times) now has 3 tabs: STICK (as before), LOOK (coin / heart / potion ray brightness and length, shot size, shot speed, ray tip fade) and PICKUPS (heart / potion / coin fall speed, magnet range and speed, grab size, heart bob, potion tilt). Rows are now config paths (src/tune.js TABS).
+- Ray length and tip fade redraw the ray pictures live: the ray pictures are now one fixed size (RAYS_MAX 40 px from the centre) and PlayScene.rebuildRays() draws them again. Ray look at the default numbers should be unchanged.
+- COPY now puts only the numbers you changed on the clipboard, one line, e.g. `sprites.coinShine.alpha = 0.3, bullet.speed = 300`; paste it to Claude. RESET puts every tab back.
+- New drops use the new fall / grab / tilt numbers; things already falling keep the old ones.
+- Checked: all 25 config paths exist and are numbers; both files pass a syntax check. UNVERIFIED: nothing was seen on screen (the browser preview would not open), so the panel layout (3 tabs, 9 rows on LOOK) and the live ray redraw are untested.

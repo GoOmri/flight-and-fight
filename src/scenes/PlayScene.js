@@ -12,6 +12,7 @@ import { Medals, MEDAL_KEYS, saveMedals, saveBest } from '../medals.js';
 // The menu passes data.theme ('forest' | 'swamp'); ?bg still wins, with no data config.background.mode is used.
 const bgName = theme => new URLSearchParams(window.location.search).get('bg') || theme || C.background.mode;
 const ANIM_FRAMES = ['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10', 'a11']; // frame names of an animated strip (made once, so nothing is built per frame)
+const RAYS_MAX = 40; // ray pictures are this many px from the centre (the longest ray the tune panel can make)
 const W = C.game.width, H = C.game.height, R = C.game.render, DEG = Math.PI / 180, TAU = Math.PI * 2;
 // Spark colours. Death pops match the creature; no red and no gold on anything that is not a shot / coin.
 const DEATH_TINTS = {
@@ -970,15 +971,25 @@ export class PlayScene extends Phaser.Scene {
   // Spinning rays: 8 wedges drawn as whole pixels. Next to the sprite a ray is S.widthStart px wide, at the tip S.widthEnd px, and it fades toward the tip (S.alphaEnd).
   // A pixel belongs to a ray when it lies along the ray (between inner and radius) and within half the ray's width at that distance. f = 0..2 turns the rays a bit further each picture.
   drawRays(ctx, S, f, color) {
-    const R = S.radius, n = R * 2 + 1, w0 = S.widthStart || 2, w1 = S.widthEnd || 6, a1 = S.alphaEnd === undefined ? 0.2 : S.alphaEnd;
+    const n = ctx.canvas.width, M = (n - 1) / 2, R = Math.min(S.radius, M), w0 = S.widthStart || 2, w1 = S.widthEnd || 6, a1 = S.alphaEnd === undefined ? 0.2 : S.alphaEnd; // M = centre pixel of the fixed-size picture (so the tune panel can change the length live)
+    ctx.clearRect(0, 0, n, n);
     for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-      const dx = x + 0.5 - (R + 0.5), dy = y + 0.5 - (R + 0.5), r = Math.hypot(dx, dy);
+      const dx = x + 0.5 - (M + 0.5), dy = y + 0.5 - (M + 0.5), r = Math.hypot(dx, dy);
       if (r < S.inner || r > R) continue;
       const t = (r - S.inner) / (R - S.inner), width = w0 + (w1 - w0) * t;
       for (let k = 0; k < 8; k++) {
         const a = k * Math.PI / 4 + f * Math.PI / 12, along = dx * Math.cos(a) + dy * Math.sin(a), perp = Math.abs(-dx * Math.sin(a) + dy * Math.cos(a));
         if (along > 0 && perp <= width / 2) { ctx.globalAlpha = 0.95 + (a1 - 0.95) * t; ctx.fillStyle = color; ctx.fillRect(x, y, 1, 1); break; }
       }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // Draws the coin / heart / potion rays again from the current config numbers (the tune panel calls this after RAY LENGTH or RAY TIP changes).
+  rebuildRays() {
+    for (const [pre, S, col] of [['rays', C.sprites.coinShine, '#ffe9a0'], ['raysh', C.sprites.heartShine, '#fff0a0'], ['praysg', C.sprites.potionShine, '#d6ffb8']]) {
+      if (!S) continue;
+      for (let f = 0; f < 3; f++) { const t = this.textures.get(pre + f); if (t && t.source[0].canvas) { const cv = t.source[0].canvas; this.drawRays(cv.getContext('2d'), S, f, S.rayColor || col); t.source[0].update(); } }
     }
   }
 
@@ -1001,7 +1012,7 @@ export class PlayScene extends Phaser.Scene {
     pix('muzzleB', ['...', '.y.', '...'].map((r, i) => i === 1 ? 'ywy' : '.y.'), fire);
     const S = C.sprites.coinShine;
     if (S && !this.textures.exists('rays0')) { // 3 versions of an 8-ray star, each turned a little more: shown one after the other they look like spinning rays, and every pixel stays on the grid
-      const n = S.radius * 2 + 1;
+      const n = RAYS_MAX * 2 + 1;
       for (let f = 0; f < 3; f++) {
         const cv = this.textures.createCanvas('rays' + f, n, n), ctx = cv.getContext('2d');
         this.drawRays(ctx, S, f, S.rayColor || '#ffe9a0');
@@ -1012,7 +1023,7 @@ export class PlayScene extends Phaser.Scene {
     }
     const HS = C.sprites.heartShine; // yellow shine for the heart pickup: spinning rays (3 pictures) and a soft glow of flat rings
     if (HS && !this.textures.exists('raysh0')) {
-      const n = HS.radius * 2 + 1;
+      const n = RAYS_MAX * 2 + 1;
       for (let f = 0; f < 3; f++) {
         const cv = this.textures.createCanvas('raysh' + f, n, n), ctx = cv.getContext('2d');
         this.drawRays(ctx, HS, f, HS.rayColor || '#fff0a0');
@@ -1029,7 +1040,7 @@ export class PlayScene extends Phaser.Scene {
     }
     const PS = C.sprites.potionShine; // the same kind of shine for the weapon potion, in green, plus a soft glow made of flat rings
     if (PS && !this.textures.exists('praysg0')) {
-      const n = PS.radius * 2 + 1;
+      const n = RAYS_MAX * 2 + 1;
       for (let f = 0; f < 3; f++) {
         const cv = this.textures.createCanvas('praysg' + f, n, n), ctx = cv.getContext('2d');
         this.drawRays(ctx, PS, f, PS.rayColor || '#d6ffb8');
