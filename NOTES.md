@@ -249,3 +249,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 v1.5.2: bigger bats
 - Omri: bats larger. Grunt (bat) scale 0.8 -> 1.1 and hitbox 20x16 -> 27x22 in config.enemies.sprites.grunt.
 - UNVERIFIED on phone: size next to the witch and shots, waves not too crowded. Open question to Omri: which sprite he chose for the shooter (now still the pink dino).
+
+## 2026-11-20 v1.5.3: vulture is the shooter
+- Omri chose the vulture for the shooter. config.enemies.sprites.shooter now uses vulture.png (frames 1,3,2,3, scale 1.0, hit 24x24). The dino sheet stays in assets but is unused.
+- UNVERIFIED: the flap loop order (a guess), which way it faces when moving, size and hitbox on the phone, death colours (shooter explosion is still magenta).

@@ -26,7 +26,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.5.2", // bump on every push so the player/Omri can see the build
+  version: "1.5.3", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -160,7 +160,7 @@ export const CONFIG = {
       // Bat 1.3 (purple, never the red files), row S (flying towards the player), cut out as bat-S.png (3 frames = one wing flap: up, flat, down). Ping-pong 0,1,2,1.
       grunt:   { file: 'bat-S.png', frameW: 48, frameH: 64, frames: [0, 1, 2, 1], fps: 8, scale: 1.1, hitW: 27, hitH: 22, faceVelocity: false },
       // Dino IDLE sheet (4 frames = one breathing/bobbing loop, side view facing right). The long dino.png is a jump (crouch, leap, land), not a loop, so it is not used.
-      shooter: { file: 'dino-idle.png', frameW: 32, frameH: 26, frames: [0, 1, 2, 3], fps: 6, scale: 1.25, hitW: 18, hitH: 20, faceVelocity: true },
+      shooter: { file: 'vulture.png', frameW: 39, frameH: 39, frames: [1, 3, 2, 3], fps: 8, scale: 1.0, hitW: 24, hitH: 24, faceVelocity: true },
       // Vulture (not used in waves yet). Frames of vulture.png: 0 = folded, 1 = wings up, 2 = wings flat/low, 3 = half. Flap loop: up, half, low, half. (Cleanest guess; check it.)
       vulture: { file: 'vulture.png', frameW: 39, frameH: 39, frames: [1, 3, 2, 3], fps: 8, scale: 0.8, hitW: 22, hitH: 22, faceVelocity: true }
     },
