@@ -27,7 +27,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.9.1", // bump on every push so the player/Omri can see the build
+  version: "1.9.2", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -202,6 +202,8 @@ export const CONFIG = {
     coinShine: { radius: 12, inner: 6, fps: 6, alpha: 0.55, glintEveryMs: 1300, glintMs: 200, glintDx: 5, glintDy: -6 },
     // Weapon potion shine (green): spinning rays (3 pictures swapped at `fps`) and a soft glow of flat rings (r in texels, cell px each, flicker steps).
     potionShine: { radius: 15, inner: 8, fps: 6, alpha: 0.55, glow: { cell: 2, rings: [{ r: 5, color: 0xb8ff90, alpha: 0.4 }, { r: 8, color: 0x4fe070, alpha: 0.26 }, { r: 11, color: 0x2fbf6a, alpha: 0.13 }], flicker: [1, 0.85, 1, 0.7, 0.95], stepFps: 6 } },
+    // Heart pickup shine (yellow): spinning rays + soft glow behind the first heart on screen, and every heart bobs while it falls (bobAmp px/s swing, bobSpeed radians/s). From Omri's gallery recipe: glow, rays, bob, yellow.
+    heartShine: { radius: 14, inner: 7, fps: 6, alpha: 0.55, rayColor: '#fff0a0', bobAmp: 14, bobSpeed: 5, glow: { cell: 2, rings: [{ r: 5, color: 0xfff0a0, alpha: 0.4 }, { r: 8, color: 0xffd23f, alpha: 0.26 }, { r: 10, color: 0xe0a020, alpha: 0.13 }], flicker: [1, 0.85, 1, 0.7, 0.95], stepFps: 6 } },
     stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -7, fadeMs: 300 },
     weaponGem: { file: 'pickups/potion-violet.png', frameW: 32, frameH: 32, frames: 1, fps: 1, scale: 0.9, hueShift: -150, hueRange: [225, 335] }, // hueShift: turn the colours inside hueRange (violet and blue-violet) by this many degrees (-> green); the cork and ribbon keep their colour // weapon upgrade = the twinkling violet potion (one 32x32 picture with sparkles drawn in). The old green gem strip is gem-green.png (4 frames of 16x16, scale 1.2)
     fxPoolSize: 8 // chest-break and heart-collect animations playing at once

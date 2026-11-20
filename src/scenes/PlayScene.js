@@ -548,6 +548,9 @@ export class PlayScene extends Phaser.Scene {
     this.coins = mk('coin', C.coin.poolSize);
     this.shineTarget = null; // the one coin that has the shine
     this.shineRays = C.sprites.coinShine ? this.add.image(0, 0, 'rays0').setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.05).setVisible(false) : null;
+    this.heartTarget = null;
+    this.heartGlow = C.sprites.heartShine ? this.add.image(0, 0, 'heartGlow').setScale(C.sprites.heartShine.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.07).setVisible(false) : null;
+    this.heartRays = C.sprites.heartShine ? this.add.image(0, 0, 'raysh0').setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.05).setVisible(false) : null;
     this.potionTarget = null;
     this.potionGlow = C.sprites.potionShine ? this.add.image(0, 0, 'potionGlow').setScale(C.sprites.potionShine.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.07).setVisible(false) : null;
     this.potionRays = C.sprites.potionShine ? this.add.image(0, 0, 'praysg0').setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.05).setVisible(false) : null;
@@ -804,6 +807,7 @@ export class PlayScene extends Phaser.Scene {
     this.updateCoins(dt);
     this.updateShine(time);
     this.updatePotionShine(time);
+    this.updateHeartShine(time);
     this.cullOffscreen(time);
     if (!this.clearAt && this.runner.finished && this.enemyCount === 0 && this.crates.countActive(true) === 0 && this.coins.countActive(true) === 0 && this.weaponUps.countActive(true) === 0 && this.heartUps.countActive(true) === 0) this.clearAt = time + C.stage.endDelayMs;
     if (this.clearAt && time >= this.clearAt) { this.stageClear(); return; }
@@ -983,6 +987,24 @@ export class PlayScene extends Phaser.Scene {
       pix('glint0', ['..w..', '..w..', 'wwwww', '..w..', '..w..'], { w: '#ffffff' });
       pix('glint1', ['.w.', 'www', '.w.'], { w: '#ffffff' });
     }
+    const HS = C.sprites.heartShine; // yellow shine for the heart pickup: spinning rays (3 pictures) and a soft glow of flat rings
+    if (HS && !this.textures.exists('raysh0')) {
+      const n = HS.radius * 2 + 1;
+      for (let f = 0; f < 3; f++) {
+        const cv = this.textures.createCanvas('raysh' + f, n, n), ctx = cv.getContext('2d');
+        for (let k = 0; k < 8; k++) for (let r = HS.inner; r <= HS.radius; r += 0.5) {
+          const a = k * Math.PI / 4 + f * Math.PI / 12, x = Math.round(HS.radius + Math.cos(a) * r), y = Math.round(HS.radius + Math.sin(a) * r);
+          ctx.globalAlpha = 0.9 - 0.6 * (r - HS.inner) / (HS.radius - HS.inner + 0.01); ctx.fillStyle = HS.rayColor; ctx.fillRect(x, y, 1, 1);
+        }
+        cv.refresh();
+      }
+      const gn = HS.glow.rings[HS.glow.rings.length - 1].r * 2 + 1, gc = this.textures.createCanvas('heartGlow', gn, gn), gx = gc.getContext('2d');
+      for (let y = 0; y < gn; y++) for (let x = 0; x < gn; x++) {
+        const dd = Math.hypot(x - (gn - 1) / 2, y - (gn - 1) / 2), ring = HS.glow.rings.find(r => dd <= r.r);
+        if (ring) { gx.fillStyle = hex(ring.color); gx.globalAlpha = ring.alpha; gx.fillRect(x, y, 1, 1); }
+      }
+      gc.refresh();
+    }
     const PS = C.sprites.potionShine; // the same kind of shine for the weapon potion, in green, plus a soft glow made of flat rings
     if (PS && !this.textures.exists('praysg0')) {
       const n = PS.radius * 2 + 1;
@@ -1018,6 +1040,20 @@ export class PlayScene extends Phaser.Scene {
     this.shineRays.setTexture('rays' + (Math.floor(time / 1000 * S.fps) % 3)).setPosition(x, y).setAlpha(S.alpha);
     const t = time % S.glintEveryMs; // the twinkle: bigger for a moment, then smaller, then gone
     if (t < S.glintMs) this.shineGlint.setTexture(t < S.glintMs / 2 ? 'glint0' : 'glint1').setPosition(x + S.glintDx, y + S.glintDy).setVisible(true);
+  }
+
+  // The falling heart pickup: every heart bobs (its fall speed swings a little up and down), and the first one on screen gets a yellow glow and spinning rays.
+  updateHeartShine(time) {
+    const HS = C.sprites.heartShine;
+    if (!HS || !this.heartRays) return;
+    this.heartUps.children.iterate(p => { if (p && p.active && p.baseV) p.body.setVelocityY(p.baseV + HS.bobAmp * Math.sin(time / 1000 * HS.bobSpeed + p.bobPh)); });
+    if (!this.heartTarget || !this.heartTarget.active || this.heartTarget.y > H + 20) this.heartTarget = this.heartUps.getChildren().find(p => p.active && p.y > -10 && p.y < H) || null;
+    const c = this.heartTarget;
+    this.heartRays.setVisible(!!c); this.heartGlow.setVisible(!!c);
+    if (!c) return;
+    const x = Math.round(c.x), y = Math.round(c.y);
+    this.heartGlow.setPosition(x, y).setAlpha(HS.glow.flicker[Math.floor(time / 1000 * HS.glow.stepFps) % HS.glow.flicker.length]);
+    this.heartRays.setTexture('raysh' + (Math.floor(time / 1000 * HS.fps) % 3)).setPosition(x, y).setAlpha(HS.alpha);
   }
 
   // The falling weapon potion gets a soft green glow and spinning green rays (one potion at a time is the norm, so one shine is enough).
@@ -1182,7 +1218,7 @@ export class PlayScene extends Phaser.Scene {
     p.dropping = !!sp && !gem;
     if (gem) { p.play('gem_spin'); p.anims.setCurrentFrame(p.anims.currentAnim.frames[Phaser.Math.Between(0, gem.frames - 1)]); } // loops, random start frame
     else if (sp) p.play('heart_drop'); else p.anims.stop();
-    p.body.setVelocity(0, fallSpeed);
+    p.body.setVelocity(0, fallSpeed); p.baseV = fallSpeed; p.bobPh = Math.random() * TAU;
   }
 
   weaponUp() {
