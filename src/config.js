@@ -9,24 +9,25 @@ export const snap4 = n => Math.max(8, Math.round(n / 4) * 4); // pixel font look
 // One shot of a pattern: dx offset, angle in degrees, optional own damage.
 const S = (dx, deg = 0, dmg) => ({ dx, deg, dmg });
 const TWIN = [S(-5), S(5)];
+const SINGLE = [S(0)]; // one shot straight up (the fire shot); it hits twice as hard as one twin shot, so damage per second stays the same
 // Weapon upgrades are ONLY fire rate and damage (same twin shot at every level).
 // Special shots (spread, lasers...) will come later from bought power-ups / hangar upgrades.
 // Level 10 does about 2.2x the damage per second of level 0. Tune the two steps below.
-const WEAPON = { baseFireRateMs: 170, fireRateStep: 6, damageStep: 0.04 }; // each level: shoots 6 ms sooner, hits 4% harder
+const WEAPON = { baseFireRateMs: 170, fireRateStep: 6, damageStep: 0.04, shotDamageMul: 2 }; // each level: shoots 6 ms sooner, hits 4% harder
 function weaponLevels() {
   const out = [];
   for (let i = 0; i <= 10; i++) {
     out.push({
       fireRateMs: WEAPON.baseFireRateMs - WEAPON.fireRateStep * i,
-      pattern: TWIN,
-      damage: Math.round((1 + WEAPON.damageStep * i) * 100) / 100
+      pattern: SINGLE,
+      damage: Math.round((1 + WEAPON.damageStep * i) * WEAPON.shotDamageMul * 100) / 100
     });
   }
   return out;
 }
 
 export const CONFIG = {
-  version: "1.7.1", // bump on every push so the player/Omri can see the build
+  version: "1.8.0", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -94,6 +95,8 @@ export const CONFIG = {
   // Player shots. Which shots, how fast and how hard come from weaponLevels below.
   bullet: {
     speed: z(620),
+    // The witch's shot: one orange fire bolt straight up ("flight_smooth" of the SovDigital fire pack, north row, shrunk 5x and cut to 6 fire colours). Delete this entry to get the old twin code-drawn shots back (then set pattern TWIN).
+    fire: { file: 'fx/fire-shot.png', frameW: 8, frameH: 22, frames: 12, fps: 24, scale: 1, hitW: 6, hitH: 16 },
     poolSize: 90         // level 10 fires 7 shots every 145 ms and they live about 1 s: about 50 alive at once
   },
 
@@ -304,6 +307,18 @@ CONFIG.background.swamp = {
   patchCount: 8, blobVariants: 6, blobSize: [20, 40], blobCell: 2, // dark still-water pools instead of grass blobs
   blobColor: 0x2d4745, blobColor2: 0x3a5955,                       // pool colour (dark teal) and its lighter specks
   treeShadow: { on: true, angleDeg: 55, lenMul: 0.6, alpha: 0.28, color: 0x0a120c, depth: -9 },
+  // Lanterns beside the path (swamp only): file = strip in assets/swamp (8 frames), w/h = one frame, glowDy = where the lamp is (px from the picture centre, negative = up).
+  // Glow = flat rings, added as light (r in texels, one texel = glow.cell px) in green, flickering in steps (alpha list, stepFps per second). bugs = little lights flying around, bugSize px.
+  lanterns: { on: true, count: 3, scale: 1.2, fps: 4, stepFps: 6, depth: -7.5, laneX: [[52, 84], [156, 188]], gapY: [220, 480],
+    files: [
+      { file: 'bog_lantern_post_1_anim', w: 24, h: 29, glowDy: -9 },
+      { file: 'buoy_lantern_0_anim', w: 26, h: 26, glowDy: -4 },
+      { file: 'buoy_lantern_1_anim', w: 26, h: 20, glowDy: -3 },
+      { file: 'lantern_1_anim', w: 24, h: 52, glowDy: 4 },
+      { file: 'witch_lantern_0_anim', w: 24, h: 41, glowDy: -10 }
+    ],
+    glow: { cell: 3, rings: [{ r: 3, color: 0xb8ff90, alpha: 0.55 }, { r: 6, color: 0x4fe070, alpha: 0.34 }, { r: 10, color: 0x2fbf6a, alpha: 0.18 }], flicker: [1, 0.8, 1, 0.65, 0.9, 1, 0.75] },
+    bugs: 3, bugSize: 2, bugColor: 0xe6ff8a },
   light: { on: true, depth: -6, // fog: big, very soft, pale grey-green patches (same code as the forest cloud shadows) drifting over the floor
     shadowCount: 5, shadowVariants: 3, shadowSize: 64, shadowCell: 4, shadowGapY: 300, shadowSpeedMul: 1.5, shadowDrift: 5, shadowAlpha: 0.12, shadowColor: 0xb4c2b0,
     shaftCount: 0, shaftScale: [1, 1], shaftAngleDeg: 0, shaftAlpha: [0, 0], shaftPulse: 0, shaftDrift: 0 } // no light shafts in the swamp

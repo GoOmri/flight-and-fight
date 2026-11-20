@@ -47,6 +47,9 @@ export class PlayScene extends Phaser.Scene {
     if (K.poof) strip('sp_poof', K.poof);
     if (K.weaponGem) strip('sp_gem', K.weaponGem);
     if (K.stunned) strip('sp_stunned', K.stunned);
+    if (C.bullet.fire) strip('sp_fire', C.bullet.fire);
+    const LN = this.bg === 'swamp' ? C.background.swamp.lanterns : null; // swamp lanterns (8-frame strips, see makeLanterns)
+    if (LN) LN.files.forEach((f, i) => this.load.spritesheet('lan_' + i, 'assets/swamp/' + f.file + '.png', { frameWidth: f.w, frameHeight: f.h }));
     if (this.bg === 'swamp') { // swamp pictures (assets/swamp, pack "Murky Swamp", see CREDITS.md): only the ones listed in config are loaded
       const A = C.background.swamp.files;
       new Set([...A.trees, ...A.bushes, ...A.smalls, ...A.rocks, ...A.bigRocks]).forEach(n => this.load.image('sw-' + n, 'assets/swamp/' + n + '.png'));
@@ -67,6 +70,7 @@ export class PlayScene extends Phaser.Scene {
       if (!this.anims.exists(key)) this.anims.create({ key, frames: this.anims.generateFrameNumbers(tex, { start: 0, end: d.frames - 1 }), frameRate: d.fps, repeat });
     };
     if (K.stunned) mkAnim('stunned', 'sp_stunned', K.stunned, -1);
+    if (C.bullet.fire) mkAnim('fire_shot', 'sp_fire', C.bullet.fire, -1);
     if (K.coin) mkAnim('coin_spin', 'sp_coin', K.coin, -1);
     if (K.heartPickup) { mkAnim('heart_idle', 'sp_heart_idle', K.heartPickup.idle, -1); mkAnim('heart_drop', 'sp_heart_drop', K.heartPickup.drop, 0); mkAnim('heart_collect', 'sp_heart_collect', K.heartPickup.collect, 0); }
     if (K.crate) { mkAnim('crate_idle', 'sp_crate_idle', K.crate.idle, -1); mkAnim('crate_break', 'sp_crate_break', K.crate.break, 0); }
@@ -96,6 +100,7 @@ export class PlayScene extends Phaser.Scene {
     this.enemiesSpawned = 0; this.enemiesKilled = 0; this.coinsSpawned = 0; this.coinsCollected = 0; this.hitsTaken = 0;
 
     this.makeBackground();
+    this.makeLanterns();
     this.makePools();
     this.makeShip();
     const waveTotals = STAGE1.map(w => w.groups.reduce((n, g) => n + g.n, 0));
@@ -586,6 +591,56 @@ export class PlayScene extends Phaser.Scene {
   }
 
   // Virtual stick art: a faint ring and a knob, above the game, below the end screen.
+  // SWAMP LANTERNS: a few lanterns (all 5 pictures, mixed) stand beside the path and scroll with the ground. Each has a soft GREEN glow
+  // (stepped rings, hard edges, flickers in steps) and 3 little bugs flying around it on whole pixels. Everything snaps to the pixel grid.
+  makeLanterns() {
+    this.lanterns = [];
+    const LN = this.bg === 'swamp' ? C.background.swamp.lanterns : null;
+    if (!LN || !LN.on) return;
+    LN.files.forEach((f, i) => { if (!this.anims.exists('lan_' + i)) this.anims.create({ key: 'lan_' + i, frames: this.anims.generateFrameNumbers('lan_' + i, { start: 0, end: 7 }), frameRate: LN.fps, repeat: -1 }); });
+    if (!this.textures.exists('lanternGlow')) { // rings of flat colour, one texel = glowCell game px (so the edges are chunky pixels, never smooth)
+      const G = LN.glow, n = G.rings[G.rings.length - 1].r * 2 + 1, cv = this.textures.createCanvas('lanternGlow', n, n), ctx = cv.getContext('2d');
+      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+        const d = Math.hypot(x - (n - 1) / 2, y - (n - 1) / 2), ring = G.rings.find(r => d <= r.r);
+        if (!ring) continue;
+        ctx.fillStyle = hex(ring.color); ctx.globalAlpha = ring.alpha; ctx.fillRect(x, y, 1, 1);
+      }
+      cv.refresh();
+    }
+    for (let i = 0; i < LN.count; i++) {
+      const L = { spr: this.add.sprite(0, 0, 'lan_0', 0).setDepth(LN.depth), glow: this.add.image(0, 0, 'lanternGlow').setScale(LN.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(LN.depth - 0.05), bugs: [], ph: Math.random() * 10, side: i % 2 ? 1 : -1 };
+      for (let b = 0; b < LN.bugs; b++) L.bugs.push({ s: this.add.image(0, 0, 'square').setScale(LN.bugSize).setTint(LN.bugColor).setDepth(LN.depth + 0.1), r: 7 + Math.random() * 7, w: (0.8 + Math.random() * 1.2) * (Math.random() < 0.5 ? -1 : 1), p: Math.random() * TAU, k: 1 + Math.random() * 0.8 });
+      this.lanterns.push(L);
+      this.placeLantern(L, true, i);
+    }
+  }
+
+  placeLantern(L, first, i = 0) {
+    const LN = C.background.swamp.lanterns, k = Phaser.Math.Between(0, LN.files.length - 1), f = LN.files[k];
+    L.f = f; L.spr.setTexture('lan_' + k, 0).play('lan_' + k); L.spr.anims.setCurrentFrame(L.spr.anims.currentAnim.frames[Phaser.Math.Between(0, 7)]);
+    L.spr.setScale(LN.scale).setFlipX(Math.random() < 0.5);
+    L.side = -L.side;
+    const lane = LN.laneX[L.side < 0 ? 0 : 1];
+    L.spr.x = Phaser.Math.Between(lane[0], lane[1]);
+    L.spr.y = first ? H * (0.15 + 0.35 * i) + Phaser.Math.Between(-20, 20) : -f.h * LN.scale - Phaser.Math.Between(LN.gapY[0], LN.gapY[1]);
+  }
+
+  updateLanterns(dt, time) {
+    const LN = C.background.swamp.lanterns, G = LN.glow;
+    const step = Math.floor(time / 1000 * LN.stepFps); // everything that wiggles changes in steps, like pixel art frames
+    for (const L of this.lanterns) {
+      L.spr.y += this.bgF.scroll * this.cloudMul * dt;
+      if (L.spr.y > H + L.f.h * LN.scale) this.placeLantern(L, false);
+      const x = Math.round(L.spr.x), y = Math.round(L.spr.y), gx = x, gy = y + L.f.glowDy * LN.scale;
+      L.spr.setPosition(x, y);
+      L.glow.setPosition(gx, gy).setAlpha(G.flicker[(step + Math.floor(L.ph)) % G.flicker.length]);
+      for (const b of L.bugs) {
+        const a = b.p + step * b.w * 0.5;
+        b.s.setPosition(Math.round(gx + Math.cos(a) * b.r), Math.round(gy + Math.sin(a * b.k) * b.r * 0.7)).setAlpha(((step + Math.floor(b.p * 3)) % 5 === 0) ? 0.35 : 1);
+      }
+    }
+  }
+
   makeStickArt() {
     const T = C.stick;
     this.stickRing = this.add.graphics().setDepth(T.depth);
@@ -719,6 +774,7 @@ export class PlayScene extends Phaser.Scene {
     if (!this.clearAt && this.runner.finished && this.enemyCount === 0 && this.crates.countActive(true) === 0 && this.coins.countActive(true) === 0 && this.weaponUps.countActive(true) === 0 && this.heartUps.countActive(true) === 0) this.clearAt = time + C.stage.endDelayMs;
     if (this.clearAt && time >= this.clearAt) { this.stageClear(); return; }
     this.updateFx(dt);
+    this.updateLanterns(dt, time);
 
     // invulnerability blink
     if (time < this.invulnUntil) {
@@ -780,8 +836,10 @@ export class PlayScene extends Phaser.Scene {
     const lv = C.weaponLevels[this.weaponLevel], sp = C.bullet.speed;
     this.nextShot = time + lv.fireRateMs;
     for (const sh of lv.pattern) {
-      const b = this.spawn(this.bullets, 'pbullet', this.ship.x + sh.dx, this.ship.y - C.ship.shotY);
+      const fs = C.bullet.fire;
+      const b = this.spawn(this.bullets, fs ? 'sp_fire' : 'pbullet', this.ship.x + sh.dx, this.ship.y - C.ship.shotY, fs ? fs.scale : PX);
       if (!b) continue;
+      if (fs) { b.body.setSize(fs.hitW, fs.hitH); b.play('fire_shot'); } else b.anims.stop();
       const a = sh.deg * DEG;
       b.setRotation(a);
       b.dmg = sh.dmg === undefined ? lv.damage : sh.dmg;
