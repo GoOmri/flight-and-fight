@@ -325,3 +325,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - New ?render=canvas forces CANVAS (to test). NOTE: the browser may cache src files, so after editing, fetch them with cache 'reload' or use a fresh ?v= and hard refresh.
 - Verified in real CANVAS mode (debug line: CANVAS): a hit ghost is solid white. UNVERIFIED on Omri's real desktop and phone.
 - Other WebGL-only things that may look different in CANVAS (setTint / setTintFill): tree shadows, carrier outlines (green/pink), chest colour, spark colours, ship level-up flash. They looked fine in my CANVAS screenshots but I did not check each. The real fix for him is Chrome > Settings > System > "Use graphics acceleration when available" = on, then restart Chrome (then the debug line should say WEBGL).
+
+## 2026-11-20 v1.8.5: coloured spinning smoke, longer stars, game-over outline fix (branch v1840-smoke-stun)
+- Death smoke: the puff when an enemy dies is turned a random way and tinted to the enemy's main colour. The colour is found from the sprite sheet itself (average of its solid pixels, colourful ones count more, brightened), so a new enemy sprite gets a matching smoke with no config; override with `smokeColor` in config.enemies.sprites.<type>. Chest smoke is wood brown. Done with a pre-tinted copy of the poof sheet per type (not a game-object tint), so it works in WebGL and CANVAS. Found colours: bat lavender, ghost mint, wisp orange.
+- Stunned stars: last as long as she blinks (ship.invulnMs, 1.5 s) and sit lower, just above her head (offsetY -16 -> -12). `showMs` is gone.
+- Bug (Omri's screenshot): after game over the carrier outlines and white flash copies stayed frozen while the enemies kept animating, so they separated. Their update now runs on the game over screen too (decorEnemy). Verified: after gameOver the outline offsets stay exactly +-2 px from the enemy and no flash copy is left.
+- Sparks and death rings still use the old DEATH_TINTS colours (ghost lavender, shooter magenta). Say if they should match the new sprites too.
+- UNVERIFIED on the phone/desktop for real: how the tinted smoke looks at full speed.

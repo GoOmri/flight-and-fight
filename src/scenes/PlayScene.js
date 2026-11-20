@@ -62,6 +62,13 @@ export class PlayScene extends Phaser.Scene {
 
   create() {
     makeAllTextures(this);
+    if (C.sprites.poof) { // death smoke in the main colour of each enemy (and the chest): a tinted copy of the poof sheet per type, made once (no tint at draw time, so it also works in CANVAS mode)
+      const smoke = { ...Object.fromEntries(Object.keys(C.enemies.sprites).map(t => [t, C.enemies.sprites[t].smokeColor !== undefined ? C.enemies.sprites[t].smokeColor : this.mainColour('en_' + t)])), crate: DEATH_TINTS.crate[0] };
+      for (const t in smoke) {
+        this.makeTintSheet('sp_poof', 'sp_poof_' + t, smoke[t]);
+        if (!this.anims.exists('poof_' + t)) this.anims.create({ key: 'poof_' + t, frames: this.anims.generateFrameNumbers('sp_poof_' + t, { start: 0, end: C.sprites.poof.frames - 1 }), frameRate: C.sprites.poof.fps, repeat: 0 });
+      }
+    }
     for (const t in C.enemies.sprites) this.makeWhiteSheet('en_' + t); // white copies of the enemy sheets for the hit flash (works in WebGL and in the older CANVAS mode)
     for (const t in C.enemies.sprites) { // one flap/bob loop per sprite type, made once (textures and animations persist across restarts)
       const d = C.enemies.sprites[t], key = 'en_' + t + '_loop';
@@ -773,6 +780,7 @@ export class PlayScene extends Phaser.Scene {
     if (this.over) { // game over: the world keeps scrolling, so chests (not pickups, not enemies) keep moving with it too
       const ground = this.bgF.scroll * this.cloudMul * dt;
       this.crates.children.iterate(c => { if (c && c.active) { c.y += ground; c.body.reset(c.x, c.y); } });
+      this.enemies.children.iterate(e => { if (e && e.active) this.decorEnemy(e, time); }); // outlines and flash copies keep following their enemies
       this.updateFx(dt); return;
     }
 
@@ -917,6 +925,34 @@ export class PlayScene extends Phaser.Scene {
     src.getFrameNames().forEach(n => { const f = src.get(n); cv.add(n, 0, f.cutX, f.cutY, f.cutWidth, f.cutHeight); });
   }
 
+  // The main colour of a sprite sheet: average of its solid pixels, favouring colourful ones over grey outlines, then brightened so smoke stays readable.
+  mainColour(key) {
+    const img = this.textures.get(key).getSourceImage(), cv = document.createElement('canvas');
+    cv.width = img.width; cv.height = img.height;
+    const ctx = cv.getContext('2d'); ctx.drawImage(img, 0, 0);
+    const d = ctx.getImageData(0, 0, cv.width, cv.height).data;
+    let r = 0, g = 0, b = 0, w = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 200) continue;
+      const wt = Math.max(d[i], d[i + 1], d[i + 2]) - Math.min(d[i], d[i + 1], d[i + 2]) + 20; // colourful pixels count more
+      r += d[i] * wt; g += d[i + 1] * wt; b += d[i + 2] * wt; w += wt;
+    }
+    if (!w) return 0xffffff;
+    const k = 235 / Math.max(r / w, g / w, b / w, 1);
+    return (Math.min(255, Math.round(r / w * k)) << 16) | (Math.min(255, Math.round(g / w * k)) << 8) | Math.min(255, Math.round(b / w * k));
+  }
+
+  // A copy of a sheet multiplied by a colour (the same frames). Not a game-object tint, so it works in WebGL and CANVAS alike.
+  makeTintSheet(key, newKey, color) {
+    if (this.textures.exists(newKey)) return;
+    const src = this.textures.get(key), img = src.getSourceImage(), cv = this.textures.createCanvas(newKey, img.width, img.height), ctx = cv.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = hex(color); ctx.fillRect(0, 0, img.width, img.height);
+    ctx.globalCompositeOperation = 'destination-in'; ctx.drawImage(img, 0, 0); // keep only the shape (and softness) of the original
+    cv.refresh();
+    src.getFrameNames().forEach(n => { const f = src.get(n); cv.add(n, 0, f.cutX, f.cutY, f.cutWidth, f.cutHeight); });
+  }
+
   // Show / move the white copy over a flashing enemy (same frame, flip, size, place).
   syncFlash(e) {
     if (!e.flashSpr) { e.flashSpr = this.flashPool.get(e.x, e.y, 'en_' + e.kind + '_w'); if (!e.flashSpr) return; e.flashSpr.setActive(true).setVisible(true); }
@@ -940,6 +976,17 @@ export class PlayScene extends Phaser.Scene {
   // An enemy can only be hit or hurt while its centre is inside the screen.
   inside(o) { return o.x > 0 && o.x < W && o.y > 0 && o.y < H; }
 
+  // Everything that rides on an enemy: its white hit flash copy and its carrier outline. Runs every frame, also on the game over screen
+  // (the enemy keeps animating there, so these must keep following it).
+  decorEnemy(e, time) {
+    const flashing = time < e.flashUntil;
+    if (e.sp) { if (flashing) this.syncFlash(e); else if (e.flashSpr) { e.flashSpr.setActive(false).setVisible(false); e.flashSpr = null; } }
+    else if (flashing) e.setTintFill(0xffffff); else e.clearTint();
+    const pulse = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(time * TAU / C.pickup.haloPulseMs));
+    if (e.halos) e.halos.forEach(h => h.setFrame(e.frame.name).setFlipX(e.flipX).setPosition(e.x + h.ox, e.y + h.oy).setAlpha(pulse)); // same frame and flip as the enemy, shifted 4 ways
+    if (e.halo) e.halo.setPosition(e.x, e.y).setAlpha(pulse);
+  }
+
   updateEnemies(time, dt) {
     this.enemies.children.iterate(e => {
       if (!e || !e.active) return;
@@ -954,12 +1001,7 @@ export class PlayScene extends Phaser.Scene {
         const bx = e.x - e.ox, dx = bx - e.lastX; e.lastX = bx;
         if (dx > 0.05) e.setFlipX(false); else if (dx < -0.05) e.setFlipX(true);
       }
-      const flashing = time < e.flashUntil;
-      if (e.sp) { if (flashing) this.syncFlash(e); else if (e.flashSpr) { e.flashSpr.setActive(false).setVisible(false); e.flashSpr = null; } }
-      else if (flashing) e.setTintFill(0xffffff); else e.clearTint();
-      const pulse = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(time * TAU / C.pickup.haloPulseMs));
-      if (e.halos) e.halos.forEach(h => h.setFrame(e.frame.name).setFlipX(e.flipX).setPosition(e.x + h.ox, e.y + h.oy).setAlpha(pulse)); // same frame and flip as the enemy, shifted 4 ways
-      if (e.halo) e.halo.setPosition(e.x, e.y).setAlpha(pulse);
+      this.decorEnemy(e, time);
     });
   }
 
@@ -1077,7 +1119,7 @@ export class PlayScene extends Phaser.Scene {
     e.hp -= dmg;
     if (e.hp > 0) { if (flash) { e.flashUntil = this.time.now + C.enemies.hitFlashMs; if (e.sp) this.syncFlash(e); else e.setTintFill(0xffffff); } if (C.feel.hitKickPx > 0) e.kick = 1; return; } // white at once, not only on the next update
     const big = e.kind === 'shooter';
-    this.explode(e.x, e.y, big, DEATH_TINTS[e.kind]);
+    this.explode(e.x, e.y, big, DEATH_TINTS[e.kind], true, e.kind);
     this.pop(e.x, e.y - 6, '+' + C.enemies[e.kind].score);
     if (big) this.bigShake();
     if (e.coin) this.dropCoin(e.x, e.y, 0);
@@ -1096,7 +1138,7 @@ export class PlayScene extends Phaser.Scene {
     this.kill(b);
     c.hp -= b.dmg;
     if (c.hp > 0) { c.flashUntil = this.time.now + C.enemies.hitFlashMs; if (C.feel.hitKickPx > 0) c.kick = 1; return; }
-    this.explode(c.x, c.y, true, DEATH_TINTS.crate);
+    this.explode(c.x, c.y, true, DEATH_TINTS.crate, true, 'crate');
     const cs = C.sprites.crate;
     if (cs) this.playFx(this.fxPool, 'sp_crate_break', 'crate_break', c.x, c.y, cs.scale, cs.breakDepth, cs.tint); // chest bursts at the same moment as the coins
     this.bigShake();
@@ -1106,7 +1148,7 @@ export class PlayScene extends Phaser.Scene {
 
   crashEnemy(e) {
     if (!e.active) return;
-    this.explode(e.x, e.y, false, DEATH_TINTS[e.kind]);
+    this.explode(e.x, e.y, false, DEATH_TINTS[e.kind], true, e.kind);
     this.enemyLost(e); // no score, no coin, not a kill
   }
 
@@ -1117,7 +1159,7 @@ export class PlayScene extends Phaser.Scene {
     this.medals.playerHit(); this.syncMedals();
     if (!this.god) { this.hearts--; this.hud.setHearts(this.hearts); }
     this.invulnUntil = this.time.now + C.ship.invulnMs;
-    if (this.stunFx && this.hearts > 0) { this.stunUntil = this.time.now + C.sprites.stunned.showMs; this.stunFx.play('stunned'); }
+    if (this.stunFx && this.hearts > 0) { this.stunUntil = this.time.now + C.ship.invulnMs; this.stunFx.play('stunned'); } // stars last as long as she blinks
     this.cameras.main.shake(C.ship.hitShakeMs, C.ship.hitShakeAmount);
     this.explode(this.ship.x, this.ship.y, false, WITCH_TINTS, false); // no smoke puff for the witch
     if (C.feel.hitFlashMs > 0) this.flashT = 1; // white-pink screen flash (own rectangle, fades out in updateFx)
@@ -1129,9 +1171,13 @@ export class PlayScene extends Phaser.Scene {
   bigShake() { this.cameras.main.shake(C.feel.bigShakeMs, C.feel.bigShakeAmount); }
 
   // Pop in the creature's colours plus a ring puff. big = imp / chest (more sparks, bigger ring).
-  explode(x, y, big, tints, puff = true) {
+  explode(x, y, big, tints, puff = true, smokeType = null) {
     const F = C.feel, P = C.sprites.poof;
-    if (P && puff) this.playFx(this.poofPool, 'sp_poof', 'poof', x, y, P.scale * (big ? P.bigMul : 1), P.depth, null); // smoke puff under the sparks
+    if (P && puff) { // smoke puff under the sparks: in the colour of what died, turned a random way
+      const has = smokeType && this.textures.exists('sp_poof_' + smokeType);
+      const sm = this.playFx(this.poofPool, has ? 'sp_poof_' + smokeType : 'sp_poof', has ? 'poof_' + smokeType : 'poof', x, y, P.scale * (big ? P.bigMul : 1), P.depth, null);
+      if (sm) sm.setRotation(Math.random() * TAU);
+    }
     this.burst(x, y, big ? F.bigExplosionCount : C.particles.perExplosion, tints, big ? F.bigExplosionSpeedMul : 1, big ? 5 : 4);
     if (F.deathRing) this.ring(x, y, tints[1], big ? F.bigDeathRingScale : F.deathRingScale, F.deathRingMs);
   }
