@@ -524,3 +524,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 v1.9.28: only the front coin of a stack has the shine (branch v1928-coin-stack-front)
 - Omri: coins from a chest spill stack and their effects pile up on top of each other. Now a coin has no beams, glow or twinkle when another coin is closer than 14 px and lower on screen (in front of it): only the front coin of each stack shines. Coins that are apart still all shine (v1.9.11 stays). config sprites.coinShine.groupPx 14 (0 = every coin shines again); tune: DROPS > COIN > STACK: SHINE FRONT COIN. Applies to coins only (hearts and potions come one at a time).
 - UNVERIFIED: not run (preview would not open). 14 px is a guess: the beams are 13 px long, so a spill spread wider than 14 px may still overlap a little: raise the number.
+
+## 2026-11-20 v1.9.29: potion no longer bobs (branch v1929-no-potion-bob)
+- Omri: remove the bob from the potion. sprites.potionShine.bobAmp 14 -> 0 (the potion falls at its steady speed again; the tune row DROPS > POTION > BOB AMOUNT can bring it back). The heart still bobs.

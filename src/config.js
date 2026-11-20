@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.28", // bump on every push so the player/Omri can see the build
+  version: "1.9.29", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -209,7 +209,7 @@ export const CONFIG = {
     // SHINE of every drop (coin, heart, potion): ONE shared look (SHINE above): spinning beams (3 pictures at fps, alpha = opacity, radius = length, widths in px) and a soft glow of flat rings behind it,
     // plus a little white twinkle. Only the colours and the twinkle spot differ per drop. Every drop on screen has it. The tune panel changes the shared numbers for all three at once.
     coinShine: shine({ groupPx: 14, rayColor: '#ffe9a0', glowColors: [0xfff3c0, 0xffd04a, 0xc98a1a], glintDx: 5, glintDy: -6 }),
-    potionShine: shine({ radius: 14, glowOver: { size: 0.55 }, bobAmp: 14, bobSpeed: 5, offsetY: 3, rayColor: '#cfe4ff', glowColors: [0xb8d8ff, 0x4f8fe0, 0x2f5fbf], glintDx: 6, glintDy: -9 }),
+    potionShine: shine({ radius: 14, glowOver: { size: 0.55 }, bobAmp: 0, bobSpeed: 5, offsetY: 3, rayColor: '#cfe4ff', glowColors: [0xb8d8ff, 0x4f8fe0, 0x2f5fbf], glintDx: 6, glintDy: -9 }),
     heartShine: shine({ radius: 14, glowOver: { size: 0.55 }, rayColor: '#ffc4e2', glowColors: [0xffe3f0, 0xff8fc0, 0xc0407a], glintDx: 6, glintDy: -8, bobAmp: 14, bobSpeed: 5 }), // bobAmp px/s fall-speed swing, bobSpeed radians/s
     stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -7, fadeMs: 300 },
     weaponGem: { file: 'pickups/potion-flask.png', frameW: 64, frameH: 64, frames: 24, fps: 8, scale: 0.45, angle: 25 }, // the weapon potion: round blue flask of the Alchemy pack (Frakassets, 64 px, no outline, lit; 24 frames at 12 fps). scale 0.45 = about the old size. angle = tilt in degrees
