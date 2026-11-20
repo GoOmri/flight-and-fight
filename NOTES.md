@@ -263,3 +263,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - 8 stick numbers with - and + buttons (hold = repeat): SPEED, RADIUS, DEADZONE, CURVE, RESPONSE, GLIDE (stopGlide), SETTLE (stopOmega), DAMPING (stopDamping). Changes act at once on the live config. RESET = back to the values at page load. COPY = puts `stick: { ... }` on the clipboard (or says COPY FAILED); paste it to Claude, who puts it in src/config.js. A reload loses the changes.
 - Files: new src/tune.js (also in FILES in src/update.js), hooks in src/scenes/PlayScene.js. A ?tune=1 run does not save medals.
 - Verified in the browser (desktop, Playwright): panel opens, + changes speed 240 -> 250, X closes, no console errors, screenshot looks right. UNVERIFIED on the phone: button size under the thumb, hold-to-repeat, whether COPY works on the phone, whether the panel covers too much.
+
+## 2026-11-20 v1.6.1: tuning panel works in the installed app
+- Omri's home-screen app has no address bar, so ?tune=1 could not be used there. Now: tap the version text at the bottom of the MENU 5 times quickly -> it says TUNE ON (or TUNE OFF) and the choice is remembered (localStorage 'ff_tune'). ?tune=1 also turns it on and remembers it; ?tune=0 turns it off. Code: tuneEnabled() / toggleTune() in src/tune.js, MenuScene version tap, PlayScene uses tuneEnabled().
+- Verified in the browser (phone-sized, touch): 5 taps -> next stage has the TUNE button, no console errors. UNVERIFIED on the phone/app: that the 5 taps are easy to hit (the area is about 80x24 px around the version text).
+- Remember: with the remembered flag on, no medals are saved (debug run). Turn it OFF again for normal play.

@@ -5,7 +5,7 @@ import { WaveRunner, initPath, followPath } from '../waves-runner.js';
 import { Hud, FONT, drawPlate } from '../hud.js';
 import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
-import { Tune } from '../tune.js';
+import { Tune, tuneEnabled } from '../tune.js';
 import { Medals, MEDAL_KEYS, saveMedals, saveBest } from '../medals.js';
 
 // Which background is shown: ?bg=forest | swamp | sky in the web address, else config.background.mode.
@@ -84,7 +84,7 @@ export class PlayScene extends Phaser.Scene {
     const q = new URLSearchParams(window.location.search);
     this.god = q.get('god') === '1';
     const startWave = Phaser.Math.Clamp(parseInt(q.get('wave'), 10) || 1, 1, STAGE1.length) - 1;
-    this.debug = this.god || startWave > 0 || q.get('tune') === '1'; // debug runs do not touch the saved medals
+    this.debug = this.god || startWave > 0 || tuneEnabled(); // debug runs do not touch the saved medals
     this.weaponLevel = Math.min(C.pickup.maxLevel, startWave); // wave=N starts with weapon level N-1 so later waves can be tried fairly
     this.runner = new WaveRunner(STAGE1, startWave, C.stage.firstWaveDelay);
     this.hooks = { enemy: (cg, i) => this.spawnEnemy(cg, i), crate: cc => this.spawnCrate(cc) };
@@ -115,7 +115,7 @@ export class PlayScene extends Phaser.Scene {
     this.stopT = new Phaser.Math.Vector2(); this.stopping = false; // soft stop: where she settles after the thumb is lifted
     this.makeStickArt();
     // Tuning panel (only with ?tune=1): gear under the hearts, opens a panel and pauses the game
-    this.tune = q.get('tune') === '1' ? new Tune(this,
+    this.tune = tuneEnabled() ? new Tune(this,
       () => { this.physics.world.pause(); this.dragId = null; this.stickV.set(0, 0); this.stopping = false; this.stickC.set(W / 2, C.stick.restY); },
       () => this.physics.world.resume()) : null;
     this.input.on('pointerdown', p => {

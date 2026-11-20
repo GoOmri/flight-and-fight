@@ -6,6 +6,7 @@ import { latestVersion, refreshFiles } from '../update.js';
 
 const W = C.game.width, H = C.game.height, R = C.game.render;
 const M = C.menu;
+import { toggleTune } from '../tune.js';
 const DEBUG_PARAMS = ['wave', 'god', 'bg', 'ctl']; // any of these in the web address: skip the menu (old behaviour)
 const P = M.pal;
 const STAGES = [
@@ -34,7 +35,8 @@ export class MenuScene extends Phaser.Scene {
     const txt = (x, y, s, size, stroke, align = 0.5, color = P.cream) => this.add.text(x, y, s, { ...FONT, fontSize: size + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: stroke }).setOrigin(align, 0.5);
     if (this.textures.exists('menu_logo')) this.add.image(M.logo.x, M.logo.y, 'menu_logo').setOrigin(0.5, 0).setScale(M.logo.scale); // pixel logo: "Fight & Flight", tilted up in perspective
     else txt(W / 2, M.titleY, 'Flight and Fight', M.titleSize, M.titleStroke);
-    txt(W / 2, H - M.versionBottom, 'v' + C.version, M.versionSize, 2).setAlpha(M.versionAlpha);
+    const verTxt = txt(W / 2, H - M.versionBottom, 'v' + C.version, M.versionSize, 2).setAlpha(M.versionAlpha);
+    let verTaps = 0, verAt = 0; // 5 quick taps on the version text turn the tuning panel on or off (see tune.js)
 
     this.cards = STAGES.map((st, i) => {
       const x = (W - M.cardW) / 2, y = M.cardTop + i * (M.cardH + M.cardGap);
@@ -89,7 +91,13 @@ export class MenuScene extends Phaser.Scene {
     const hit = p => this.buttons.find(c => { const px = p.x / R, py = p.y / R; return px >= c.x && px <= c.x + (c.w || M.cardW) && py >= c.y && py <= c.y + (c.h || M.cardH); });
     this.pressed = null;
     const setPressed = c => { if (this.pressed) { this.pressed.down = false; this.pressed.draw(); } this.pressed = c; if (c) { c.down = true; c.draw(); } };
-    const onDown = p => setPressed(hit(p) || null);
+    const onDown = p => {
+      if (Math.abs(p.x / R - W / 2) < 40 && Math.abs(p.y / R - (H - M.versionBottom)) < 12) {
+        verTaps = this.time.now - verAt < 800 ? verTaps + 1 : 1; verAt = this.time.now;
+        if (verTaps >= 5) { verTaps = 0; verTxt.setText(toggleTune() ? 'TUNE ON' : 'TUNE OFF'); this.time.delayedCall(1500, () => verTxt.active && verTxt.setText('v' + C.version)); }
+      }
+      setPressed(hit(p) || null);
+    };
     const onMove = p => { if (this.pressed && hit(p) !== this.pressed) setPressed(null); }; // finger slid off: cancel
     const onUp = p => {
       const c = this.pressed, same = c && hit(p) === c;

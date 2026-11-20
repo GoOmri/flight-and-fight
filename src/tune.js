@@ -22,6 +22,20 @@ const PANEL = { x: 6, y: 46, w: W - 12, rowH: 17, pad: 6 };
 const BTN = { w: 22, h: 14 };
 const DEPTH = 70;
 
+// Is the tuning panel on? ?tune=1 turns it on and remembers it, ?tune=0 turns it off, otherwise the remembered choice is used.
+// Also used by the menu: tapping the version text 5 times toggles it (for the installed app, which has no address bar).
+export function tuneEnabled() {
+  try {
+    const t = new URLSearchParams(window.location.search).get('tune');
+    if (t === '1') localStorage.setItem('ff_tune', '1');
+    else if (t === '0') localStorage.removeItem('ff_tune');
+    return t === '1' || (t !== '0' && localStorage.getItem('ff_tune') === '1');
+  } catch (e) { return new URLSearchParams(window.location.search).get('tune') === '1'; }
+}
+export function toggleTune() {
+  try { const on = localStorage.getItem('ff_tune') === '1'; if (on) localStorage.removeItem('ff_tune'); else localStorage.setItem('ff_tune', '1'); return !on; } catch (e) { return false; }
+}
+
 export class Tune {
   constructor(scene, onOpen, onClose) {
     this.scene = scene; this.onOpen = onOpen; this.onClose = onClose;
