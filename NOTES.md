@@ -332,3 +332,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Bug (Omri's screenshot): after game over the carrier outlines and white flash copies stayed frozen while the enemies kept animating, so they separated. Their update now runs on the game over screen too (decorEnemy). Verified: after gameOver the outline offsets stay exactly +-2 px from the enemy and no flash copy is left.
 - Sparks and death rings still use the old DEATH_TINTS colours (ghost lavender, shooter magenta). Say if they should match the new sprites too.
 - UNVERIFIED on the phone/desktop for real: how the tinted smoke looks at full speed.
+
+## 2026-11-20 v1.8.6: no more light blue flash (branch v1850-no-blue-flash)
+- Cause: the game's own background colour was still the old sky blue (#2a6fdb, from the first sky-and-clouds version, in src/main.js). It shows whenever no scene has drawn yet: when the page starts or reloads (UPDATE), and while the next scene loads its pictures (menu -> stage). Now it is the dark menu colour (config.menu.bgColor). Also the phone's theme colour (index.html meta and manifest) was blue: now the same dark colour.
+- Not changed: the stage still loads its pictures when it starts, so the dark screen can show for a moment on slow devices (a loading bar would fix that: ask Omri).
+- UNVERIFIED on the phone: an installed app keeps its old theme colour until it is reinstalled or the manifest refreshes.

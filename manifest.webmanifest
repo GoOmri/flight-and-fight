@@ -6,7 +6,7 @@
   "display": "fullscreen",
   "orientation": "portrait",
   "background_color": "#000000",
-  "theme_color": "#2a7bd8",
+  "theme_color": "#14161f",
   "icons": [
     { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]

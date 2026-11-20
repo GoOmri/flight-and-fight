@@ -1,4 +1,4 @@
-import { CONFIG } from './config.js';
+import { CONFIG, hex } from './config.js';
 import { MenuScene } from './scenes/MenuScene.js';
 import { PlayScene } from './scenes/PlayScene.js';
 
@@ -11,7 +11,7 @@ fontReady.then(() => { window.__game = new Phaser.Game({
   type: new URLSearchParams(window.location.search).get('render') === 'canvas' ? Phaser.CANVAS : Phaser.AUTO, // ?render=canvas forces the older drawing mode (to test browsers without WebGL)
   width: CONFIG.game.width * CONFIG.game.render,
   height: CONFIG.game.height * CONFIG.game.render,
-  backgroundColor: '#2a6fdb',
+  backgroundColor: hex(CONFIG.menu.bgColor), // the dark menu colour (was the old sky blue, which flashed on every start and scene change while pictures loaded)
   pixelArt: true,      // sharp pixels (no smoothing) inside the game
   roundPixels: true,   // sprites sit on whole pixels, no shimmer
   input: { activePointers: 1 },

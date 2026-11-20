@@ -27,7 +27,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.8.5", // bump on every push so the player/Omri can see the build
+  version: "1.8.6", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
