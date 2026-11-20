@@ -446,3 +446,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Ray tip opacity halved (alphaEnd 0.2 -> 0.1 on coin, potion and heart rays).
 - Witch shot 20% slower (speed z(416) -> z(333)).
 - UNVERIFIED on the phone: ray look, shot feel and spacing at the slower speed.
+
+## 2026-11-20 v1.9.14: rays half as bright (branch v1914-ray-opacity)
+- Omri meant the WHOLE ray, not only the tip: ray opacity 0.8 -> 0.4 on coin, potion and heart (config alpha in coinShine / potionShine / heartShine). The tip fade is back to alphaEnd 0.2 (v1.9.13 had halved it to 0.1; that is undone). Potion glow rings unchanged.
+- UNVERIFIED on the phone: whether 0.4 is the right strength.

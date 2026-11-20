@@ -27,7 +27,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.9.13", // bump on every push so the player/Omri can see the build
+  version: "1.9.14", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -200,11 +200,11 @@ export const CONFIG = {
     // Weapon-upgrade pickup = green gem (4 frames of 16x16, loops, random start frame). scale 1 = 16 px (3 screen pixels per art pixel; stays even). The grab radius stays coin.pickupRadius on screen.
     // Stars circling over her head after a hit ("stunned" of the free spell pack, MIT, 60 frames of 60x64, loops). offsetY = from her centre (negative = up; the stars sit just above her head), fadeMs = fade-out at the end. It lasts as long as she blinks after a hit (ship.invulnMs).
     // Coin shine (only ONE coin at a time has it): spinning rays behind it (3 pictures at `fps`, alpha = strength) and a little white twinkle now and then.
-    coinShine: { radius: 14, inner: 1, widthStart: 1, widthEnd: 5, alphaEnd: 0.1, rayColor: '#ffe9a0', fps: 6, alpha: 0.8, glintEveryMs: 1300, glintMs: 200, glintDx: 5, glintDy: -6 },
+    coinShine: { radius: 14, inner: 1, widthStart: 1, widthEnd: 5, alphaEnd: 0.2, rayColor: '#ffe9a0', fps: 6, alpha: 0.4, glintEveryMs: 1300, glintMs: 200, glintDx: 5, glintDy: -6 },
     // Weapon potion shine (green): spinning rays (3 pictures swapped at `fps`) and a soft glow of flat rings (r in texels, cell px each, flicker steps).
-    potionShine: { radius: 19, inner: 1, widthStart: 1, widthEnd: 5, alphaEnd: 0.1, glintEveryMs: 1100, glintMs: 200, glintDx: 6, glintDy: -9, rayColor: '#cfe4ff', fps: 6, alpha: 0.8, glow: { cell: 2, rings: [{ r: 5, color: 0xb8d8ff, alpha: 0.55 }, { r: 8, color: 0x4f8fe0, alpha: 0.38 }, { r: 11, color: 0x2f5fbf, alpha: 0.2 }], flicker: [1, 0.85, 1, 0.7, 0.95], stepFps: 6 } },
+    potionShine: { radius: 19, inner: 1, widthStart: 1, widthEnd: 5, alphaEnd: 0.2, glintEveryMs: 1100, glintMs: 200, glintDx: 6, glintDy: -9, rayColor: '#cfe4ff', fps: 6, alpha: 0.4, glow: { cell: 2, rings: [{ r: 5, color: 0xb8d8ff, alpha: 0.55 }, { r: 8, color: 0x4f8fe0, alpha: 0.38 }, { r: 11, color: 0x2f5fbf, alpha: 0.2 }], flicker: [1, 0.85, 1, 0.7, 0.95], stepFps: 6 } },
     // Heart pickup shine (yellow): spinning rays + soft glow behind the first heart on screen, and every heart bobs while it falls (bobAmp px/s swing, bobSpeed radians/s). From Omri's gallery recipe: glow, rays, bob, yellow.
-    heartShine: { radius: 17, inner: 1, widthStart: 1, widthEnd: 5, alphaEnd: 0.1, glintEveryMs: 1100, glintMs: 200, glintDx: 6, glintDy: -8, fps: 6, alpha: 0.8, rayColor: '#ffc4e2', bobAmp: 14, bobSpeed: 5 }, // heart recipe from the gallery: rays, bob, twinkle, pink (no glow). bobAmp px/s fall-speed swing, bobSpeed radians/s
+    heartShine: { radius: 17, inner: 1, widthStart: 1, widthEnd: 5, alphaEnd: 0.2, glintEveryMs: 1100, glintMs: 200, glintDx: 6, glintDy: -8, fps: 6, alpha: 0.4, rayColor: '#ffc4e2', bobAmp: 14, bobSpeed: 5 }, // heart recipe from the gallery: rays, bob, twinkle, pink (no glow). bobAmp px/s fall-speed swing, bobSpeed radians/s
     stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -7, fadeMs: 300 },
     weaponGem: { file: 'pickups/potion-violet.png', frameW: 32, frameH: 32, frames: 1, fps: 1, scale: 0.9, hueShift: -85, hueRange: [225, 335], valueMul: 1.0, satMul: 1.4, angle: 15 }, // the violet is turned to blue and made a bit darker (same family as the blue shot); the cork and ribbon keep their colour // weapon upgrade = the twinkling violet potion (one 32x32 picture with sparkles drawn in). The old green gem strip is gem-green.png (4 frames of 16x16, scale 1.2)
     fxPoolSize: 8 // chest-break and heart-collect animations playing at once
