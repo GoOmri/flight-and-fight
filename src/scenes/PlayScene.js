@@ -593,6 +593,7 @@ export class PlayScene extends Phaser.Scene {
       // instead of stopping dead. The rest point is where she would be after stopGlide seconds; a damped spring (stopOmega, stopDamping) pulls her there.
       if (!this.stopping) {
         this.stopping = true;
+        this.stopDirX = Math.sign(this.stickV.x); // remember which way she was flying: the bounce back must not turn her
         this.stopT.set(Phaser.Math.Clamp(s.x + this.stickV.x * T.stopGlide, S.margin, W - S.margin), Phaser.Math.Clamp(s.y + this.stickV.y * T.stopGlide, S.margin, H - S.margin));
       }
       const sd = Math.min(dt, 0.04), w2 = T.stopOmega * T.stopOmega, c = 2 * T.stopDamping * T.stopOmega;
@@ -626,9 +627,11 @@ export class PlayScene extends Phaser.Scene {
     if (Math.abs(this.target.y - s.y) < 0.25) s.y = this.target.y;
     const vx = dt > 0 ? (s.x - px) / dt : 0;
     this.vx = vx; this.vy = dt > 0 ? (s.y - py) / dt : 0;
-    const dirKey = vx > S.sideSpeed ? 'witch_e' : (vx < -S.sideSpeed ? 'witch_w' : 'witch_n'); // side view when she flies sideways
+    // Look (side view + tilt): during the soft stop only the forward glide counts, never the bounce back (it would turn her the other way).
+    const vl = (this.stickMode && this.stopping && vx * this.stopDirX <= 0) ? 0 : vx;
+    const dirKey = vl > S.sideSpeed ? 'witch_e' : (vl < -S.sideSpeed ? 'witch_w' : 'witch_n'); // side view when she flies sideways
     if (dirKey !== this.witchAnim) { this.witchAnim = dirKey; s.play(dirKey, true); }
-    const want = Phaser.Math.Clamp(vx / S.bankSpeed, -1, 1) * Phaser.Math.DegToRad(S.bankDeg);
+    const want = Phaser.Math.Clamp(vl / S.bankSpeed, -1, 1) * Phaser.Math.DegToRad(S.bankDeg);
     s.rotation += (want - s.rotation) * (1 - Math.exp(-S.bankEase * dt));
   }
 

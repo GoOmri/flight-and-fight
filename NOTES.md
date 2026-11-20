@@ -253,3 +253,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 v1.5.3: vulture is the shooter
 - Omri chose the vulture for the shooter. config.enemies.sprites.shooter now uses vulture.png (frames 1,3,2,3, scale 1.0, hit 24x24). The dino sheet stays in assets but is unused.
 - UNVERIFIED: the flap loop order (a guess), which way it faces when moving, size and hitbox on the phone, death colours (shooter explosion is still magenta).
+
+## 2026-11-20 v1.5.4: soft stop no longer turns the witch
+- Omri: after every move the witch turned (side view + tilt) the other way. Cause: the soft-stop spring bounces the speed back, and the look followed that speed. Now during the soft stop only the forward glide counts (this.stopDirX); the bounce back is ignored for the side view and tilt. Movement itself is unchanged.
+- UNVERIFIED on the phone (syntax checked only, not run). Check: lift the thumb after a sideways move: she should not flip to the other side. If it still feels wrong, set config.stick.stopGlide to 0 to turn the soft stop off.
