@@ -167,7 +167,8 @@ export class PlayScene extends Phaser.Scene {
     // ?debug=1: a small line under the version (drawing mode, speed, controls) so a problem on one device can be read off the screen
     this.dbg = q.get('debug') ? this.add.text(4, 38, '', { fontSize: '8px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }).setDepth(90) : null;
     this.dbgAt = 0;
-    this.dbgInfo = () => 'v' + C.version + ' ' + (this.game.config.renderType === Phaser.WEBGL ? 'WEBGL' : 'CANVAS') + ' ' + Math.round(this.game.loop.actualFps) + 'fps ' + (this.mouseMode ? 'mouse' : (this.stickMode ? 'stick' : 'drag'));
+    const glOk = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; } })(); // can this browser make a WebGL picture at all?
+    this.dbgInfo = () => 'v' + C.version + ' ' + (this.game.config.renderType === Phaser.WEBGL ? 'WEBGL' : 'CANVAS') + ' gl:' + (glOk ? 'yes' : 'no') + ' ' + Math.round(this.game.loop.actualFps) + 'fps ' + (this.mouseMode ? 'mouse' : (this.stickMode ? 'stick' : 'drag'));
 
     // Collisions
     this.physics.add.overlap(this.bullets, this.enemies, (b, e) => this.bulletHitsEnemy(b, e));
@@ -574,7 +575,7 @@ export class PlayScene extends Phaser.Scene {
         .setOrigin(0.5).setDepth(30).setVisible(false));
     }
     // muzzle flash: two small white pixels at the nose, shown for a few ms on every volley
-    this.muzzle = [0, 1].map(() => this.add.image(0, 0, 'square').setScale(C.feel.muzzleSize).setDepth(11).setVisible(false));
+    this.muzzle = [0].map(() => this.add.image(0, 0, 'square').setScale(C.feel.muzzleSize).setDepth(11).setVisible(false));
   }
 
   makeShip() {
@@ -621,9 +622,10 @@ export class PlayScene extends Phaser.Scene {
       }
       cv.refresh();
     }
+    if (!this.textures.exists('bugDot')) { const bc = this.textures.createCanvas('bugDot', 1, 1); bc.getContext('2d').fillStyle = hex(LN.bugColor); bc.getContext('2d').fillRect(0, 0, 1, 1); bc.refresh(); } // a coloured dot made once (no tint, so it is coloured in CANVAS too)
     for (let i = 0; i < LN.count; i++) {
       const L = { spr: this.add.sprite(0, 0, 'lan_0', 0).setDepth(LN.depth), glow: this.add.image(0, 0, 'lanternGlow').setScale(LN.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(LN.depth - 0.05), bugs: [], ph: Math.random() * 10, side: i % 2 ? 1 : -1 };
-      for (let b = 0; b < LN.bugs; b++) L.bugs.push({ s: this.add.image(0, 0, 'square').setScale(LN.bugSize).setTint(LN.bugColor).setDepth(LN.depth + 0.1), r: 4 + Math.random() * 5, w: (0.8 + Math.random() * 1.2) * (Math.random() < 0.5 ? -1 : 1), p: Math.random() * TAU, k: 1 + Math.random() * 0.8 });
+      for (let b = 0; b < LN.bugs; b++) L.bugs.push({ s: this.add.image(0, 0, 'bugDot').setScale(LN.bugSize).setDepth(LN.depth + 0.1), r: 4 + Math.random() * 5, w: (0.8 + Math.random() * 1.2) * (Math.random() < 0.5 ? -1 : 1), p: Math.random() * TAU, k: 1 + Math.random() * 0.8 });
       this.lanterns.push(L);
       this.placeLantern(L, true, i);
     }
@@ -649,7 +651,7 @@ export class PlayScene extends Phaser.Scene {
       L.spr.setPosition(x, y);
       L.glow.setPosition(gx, gy).setAlpha(G.flicker[(step + Math.floor(L.ph)) % G.flicker.length]);
       for (const b of L.bugs) {
-        const a = b.p + step * b.w * 0.5;
+        const a = b.p + step * b.w * LN.bugSpeed;
         b.s.setPosition(Math.round(gx + Math.cos(a) * b.r), Math.round(gy + Math.sin(a * b.k) * b.r * 0.7)).setAlpha(((step + Math.floor(b.p * 3)) % 5 === 0) ? 0.35 : 1);
       }
     }
@@ -866,7 +868,7 @@ export class PlayScene extends Phaser.Scene {
       b.body.setVelocity(Math.sin(a) * sp, -Math.cos(a) * sp);
     }
     const F = C.feel;
-    this.muzzle.forEach((m, i) => m.setPosition(this.ship.x + (i ? F.muzzleSpread : -F.muzzleSpread), this.ship.y - C.ship.muzzleY).setVisible(true));
+    this.muzzle.forEach((m, i) => m.setPosition(this.ship.x + (this.muzzle.length > 1 ? (i ? F.muzzleSpread : -F.muzzleSpread) : 0), this.ship.y - C.ship.muzzleY).setVisible(true));
     this.muzzleUntil = time + F.muzzleMs;
     this.recoil = 1;
   }

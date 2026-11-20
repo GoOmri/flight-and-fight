@@ -27,7 +27,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.8.6", // bump on every push so the player/Omri can see the build
+  version: "1.8.7", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -96,7 +96,7 @@ export const CONFIG = {
   bullet: {
     speed: z(620),
     // The witch's shot: one orange fire bolt straight up ("flight_smooth" of the SovDigital fire pack, north row, shrunk 5x and cut to 6 fire colours). Delete this entry to get the old twin code-drawn shots back (then set pattern TWIN).
-    fire: { file: 'fx/fire-shot.png', frameW: 8, frameH: 22, frames: 12, fps: 24, scale: 1.6, hitW: 6, hitH: 16 },
+    fire: { file: 'fx/fire-shot.png', frameW: 8, frameH: 22, frames: 12, fps: 24, scale: 2, hitW: 6, hitH: 16 },
     poolSize: 90         // level 10 fires 7 shots every 145 ms and they live about 1 s: about 50 alive at once
   },
 
@@ -165,7 +165,7 @@ export const CONFIG = {
       grunt:   { file: 'bat-S.png', frameW: 48, frameH: 64, frames: [0, 1, 2, 1], fps: 8, scale: 1.1, hitW: 27, hitH: 22, faceVelocity: false },
       // Dino IDLE sheet (4 frames = one breathing/bobbing loop, side view facing right). The long dino.png is a jump (crouch, leap, land), not a loop, so it is not used.
       // Ghost = the green pixel ghost, animation 'column 3' of gosth.png (gallery numbering, x=50) (4 frames of 25x25, read top to bottom), replaces the code-drawn swaying ghost.
-    zigzag:  { file: 'ghost-sway.png', frameW: 25, frameH: 25, frames: [0, 1, 2, 3], fps: 8, scale: 1.7, hitW: 14, hitH: 16, faceVelocity: false },
+    zigzag:  { file: 'ghost-sway.png', frameW: 25, frameH: 25, frames: [0, 1, 2, 3], fps: 8, scale: 2.1, hitW: 14, hitH: 16, faceVelocity: false },
     shooter: { file: 'wisp.png', frameW: 96, frameH: 96, frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], fps: 12, scale: 0.5, hitW: 44, hitH: 52, faceVelocity: false }, // fire wisp (10 frames of 96 px, drawn at half size)
       // Vulture (not used in waves yet). Frames of vulture.png: 0 = folded, 1 = wings up, 2 = wings flat/low, 3 = half. Flap loop: up, half, low, half. (Cleanest guess; check it.)
       vulture: { file: 'vulture.png', frameW: 39, frameH: 39, frames: [1, 3, 2, 3], fps: 8, scale: 0.8, hitW: 22, hitH: 22, faceVelocity: true }
@@ -198,7 +198,7 @@ export const CONFIG = {
     poof: { file: 'fx/poof.png', frameW: 82, frameH: 72, frames: 30, fps: 60, scale: 0.6, bigMul: 1.5, poolSize: 8, depth: 18 },
     // Weapon-upgrade pickup = green gem (4 frames of 16x16, loops, random start frame). scale 1 = 16 px (3 screen pixels per art pixel; stays even). The grab radius stays coin.pickupRadius on screen.
     // Stars circling over her head after a hit ("stunned" of the free spell pack, MIT, 60 frames of 60x64, loops). offsetY = from her centre (negative = up; the stars sit just above her head), fadeMs = fade-out at the end. It lasts as long as she blinks after a hit (ship.invulnMs).
-    stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -12, fadeMs: 300 },
+    stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -10, fadeMs: 300 },
     weaponGem: { file: 'pickups/gem-green.png', frameW: 16, frameH: 16, frames: 4, fps: 8, scale: 1.2 },
     fxPoolSize: 8 // chest-break and heart-collect animations playing at once
   },
@@ -320,7 +320,7 @@ CONFIG.background.swamp = {
       { file: 'witch_lantern_0_anim', w: 24, h: 41, glowDx: -1.2, glowDy: -7.3 }
     ],
     glow: { cell: 2, rings: [{ r: 2, color: 0xb8ff90, alpha: 0.6 }, { r: 4, color: 0x4fe070, alpha: 0.36 }, { r: 7, color: 0x2fbf6a, alpha: 0.18 }], flicker: [1, 0.8, 1, 0.65, 0.9, 1, 0.75] },
-    bugs: 3, bugSize: 2, bugColor: 0xe6ff8a },
+    bugs: 3, bugSize: 1.5, bugSpeed: 0.3, bugColor: 0xe6ff8a }, // bugSize in px (a bit smaller than 2), bugSpeed = how fast they circle (was 0.5)
   light: { on: true, depth: -6, // fog: big, very soft, pale grey-green patches (same code as the forest cloud shadows) drifting over the floor
     shadowCount: 5, shadowVariants: 3, shadowSize: 64, shadowCell: 4, shadowGapY: 300, shadowSpeedMul: 1.5, shadowDrift: 5, shadowAlpha: 0.12, shadowColor: 0xb4c2b0,
     shaftCount: 0, shaftScale: [1, 1], shaftAngleDeg: 0, shaftAlpha: [0, 0], shaftPulse: 0, shaftDrift: 0 } // no light shafts in the swamp
