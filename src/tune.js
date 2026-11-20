@@ -17,7 +17,7 @@ const dropRows = k => [
   ['GLOW OPACITY', `sprites.${k}Shine.glow.opacity`, 0.1, 0, 2, 1, true],
   ['FALL SPEED', { coin: 'coin.fallSpeed', heart: 'pickup.heartFallSpeed', potion: 'pickup.weaponFallSpeed' }[k], 5, 10, 300, 0],
   ...{
-    coin: [['MAGNET RANGE', 'feel.magnetRadius', 2, 0, 120, 0], ['MAGNET SPEED', 'feel.magnetSpeed', 10, 50, 900, 0]],
+    coin: [['STACK: SHINE FRONT COIN', 'sprites.coinShine.groupPx', 2, 0, 40, 0], ['MAGNET RANGE', 'feel.magnetRadius', 2, 0, 120, 0], ['MAGNET SPEED', 'feel.magnetSpeed', 10, 50, 900, 0]],
     heart: [['BOB AMOUNT', 'sprites.heartShine.bobAmp', 1, 0, 40, 0]],
     potion: [['TILT ANGLE', 'sprites.weaponGem.angle', 5, -45, 45, 0], ['BOB AMOUNT', 'sprites.potionShine.bobAmp', 1, 0, 40, 0]]
   }[k],

@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.27", // bump on every push so the player/Omri can see the build
+  version: "1.9.28", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -208,7 +208,7 @@ export const CONFIG = {
     // Stars circling over her head after a hit ("stunned" of the free spell pack, MIT, 60 frames of 60x64, loops). offsetY = from her centre (negative = up; the stars sit just above her head), fadeMs = fade-out at the end. It lasts as long as she blinks after a hit (ship.invulnMs).
     // SHINE of every drop (coin, heart, potion): ONE shared look (SHINE above): spinning beams (3 pictures at fps, alpha = opacity, radius = length, widths in px) and a soft glow of flat rings behind it,
     // plus a little white twinkle. Only the colours and the twinkle spot differ per drop. Every drop on screen has it. The tune panel changes the shared numbers for all three at once.
-    coinShine: shine({ rayColor: '#ffe9a0', glowColors: [0xfff3c0, 0xffd04a, 0xc98a1a], glintDx: 5, glintDy: -6 }),
+    coinShine: shine({ groupPx: 14, rayColor: '#ffe9a0', glowColors: [0xfff3c0, 0xffd04a, 0xc98a1a], glintDx: 5, glintDy: -6 }),
     potionShine: shine({ radius: 14, glowOver: { size: 0.55 }, bobAmp: 14, bobSpeed: 5, offsetY: 3, rayColor: '#cfe4ff', glowColors: [0xb8d8ff, 0x4f8fe0, 0x2f5fbf], glintDx: 6, glintDy: -9 }),
     heartShine: shine({ radius: 14, glowOver: { size: 0.55 }, rayColor: '#ffc4e2', glowColors: [0xffe3f0, 0xff8fc0, 0xc0407a], glintDx: 6, glintDy: -8, bobAmp: 14, bobSpeed: 5 }), // bobAmp px/s fall-speed swing, bobSpeed radians/s
     stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -7, fadeMs: 300 },

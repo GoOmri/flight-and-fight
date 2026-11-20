@@ -1034,8 +1034,10 @@ export class PlayScene extends Phaser.Scene {
       const S = C.sprites[kind + 'Shine'], pool = this.shinePools[kind];
       if (!S || !group) continue;
       let n = 0;
-      group.children.iterate(c => {
-        if (!c || !c.active || c.y <= -10 || c.y >= H) return;
+      const live = []; group.children.iterate(c => { if (c && c.active && c.y > -10 && c.y < H) live.push(c); });
+      // coins in a stack (a chest spill): only the coin in FRONT (lowest on screen) of its stack gets the shine, so the effects do not pile up
+      const front = kind === 'coin' && S.groupPx > 0 ? live.filter((c, i) => !live.some((d, j) => j !== i && (d.y > c.y || (d.y === c.y && j > i)) && Math.hypot(d.x - c.x, d.y - c.y) < S.groupPx)) : live;
+      front.forEach(c => {
         let sh = pool[n];
         if (!sh) sh = pool[n] = {
           rays: this.add.image(0, 0, pre + '0').setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.5),

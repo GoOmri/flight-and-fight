@@ -520,3 +520,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 v1.9.27: potion and heart animation at 8 fps (branch v1927-slower-anim)
 - Omri: the potion's first animation looked smoother; both should play at 8 fps. Potion flask 12 -> 8 fps. Heart idle loop 18 -> 8 fps (the v1.9.24 speed-up is undone; the top-bar hearts and the pack's shine layer share that loop, so they slow down too). Heart drop and collect go back to their original 14 fps.
 - UNVERIFIED on the phone: how the flask and heart look at 8 fps (config sprites.weaponGem.fps, sprites.heartPickup.idle.fps).
+
+## 2026-11-20 v1.9.28: only the front coin of a stack has the shine (branch v1928-coin-stack-front)
+- Omri: coins from a chest spill stack and their effects pile up on top of each other. Now a coin has no beams, glow or twinkle when another coin is closer than 14 px and lower on screen (in front of it): only the front coin of each stack shines. Coins that are apart still all shine (v1.9.11 stays). config sprites.coinShine.groupPx 14 (0 = every coin shines again); tune: DROPS > COIN > STACK: SHINE FRONT COIN. Applies to coins only (hearts and potions come one at a time).
+- UNVERIFIED: not run (preview would not open). 14 px is a guess: the beams are 13 px long, so a spill spread wider than 14 px may still overlap a little: raise the number.
