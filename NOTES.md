@@ -419,3 +419,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 v1.9.8: witch shot = Fox shot 6, colour 5 (branch v1980-fox-shot, includes v1.9.7)
 - Omri picked "Fox shot 6, colour 5" in the gallery (a blue teardrop) as the witch's shot. It is now one picture (assets/shots/fox-shot-6.png, 13x19 with 1 px of space, cut from the FoX71 sheet) drawn at scale 2 (26x38 px), hitbox 6x14, no animation. The old fire strip (assets/fx/fire-shot.png, blue via hue shift) is unused; to get it back set bullet.fire to { file 'fx/fire-shot.png', frameW 8, frameH 22, frames 12, fps 24, scale 2, hitW 6, hitH 16, hueShift 195 }. Credit FoX71 in CREDITS.md (the pack requires it). Verified: 6 shots on screen, about 64 px apart, 26x38 px. This branch also carries v1.9.7 (pickups above the colour wash, rays from the centre), which was not pushed yet.
 - UNVERIFIED on the phone: how a static teardrop looks flying (the fire strip flickered), the size, the spacing at the slower speed.
+
+## 2026-11-20 v1.9.9: shorter rays, front coin shine, smaller witch shot (branch v1990-shorter-rays)
+- Omri: witch shot too big -> scale 2 -> 1.5 (19x28 px). Rays too long -> coin radius 20 -> 14, potion 26 -> 19, heart 24 -> 17 (still starting at the sprite centre, 2 to 5 px wide).
+- Coin shine: only ONE coin has it at a time (by design, so a chest spill shows one). It is now the coin in FRONT (lowest on screen), and it keeps the shine until it is gone or another coin is more than 10 px further down; before it was simply the first coin in the pool. Verified with 6 coins: the target is the lowest one.
+- UNVERIFIED on the phone: shot size, ray length.

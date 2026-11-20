@@ -1043,9 +1043,11 @@ export class PlayScene extends Phaser.Scene {
   updateShine(time) {
     const S = C.sprites.coinShine;
     if (!S || !this.shineRays) return;
-    if (!this.shineTarget || !this.shineTarget.active || this.shineTarget.y > H + 10) {
-      this.shineTarget = this.coins.getChildren().find(c => c.active && c.y > 0 && c.y < H) || null;
-    }
+    // the coin in FRONT (lowest on screen) has the shine; it keeps it until it is gone or another coin is clearly further down
+    const cur = this.shineTarget && this.shineTarget.active && this.shineTarget.y < H + 10 ? this.shineTarget : null;
+    let front = cur;
+    this.coins.children.iterate(c => { if (c && c.active && c.y > 0 && c.y < H && (!front || c.y > front.y + 10)) front = c; });
+    this.shineTarget = front;
     const c = this.shineTarget;
     this.shineRays.setVisible(!!c); this.shineGlint.setVisible(false);
     if (!c) return;
