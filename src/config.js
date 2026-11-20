@@ -96,7 +96,7 @@ export const CONFIG = {
   bullet: {
     speed: z(520), // witch shot speed (was z(620))
     // The witch's shot: one orange fire bolt straight up ("flight_smooth" of the SovDigital fire pack, north row, shrunk 5x and cut to 6 fire colours). Delete this entry to get the old twin code-drawn shots back (then set pattern TWIN).
-    fire: { file: 'fx/fire-shot.png', frameW: 8, frameH: 22, frames: 12, fps: 24, scale: 2, hitW: 6, hitH: 16, hueShift: 195 }, // hueShift: the orange fire is turned to blue (the player's side is cool, danger is hot)
+    fire: { file: 'shots/fox-shot-6.png', frameW: 13, frameH: 19, frames: 1, fps: 1, scale: 2, hitW: 6, hitH: 14 }, // the witch's shot: Fox shot 6, colour 5 (a blue teardrop, one picture) from the FoX71 shot sheet. Old fire strip: fx/fire-shot.png (frameW 8, frameH 22, frames 12, fps 24, hueShift 195)
     poolSize: 90         // level 10 fires 7 shots every 145 ms and they live about 1 s: about 50 alive at once
   },
 
