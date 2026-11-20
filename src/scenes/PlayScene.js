@@ -42,7 +42,7 @@ export class PlayScene extends Phaser.Scene {
     const K = C.sprites; // coin / heart / chest / puff strips (assets/pickups, assets/fx); a thing without an entry keeps its code-drawn picture
     const strip = (key, d) => this.load.spritesheet(key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
     if (K.coin) strip('sp_coin', K.coin);
-    if (K.heartPickup) for (const n of ['idle', 'drop', 'collect']) strip('sp_heart_' + n, K.heartPickup[n]);
+    if (K.heartPickup) for (const n of ['idle', 'drop', 'collect', 'shine']) if (K.heartPickup[n]) strip('sp_heart_' + n, K.heartPickup[n]);
     if (K.crate) { strip('sp_crate_idle', K.crate.idle); strip('sp_crate_break', K.crate.break); }
     if (K.poof) strip('sp_poof', K.poof);
     if (K.weaponGem) strip('sp_gem', K.weaponGem);
@@ -554,7 +554,7 @@ export class PlayScene extends Phaser.Scene {
     this.events.on('postupdate', this.shinePost);
     this.coinShines = null; // one rays + glint picture per coin, made on demand (scene restarts get a fresh list)
     this.shineRays = C.sprites.coinShine ? this.add.image(0, 0, 'rays0').setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.5).setVisible(false) : null;
-    this.heartTarget = null;
+    this.heartTarget = null; this.heartShineSp = null; // pack shine overlays, made on demand
     this.heartGlint = C.sprites.heartShine ? this.add.image(0, 0, 'glint0').setDepth(C.pickup.depth + 0.1).setVisible(false) : null;
     this.heartGlow = C.sprites.heartShine && C.sprites.heartShine.glow ? this.add.image(0, 0, 'heartGlow').setScale(C.sprites.heartShine.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.6).setVisible(false) : null;
     this.heartRays = C.sprites.heartShine ? this.add.image(0, 0, 'raysh0').setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.5).setVisible(false) : null;
@@ -1069,7 +1069,17 @@ export class PlayScene extends Phaser.Scene {
   updateHeartShine(time) {
     const HS = C.sprites.heartShine;
     if (!HS || !this.heartRays) return;
-    this.heartUps.children.iterate(p => { if (p && p.active && p.baseV) p.body.setVelocityY(p.baseV + HS.bobAmp * Math.sin(time / 1000 * HS.bobSpeed + p.bobPh)); });
+    const shSp = C.sprites.heartPickup && C.sprites.heartPickup.shine ? (this.heartShineSp = this.heartShineSp || []) : null; // the pack's own shine layer: glints crossing the heart, same frame as the heart's Idle loop
+    let ns = 0;
+    this.heartUps.children.iterate(p => {
+      if (!p || !p.active) return;
+      if (p.baseV) p.body.setVelocityY(p.baseV + HS.bobAmp * Math.sin(time / 1000 * HS.bobSpeed + p.bobPh));
+      if (!shSp || !p.anims.currentAnim || p.anims.currentAnim.key !== 'heart_idle') return;
+      const o = shSp[ns] || (shSp[ns] = this.add.image(0, 0, 'sp_heart_shine').setDepth(C.pickup.depth + 0.05));
+      ns++;
+      o.setFrame(Number(p.frame.name) || 0).setScale(p.scaleX).setPosition(p.x, p.y).setVisible(true);
+    });
+    if (shSp) for (let i = ns; i < shSp.length; i++) shSp[i].setVisible(false);
     if (!this.heartTarget || !this.heartTarget.active || this.heartTarget.y > H + 20) this.heartTarget = this.heartUps.getChildren().find(p => p.active && p.y > -10 && p.y < H) || null;
     const c = this.heartTarget;
     this.heartRays.setVisible(!!c); if (this.heartGlow) this.heartGlow.setVisible(!!c); this.heartGlint.setVisible(false);

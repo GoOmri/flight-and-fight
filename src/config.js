@@ -183,6 +183,7 @@ export const CONFIG = {
     // Falling heart (carrier drop): Drop plays once when it appears, then Idle loops while it falls; Collect plays once at the witch when she grabs it.
     heartPickup: { scale: 1, collectDepth: 12, // collectDepth: drawn over the witch (10)
       idle:    { file: 'pickups/heart-idle.png',    frameW: 26, frameH: 62, frames: 24, fps: 12 },
+      shine:   { file: 'pickups/heart-shine.png',   frameW: 26, frameH: 62, frames: 24 }, // the pack's outline_shine layer, drawn over Idle (same frames); remove the key to hide it
       drop:    { file: 'pickups/heart-drop.png',    frameW: 26, frameH: 62, frames: 11, fps: 14 },
       collect: { file: 'pickups/heart-collect.png', frameW: 26, frameH: 62, frames: 12, fps: 14 } },
     // Hearts in the top bar: the same Idle loop, scale = size (the old code-drawn heart was 14 px wide), desync = frames between neighbouring hearts.
