@@ -27,13 +27,13 @@ function weaponLevels() {
 }
 
 // Shared shine look of coins, hearts and potions (see sprites.coinShine / heartShine / potionShine). glow.size scales the glow (1 = rings of 5, 8, 11 pixels; the potion's glow was 50% too big, so 0.67),
-// glow.opacity scales how strong it is. beamMul / glowMul (per drop) make the beams and the glow of a bigger drop bigger: coin 1 / 1, heart 1.1 / 1.25, potion 1.15 / 1.5. The glow object is shared, so changing it changes all three.
-const SHINE = { radius: 13, inner: 1, widthStart: 1, widthEnd: 5, alphaEnd: 0.2, fps: 6, alpha: 0.2, glintEveryMs: 1200, glintMs: 200,
+// glow.opacity scales how strong it is. Each drop has its own beam length (radius), opacity (alpha), tip fade (alphaEnd) and glow numbers: change them per drop in the tune panel (DROPS tab).
+const SHINE = { radius: 13, inner: 1, widthStart: 1, widthEnd: 5, alphaEnd: 0.25, fps: 6, alpha: 0.2, glintEveryMs: 1200, glintMs: 200,
   glow: { cell: 2, size: 0.52, opacity: 0.6, rings: [{ r: 5, a: 0.55 }, { r: 8, a: 0.38 }, { r: 11, a: 0.2 }], flicker: [1, 0.85, 1, 0.7, 0.95], stepFps: 6 } };
-const shine = own => ({ ...SHINE, ...own });
+const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.24", // bump on every push so the player/Omri can see the build
+  version: "1.9.25", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -208,11 +208,11 @@ export const CONFIG = {
     // Stars circling over her head after a hit ("stunned" of the free spell pack, MIT, 60 frames of 60x64, loops). offsetY = from her centre (negative = up; the stars sit just above her head), fadeMs = fade-out at the end. It lasts as long as she blinks after a hit (ship.invulnMs).
     // SHINE of every drop (coin, heart, potion): ONE shared look (SHINE above): spinning beams (3 pictures at fps, alpha = opacity, radius = length, widths in px) and a soft glow of flat rings behind it,
     // plus a little white twinkle. Only the colours and the twinkle spot differ per drop. Every drop on screen has it. The tune panel changes the shared numbers for all three at once.
-    coinShine: shine({ beamMul: 1, glowMul: 1, rayColor: '#ffe9a0', glowColors: [0xfff3c0, 0xffd04a, 0xc98a1a], glintDx: 5, glintDy: -6 }),
-    potionShine: shine({ beamMul: 1.15, glowMul: 1.5, rayColor: '#cfe4ff', glowColors: [0xb8d8ff, 0x4f8fe0, 0x2f5fbf], glintDx: 6, glintDy: -9 }),
-    heartShine: shine({ beamMul: 1.1, glowMul: 1.25, rayColor: '#ffc4e2', glowColors: [0xffe3f0, 0xff8fc0, 0xc0407a], glintDx: 6, glintDy: -8, bobAmp: 14, bobSpeed: 5 }), // bobAmp px/s fall-speed swing, bobSpeed radians/s
+    coinShine: shine({ rayColor: '#ffe9a0', glowColors: [0xfff3c0, 0xffd04a, 0xc98a1a], glintDx: 5, glintDy: -6 }),
+    potionShine: shine({ radius: 14, glowOver: { size: 0.55 }, rayColor: '#cfe4ff', glowColors: [0xb8d8ff, 0x4f8fe0, 0x2f5fbf], glintDx: 6, glintDy: -9 }),
+    heartShine: shine({ radius: 14, glowOver: { size: 0.55 }, rayColor: '#ffc4e2', glowColors: [0xffe3f0, 0xff8fc0, 0xc0407a], glintDx: 6, glintDy: -8, bobAmp: 14, bobSpeed: 5 }), // bobAmp px/s fall-speed swing, bobSpeed radians/s
     stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -7, fadeMs: 300 },
-    weaponGem: { file: 'pickups/potion-violet.png', frameW: 32, frameH: 32, frames: 1, fps: 1, scale: 0.9, hueShift: -85, hueRange: [225, 335], valueMul: 1.0, satMul: 1.4, angle: 15 }, // the violet is turned to blue and made a bit darker (same family as the blue shot); the cork and ribbon keep their colour // weapon upgrade = the twinkling violet potion (one 32x32 picture with sparkles drawn in). The old green gem strip is gem-green.png (4 frames of 16x16, scale 1.2)
+    weaponGem: { file: 'pickups/potion-flask.png', frameW: 64, frameH: 64, frames: 24, fps: 12, scale: 0.45, angle: 0 }, // the weapon potion: round blue flask of the Alchemy pack (Frakassets, 64 px, no outline, lit; 24 frames at 12 fps). scale 0.45 = about the old size. angle = tilt in degrees
     fxPoolSize: 8 // chest-break and heart-collect animations playing at once
   },
 

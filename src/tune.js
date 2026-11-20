@@ -6,7 +6,23 @@ import { FONT, drawPlate } from './hud.js';
 
 const W = C.game.width; // logical width (240)
 const P = C.menu.pal;
-// Tabs. Each row: label, path in CONFIG, step, min, max, decimals, [rebuild = beams and glow pictures must be drawn again], [all3 = also set the same number on the heart and potion shine]
+// Tabs. Each row: label, path in CONFIG, step, min, max, decimals, [rebuild = beams and glow pictures must be drawn again].
+// The DROPS tab has a "which drop" button (coin / heart / potion): its rows are written for the chosen drop, every drop has its own numbers (nothing is shared).
+const KINDS = ['coin', 'heart', 'potion'];
+const dropRows = k => [
+  ['BEAM LENGTH', `sprites.${k}Shine.radius`, 1, 4, 40, 0, true],
+  ['BEAM OPACITY', `sprites.${k}Shine.alpha`, 0.05, 0, 1, 2],
+  ['BEAM TIP FADE-OUT', `sprites.${k}Shine.alphaEnd`, 0.05, 0, 1, 2, true],
+  ['GLOW SIZE', `sprites.${k}Shine.glow.size`, 0.05, 0.2, 1.8, 2, true],
+  ['GLOW OPACITY', `sprites.${k}Shine.glow.opacity`, 0.1, 0, 2, 1, true],
+  ['FALL SPEED', { coin: 'coin.fallSpeed', heart: 'pickup.heartFallSpeed', potion: 'pickup.weaponFallSpeed' }[k], 5, 10, 300, 0],
+  ...{
+    coin: [['MAGNET RANGE', 'feel.magnetRadius', 2, 0, 120, 0], ['MAGNET SPEED', 'feel.magnetSpeed', 10, 50, 900, 0]],
+    heart: [['BOB AMOUNT', 'sprites.heartShine.bobAmp', 1, 0, 40, 0]],
+    potion: [['TILT ANGLE', 'sprites.weaponGem.angle', 5, -45, 45, 0]]
+  }[k],
+  ['GRAB SIZE (ALL DROPS)', 'coin.pickupRadius', 1, 4, 40, 0]
+];
 const TABS = [
   ['STICK', [
     ['SHIP MOVE SPEED', 'stick.speed', 10, 60, 600, 0],
@@ -17,43 +33,26 @@ const TABS = [
     ['GLIDE AFTER RELEASE', 'stick.stopGlide', 0.02, 0, 0.4, 2],
     ['STOP SETTLE SPEED', 'stick.stopOmega', 1, 4, 40, 0],
     ['STOP DAMPING (BRAKE)', 'stick.stopDamping', 0.05, 0.1, 1, 2]]],
-  ['LOOK', [
-    ['DROP BEAM OPACITY', 'sprites.coinShine.alpha', 0.05, 0, 1, 2, false, true],
-    ['DROP BEAM LENGTH', 'sprites.coinShine.radius', 1, 4, 40, 0, true, true],
-    ['BEAM TIP FADE-OUT', 'sprites.coinShine.alphaEnd', 0.05, 0, 1, 2, true, true],
-    ['DROP GLOW SIZE', 'sprites.coinShine.glow.size', 0.05, 0.3, 1.8, 2, true, true],
-    ['DROP GLOW OPACITY', 'sprites.coinShine.glow.opacity', 0.1, 0, 2, 1, true, true],
+  ['SHOT', [
     ['WITCH SHOT SIZE', 'bullet.fire.scale', 0.05, 0.5, 3, 2],
     ['WITCH SHOT SPEED', 'bullet.speed', 10, 100, 900, 0],
-    ['GAP BETWEEN SHOTS', 'bullet.gap', 0.1, 0.3, 3, 1],]],
-  ['DROPS', [
-    ['HEART FALL SPEED', 'pickup.heartFallSpeed', 5, 10, 200, 0],
-    ['POTION FALL SPEED', 'pickup.weaponFallSpeed', 5, 10, 300, 0],
-    ['COIN FALL SPEED', 'coin.fallSpeed', 5, 10, 300, 0],
-    ['COIN MAGNET RANGE', 'feel.magnetRadius', 2, 0, 120, 0],
-    ['COIN MAGNET SPEED', 'feel.magnetSpeed', 10, 50, 900, 0],
-    ['PICKUP GRAB SIZE', 'coin.pickupRadius', 1, 4, 40, 0],
-    ['HEART BOB AMOUNT', 'sprites.heartShine.bobAmp', 1, 0, 40, 0],
-    ['POTION TILT ANGLE', 'sprites.weaponGem.angle', 5, -45, 45, 0],
-    ['HEART BEAM LENGTH X', 'sprites.heartShine.beamMul', 0.05, 0.5, 2.5, 2, true],
-    ['HEART GLOW SIZE X', 'sprites.heartShine.glowMul', 0.05, 0.5, 2.5, 2, true],
-    ['POTION BEAM LENGTH X', 'sprites.potionShine.beamMul', 0.05, 0.5, 2.5, 2, true],
-    ['POTION GLOW SIZE X', 'sprites.potionShine.glowMul', 0.05, 0.5, 2.5, 2, true]]],
-  ['HARD', [
+    ['GAP BETWEEN SHOTS', 'bullet.gap', 0.1, 0.3, 3, 1],
+    ['MY SHOT DAMAGE (X)', 'difficulty.myDamage', 0.25, 0.25, 4, 2]]],
+  ['DROPS', null],
+  ['ENEMY', [
     ['ENEMY HEALTH (X)', 'difficulty.enemyHp', 0.25, 0.25, 4, 2],
     ['ENEMY FLY SPEED (X)', 'difficulty.enemySpeed', 0.1, 0.5, 2, 1],
     ['ENEMY SHOT SPEED (X)', 'difficulty.shotSpeed', 0.1, 0.5, 2, 1],
-    ['ENEMY SHOT DELAY (X)', 'difficulty.shotDelay', 0.1, 0.5, 3, 1],
-    ['MY SHOT DAMAGE (X)', 'difficulty.myDamage', 0.25, 0.25, 4, 2]]],
+    ['ENEMY SHOT DELAY (X)', 'difficulty.shotDelay', 0.1, 0.5, 3, 1]]],
   ['TEST', [
     ['START AT WAVE', 'testing.wave', 1, 1, 10, 0],
     ['START WEAPON LEVEL', 'testing.level', 1, -1, 10, 0],
     ['NO DAMAGE (1 = ON)', 'testing.god', 1, 0, 1, 0]]]
-
 ];
-// New drops use the fall / grab / tilt numbers (things already falling keep the old ones).
-const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'BEAM = LIGHT LINE, GLOW = SOFT HALO', 'NEW DROPS ONLY. X = BIGGER THAN COIN', '(X) 1 = NORMAL. DELAY MORE = EASIER', 'PRESS RESTART. LEVEL -1 = BY WAVE']; // one plain line under each tab
-const ALL = TABS.flatMap(t => t[1]);
+const DROPS_TAB = 2;
+const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'WITCH SHOT: SIZE, SPEED, SPACING', 'TAP THE DROP NAME TO SWITCH DROP', '(X) 1 = NORMAL. DELAY MORE = EASIER', 'PRESS RESTART. LEVEL -1 = BY WAVE'];
+const rowsOf = (tab, pick) => tab === DROPS_TAB ? dropRows(KINDS[pick]) : TABS[tab][1];
+const ALL = TABS.flatMap((t, i) => i === DROPS_TAB ? KINDS.flatMap(dropRows) : t[1]);
 const getp = path => path.split('.').reduce((o, k) => o[k], C);
 const setp = (path, v) => { const ks = path.split('.'), last = ks.pop(); ks.reduce((o, k) => o[k], C)[last] = v; };
 const GEAR = { x: W - 16, y: 34, w: 22, h: 20 };          // gear button (centre), just under the hearts
@@ -79,7 +78,7 @@ export class Tune {
   constructor(scene, onOpen, onClose) {
     this.scene = scene; this.onOpen = onOpen; this.onClose = onClose;
     this.open = false;
-    this.tab = 0;
+    this.tab = 0; this.pick = 0; // pick = which drop the DROPS tab shows
     this.start = {}; ALL.forEach(r => { this.start[r[1]] = getp(r[1]); }); // for RESET
     this.hold = null; this.holdAt = 0; // button being held: { fn }
     this.hits = [];                    // clickable boxes while the panel is open: { x, y, w, h, fn, hold }
@@ -99,7 +98,6 @@ export class Tune {
   set(r, v) {
     v = Math.round(Math.min(r[4], Math.max(r[3], v)) * 1000) / 1000;
     setp(r[1], v);
-    if (r[7]) for (const k of ['heartShine', 'potionShine']) setp(r[1].replace('coinShine', k), v); // a drop-shine row changes coin, heart and potion together
     if (r[6] && this.scene.rebuildRays) this.scene.rebuildRays();
   }
 
@@ -140,20 +138,21 @@ export class Tune {
     button(GEAR.x - GEAR.w / 2, GEAR.y - GEAR.h / 2, GEAR.w, GEAR.h, this.open ? 'X' : 'TUNE', () => this.toggle(), false, this.open ? P.pink : P.purple);
     if (!this.open) { this.hits = this.hits.slice(0, 1); return; }
     // panel
-    const ROWS = TABS[this.tab][1], TABH = 18;
-    const h = PANEL.pad * 2 + TABH + ROWS.length * PANEL.rowH + 36;
+    const ROWS = rowsOf(this.tab, this.pick), TABH = 18, top = this.tab === DROPS_TAB ? 1 : 0; // top = extra first row for the "which drop" button
+    const h = PANEL.pad * 2 + TABH + (ROWS.length + top) * PANEL.rowH + 36;
     g.fillStyle(P.dark, 0.92).fillRect(PANEL.x, PANEL.y, PANEL.w, h);
     g.lineStyle(2, P.pink, 1).strokeRect(PANEL.x, PANEL.y, PANEL.w, h);
     const tw = (PANEL.w - 12) / TABS.length; // tab buttons
     TABS.forEach((t, i) => button(PANEL.x + 6 + i * tw, PANEL.y + 4, tw - 4, 14, t[0], () => { this.tab = i; this.draw(); }, false, i === this.tab ? P.pink : P.purple));
+    if (top) { const y = PANEL.y + PANEL.pad + TABH; T(PANEL.x + 8, y + PANEL.rowH / 2, 'WHICH DROP', 8, P.cream, 0); button(PANEL.x + 112, y + 1, 110, BTN.h, KINDS[this.pick].toUpperCase() + '  (TAP)', () => { this.pick = (this.pick + 1) % KINDS.length; this.draw(); }, false, P.pink); }
     ROWS.forEach((r, i) => {
-      const y = PANEL.y + PANEL.pad + TABH + i * PANEL.rowH, cy = y + PANEL.rowH / 2;
+      const y = PANEL.y + PANEL.pad + TABH + (i + top) * PANEL.rowH, cy = y + PANEL.rowH / 2;
       T(PANEL.x + 8, cy, r[0], 8, P.cream, 0);
       T(PANEL.x + 166, cy, this.val(r), 8, P.cyan, 1);
       button(PANEL.x + 172, y + 1, BTN.w, BTN.h, '-', () => this.change(r, -1), true);
       button(PANEL.x + 198, y + 1, BTN.w, BTN.h, '+', () => this.change(r, 1), true);
     });
-    const by = PANEL.y + PANEL.pad + TABH + ROWS.length * PANEL.rowH + 2;
+    const by = PANEL.y + PANEL.pad + TABH + (ROWS.length + top) * PANEL.rowH + 2;
     button(PANEL.x + 8, by, 52, BTN.h + 2, 'COPY', () => this.copy(), false);
     button(PANEL.x + 66, by, 52, BTN.h + 2, 'RESET', () => this.reset(), false);
     if (this.tab === 4) button(PANEL.x + 124, by, 60, BTN.h + 2, 'RESTART', () => this.restart(), false, P.pink);
