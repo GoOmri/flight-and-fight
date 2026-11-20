@@ -69,6 +69,7 @@ export class PlayScene extends Phaser.Scene {
         if (!this.anims.exists('poof_' + t)) this.anims.create({ key: 'poof_' + t, frames: this.anims.generateFrameNumbers('sp_poof_' + t, { start: 0, end: C.sprites.poof.frames - 1 }), frameRate: C.sprites.poof.fps, repeat: 0 });
       }
     }
+    this.makeShineTextures(); // muzzle flash and coin shine pictures (pixel patterns drawn once)
     for (const t in C.enemies.sprites) this.makeWhiteSheet('en_' + t); // white copies of the enemy sheets for the hit flash (works in WebGL and in the older CANVAS mode)
     for (const t in C.enemies.sprites) { // one flap/bob loop per sprite type, made once (textures and animations persist across restarts)
       const d = C.enemies.sprites[t], key = 'en_' + t + '_loop';
@@ -543,6 +544,9 @@ export class PlayScene extends Phaser.Scene {
     this.enemyBullets = mk('ebullet', C.enemyBullet.poolSize);
     this.enemies = mk('grunt', C.enemies.poolSize);
     this.coins = mk('coin', C.coin.poolSize);
+    this.shineTarget = null; // the one coin that has the shine
+    this.shineRays = C.sprites.coinShine ? this.add.image(0, 0, 'rays0').setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.05).setVisible(false) : null;
+    this.shineGlint = C.sprites.coinShine ? this.add.image(0, 0, 'glint0').setDepth(0.05).setVisible(false) : null;
     this.crates = mk('crate', C.crate.poolSize);
     this.weaponUps = mk('weaponUp', C.pickup.weaponPoolSize);
     this.heartUps = mk('heartUp', C.pickup.heartPoolSize);
@@ -575,7 +579,7 @@ export class PlayScene extends Phaser.Scene {
         .setOrigin(0.5).setDepth(30).setVisible(false));
     }
     // muzzle flash: two small white pixels at the nose, shown for a few ms on every volley
-    this.muzzle = [0].map(() => this.add.image(0, 0, 'square').setScale(C.feel.muzzleSize).setDepth(11).setVisible(false));
+    this.muzzle = [0].map(() => this.add.image(0, 0, 'muzzleA').setScale(C.feel.muzzleSize).setDepth(11).setVisible(false));
   }
 
   makeShip() {
@@ -793,6 +797,7 @@ export class PlayScene extends Phaser.Scene {
     this.updateEnemies(time, dt);
     this.updateCrates(time, dt);
     this.updateCoins(dt);
+    this.updateShine(time);
     this.cullOffscreen(time);
     if (!this.clearAt && this.runner.finished && this.enemyCount === 0 && this.crates.countActive(true) === 0 && this.coins.countActive(true) === 0 && this.weaponUps.countActive(true) === 0 && this.heartUps.countActive(true) === 0) this.clearAt = time + C.stage.endDelayMs;
     if (this.clearAt && time >= this.clearAt) { this.stageClear(); return; }
@@ -803,7 +808,7 @@ export class PlayScene extends Phaser.Scene {
       this.ship.setAlpha(Math.floor(time / C.ship.blinkMs) % 2 ? 0.25 : 1);
     } else this.ship.setAlpha(1);
     if (time < this.shipFlashUntil) this.ship.setTintFill(0xb8ffd0); else this.ship.clearTint(); // level-up flash
-    if (this.muzzle[0].visible && time >= this.muzzleUntil) this.muzzle.forEach(m => m.setVisible(false));
+    if (this.muzzle[0].visible) { if (time >= this.muzzleUntil) this.muzzle.forEach(m => m.setVisible(false)); else this.muzzle[0].setTexture(this.muzzleUntil - time > C.feel.muzzleMs / 2 ? 'muzzleA' : 'muzzleB'); } // big burst, then a small one
   }
 
   scrollBackground(dt) {
@@ -925,6 +930,50 @@ export class PlayScene extends Phaser.Scene {
     ctx.drawImage(img, 0, 0); ctx.globalCompositeOperation = 'source-in'; ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, img.width, img.height);
     cv.refresh();
     src.getFrameNames().forEach(n => { const f = src.get(n); cv.add(n, 0, f.cutX, f.cutY, f.cutWidth, f.cutHeight); });
+  }
+
+  // Small pixel-art pictures made in code (no files): the muzzle flash at the wand and the shine behind a coin.
+  makeShineTextures() {
+    const pix = (key, rows, pal) => { // rows of characters, '.' = empty
+      if (this.textures.exists(key)) return;
+      const w = rows[0].length, h = rows.length, cv = this.textures.createCanvas(key, w, h), ctx = cv.getContext('2d');
+      rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '.') { ctx.fillStyle = pal[ch]; ctx.fillRect(x, y, 1, 1); } }));
+      cv.refresh();
+    };
+    const fire = { y: '#ffdc58', o: '#ff8a1f', w: '#fff6b8' };
+    pix('muzzleA', ['...y...', '..yoy..', '.yowoy.', 'yowwwoy', '.yowoy.', '..yoy..', '...y...'], fire);
+    pix('muzzleB', ['...', '.y.', '...'].map((r, i) => i === 1 ? 'ywy' : '.y.'), fire);
+    const S = C.sprites.coinShine;
+    if (S && !this.textures.exists('rays0')) { // 3 versions of an 8-ray star, each turned a little more: shown one after the other they look like spinning rays, and every pixel stays on the grid
+      const n = S.radius * 2 + 1;
+      for (let f = 0; f < 3; f++) {
+        const cv = this.textures.createCanvas('rays' + f, n, n), ctx = cv.getContext('2d');
+        for (let k = 0; k < 8; k++) for (let r = S.inner; r <= S.radius; r += 0.5) {
+          const a = k * Math.PI / 4 + f * Math.PI / 12, x = Math.round(S.radius + Math.cos(a) * r), y = Math.round(S.radius + Math.sin(a) * r);
+          ctx.globalAlpha = 0.9 - 0.6 * (r - S.inner) / (S.radius - S.inner + 0.01); ctx.fillStyle = '#ffe9a0'; ctx.fillRect(x, y, 1, 1);
+        }
+        cv.refresh();
+      }
+      pix('glint0', ['..w..', '..w..', 'wwwww', '..w..', '..w..'], { w: '#ffffff' });
+      pix('glint1', ['.w.', 'www', '.w.'], { w: '#ffffff' });
+    }
+  }
+
+  // ONE coin at a time gets the shine (soft spinning rays behind it and a little twinkle): the first coin on screen; when it is gone the next one takes over.
+  // So a chest that spills six coins still shows just one shine.
+  updateShine(time) {
+    const S = C.sprites.coinShine;
+    if (!S || !this.shineRays) return;
+    if (!this.shineTarget || !this.shineTarget.active || this.shineTarget.y > H + 10) {
+      this.shineTarget = this.coins.getChildren().find(c => c.active && c.y > 0 && c.y < H) || null;
+    }
+    const c = this.shineTarget;
+    this.shineRays.setVisible(!!c); this.shineGlint.setVisible(false);
+    if (!c) return;
+    const x = Math.round(c.x), y = Math.round(c.y);
+    this.shineRays.setTexture('rays' + (Math.floor(time / 1000 * S.fps) % 3)).setPosition(x, y).setAlpha(S.alpha);
+    const t = time % S.glintEveryMs; // the twinkle: bigger for a moment, then smaller, then gone
+    if (t < S.glintMs) this.shineGlint.setTexture(t < S.glintMs / 2 ? 'glint0' : 'glint1').setPosition(x + S.glintDx, y + S.glintDy).setVisible(true);
   }
 
   // The main colour of a sprite sheet: average of its solid pixels, favouring colourful ones over grey outlines, then brightened so smoke stays readable.
@@ -1178,7 +1227,7 @@ export class PlayScene extends Phaser.Scene {
     if (P && puff) { // smoke puff under the sparks: in the colour of what died, turned a random way
       const has = smokeType && this.textures.exists('sp_poof_' + smokeType);
       const sm = this.playFx(this.poofPool, has ? 'sp_poof_' + smokeType : 'sp_poof', has ? 'poof_' + smokeType : 'poof', x, y, P.scale * (big ? P.bigMul : 1), P.depth, null);
-      if (sm) sm.setRotation(Math.random() * TAU);
+      if (sm) sm.setOrigin(P.originX, P.originY).setRotation(Math.random() * TAU); // turn around the middle of the smoke itself, so it stays where the sparks start
     }
     this.burst(x, y, big ? F.bigExplosionCount : C.particles.perExplosion, tints, big ? F.bigExplosionSpeedMul : 1, big ? 5 : 4);
     if (F.deathRing) this.ring(x, y, tints[1], big ? F.bigDeathRingScale : F.deathRingScale, F.deathRingMs);

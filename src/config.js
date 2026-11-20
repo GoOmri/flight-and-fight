@@ -27,7 +27,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.8.7", // bump on every push so the player/Omri can see the build
+  version: "1.8.8", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -195,10 +195,12 @@ export const CONFIG = {
       break: { file: 'pickups/crate-break.png', frameW: 88, frameH: 40, frames: 15, fps: 20 } },
     // Death puff under the sparks: 30 frames of the pack's "poof" (white pop, smoke balls, thinning; the thin tail was left out) played once.
     // scale = size, bigMul = extra size for the shooter and the chest, poolSize = puffs at once, depth = under the sparks (20) and rings (19).
-    poof: { file: 'fx/poof.png', frameW: 82, frameH: 72, frames: 30, fps: 60, scale: 0.6, bigMul: 1.5, poolSize: 8, depth: 18 },
+    poof: { file: 'fx/poof.png', frameW: 82, frameH: 72, frames: 30, fps: 60, scale: 0.6, bigMul: 1.5, poolSize: 8, depth: 18, originX: 0.45, originY: 0.57 }, // origin = the middle of the smoke inside its picture (found from the pixels), so a random turn spins it in place
     // Weapon-upgrade pickup = green gem (4 frames of 16x16, loops, random start frame). scale 1 = 16 px (3 screen pixels per art pixel; stays even). The grab radius stays coin.pickupRadius on screen.
     // Stars circling over her head after a hit ("stunned" of the free spell pack, MIT, 60 frames of 60x64, loops). offsetY = from her centre (negative = up; the stars sit just above her head), fadeMs = fade-out at the end. It lasts as long as she blinks after a hit (ship.invulnMs).
-    stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -10, fadeMs: 300 },
+    // Coin shine (only ONE coin at a time has it): spinning rays behind it (3 pictures at `fps`, alpha = strength) and a little white twinkle now and then.
+    coinShine: { radius: 12, inner: 6, fps: 6, alpha: 0.55, glintEveryMs: 1300, glintMs: 200, glintDx: 5, glintDy: -6 },
+    stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -7, fadeMs: 300 },
     weaponGem: { file: 'pickups/gem-green.png', frameW: 16, frameH: 16, frames: 4, fps: 8, scale: 1.2 },
     fxPoolSize: 8 // chest-break and heart-collect animations playing at once
   },
@@ -241,7 +243,8 @@ export const CONFIG = {
     bigShakeMs: 90, bigShakeAmount: 0.004,
     coinSparkCount: 4, coinSparkSpeedMul: 0.5,
     scorePopScale: 0.3, scorePopMs: 160,    // score text grows by this much and settles back
-    muzzleMs: 45, muzzleSize: 2, muzzleSpread: 3, // flash at the nose on each volley
+    muzzleMs: 90, muzzleSize: 2, muzzleSpread: 3, // muzzleMs: how long the flash shows (a big burst, then a small one); muzzleSpread is unused now (one flash in the middle)
+    // flash at the nose on each volley
     levelFlashMs: 160, levelSparkCount: 8,  // green flash on the ship at a weapon upgrade
 
     // Sparkle trail behind the broom

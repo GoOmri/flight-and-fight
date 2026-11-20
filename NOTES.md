@@ -345,3 +345,11 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Answers: sparks stay as they are; credits screen not yet; cat names stay Cat-1..6; flying eye PARKED; chest monsters (mimics) PARKED; boss style wanted = shots in patterns (spirals, walls); build one boss NOT yet (more polish first). Boss for stage 2 (swamp) was not answered; stage 1 boss: Omri wants to look at them in the gallery first.
 - art-packs/_deleted (97 files) erased for good at Omri's word.
 - Gallery: the 4 new packs are shown properly: Necromancer (17x7 cells of 160x128, one animation per row: idle, run, attack 1-3, hurt, death), Final boss (strips of 128x150), Keeper (RPG Maker battler: 18 motions of 3 frames, 192x64 cells), Chest monsters (64 px strips). Keeper motion names are numbers (I do not know the RPG Maker motion order).
+
+## 2026-11-20 v1.8.8: coin shine, real muzzle flash, smoke centre (branch v1860-coin-shine-muzzle)
+- Omri's test of v1.8.7: items 1-4, 6, 7, 11-15, 17 ok; desktop debug line "v1.8.7 WEBGL gl:yes 60fps mouse" (graphics acceleration fixed his desktop: WebGL now). Boss chosen: the Final boss FLYING strip (liz cheong; credit needed). Keeper needs FRONT facing sprites: gallery now shows waechter-19.png rows front / left / right / back.
+- Muzzle flash: a one-pixel dot was pointless, so it is now a small fire burst made in code (7x7 orange-yellow-white diamond, then a small 3x3 plus, 90 ms in all), one in the middle of the wand.
+- Death smoke: the picture's own middle was 4 px left and 5 px below the cell centre, so the random turn swung it around. The smoke now turns around its real middle (config.sprites.poof originX 0.45 / originY 0.57), which is also where the sparks start. The sparks still draw in FRONT of the smoke (depth 20 vs 18).
+- Coin shine: subtle soft rays spinning behind a coin (3 pictures drawn in code and swapped at 6 per second, so every pixel stays on the grid) plus a small white twinkle now and then. ONLY ONE coin has it at a time (the first on screen; when it is gone the next one takes over), so a chest spilling six coins shows one shine. Config: sprites.coinShine.
+- Stars 3 px lower (offsetY -7).
+- UNVERIFIED on the phone: how subtle the rays look at full speed on a real screen (alpha 0.55, radius 12 px), the muzzle burst size.
