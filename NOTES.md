@@ -257,3 +257,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 v1.5.4: soft stop no longer turns the witch
 - Omri: after every move the witch turned (side view + tilt) the other way. Cause: the soft-stop spring bounces the speed back, and the look followed that speed. Now during the soft stop only the forward glide counts (this.stopDirX); the bounce back is ignored for the side view and tilt. Movement itself is unchanged.
 - UNVERIFIED on the phone (syntax checked only, not run). Check: lift the thumb after a sideways move: she should not flip to the other side. If it still feels wrong, set config.stick.stopGlide to 0 to turn the soft stop off.
+
+## 2026-11-20 v1.6.0: tuning panel (?tune=1)
+- Add `?tune=1` after the game address (the menu still shows first). A small TUNE button sits under the hearts (top right). A tap opens a panel at the top and PAUSES the game; tap X to close and fly again. Players never see it without ?tune=1.
+- 8 stick numbers with - and + buttons (hold = repeat): SPEED, RADIUS, DEADZONE, CURVE, RESPONSE, GLIDE (stopGlide), SETTLE (stopOmega), DAMPING (stopDamping). Changes act at once on the live config. RESET = back to the values at page load. COPY = puts `stick: { ... }` on the clipboard (or says COPY FAILED); paste it to Claude, who puts it in src/config.js. A reload loses the changes.
+- Files: new src/tune.js (also in FILES in src/update.js), hooks in src/scenes/PlayScene.js. A ?tune=1 run does not save medals.
+- Verified in the browser (desktop, Playwright): panel opens, + changes speed 240 -> 250, X closes, no console errors, screenshot looks right. UNVERIFIED on the phone: button size under the thumb, hold-to-repeat, whether COPY works on the phone, whether the panel covers too much.
