@@ -26,7 +26,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.7.0", // bump on every push so the player/Omri can see the build
+  version: "1.7.1", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -66,6 +66,7 @@ export const CONFIG = {
     followRate: 28,
     glueRate: 2.5,        // per second: how fast the witch settles to the spot just above the finger (0 = pure relative drag, drift stays). Higher = stricter
     fingerOffsetY: z(45), // that spot is this far above the finger
+    mouseOnDesktop: true, // on a desktop browser (a real mouse) the witch follows the mouse pointer automatically; phones keep "controls" below. ?ctl=mouse / stick / drag overrides
     controls: "stick",    // "stick" = virtual stick (ring on screen, witch flies where you push) | "drag" = move by finger movement. Try both with ?ctl=stick / ?ctl=drag after the web address
     bankDeg: 8,          // max tilt in degrees when moving sideways (0 = no tilt)
     bankSpeed: z(400),   // sideways speed (units/s) that gives the full tilt
@@ -164,7 +165,7 @@ export const CONFIG = {
       // Vulture (not used in waves yet). Frames of vulture.png: 0 = folded, 1 = wings up, 2 = wings flat/low, 3 = half. Flap loop: up, half, low, half. (Cleanest guess; check it.)
       vulture: { file: 'vulture.png', frameW: 39, frameH: 39, frames: [1, 3, 2, 3], fps: 8, scale: 0.8, hitW: 22, hitH: 22, faceVelocity: true }
     },
-    haloTint: { weapon: 0x2ee86a, heart: 0xffc9e3 }, haloScaleSprite: 1.3
+    haloTint: { weapon: 0x2ee86a, heart: 0xffc9e3 }, haloPx: 2 // outline thickness of a carrier in game px (4 shifted copies of its frame)
   },
 
   // Animated pictures for coins, hearts, chests and the death puff (strips cut from the packs, see CREDITS.md). Every entry is optional:
@@ -217,7 +218,7 @@ export const CONFIG = {
   pickup: {
     weaponFallSpeed: z(130), heartFallSpeed: z(55), heartScoreIfFull: 50, maxLevel: 10,
     weaponPoolSize: 4, heartPoolSize: 4, // pickups on screen at once
-    haloPoolSize: 12,  // glowing outlines around carriers alive at once
+    haloPoolSize: 48,  // glow pictures alive at once (an animated carrier uses 4, a code-drawn one 1)
     haloPulseMs: 500    // one pulse of the carrier glow
   },
 

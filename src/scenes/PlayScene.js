@@ -111,7 +111,12 @@ export class PlayScene extends Phaser.Scene {
     this.finger = new Phaser.Math.Vector2();    // finger position now
     // Controls: 'stick' = virtual stick (the ring appears where the thumb lands, the witch flies where you push),
     // 'drag' = the code above. Choose in config.ship.controls or with ?ctl=stick / ?ctl=drag.
-    this.stickMode = (q.get('ctl') || C.ship.controls) === 'stick';
+    // 'mouse' = the witch follows the mouse pointer (no click needed). It is the automatic choice on a desktop browser (a mouse: hover + fine pointer), never on a phone. ?ctl=mouse forces it, ?ctl=stick / ?ctl=drag force the others.
+    const desktop = !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+    const ctl = q.get('ctl') || (C.ship.mouseOnDesktop && desktop ? 'mouse' : C.ship.controls);
+    this.stickMode = ctl === 'stick';
+    this.mouseMode = ctl === 'mouse';
+    this.mouseSeen = false; // the witch waits where she is until the mouse has moved over the game
     this.stickC = new Phaser.Math.Vector2(W / 2, C.stick.restY); // ring centre
     this.stickV = new Phaser.Math.Vector2();                     // witch speed from the stick
     this.stopT = new Phaser.Math.Vector2(); this.stopping = false; // soft stop: where she settles after the thumb is lifted
@@ -137,6 +142,7 @@ export class PlayScene extends Phaser.Scene {
       if (this.stickMode) this.stickC.copy(this.finger); // the ring appears under the thumb
     });
     this.input.on('pointermove', p => {
+      if (this.mouseMode) { this.mouseSeen = true; return; }
       if (p.id !== this.dragId || !p.isDown || this.over) return;
       this.finger.set(p.x / R, p.y / R);
       if (!this.stickMode) this.aimTarget();
@@ -629,7 +635,9 @@ export class PlayScene extends Phaser.Scene {
   moveShip(dt) {
     const S = C.ship, s = this.ship;
     if (this.stickMode) this.stickTarget(dt);
-    else if (this.dragId !== null && !this.over && S.glueRate > 0) {
+    else if (this.mouseMode) {
+      if (this.mouseSeen && !this.over) { const m = this.input.activePointer; this.target.x = Phaser.Math.Clamp(m.x / R, S.margin, W - S.margin); this.target.y = Phaser.Math.Clamp(m.y / R, S.margin, H - S.margin); }
+    } else if (this.dragId !== null && !this.over && S.glueRate > 0) {
       // Slowly slide the start point so the target settles just above the finger: the drift (finger far from the ship) heals itself.
       const g = 1 - Math.exp(-S.glueRate * dt);
       const ix = Phaser.Math.Clamp(this.finger.x, S.margin, W - S.margin), iy = Phaser.Math.Clamp(this.finger.y - S.fingerOffsetY, S.margin, H - S.margin);
@@ -803,14 +811,16 @@ export class PlayScene extends Phaser.Scene {
     e.coin = g.type === 'shooter' || (g.coinEvery > 0 && (i + 1) % g.coinEvery === 0); // shooters always drop 1 coin
     e.wave = cg.w;
     e.drop = g.drop && i === g.n - 1 ? g.drop : null; // the last enemy of a marked group is the carrier
-    e.halo = null;
+    e.halo = null; e.halos = null;
     if (e.drop) {
       const key = 'ring_' + g.type + '_' + e.drop;
-      e.halo = this.halos.get(e.x, e.y, key);
-      if (e.halo && sp) { // animated enemy: a solid-colour, bigger copy of its current frame behind it (green = weapon, pink-white = heart)
-        e.halo.setTexture('en_' + g.type, e.frame.name).setActive(true).setVisible(true).setScale(sp.scale * C.enemies.haloScaleSprite)
-          .setTintFill(C.enemies.haloTint[e.drop]).setDepth(-0.5);
-      } else if (e.halo) e.halo.setTexture(key).setActive(true).setVisible(true).setScale(PX).clearTint().setDepth(0);
+      if (sp) { // animated enemy: the outline is 4 solid-colour copies of its current frame, pushed up/down/left/right by haloPx. They follow the real shape, so the outline always fits (green = weapon, pink-white = heart)
+        const H = C.enemies.haloPx, offs = [[-H, 0], [H, 0], [0, -H], [0, H]];
+        e.halos = offs.map(o => { const h = this.halos.get(e.x, e.y, key); if (!h) return null; h.ox = o[0]; h.oy = o[1]; return h.setTexture('en_' + g.type, e.frame.name).setActive(true).setVisible(true).setScale(sp.scale).setTintFill(C.enemies.haloTint[e.drop]).setDepth(-0.5); }).filter(Boolean);
+      } else {
+        e.halo = this.halos.get(e.x, e.y, key);
+        if (e.halo) e.halo.setTexture(key).setActive(true).setVisible(true).setScale(PX).clearTint().setDepth(0);
+      }
     }
     this.hud.waveAlive(cg.w, 1);
     this.enemyCount++; this.enemiesSpawned++;
@@ -828,6 +838,7 @@ export class PlayScene extends Phaser.Scene {
 
   removeEnemy(e) {
     if (e.halo) { e.halo.setActive(false).setVisible(false); e.halo = null; }
+    if (e.halos) { e.halos.forEach(h => h.setActive(false).setVisible(false)); e.halos = null; }
     this.hud.waveAlive(e.wave, -1);
     this.kill(e); this.enemyCount--;
   }
@@ -856,8 +867,9 @@ export class PlayScene extends Phaser.Scene {
         if (dx > 0.05) e.setFlipX(false); else if (dx < -0.05) e.setFlipX(true);
       }
       if (time < e.flashUntil) e.setTintFill(0xffffff); else e.clearTint();
-      if (e.halo && e.sp) e.halo.setFrame(e.frame.name).setFlipX(e.flipX);
-      if (e.halo) e.halo.setPosition(e.x, e.y).setAlpha(0.45 + 0.55 * (0.5 + 0.5 * Math.sin(time * TAU / C.pickup.haloPulseMs)));
+      const pulse = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(time * TAU / C.pickup.haloPulseMs));
+      if (e.halos) e.halos.forEach(h => h.setFrame(e.frame.name).setFlipX(e.flipX).setPosition(e.x + h.ox, e.y + h.oy).setAlpha(pulse)); // same frame and flip as the enemy, shifted 4 ways
+      if (e.halo) e.halo.setPosition(e.x, e.y).setAlpha(pulse);
     });
   }
 

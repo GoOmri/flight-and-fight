@@ -287,3 +287,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-20 gallery cleanup (local tool, nothing in the game; same branch)
 - New `art-packs/_tools/gallery/apply-deletes.mjs` (real deletion of marked cards: dry run, then --yes, files go to art-packs/_deleted), duplicate hiding by pixels in build.mjs, folding groups per cat colour. Details in art-packs/CATALOG.md. Projectile packs (fox717, SovDigital) catalogued. Tested: dry run + a real move of a throwaway file. UNVERIFIED: the clipboard read when run from Omri's own terminal (it uses PowerShell Get-Clipboard).
+
+## 2026-11-20 v1.7.1: outline that fits, mouse on desktop (branch v1710-outline-mouse)
+- Carrier outline (green = weapon, pink = heart) was one bigger copy of the sprite, so it drifted off when the picture was not centred in its frame (the eagle). Now it is 4 solid-colour copies of the current frame shifted 2 px up/down/left/right (config.enemies.haloPx), so it follows the real shape of any sprite. Halo pool 12 -> 48. Verified in the browser on the wisp (temporarily made the shooter a carrier, then undone): the outline hugs it. No wave has a carrier shooter yet.
+- Mouse control: on a desktop browser (hover + fine pointer) the witch follows the mouse pointer, no click needed. Phones keep the stick. ?ctl=mouse / stick / drag forces one. config.ship.mouseOnDesktop = false turns the automatic part off. The witch waits until the mouse has moved over the game. Verified: desktop pane -> mouse mode, follows the pointer; emulated phone -> stick.
+- UNVERIFIED: a touch laptop (counts as desktop if its main pointer is a mouse); the outline on a carrier bat/ghost on the phone.
