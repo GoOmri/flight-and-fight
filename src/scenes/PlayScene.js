@@ -71,7 +71,8 @@ export class PlayScene extends Phaser.Scene {
     }
     this.makeShineTextures(); // muzzle flash and coin shine pictures (pixel patterns drawn once)
     const WG = C.sprites.weaponGem; // the weapon potion is turned green by shifting every colour's hue once (a recoloured copy, so it works in WebGL and CANVAS)
-    if (WG && WG.hueShift) this.makeHueSheet('sp_gem', 'sp_gem_g', WG.hueShift, WG.hueRange);
+    if (WG && WG.hueShift) this.makeHueSheet('sp_gem', 'sp_gem_g', WG.hueShift, WG.hueRange, WG.valueMul);
+    if (C.bullet.fire && C.bullet.fire.hueShift) this.makeHueSheet('sp_fire', 'sp_fire_b', C.bullet.fire.hueShift);
     for (const t in C.enemies.sprites) this.makeWhiteSheet('en_' + t); // white copies of the enemy sheets for the hit flash (works in WebGL and in the older CANVAS mode)
     for (const t in C.enemies.sprites) { // one flap/bob loop per sprite type, made once (textures and animations persist across restarts)
       const d = C.enemies.sprites[t], key = 'en_' + t + '_loop';
@@ -81,7 +82,7 @@ export class PlayScene extends Phaser.Scene {
       if (!this.anims.exists(key)) this.anims.create({ key, frames: this.anims.generateFrameNumbers(tex, { start: 0, end: d.frames - 1 }), frameRate: d.fps, repeat });
     };
     if (K.stunned) mkAnim('stunned', 'sp_stunned', K.stunned, -1);
-    if (C.bullet.fire) mkAnim('fire_shot', 'sp_fire', C.bullet.fire, -1);
+    if (C.bullet.fire) mkAnim('fire_shot', this.textures.exists('sp_fire_b') ? 'sp_fire_b' : 'sp_fire', C.bullet.fire, -1);
     if (K.coin) mkAnim('coin_spin', 'sp_coin', K.coin, -1);
     if (K.heartPickup) { mkAnim('heart_idle', 'sp_heart_idle', K.heartPickup.idle, -1); mkAnim('heart_drop', 'sp_heart_drop', K.heartPickup.drop, 0); mkAnim('heart_collect', 'sp_heart_collect', K.heartPickup.collect, 0); }
     if (K.crate) { mkAnim('crate_idle', 'sp_crate_idle', K.crate.idle, -1); mkAnim('crate_break', 'sp_crate_break', K.crate.break, 0); }
@@ -874,7 +875,7 @@ export class PlayScene extends Phaser.Scene {
     this.nextShot = time + lv.fireRateMs;
     for (const sh of lv.pattern) {
       const fs = C.bullet.fire;
-      const b = this.spawn(this.bullets, fs ? 'sp_fire' : 'pbullet', this.ship.x + sh.dx, this.ship.y - C.ship.shotY, fs ? fs.scale : PX);
+      const b = this.spawn(this.bullets, fs ? (this.textures.exists('sp_fire_b') ? 'sp_fire_b' : 'sp_fire') : 'pbullet', this.ship.x + sh.dx, this.ship.y - C.ship.shotY, fs ? fs.scale : PX);
       if (!b) continue;
       if (fs) { b.body.setSize(fs.hitW, fs.hitH); b.play('fire_shot'); } else b.anims.stop();
       const a = sh.deg * DEG;
@@ -943,7 +944,7 @@ export class PlayScene extends Phaser.Scene {
   }
 
   // A copy of a sheet with every colour's hue turned by `deg` degrees (same frames, same brightness and see-through parts).
-  makeHueSheet(key, newKey, deg, range = null) { // range = [from, to] degrees: only colours with a hue inside it are turned (the cork and ribbon keep their colour)
+  makeHueSheet(key, newKey, deg, range = null, valueMul = 1) { // range = [from, to] degrees: only colours with a hue inside it are turned (the cork and ribbon keep their colour)
     if (this.textures.exists(newKey)) return;
     const src = this.textures.get(key), img = src.getSourceImage(), cv = this.textures.createCanvas(newKey, img.width, img.height), ctx = cv.getContext('2d', { willReadFrequently: true });
     ctx.drawImage(img, 0, 0);
@@ -954,12 +955,25 @@ export class PlayScene extends Phaser.Scene {
       let h = mx === r ? ((g - b) / c) % 6 : (mx === g ? (b - r) / c + 2 : (r - g) / c + 4); h = (h * 60 + 360) % 360;
       if (range && (h < range[0] || h > range[1])) continue;
       h = ((h + deg) % 360 + 360) % 360;
-      const v = mx, sat = c / mx, c2 = v * sat, x = c2 * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c2;
+      const v = mx * valueMul, sat = c / mx, c2 = v * sat, x = c2 * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c2;
       const [rr, gg, bb] = h < 60 ? [c2, x, 0] : h < 120 ? [x, c2, 0] : h < 180 ? [0, c2, x] : h < 240 ? [0, x, c2] : h < 300 ? [x, 0, c2] : [c2, 0, x];
       p[i] = Math.round((rr + m) * 255); p[i + 1] = Math.round((gg + m) * 255); p[i + 2] = Math.round((bb + m) * 255);
     }
     ctx.putImageData(d, 0, 0); cv.refresh();
     src.getFrameNames().forEach(n => { const f = src.get(n); cv.add(n, 0, f.cutX, f.cutY, f.cutWidth, f.cutHeight); });
+  }
+
+  // Spinning rays: 8 tapered wedges (wide at the base, 1 px at the tip), drawn as whole pixels. f = 0..2 turns them a little further each picture.
+  drawRays(ctx, S, f, color) {
+    const R = S.radius, W = S.width || 3;
+    for (let k = 0; k < 8; k++) {
+      const a = k * Math.PI / 4 + f * Math.PI / 12, ca = Math.cos(a), sa = Math.sin(a);
+      for (let r = S.inner; r <= R; r += 0.5) {
+        const t = (r - S.inner) / (R - S.inner + 0.01), half = Math.max(0, (W / 2) * (1 - t) - 0.2);
+        ctx.globalAlpha = 0.95 - 0.55 * t; ctx.fillStyle = color;
+        for (let j = -Math.floor(half); j <= Math.floor(half); j++) ctx.fillRect(Math.round(R + ca * r - sa * j), Math.round(R + sa * r + ca * j), 1, 1);
+      }
+    }
   }
 
   // Small pixel-art pictures made in code (no files): the muzzle flash at the wand and the shine behind a coin.
@@ -970,7 +984,7 @@ export class PlayScene extends Phaser.Scene {
       rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '.') { ctx.fillStyle = pal[ch]; ctx.fillRect(x, y, 1, 1); } }));
       cv.refresh();
     };
-    const fire = { y: '#ffdc58', o: '#ff8a1f', w: '#fff6b8' };
+    const fire = { y: '#bfe9ff', o: '#4aa3ff', w: '#ffffff' }; // the muzzle burst matches the blue shot
     pix('muzzleA', ['..y..', '.yoy.', 'yowoy', '.yoy.', '..y..'], fire); // smaller than before: the old 7x7 burst on every shot looked like flashing
     pix('muzzleB', ['...', '.y.', '...'].map((r, i) => i === 1 ? 'ywy' : '.y.'), fire);
     const S = C.sprites.coinShine;
@@ -978,10 +992,7 @@ export class PlayScene extends Phaser.Scene {
       const n = S.radius * 2 + 1;
       for (let f = 0; f < 3; f++) {
         const cv = this.textures.createCanvas('rays' + f, n, n), ctx = cv.getContext('2d');
-        for (let k = 0; k < 8; k++) for (let r = S.inner; r <= S.radius; r += 0.5) {
-          const a = k * Math.PI / 4 + f * Math.PI / 12, x = Math.round(S.radius + Math.cos(a) * r), y = Math.round(S.radius + Math.sin(a) * r);
-          ctx.globalAlpha = 0.9 - 0.6 * (r - S.inner) / (S.radius - S.inner + 0.01); ctx.fillStyle = '#ffe9a0'; ctx.fillRect(x, y, 1, 1);
-        }
+        this.drawRays(ctx, S, f, S.rayColor || '#ffe9a0');
         cv.refresh();
       }
       pix('glint0', ['..w..', '..w..', 'wwwww', '..w..', '..w..'], { w: '#ffffff' });
@@ -992,10 +1003,7 @@ export class PlayScene extends Phaser.Scene {
       const n = HS.radius * 2 + 1;
       for (let f = 0; f < 3; f++) {
         const cv = this.textures.createCanvas('raysh' + f, n, n), ctx = cv.getContext('2d');
-        for (let k = 0; k < 8; k++) for (let r = HS.inner; r <= HS.radius; r += 0.5) {
-          const a = k * Math.PI / 4 + f * Math.PI / 12, x = Math.round(HS.radius + Math.cos(a) * r), y = Math.round(HS.radius + Math.sin(a) * r);
-          ctx.globalAlpha = 0.9 - 0.6 * (r - HS.inner) / (HS.radius - HS.inner + 0.01); ctx.fillStyle = HS.rayColor; ctx.fillRect(x, y, 1, 1);
-        }
+        this.drawRays(ctx, HS, f, HS.rayColor || '#fff0a0');
         cv.refresh();
       }
       const gn = HS.glow.rings[HS.glow.rings.length - 1].r * 2 + 1, gc = this.textures.createCanvas('heartGlow', gn, gn), gx = gc.getContext('2d');
@@ -1010,10 +1018,7 @@ export class PlayScene extends Phaser.Scene {
       const n = PS.radius * 2 + 1;
       for (let f = 0; f < 3; f++) {
         const cv = this.textures.createCanvas('praysg' + f, n, n), ctx = cv.getContext('2d');
-        for (let k = 0; k < 8; k++) for (let r = PS.inner; r <= PS.radius; r += 0.5) {
-          const a = k * Math.PI / 4 + f * Math.PI / 12, x = Math.round(PS.radius + Math.cos(a) * r), y = Math.round(PS.radius + Math.sin(a) * r);
-          ctx.globalAlpha = 0.9 - 0.6 * (r - PS.inner) / (PS.radius - PS.inner + 0.01); ctx.fillStyle = '#d6ffb8'; ctx.fillRect(x, y, 1, 1);
-        }
+        this.drawRays(ctx, PS, f, PS.rayColor || '#d6ffb8');
         cv.refresh();
       }
       const gn = PS.glow.rings[PS.glow.rings.length - 1].r * 2 + 1, gc = this.textures.createCanvas('potionGlow', gn, gn), gx = gc.getContext('2d');
@@ -1181,7 +1186,7 @@ export class PlayScene extends Phaser.Scene {
     const hit = C.enemyBullet.hitSize;
     if (C.feel.fireFlashScale > 0) this.ring(e.x, e.y + 14, 0xffffff, C.feel.fireFlashScale, C.feel.fireFlashMs, C.feel.fireFlashAlpha); // telegraph
     for (let i = 0; i < n; i++) {
-      const b = this.spawn(this.enemyBullets, 'ebullet', e.x, e.y + 14);
+      const b = this.spawn(this.enemyBullets, 'ebullet', e.x, e.y + 14, C.enemyBullet.scale);
       if (!b) return;
       b.setDepth(C.enemyBullet.depth); // above all play effects, below the HUD
       b.body.setSize(hit, hit); // only the bright core hurts

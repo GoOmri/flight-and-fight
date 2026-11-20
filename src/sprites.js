@@ -19,7 +19,8 @@ const PAL = {
   //  Chest = brown wood (T,B) with grey steel bands (g,d), outline X. No gold/yellow, so it is never mistaken for coins.
   //  HUD medal icons: bone-white skulls, blue shield, gold coin (coin colour). Never red or gold except the coin.
   // (Explosion sparks are tinted white / light grey / red-orange in code: never yellow or gold, so they never look like coins.)
-  e: 0x7a0a0a, h: 0xff2a2a, q: 0xff7a7a, // enemy shot: dark red outline, bright red, lighter red core
+  e: 0x7a0a0a, h: 0xff2a2a, q: 0xff7a7a, // (old enemy shot colours, kept)
+  R: 0xff3d9a, O: 0x3a0a2e, // enemy shot now: hot pink rim (R) and dark plum outline (O), with a white core (w)
   Q: 0xffc928, A: 0xfff2a0, U: 0xb36b00, K: 0x5a3200, // coin: gold body, light shine, brown rim, dark outline
   V: 0x5a2184, v: 0xc89cff, f: 0xf6cfa6, i: 0x2a1a55, y: 0xff7ad9, // witch: hat, hat band, skin, cloak/hair, pink sparkle
   I: 0x3c3a8c, u: 0x8f86d8,                                       // bat: indigo body, lighter belly
@@ -113,7 +114,7 @@ const CRATE = [
   'XgBBBgX',
   'XXXXXXX'
 ];
-const EBULLET = ['.eee.', 'ehqhe', 'ehqhe', 'ehhhe', '.eee.']; // round red orb, dark red outline
+const EBULLET = ['..OOO..', '.ORRRO.', 'ORRwRRO', 'ORwwwRO', 'ORRwRRO', '.ORRRO.', '..OOO..']; // round hot-pink orb with a white core and a dark plum outline (7x7, drawn at scale C.enemyBullet.scale)
 // Player bolt size lives here: 2 x 5 art pixels (white head, cyan tail). Hitbox = texture size.
 const PBULLET = ['ww', 'ww', 'ww', 'cc', 'cc'];
 // coin: round gold coin (7x7): gold body, light shine top-left, brown rim, dark outline

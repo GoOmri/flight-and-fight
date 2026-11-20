@@ -27,7 +27,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.9.2", // bump on every push so the player/Omri can see the build
+  version: "1.9.3", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -96,7 +96,7 @@ export const CONFIG = {
   bullet: {
     speed: z(620),
     // The witch's shot: one orange fire bolt straight up ("flight_smooth" of the SovDigital fire pack, north row, shrunk 5x and cut to 6 fire colours). Delete this entry to get the old twin code-drawn shots back (then set pattern TWIN).
-    fire: { file: 'fx/fire-shot.png', frameW: 8, frameH: 22, frames: 12, fps: 24, scale: 2, hitW: 6, hitH: 16 },
+    fire: { file: 'fx/fire-shot.png', frameW: 8, frameH: 22, frames: 12, fps: 24, scale: 2, hitW: 6, hitH: 16, hueShift: 195 }, // hueShift: the orange fire is turned to blue (the player's side is cool, danger is hot)
     poolSize: 90         // level 10 fires 7 shots every 145 ms and they live about 1 s: about 50 alive at once
   },
 
@@ -199,13 +199,13 @@ export const CONFIG = {
     // Weapon-upgrade pickup = green gem (4 frames of 16x16, loops, random start frame). scale 1 = 16 px (3 screen pixels per art pixel; stays even). The grab radius stays coin.pickupRadius on screen.
     // Stars circling over her head after a hit ("stunned" of the free spell pack, MIT, 60 frames of 60x64, loops). offsetY = from her centre (negative = up; the stars sit just above her head), fadeMs = fade-out at the end. It lasts as long as she blinks after a hit (ship.invulnMs).
     // Coin shine (only ONE coin at a time has it): spinning rays behind it (3 pictures at `fps`, alpha = strength) and a little white twinkle now and then.
-    coinShine: { radius: 12, inner: 6, fps: 6, alpha: 0.55, glintEveryMs: 1300, glintMs: 200, glintDx: 5, glintDy: -6 },
+    coinShine: { radius: 12, inner: 5, width: 4, rayColor: '#ffe9a0', fps: 6, alpha: 0.55, glintEveryMs: 1300, glintMs: 200, glintDx: 5, glintDy: -6 },
     // Weapon potion shine (green): spinning rays (3 pictures swapped at `fps`) and a soft glow of flat rings (r in texels, cell px each, flicker steps).
-    potionShine: { radius: 15, inner: 8, fps: 6, alpha: 0.55, glow: { cell: 2, rings: [{ r: 5, color: 0xb8ff90, alpha: 0.4 }, { r: 8, color: 0x4fe070, alpha: 0.26 }, { r: 11, color: 0x2fbf6a, alpha: 0.13 }], flicker: [1, 0.85, 1, 0.7, 0.95], stepFps: 6 } },
+    potionShine: { radius: 15, inner: 7, width: 4, rayColor: '#cfe4ff', fps: 6, alpha: 0.55, glow: { cell: 2, rings: [{ r: 5, color: 0xb8d8ff, alpha: 0.4 }, { r: 8, color: 0x4f8fe0, alpha: 0.26 }, { r: 11, color: 0x2f5fbf, alpha: 0.13 }], flicker: [1, 0.85, 1, 0.7, 0.95], stepFps: 6 } },
     // Heart pickup shine (yellow): spinning rays + soft glow behind the first heart on screen, and every heart bobs while it falls (bobAmp px/s swing, bobSpeed radians/s). From Omri's gallery recipe: glow, rays, bob, yellow.
-    heartShine: { radius: 14, inner: 7, fps: 6, alpha: 0.55, rayColor: '#fff0a0', bobAmp: 14, bobSpeed: 5, glow: { cell: 2, rings: [{ r: 5, color: 0xfff0a0, alpha: 0.4 }, { r: 8, color: 0xffd23f, alpha: 0.26 }, { r: 10, color: 0xe0a020, alpha: 0.13 }], flicker: [1, 0.85, 1, 0.7, 0.95], stepFps: 6 } },
+    heartShine: { radius: 14, inner: 6, width: 4, fps: 6, alpha: 0.55, rayColor: '#ffe4f0', bobAmp: 14, bobSpeed: 5, glow: { cell: 2, rings: [{ r: 5, color: 0xfff0f6, alpha: 0.4 }, { r: 8, color: 0xffb3d6, alpha: 0.26 }, { r: 10, color: 0xff80b8, alpha: 0.13 }], flicker: [1, 0.85, 1, 0.7, 0.95], stepFps: 6 } },
     stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -7, fadeMs: 300 },
-    weaponGem: { file: 'pickups/potion-violet.png', frameW: 32, frameH: 32, frames: 1, fps: 1, scale: 0.9, hueShift: -150, hueRange: [225, 335] }, // hueShift: turn the colours inside hueRange (violet and blue-violet) by this many degrees (-> green); the cork and ribbon keep their colour // weapon upgrade = the twinkling violet potion (one 32x32 picture with sparkles drawn in). The old green gem strip is gem-green.png (4 frames of 16x16, scale 1.2)
+    weaponGem: { file: 'pickups/potion-violet.png', frameW: 32, frameH: 32, frames: 1, fps: 1, scale: 0.9, hueShift: -70, hueRange: [225, 335], valueMul: 0.82 }, // the violet is turned to blue and made a bit darker (same family as the blue shot); the cork and ribbon keep their colour // weapon upgrade = the twinkling violet potion (one 32x32 picture with sparkles drawn in). The old green gem strip is gem-green.png (4 frames of 16x16, scale 1.2)
     fxPoolSize: 8 // chest-break and heart-collect animations playing at once
   },
 
@@ -213,7 +213,7 @@ export const CONFIG = {
   // Colour wash (easy tint): one flat colour over the play field at low strength, so pictures from different packs sit closer together. Per stage: color, alpha (0 = none, 0.2 = strong).
   // depth 33: over the play field and its effects, under the enemy shots (35), coins' pop texts are under it too, and the HUD (50). Try off with ?tint=0.
   tint: { on: true, depth: 33, forest: { color: 0x7a4fd0, alpha: 0.12 }, swamp: { color: 0x2a9a8a, alpha: 0.12 } },
-  enemyBullet: { poolSize: 30, speed: 100, hitSize: 3, depth: 35 }, // depth 35: above all effects (sparks 20, texts 30), below the HUD (50)
+  enemyBullet: { poolSize: 30, speed: 100, hitSize: 3, depth: 35, scale: 2 }, // scale: size of the 7x7 picture (2 = 14 px) // depth 35: above all effects (sparks 20, texts 30), below the HUD (50)
 
   // pickupRadius: how close the ship must be to grab a coin (logical px). Bigger than the ship hitbox on purpose.
   coin: { fallSpeed: z(90), value: 5, poolSize: 40, pickupRadius: 10 },

@@ -377,3 +377,13 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - From Omri's gallery recipe (plump-heart, lit, glow + rays + bob, yellow): the falling heart pickup now has a soft yellow glow and 8 spinning rays behind it (config sprites.heartShine; same stepped pixel look as the potion and coin) and every heart bobs while it falls (its fall speed swings +-14 px/s, about 1 swing per 1.25 s). One glow + rays at a time (the first heart on screen). Verified in the browser: the heart shows with yellow glow and rays; its fall speed swings 36 to 63 px/s around the base 50.
 - PARKED (Omri: "start out aside, we'll find a use for it"): power-star recipe = power-star, Idle_South, 32px, lit; effects glow, rays, colour yellow. Not built. The loot pack's own layers (shadow, glow, shine, outline) are chips in the gallery.
 - UNVERIFIED on the phone: ray and glow strength, how the bob feels.
+
+## 2026-11-20 v1.9.3: colour roles (branch v1930-colour-roles)
+- Colour roles (Omri, from the readability talk): the player's side is COOL (blue shot, blue potion), danger is HOT (enemy shots hot pink), coins gold, hearts pink-white. The ghost stays mint, the wisp orange, carrier outlines green / pink.
+- Witch shot: the orange fire strip is turned blue (config.bullet.fire.hueShift 195, a recoloured copy made at start, so it also works in CANVAS). The muzzle burst is blue too.
+- Weapon potion: violet turned to blue and a bit darker (hueShift -70, valueMul 0.82, hue range 225-335); its glow and rays are blue.
+- Enemy shots: new 7x7 picture with a white core, hot-pink rim and dark plum outline, drawn at scale 2 (config.enemyBullet.scale); hit size unchanged (3). The old red picture letters (e, h, q) stay in the palette but are unused.
+- Heart glow and rays: pink-white (was yellow).
+- Rays (coin, potion, heart): now tapered wedges 4 px wide at the base instead of 1 px lines (config coinShine / potionShine / heartShine: width, inner, rayColor; shared drawRays()).
+- NOT done (Omri's step 5, later): a subtle warm-dark glow behind every enemy; the carrier outline must stay stronger.
+- Verified in the browser (stage dropped items): shots blue, potion dark blue with blue glow, heart pink-white glow, coin rays wider, enemy bullet pink with white core. UNVERIFIED on the phone: enemy bullet size (14 px) and readability, ray width.
