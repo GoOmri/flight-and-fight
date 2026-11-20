@@ -8,7 +8,7 @@ const fontReady = Promise.race([
   new Promise(r => setTimeout(r, 2000))
 ]);
 fontReady.then(() => { window.__game = new Phaser.Game({
-  type: Phaser.AUTO,
+  type: new URLSearchParams(window.location.search).get('render') === 'canvas' ? Phaser.CANVAS : Phaser.AUTO, // ?render=canvas forces the older drawing mode (to test browsers without WebGL)
   width: CONFIG.game.width * CONFIG.game.render,
   height: CONFIG.game.height * CONFIG.game.render,
   backgroundColor: '#2a6fdb',

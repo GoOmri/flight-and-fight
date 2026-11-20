@@ -62,6 +62,7 @@ export class PlayScene extends Phaser.Scene {
 
   create() {
     makeAllTextures(this);
+    for (const t in C.enemies.sprites) this.makeWhiteSheet('en_' + t); // white copies of the enemy sheets for the hit flash (works in WebGL and in the older CANVAS mode)
     for (const t in C.enemies.sprites) { // one flap/bob loop per sprite type, made once (textures and animations persist across restarts)
       const d = C.enemies.sprites[t], key = 'en_' + t + '_loop';
       if (!this.anims.exists(key)) this.anims.create({ key, frames: d.frames.map(f => ({ key: 'en_' + t, frame: f })), frameRate: d.fps, repeat: -1 });
@@ -538,6 +539,7 @@ export class PlayScene extends Phaser.Scene {
     this.weaponUps = mk('weaponUp', C.pickup.weaponPoolSize);
     this.heartUps = mk('heartUp', C.pickup.heartPoolSize);
     this.sparks = this.add.group({ defaultKey: 'square', maxSize: C.particles.poolSize });
+    this.flashPool = this.add.group({ defaultKey: 'square', maxSize: 30 }); // white hit-flash copies of enemies
     this.halos = this.add.group({ defaultKey: 'square', maxSize: C.pickup.haloPoolSize }); // glowing outlines of carriers
     this.trail = this.add.group({ defaultKey: 'square', maxSize: C.feel.trailPoolSize }); // broom sparkles (own pool so bursts never starve it)
     this.fxGroups = [this.sparks, this.trail];
@@ -874,7 +876,7 @@ export class PlayScene extends Phaser.Scene {
       e.play('en_' + g.type + '_loop');
     } else e.anims.stop(); // pooled sprite may still hold an animation from an earlier life
     initPath(e, cg.p, g.spd);
-    e.kind = g.type; e.hp = cfg.hp; e.flashUntil = 0; e.onScreen = false;
+    e.kind = g.type; e.hp = cfg.hp; e.flashUntil = 0; e.flashSpr = null; e.onScreen = false;
     e.fire = g.fire || null; e.armed = false; e.fireT = 0;
     e.coin = g.type === 'shooter' || (g.coinEvery > 0 && (i + 1) % g.coinEvery === 0); // shooters always drop 1 coin
     e.wave = cg.w;
@@ -904,7 +906,25 @@ export class PlayScene extends Phaser.Scene {
     c.hp = cc.c.hp; c.coins = cc.c.coins; c.flashUntil = 0; c.onScreen = false;
   }
 
+  // A copy of a sprite sheet with every visible pixel white (same frames). The hit flash shows it on top of the enemy.
+  // (setTintFill, the usual way, only works in WebGL; some browsers draw in CANVAS mode, where it does nothing.)
+  makeWhiteSheet(key) {
+    const wk = key + '_w';
+    if (this.textures.exists(wk)) return;
+    const src = this.textures.get(key), img = src.getSourceImage(), cv = this.textures.createCanvas(wk, img.width, img.height), ctx = cv.getContext('2d');
+    ctx.drawImage(img, 0, 0); ctx.globalCompositeOperation = 'source-in'; ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, img.width, img.height);
+    cv.refresh();
+    src.getFrameNames().forEach(n => { const f = src.get(n); cv.add(n, 0, f.cutX, f.cutY, f.cutWidth, f.cutHeight); });
+  }
+
+  // Show / move the white copy over a flashing enemy (same frame, flip, size, place).
+  syncFlash(e) {
+    if (!e.flashSpr) { e.flashSpr = this.flashPool.get(e.x, e.y, 'en_' + e.kind + '_w'); if (!e.flashSpr) return; e.flashSpr.setActive(true).setVisible(true); }
+    e.flashSpr.setTexture('en_' + e.kind + '_w', e.frame.name).setPosition(e.x, e.y).setScale(e.scaleX, e.scaleY).setFlipX(e.flipX).setRotation(e.rotation).setDepth(e.depth + 0.01);
+  }
+
   removeEnemy(e) {
+    if (e.flashSpr) { e.flashSpr.setActive(false).setVisible(false); e.flashSpr = null; }
     if (e.halo) { e.halo.setActive(false).setVisible(false); e.halo = null; }
     if (e.halos) { e.halos.forEach(h => h.setActive(false).setVisible(false)); e.halos = null; }
     this.hud.waveAlive(e.wave, -1);
@@ -934,7 +954,9 @@ export class PlayScene extends Phaser.Scene {
         const bx = e.x - e.ox, dx = bx - e.lastX; e.lastX = bx;
         if (dx > 0.05) e.setFlipX(false); else if (dx < -0.05) e.setFlipX(true);
       }
-      if (time < e.flashUntil) e.setTintFill(0xffffff); else e.clearTint();
+      const flashing = time < e.flashUntil;
+      if (e.sp) { if (flashing) this.syncFlash(e); else if (e.flashSpr) { e.flashSpr.setActive(false).setVisible(false); e.flashSpr = null; } }
+      else if (flashing) e.setTintFill(0xffffff); else e.clearTint();
       const pulse = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(time * TAU / C.pickup.haloPulseMs));
       if (e.halos) e.halos.forEach(h => h.setFrame(e.frame.name).setFlipX(e.flipX).setPosition(e.x + h.ox, e.y + h.oy).setAlpha(pulse)); // same frame and flip as the enemy, shifted 4 ways
       if (e.halo) e.halo.setPosition(e.x, e.y).setAlpha(pulse);
@@ -1053,7 +1075,7 @@ export class PlayScene extends Phaser.Scene {
   damageEnemy(e, dmg, flash) {
     if (!e.active) return;
     e.hp -= dmg;
-    if (e.hp > 0) { if (flash) { e.flashUntil = this.time.now + C.enemies.hitFlashMs; e.setTintFill(0xffffff); } if (C.feel.hitKickPx > 0) e.kick = 1; return; } // white at once, not only on the next update
+    if (e.hp > 0) { if (flash) { e.flashUntil = this.time.now + C.enemies.hitFlashMs; if (e.sp) this.syncFlash(e); else e.setTintFill(0xffffff); } if (C.feel.hitKickPx > 0) e.kick = 1; return; } // white at once, not only on the next update
     const big = e.kind === 'shooter';
     this.explode(e.x, e.y, big, DEATH_TINTS[e.kind]);
     this.pop(e.x, e.y - 6, '+' + C.enemies[e.kind].score);
