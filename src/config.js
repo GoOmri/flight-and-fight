@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.32", // bump on every push so the player/Omri can see the build
+  version: "1.9.33", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -68,7 +68,7 @@ export const CONFIG = {
   ship: {
     startY: z(520),
     dragSensitivity: 1.2, // ship moves this many times the finger movement (1 = 1:1, 1.5 = faster)
-    // Drag feel (spring). While the finger MOVES the witch catches up quickly (fastW strength, fastZ damping, no bounce). When the finger STOPS for idleMs she coasts a little past it
+    // Drag feel (spring). While the finger MOVES the witch catches up quickly (fastW strength, fastZ damping, no bounce). When the thumb is DOWN and the finger STOPS for idleMs she coasts a little past it (when the thumb is lifted she stops where the swipe put her, no overshoot)
     // and slowly settles back (slowW low = lazy return, slowZ low = more bounce). Moving the finger again switches back to the quick catch-up at once. spring: null = the old easing (followRate).
     spring: { fastW: 44, fastZ: 0.9, slowW: 5, slowZ: 0.5, idleMs: 50 },
     dragSlopPx: 4,        // touch dead zone: after the thumb lands it must move this far before the witch follows (a resting thumb never moves her)

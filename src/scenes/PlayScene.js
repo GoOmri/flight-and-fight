@@ -743,8 +743,8 @@ export class PlayScene extends Phaser.Scene {
     const SPR = S.spring, spring = SPR && !this.stickMode && !this.mouseMode;
     const px = s.x, py = s.y;
     if (spring) {
-      // Spring toward the target: stiff and calm while the finger moves, soft and a little bouncy when it rests (she coasts past it, then drifts back slowly).
-      const moving = this.dragId !== null && this.time.now - (this.lastMoveAt || 0) < SPR.idleMs, w = moving ? SPR.fastW : SPR.slowW, z = moving ? SPR.fastZ : SPR.slowZ;
+      // Spring toward the target: stiff and calm while the finger moves or after it is lifted, soft and a little bouncy only while the thumb is DOWN and resting (she coasts past, then drifts back slowly).
+      const moving = this.dragId === null || this.time.now - (this.lastMoveAt || 0) < SPR.idleMs, // thumb lifted = the quick calm spring (she stops where the swipe put her); the soft bouncy one is only for a thumb that is down but resting, w = moving ? SPR.fastW : SPR.slowW, z = moving ? SPR.fastZ : SPR.slowZ;
       this.shipV = this.shipV || { x: 0, y: 0 };
       const n = Math.max(1, Math.ceil(dt / 0.01)), h = dt / n;
       for (let i = 0; i < n; i++) {
