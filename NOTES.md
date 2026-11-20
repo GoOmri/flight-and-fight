@@ -353,3 +353,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Coin shine: subtle soft rays spinning behind a coin (3 pictures drawn in code and swapped at 6 per second, so every pixel stays on the grid) plus a small white twinkle now and then. ONLY ONE coin has it at a time (the first on screen; when it is gone the next one takes over), so a chest spilling six coins shows one shine. Config: sprites.coinShine.
 - Stars 3 px lower (offsetY -7).
 - UNVERIFIED on the phone: how subtle the rays look at full speed on a real screen (alpha 0.55, radius 12 px), the muzzle burst size.
+
+## 2026-11-20 v1.8.9: calmer muzzle flash (branch v1870-muzzle-gallery)
+- Omri: muzzle burst almost flashing. The burst is now 5x5 (was 7x7), shows 70 ms (was 90) at 80% strength (config.feel.muzzleMs / muzzleAlpha). Coin shine and stars: ok as they are.
+- Gallery: the Keeper's side-view sheet (sv_waechter) is hidden (Omri: not needed); the front / left / right / back rows now belong to the right sheet (waechter-19.png). The Fox shot sheet is a still picture of bullet shapes, so it only shows when "still pictures" is ticked (search "fox").
+- UNVERIFIED on the phone: how the smaller muzzle burst feels at full speed.

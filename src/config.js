@@ -27,7 +27,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.8.8", // bump on every push so the player/Omri can see the build
+  version: "1.8.9", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -243,7 +243,7 @@ export const CONFIG = {
     bigShakeMs: 90, bigShakeAmount: 0.004,
     coinSparkCount: 4, coinSparkSpeedMul: 0.5,
     scorePopScale: 0.3, scorePopMs: 160,    // score text grows by this much and settles back
-    muzzleMs: 90, muzzleSize: 2, muzzleSpread: 3, // muzzleMs: how long the flash shows (a big burst, then a small one); muzzleSpread is unused now (one flash in the middle)
+    muzzleMs: 70, muzzleAlpha: 0.8, muzzleSize: 2, muzzleSpread: 3, // muzzleMs: how long the flash shows (a big burst, then a small one); muzzleSpread is unused now (one flash in the middle)
     // flash at the nose on each volley
     levelFlashMs: 160, levelSparkCount: 8,  // green flash on the ship at a weapon upgrade
 

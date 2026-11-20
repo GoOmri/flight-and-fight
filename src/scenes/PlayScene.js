@@ -579,7 +579,7 @@ export class PlayScene extends Phaser.Scene {
         .setOrigin(0.5).setDepth(30).setVisible(false));
     }
     // muzzle flash: two small white pixels at the nose, shown for a few ms on every volley
-    this.muzzle = [0].map(() => this.add.image(0, 0, 'muzzleA').setScale(C.feel.muzzleSize).setDepth(11).setVisible(false));
+    this.muzzle = [0].map(() => this.add.image(0, 0, 'muzzleA').setScale(C.feel.muzzleSize).setAlpha(C.feel.muzzleAlpha).setDepth(11).setVisible(false));
   }
 
   makeShip() {
@@ -941,7 +941,7 @@ export class PlayScene extends Phaser.Scene {
       cv.refresh();
     };
     const fire = { y: '#ffdc58', o: '#ff8a1f', w: '#fff6b8' };
-    pix('muzzleA', ['...y...', '..yoy..', '.yowoy.', 'yowwwoy', '.yowoy.', '..yoy..', '...y...'], fire);
+    pix('muzzleA', ['..y..', '.yoy.', 'yowoy', '.yoy.', '..y..'], fire); // smaller than before: the old 7x7 burst on every shot looked like flashing
     pix('muzzleB', ['...', '.y.', '...'].map((r, i) => i === 1 ? 'ywy' : '.y.'), fire);
     const S = C.sprites.coinShine;
     if (S && !this.textures.exists('rays0')) { // 3 versions of an 8-ray star, each turned a little more: shown one after the other they look like spinning rays, and every pixel stays on the grid
