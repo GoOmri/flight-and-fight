@@ -1,0 +1,21 @@
+Asset licence (simple commercial-use licence), Shmup Shots, Explosions and Pickups 16x16
+Seller: capttainjack on itch.io. Version 1.0, October 2026.
+
+You may:
+- use these assets in any number of games, apps, videos and other projects, free or paid, commercial or not;
+- change, recolour, crop, scale and combine them;
+- ship them inside your finished project (including in its files, where players could extract them).
+
+You may not:
+- sell, give away, or re-upload the assets themselves, on their own or as part of another asset pack,
+  sprite collection, template or tileset, whether changed or unchanged;
+- claim you made the original assets;
+- use them as training data for, or as input to, any AI image model.
+
+Credit is welcome but not required. Suggested credit: "Shmup Shots, Explosions and Pickups 16x16 by capttainjack".
+
+The assets are given as is, with no warranty. If you want to do something this licence does not allow,
+ask through the itch.io page first.
+
+How they were made: every pixel is drawn by a deterministic code generator (fixed palettes and a fixed
+seed). The code was written with AI assistance. No AI image model made or touched any image.

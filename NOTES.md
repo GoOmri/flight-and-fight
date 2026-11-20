@@ -387,3 +387,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Rays (coin, potion, heart): now tapered wedges 4 px wide at the base instead of 1 px lines (config coinShine / potionShine / heartShine: width, inner, rayColor; shared drawRays()).
 - NOT done (Omri's step 5, later): a subtle warm-dark glow behind every enemy; the carrier outline must stay stronger.
 - Verified in the browser (stage dropped items): shots blue, potion dark blue with blue glow, heart pink-white glow, coin rays wider, enemy bullet pink with white core. UNVERIFIED on the phone: enemy bullet size (14 px) and readability, ray width.
+
+## 2026-11-20 v1.9.4: pack enemy shot, rays widen outward, lighter potion (branch v1940-enemy-shot-art)
+- Omri: my 7x7 enemy shot was just a big chunky one with few pixels. Now the enemy shot is the red orb of the pack "Shmup Shots, Explosions and Pickups 16x16" (capttainjack; 24 shots: orb, bolt, bullet, ring x red, orange, yellow, green, cyan, magenta; licence = use freely, no reselling or re-sharing the assets; credit in CREDITS.md and a licence copy in assets/shots). One picture: assets/shots/orb-red.png, 16x16 at scale 1, hit size still 3. Config enemyBullet.file; remove it for the code-drawn pink orb. Other colours / shapes are in art-packs/effects-vfx/shmup-effects-pack (the pack also has pickups, explosions, muzzle and spark pictures).
+- Rays (coin, potion, heart): reversed taper: 1 px next to the sprite and wider outward (about 4 px at the tip), as Omri asked.
+- Potion: less dark (valueMul 0.82 -> 0.95).
+- PARKED (Omri: "put it to the side, don't work on it now"): some elements such as explosions stay on the pause screen and the game over screen. We need a way to tell "world" things from "effects that should stop or clear". Not worked on.
+- UNVERIFIED on the phone: the orb's size next to the shots and the ghost; ray width.

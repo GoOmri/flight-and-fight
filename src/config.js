@@ -27,7 +27,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.9.3", // bump on every push so the player/Omri can see the build
+  version: "1.9.4", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -205,7 +205,7 @@ export const CONFIG = {
     // Heart pickup shine (yellow): spinning rays + soft glow behind the first heart on screen, and every heart bobs while it falls (bobAmp px/s swing, bobSpeed radians/s). From Omri's gallery recipe: glow, rays, bob, yellow.
     heartShine: { radius: 14, inner: 6, width: 4, fps: 6, alpha: 0.55, rayColor: '#ffe4f0', bobAmp: 14, bobSpeed: 5, glow: { cell: 2, rings: [{ r: 5, color: 0xfff0f6, alpha: 0.4 }, { r: 8, color: 0xffb3d6, alpha: 0.26 }, { r: 10, color: 0xff80b8, alpha: 0.13 }], flicker: [1, 0.85, 1, 0.7, 0.95], stepFps: 6 } },
     stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -7, fadeMs: 300 },
-    weaponGem: { file: 'pickups/potion-violet.png', frameW: 32, frameH: 32, frames: 1, fps: 1, scale: 0.9, hueShift: -70, hueRange: [225, 335], valueMul: 0.82 }, // the violet is turned to blue and made a bit darker (same family as the blue shot); the cork and ribbon keep their colour // weapon upgrade = the twinkling violet potion (one 32x32 picture with sparkles drawn in). The old green gem strip is gem-green.png (4 frames of 16x16, scale 1.2)
+    weaponGem: { file: 'pickups/potion-violet.png', frameW: 32, frameH: 32, frames: 1, fps: 1, scale: 0.9, hueShift: -70, hueRange: [225, 335], valueMul: 0.95 }, // the violet is turned to blue and made a bit darker (same family as the blue shot); the cork and ribbon keep their colour // weapon upgrade = the twinkling violet potion (one 32x32 picture with sparkles drawn in). The old green gem strip is gem-green.png (4 frames of 16x16, scale 1.2)
     fxPoolSize: 8 // chest-break and heart-collect animations playing at once
   },
 
@@ -213,7 +213,7 @@ export const CONFIG = {
   // Colour wash (easy tint): one flat colour over the play field at low strength, so pictures from different packs sit closer together. Per stage: color, alpha (0 = none, 0.2 = strong).
   // depth 33: over the play field and its effects, under the enemy shots (35), coins' pop texts are under it too, and the HUD (50). Try off with ?tint=0.
   tint: { on: true, depth: 33, forest: { color: 0x7a4fd0, alpha: 0.12 }, swamp: { color: 0x2a9a8a, alpha: 0.12 } },
-  enemyBullet: { poolSize: 30, speed: 100, hitSize: 3, depth: 35, scale: 2 }, // scale: size of the 7x7 picture (2 = 14 px) // depth 35: above all effects (sparks 20, texts 30), below the HUD (50)
+  enemyBullet: { poolSize: 30, speed: 100, hitSize: 3, depth: 35, scale: 1, file: 'shots/orb-red.png' }, // the red orb of the "Shmup Shots, Explosions and Pickups 16x16" pack (16x16, scale 1). Remove `file` to get the code-drawn pink orb back (it then uses scale 2) // depth 35: above all effects (sparks 20, texts 30), below the HUD (50)
 
   // pickupRadius: how close the ship must be to grab a coin (logical px). Bigger than the ship hitbox on purpose.
   coin: { fallSpeed: z(90), value: 5, poolSize: 40, pickupRadius: 10 },

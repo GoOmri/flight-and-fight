@@ -48,6 +48,7 @@ export class PlayScene extends Phaser.Scene {
     if (K.weaponGem) strip('sp_gem', K.weaponGem);
     if (K.stunned) strip('sp_stunned', K.stunned);
     if (C.bullet.fire) strip('sp_fire', C.bullet.fire);
+    if (C.enemyBullet.file) this.load.image('eb_pic', 'assets/' + C.enemyBullet.file); // enemy shot picture (shmup pack, capttainjack); without it the code-drawn orb is used
     const LN = this.bg === 'swamp' ? C.background.swamp.lanterns : null; // swamp lanterns (8-frame strips, see makeLanterns)
     if (LN) LN.files.forEach((f, i) => this.load.spritesheet('lan_' + i, 'assets/swamp/' + f.file + '.png', { frameWidth: f.w, frameHeight: f.h }));
     if (this.bg === 'swamp') { // swamp pictures (assets/swamp, pack "Murky Swamp", see CREDITS.md): only the ones listed in config are loaded
@@ -963,14 +964,14 @@ export class PlayScene extends Phaser.Scene {
     src.getFrameNames().forEach(n => { const f = src.get(n); cv.add(n, 0, f.cutX, f.cutY, f.cutWidth, f.cutHeight); });
   }
 
-  // Spinning rays: 8 tapered wedges (wide at the base, 1 px at the tip), drawn as whole pixels. f = 0..2 turns them a little further each picture.
+  // Spinning rays: 8 wedges (1 px next to the sprite, widening outward), drawn as whole pixels. f = 0..2 turns them a little further each picture.
   drawRays(ctx, S, f, color) {
     const R = S.radius, W = S.width || 3;
     for (let k = 0; k < 8; k++) {
       const a = k * Math.PI / 4 + f * Math.PI / 12, ca = Math.cos(a), sa = Math.sin(a);
       for (let r = S.inner; r <= R; r += 0.5) {
-        const t = (r - S.inner) / (R - S.inner + 0.01), half = Math.max(0, (W / 2) * (1 - t) - 0.2);
-        ctx.globalAlpha = 0.95 - 0.55 * t; ctx.fillStyle = color;
+        const t = (r - S.inner) / (R - S.inner + 0.01), half = Math.max(0, (W / 2) * (0.25 + 0.75 * t) - 0.2); // narrow next to the sprite, widest at the tip
+        ctx.globalAlpha = 0.95 - 0.35 * t; ctx.fillStyle = color;
         for (let j = -Math.floor(half); j <= Math.floor(half); j++) ctx.fillRect(Math.round(R + ca * r - sa * j), Math.round(R + sa * r + ca * j), 1, 1);
       }
     }
@@ -1186,7 +1187,7 @@ export class PlayScene extends Phaser.Scene {
     const hit = C.enemyBullet.hitSize;
     if (C.feel.fireFlashScale > 0) this.ring(e.x, e.y + 14, 0xffffff, C.feel.fireFlashScale, C.feel.fireFlashMs, C.feel.fireFlashAlpha); // telegraph
     for (let i = 0; i < n; i++) {
-      const b = this.spawn(this.enemyBullets, 'ebullet', e.x, e.y + 14, C.enemyBullet.scale);
+      const b = this.spawn(this.enemyBullets, this.textures.exists('eb_pic') ? 'eb_pic' : 'ebullet', e.x, e.y + 14, this.textures.exists('eb_pic') ? C.enemyBullet.scale : 2);
       if (!b) return;
       b.setDepth(C.enemyBullet.depth); // above all play effects, below the HUD
       b.body.setSize(hit, hit); // only the bright core hurts
