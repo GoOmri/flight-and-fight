@@ -6,7 +6,7 @@ import { FONT, drawPlate } from './hud.js';
 
 const W = C.game.width; // logical width (240)
 const P = C.menu.pal;
-// Tabs. Each row: label, path in CONFIG, step, min, max, decimals, [rebuild = the ray pictures must be drawn again]
+// Tabs. Each row: label, path in CONFIG, step, min, max, decimals, [rebuild = beams and glow pictures must be drawn again], [all3 = also set the same number on the heart and potion shine]
 const TABS = [
   ['STICK', [
     ['SHIP MOVE SPEED', 'stick.speed', 10, 60, 600, 0],
@@ -18,16 +18,14 @@ const TABS = [
     ['STOP SETTLE SPEED', 'stick.stopOmega', 1, 4, 40, 0],
     ['STOP DAMPING (BRAKE)', 'stick.stopDamping', 0.05, 0.1, 1, 2]]],
   ['LOOK', [
-    ['COIN BEAM OPACITY', 'sprites.coinShine.alpha', 0.05, 0, 1, 2],
-    ['COIN BEAM LENGTH', 'sprites.coinShine.radius', 1, 4, 40, 0, true],
-    ['HEART BEAM OPACITY', 'sprites.heartShine.alpha', 0.05, 0, 1, 2],
-    ['HEART BEAM LENGTH', 'sprites.heartShine.radius', 1, 4, 40, 0, true],
-    ['POTION BEAM OPACITY', 'sprites.potionShine.alpha', 0.05, 0, 1, 2],
-    ['POTION BEAM LENGTH', 'sprites.potionShine.radius', 1, 4, 40, 0, true],
+    ['DROP BEAM OPACITY', 'sprites.coinShine.alpha', 0.05, 0, 1, 2, false, true],
+    ['DROP BEAM LENGTH', 'sprites.coinShine.radius', 1, 4, 40, 0, true, true],
+    ['BEAM TIP FADE-OUT', 'sprites.coinShine.alphaEnd', 0.05, 0, 1, 2, true, true],
+    ['DROP GLOW SIZE', 'sprites.coinShine.glow.size', 0.05, 0.3, 1.8, 2, true, true],
+    ['DROP GLOW OPACITY', 'sprites.coinShine.glow.opacity', 0.1, 0, 2, 1, true, true],
     ['WITCH SHOT SIZE', 'bullet.fire.scale', 0.05, 0.5, 3, 2],
     ['WITCH SHOT SPEED', 'bullet.speed', 10, 100, 900, 0],
-    ['GAP BETWEEN SHOTS', 'bullet.gap', 0.1, 0.3, 3, 1],
-    ['BEAM TIP FADE-OUT', 'sprites.coinShine.alphaEnd', 0.05, 0, 1, 2, true]]], // the fade changes all three rays together (see set())
+    ['GAP BETWEEN SHOTS', 'bullet.gap', 0.1, 0.3, 3, 1],]],
   ['PICKUPS', [
     ['HEART FALL SPEED', 'pickup.heartFallSpeed', 5, 10, 200, 0],
     ['POTION FALL SPEED', 'pickup.weaponFallSpeed', 5, 10, 300, 0],
@@ -46,7 +44,7 @@ const TABS = [
 
 ];
 // New drops use the fall / grab / tilt numbers (things already falling keep the old ones).
-const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'BEAM = SPINNING LIGHT LINE. 1 = NORMAL', 'NEW DROPS ONLY (FALL, GRAB, TILT)', '(X) 1 = NORMAL. DELAY MORE = EASIER']; // one plain line under each tab
+const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'BEAM = LIGHT LINE, GLOW = SOFT HALO', 'NEW DROPS ONLY (FALL, GRAB, TILT)', '(X) 1 = NORMAL. DELAY MORE = EASIER']; // one plain line under each tab
 const ALL = TABS.flatMap(t => t[1]);
 const getp = path => path.split('.').reduce((o, k) => o[k], C);
 const setp = (path, v) => { const ks = path.split('.'), last = ks.pop(); ks.reduce((o, k) => o[k], C)[last] = v; };
@@ -93,7 +91,7 @@ export class Tune {
   set(r, v) {
     v = Math.round(Math.min(r[4], Math.max(r[3], v)) * 1000) / 1000;
     setp(r[1], v);
-    if (r[1] === 'sprites.coinShine.alphaEnd') { C.sprites.heartShine.alphaEnd = v; C.sprites.potionShine.alphaEnd = v; } // one tip fade for all three rays
+    if (r[7]) for (const k of ['heartShine', 'potionShine']) setp(r[1].replace('coinShine', k), v); // a drop-shine row changes coin, heart and potion together
     if (r[6] && this.scene.rebuildRays) this.scene.rebuildRays();
   }
 

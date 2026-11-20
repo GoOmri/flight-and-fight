@@ -12,6 +12,8 @@ import { Medals, MEDAL_KEYS, saveMedals, saveBest } from '../medals.js';
 // The menu passes data.theme ('forest' | 'swamp'); ?bg still wins, with no data config.background.mode is used.
 const bgName = theme => new URLSearchParams(window.location.search).get('bg') || theme || C.background.mode;
 const ANIM_FRAMES = ['a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10', 'a11']; // frame names of an animated strip (made once, so nothing is built per frame)
+const SHINE_KINDS = [['coin', 'rays'], ['heart', 'raysh'], ['potion', 'praysg']]; // drop kind, name of its beam pictures
+const GLOW_MAX = 20; // glow pictures are this many px from the centre (the biggest glow the tune panel can make)
 const RAYS_MAX = 40; // ray pictures are this many px from the centre (the longest ray the tune panel can make)
 const W = C.game.width, H = C.game.height, R = C.game.render, DEG = Math.PI / 180, TAU = Math.PI * 2;
 // Spark colours. Death pops match the creature; no red and no gold on anything that is not a shot / coin.
@@ -551,19 +553,9 @@ export class PlayScene extends Phaser.Scene {
     this.coins = mk('coin', C.coin.poolSize);
     if (this.shinePost) this.events.off('postupdate', this.shinePost); // (never call off() without the function: it would remove EVERY postupdate listener, physics included)
     // the shine follows its coin / potion / heart AFTER physics moved them (before, it was one frame behind: visible on fast coins)
-    this.shinePost = () => { if (!this.coins) return; const t = this.time.now; this.updateShine(t); this.updatePotionShine(t); this.updateHeartShine(t); };
+    this.shinePost = () => { if (!this.coins) return; const t = this.time.now; this.updateShine(t); this.updateHeartShine(t); };
     this.events.on('postupdate', this.shinePost);
-    this.coinShines = null; // one rays + glint picture per coin, made on demand (scene restarts get a fresh list)
-    this.shineRays = C.sprites.coinShine ? this.add.image(0, 0, 'rays0').setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.5).setVisible(false) : null;
-    this.heartTarget = null; this.heartShineSp = null; // pack shine overlays, made on demand
-    this.heartGlint = C.sprites.heartShine ? this.add.image(0, 0, 'glint0').setDepth(C.pickup.depth + 0.1).setVisible(false) : null;
-    this.heartGlow = C.sprites.heartShine && C.sprites.heartShine.glow ? this.add.image(0, 0, 'heartGlow').setScale(C.sprites.heartShine.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.6).setVisible(false) : null;
-    this.heartRays = C.sprites.heartShine ? this.add.image(0, 0, 'raysh0').setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.5).setVisible(false) : null;
-    this.potionGlint = C.sprites.potionShine ? this.add.image(0, 0, 'glint0').setDepth(C.pickup.depth + 0.1).setVisible(false) : null;
-    this.potionTarget = null;
-    this.potionGlow = C.sprites.potionShine ? this.add.image(0, 0, 'potionGlow').setScale(C.sprites.potionShine.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.6).setVisible(false) : null;
-    this.potionRays = C.sprites.potionShine ? this.add.image(0, 0, 'praysg0').setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.5).setVisible(false) : null;
-    this.shineGlint = C.sprites.coinShine ? this.add.image(0, 0, 'glint0').setDepth(C.pickup.depth + 0.1).setVisible(false) : null;
+    this.shinePools = { coin: [], heart: [], potion: [] }; this.heartShineSp = null; // beams + glow + twinkle for every drop, made on demand
     this.crates = mk('crate', C.crate.poolSize);
     this.weaponUps = mk('weaponUp', C.pickup.weaponPoolSize);
     this.heartUps = mk('heartUp', C.pickup.heartPoolSize);
@@ -985,11 +977,14 @@ export class PlayScene extends Phaser.Scene {
     ctx.globalAlpha = 1;
   }
 
-  // Draws the coin / heart / potion rays again from the current config numbers (the tune panel calls this after RAY LENGTH or RAY TIP changes).
+  // Draws the beams and glow of coin / heart / potion again from the current config numbers (the tune panel calls this after a change).
   rebuildRays() {
-    for (const [pre, S, col] of [['rays', C.sprites.coinShine, '#ffe9a0'], ['raysh', C.sprites.heartShine, '#fff0a0'], ['praysg', C.sprites.potionShine, '#d6ffb8']]) {
+    for (const [kind, pre] of SHINE_KINDS) {
+      const S = C.sprites[kind + 'Shine'];
       if (!S) continue;
-      for (let f = 0; f < 3; f++) { const t = this.textures.get(pre + f); if (t && t.source[0].canvas) { const cv = t.source[0].canvas; this.drawRays(cv.getContext('2d'), S, f, S.rayColor || col); t.source[0].update(); } }
+      for (let f = 0; f < 3; f++) { const t = this.textures.get(pre + f); if (t && t.getContext) { this.drawRays(t.getContext(), S, f, S.rayColor); t.refresh(); } } // CanvasTexture: getContext() + refresh()
+      const g = this.textures.get(kind + 'Glow');
+      if (g && g.getContext) { this.drawGlow(g.getContext(), S); g.refresh(); }
     }
   }
 
@@ -1010,76 +1005,58 @@ export class PlayScene extends Phaser.Scene {
     const fire = { y: '#bfe9ff', o: '#4aa3ff', w: '#ffffff' }; // the muzzle burst matches the blue shot
     pix('muzzleA', ['..y..', '.yoy.', 'yowoy', '.yoy.', '..y..'], fire); // smaller than before: the old 7x7 burst on every shot looked like flashing
     pix('muzzleB', ['...', '.y.', '...'].map((r, i) => i === 1 ? 'ywy' : '.y.'), fire);
-    const S = C.sprites.coinShine;
-    if (S && !this.textures.exists('rays0')) { // 3 versions of an 8-ray star, each turned a little more: shown one after the other they look like spinning rays, and every pixel stays on the grid
-      const n = RAYS_MAX * 2 + 1;
-      for (let f = 0; f < 3; f++) {
-        const cv = this.textures.createCanvas('rays' + f, n, n), ctx = cv.getContext('2d');
-        this.drawRays(ctx, S, f, S.rayColor || '#ffe9a0');
-        cv.refresh();
-      }
-      pix('glint0', ['..w..', '..w..', 'wwwww', '..w..', '..w..'], { w: '#ffffff' });
-      pix('glint1', ['.w.', 'www', '.w.'], { w: '#ffffff' });
+    pix('glint0', ['..w..', '..w..', 'wwwww', '..w..', '..w..'], { w: '#ffffff' });
+    pix('glint1', ['.w.', 'www', '.w.'], { w: '#ffffff' });
+    for (const [kind, pre] of SHINE_KINDS) { // beams (3 turned pictures) and glow, one set per drop kind; fixed size so the tune panel can redraw them
+      const S = C.sprites[kind + 'Shine'];
+      if (!S || this.textures.exists(pre + '0')) continue;
+      for (let f = 0; f < 3; f++) this.textures.createCanvas(pre + f, RAYS_MAX * 2 + 1, RAYS_MAX * 2 + 1);
+      this.textures.createCanvas(kind + 'Glow', GLOW_MAX * 2 + 1, GLOW_MAX * 2 + 1);
     }
-    const HS = C.sprites.heartShine; // yellow shine for the heart pickup: spinning rays (3 pictures) and a soft glow of flat rings
-    if (HS && !this.textures.exists('raysh0')) {
-      const n = RAYS_MAX * 2 + 1;
-      for (let f = 0; f < 3; f++) {
-        const cv = this.textures.createCanvas('raysh' + f, n, n), ctx = cv.getContext('2d');
-        this.drawRays(ctx, HS, f, HS.rayColor || '#fff0a0');
-        cv.refresh();
-      }
-      if (HS.glow) {
-      const gn = HS.glow.rings[HS.glow.rings.length - 1].r * 2 + 1, gc = this.textures.createCanvas('heartGlow', gn, gn), gx = gc.getContext('2d');
-      for (let y = 0; y < gn; y++) for (let x = 0; x < gn; x++) {
-        const dd = Math.hypot(x - (gn - 1) / 2, y - (gn - 1) / 2), ring = HS.glow.rings.find(r => dd <= r.r);
-        if (ring) { gx.fillStyle = hex(ring.color); gx.globalAlpha = ring.alpha; gx.fillRect(x, y, 1, 1); }
-      }
-      gc.refresh();
-      }
-    }
-    const PS = C.sprites.potionShine; // the same kind of shine for the weapon potion, in green, plus a soft glow made of flat rings
-    if (PS && !this.textures.exists('praysg0')) {
-      const n = RAYS_MAX * 2 + 1;
-      for (let f = 0; f < 3; f++) {
-        const cv = this.textures.createCanvas('praysg' + f, n, n), ctx = cv.getContext('2d');
-        this.drawRays(ctx, PS, f, PS.rayColor || '#d6ffb8');
-        cv.refresh();
-      }
-      const gn = PS.glow.rings[PS.glow.rings.length - 1].r * 2 + 1, gc = this.textures.createCanvas('potionGlow', gn, gn), gx = gc.getContext('2d');
-      for (let y = 0; y < gn; y++) for (let x = 0; x < gn; x++) {
-        const dd = Math.hypot(x - (gn - 1) / 2, y - (gn - 1) / 2), ring = PS.glow.rings.find(r => dd <= r.r);
-        if (ring) { gx.fillStyle = hex(ring.color); gx.globalAlpha = ring.alpha; gx.fillRect(x, y, 1, 1); }
-      }
-      gc.refresh();
-    }
+    this.rebuildRays();
   }
 
-  // EVERY coin on screen gets the shine (soft spinning rays behind it and a little twinkle). One rays + glint picture per coin in the pool; each coin twinkles at its own moment.
+  // Draws the soft glow (flat rings, colours per drop) into its fixed-size picture.
+  drawGlow(ctx, S) {
+    const G = S.glow, n = ctx.canvas.width, M = (n - 1) / 2;
+    ctx.clearRect(0, 0, n, n);
+    for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+      const dd = Math.hypot(x - M, y - M), i = G.rings.findIndex(r => dd <= r.r * G.size);
+      if (i >= 0) { ctx.fillStyle = hex(S.glowColors[i]); ctx.globalAlpha = Math.min(1, G.rings[i].a * G.opacity); ctx.fillRect(x, y, 1, 1); }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // EVERY drop on screen (coins, hearts, potions) gets the same shine: soft glow, spinning beams and a little twinkle.
+  // One glow + beams + twinkle picture set per drop in a pool; each drop twinkles at its own moment.
   updateShine(time) {
-    const S = C.sprites.coinShine;
-    if (!S || !this.shineRays) return;
-    if (!this.coinShines) this.coinShines = [];
-    let n = 0;
-    this.coins.children.iterate(c => {
-      if (!c || !c.active || c.y <= 0 || c.y >= H) return;
-      let sh = this.coinShines[n];
-      if (!sh) sh = this.coinShines[n] = n === 0 ? { rays: this.shineRays, glint: this.shineGlint }
-        : { rays: this.add.image(0, 0, 'rays0').setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.5), glint: this.add.image(0, 0, 'glint0').setDepth(C.pickup.depth + 0.1) };
-      n++;
-      const x = Math.round(c.x), y = Math.round(c.y);
-      sh.rays.setVisible(true).setTexture('rays' + (Math.floor(time / 1000 * S.fps) % 3)).setPosition(x, y).setAlpha(S.alpha);
-      const t = (time + n * 370) % S.glintEveryMs; // the twinkle: bigger for a moment, then smaller, then gone
-      if (t < S.glintMs) sh.glint.setTexture(t < S.glintMs / 2 ? 'glint0' : 'glint1').setPosition(x + S.glintDx, y + S.glintDy).setVisible(true);
-      else sh.glint.setVisible(false);
-    });
-    for (let i = n; i < this.coinShines.length; i++) { this.coinShines[i].rays.setVisible(false); this.coinShines[i].glint.setVisible(false); }
+    for (const [kind, pre, group] of [['coin', 'rays', this.coins], ['heart', 'raysh', this.heartUps], ['potion', 'praysg', this.weaponUps]]) {
+      const S = C.sprites[kind + 'Shine'], pool = this.shinePools[kind];
+      if (!S || !group) continue;
+      let n = 0;
+      group.children.iterate(c => {
+        if (!c || !c.active || c.y <= -10 || c.y >= H) return;
+        let sh = pool[n];
+        if (!sh) sh = pool[n] = {
+          rays: this.add.image(0, 0, pre + '0').setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.5),
+          glow: this.add.image(0, 0, kind + 'Glow').setScale(S.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.6),
+          glint: this.add.image(0, 0, 'glint0').setDepth(C.pickup.depth + 0.1) };
+        n++;
+        const x = Math.round(c.x), y = Math.round(c.y);
+        sh.glow.setVisible(true).setPosition(x, y).setAlpha(S.glow.flicker[Math.floor(time / 1000 * S.glow.stepFps) % S.glow.flicker.length]);
+        sh.rays.setVisible(true).setTexture(pre + (Math.floor(time / 1000 * S.fps) % 3)).setPosition(x, y).setAlpha(S.alpha);
+        const t = (time + n * 370) % S.glintEveryMs; // the twinkle: bigger for a moment, then smaller, then gone
+        if (t < S.glintMs) sh.glint.setTexture(t < S.glintMs / 2 ? 'glint0' : 'glint1').setPosition(x + S.glintDx, y + S.glintDy).setVisible(true);
+        else sh.glint.setVisible(false);
+      });
+      for (let i = n; i < pool.length; i++) { pool[i].rays.setVisible(false); pool[i].glow.setVisible(false); pool[i].glint.setVisible(false); }
+    }
   }
 
-  // The falling heart pickup: every heart bobs (its fall speed swings a little up and down), and the first one on screen gets a yellow glow and spinning rays.
+  // The falling heart pickup: every heart bobs (its fall speed swings a little up and down) and carries the pack's own shine layer over its idle loop.
   updateHeartShine(time) {
     const HS = C.sprites.heartShine;
-    if (!HS || !this.heartRays) return;
+    if (!HS) return;
     const shSp = C.sprites.heartPickup && C.sprites.heartPickup.shine ? (this.heartShineSp = this.heartShineSp || []) : null; // the pack's own shine layer: glints crossing the heart, same frame as the heart's Idle loop
     let ns = 0;
     this.heartUps.children.iterate(p => {
@@ -1091,30 +1068,6 @@ export class PlayScene extends Phaser.Scene {
       o.setFrame(Number(p.frame.name) || 0).setScale(p.scaleX).setPosition(p.x, p.y).setVisible(true);
     });
     if (shSp) for (let i = ns; i < shSp.length; i++) shSp[i].setVisible(false);
-    if (!this.heartTarget || !this.heartTarget.active || this.heartTarget.y > H + 20) this.heartTarget = this.heartUps.getChildren().find(p => p.active && p.y > -10 && p.y < H) || null;
-    const c = this.heartTarget;
-    this.heartRays.setVisible(!!c); if (this.heartGlow) this.heartGlow.setVisible(!!c); this.heartGlint.setVisible(false);
-    if (!c) return;
-    const x = Math.round(c.x), y = Math.round(c.y);
-    if (this.heartGlow) this.heartGlow.setPosition(x, y).setAlpha(HS.glow.flicker[Math.floor(time / 1000 * HS.glow.stepFps) % HS.glow.flicker.length]);
-    const tw = time % HS.glintEveryMs; // twinkle
-    if (tw < HS.glintMs) this.heartGlint.setTexture(tw < HS.glintMs / 2 ? 'glint0' : 'glint1').setPosition(x + HS.glintDx, y + HS.glintDy).setVisible(true);
-    this.heartRays.setTexture('raysh' + (Math.floor(time / 1000 * HS.fps) % 3)).setPosition(x, y).setAlpha(HS.alpha);
-  }
-
-  // The falling weapon potion gets a soft green glow and spinning green rays (one potion at a time is the norm, so one shine is enough).
-  updatePotionShine(time) {
-    const PS = C.sprites.potionShine;
-    if (!PS || !this.potionRays) return;
-    if (!this.potionTarget || !this.potionTarget.active || this.potionTarget.y > H + 20) this.potionTarget = this.weaponUps.getChildren().find(p => p.active && p.y > -10 && p.y < H) || null;
-    const c = this.potionTarget;
-    this.potionRays.setVisible(!!c); this.potionGlow.setVisible(!!c); this.potionGlint.setVisible(false);
-    if (!c) return;
-    const x = Math.round(c.x), y = Math.round(c.y);
-    this.potionGlow.setPosition(x, y).setAlpha(PS.glow.flicker[Math.floor(time / 1000 * PS.glow.stepFps) % PS.glow.flicker.length]);
-    this.potionRays.setTexture('praysg' + (Math.floor(time / 1000 * PS.fps) % 3)).setPosition(x, y).setAlpha(PS.alpha);
-    const tw = time % PS.glintEveryMs; // the twinkle: bigger for a moment, then smaller
-    if (tw < PS.glintMs) this.potionGlint.setTexture(tw < PS.glintMs / 2 ? 'glint0' : 'glint1').setPosition(x + PS.glintDx, y + PS.glintDy).setVisible(true);
   }
 
   // The main colour of a sprite sheet: average of its solid pixels, favouring colourful ones over grey outlines, then brightened so smoke stays readable.

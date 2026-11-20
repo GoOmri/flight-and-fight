@@ -476,3 +476,11 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 v1.9.19: wider tune rows, longer names (branch v1919-wide-tune-rows)
 - Omri: free space on the right of the tune panel. The - and + buttons moved to the right edge, the value sits next to them, and every row has a longer plain name (up to 20 letters), e.g. COIN BEAM OPACITY, COIN BEAM LENGTH, WITCH SHOT SPEED, GAP BETWEEN SHOTS, ENEMY SHOT DELAY (X), PICKUP GRAB SIZE. Hints reworded.
 - UNVERIFIED: not seen on screen (the browser preview would not open). If a long name touches its number, tell me which one.
+
+## 2026-11-20 v1.9.20: one shared shine for every drop (branch v1920-shared-drop-shine)
+- Omri: glow and beams should be the same on all drops, with the same glow on all, and the potion's glow was 50% too big. Now coin, heart and potion share ONE look (config SHINE at the top of config.js): beam length 17, width 1 to 5 px, opacity 0.4, tip fade 0.2, and a soft glow of 3 flat rings. Only the colours (rayColor, glowColors) and the twinkle spot differ per drop. Every drop on screen has beams + glow + twinkle (before: coins had no glow, only the first heart/potion had a shine).
+- Glow: now on coins and hearts too. glow.size 0.67 (the potion's glow shrinks to two thirds, since it was 1.5x too big). glow.opacity 1.
+- Tune panel LOOK tab: the per-drop beam rows are replaced by shared rows that change all three drops at once: DROP BEAM OPACITY, DROP BEAM LENGTH, BEAM TIP FADE-OUT, DROP GLOW SIZE, DROP GLOW OPACITY (then witch shot size, speed, gap).
+- Code: beams and glow are fixed-size canvas pictures redrawn by rebuildRays() (a CanvasTexture needs getContext() + refresh(); the first version used a source .canvas that Phaser does not have, found before the push). One pool of beams + glow + twinkle per drop kind (updateShine), replaces the old coin / heart / potion specific code.
+- Side effects: potion beams are shorter now (19 -> 17), coin beams longer (14 -> 17).
+- UNVERIFIED: never run (the browser preview would not open). RISK: a code mistake here could stop the game from starting; if the menu or game will not load, tell me at once and I revert to v1.9.19.
