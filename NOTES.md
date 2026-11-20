@@ -424,3 +424,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri: witch shot too big -> scale 2 -> 1.5 (19x28 px). Rays too long -> coin radius 20 -> 14, potion 26 -> 19, heart 24 -> 17 (still starting at the sprite centre, 2 to 5 px wide).
 - Coin shine: only ONE coin has it at a time (by design, so a chest spill shows one). It is now the coin in FRONT (lowest on screen), and it keeps the shine until it is gone or another coin is more than 10 px further down; before it was simply the first coin in the pool. Verified with 6 coins: the target is the lowest one.
 - UNVERIFIED on the phone: shot size, ray length.
+
+## 2026-11-20 v1.9.10: potion tweaks, slower smaller shot (branch v1991-potion-tweaks)
+- Witch shot: 10% smaller (scale 1.5 -> 1.35, 17.5 px wide) and 20% slower (speed z(520) -> z(416)).
+- Rays: 1 px wide at the centre (widthStart 2 -> 1), still 5 px at the tip.
+- Potion: more teal (hueShift -70 -> -85) and tilted 15 degrees to the right (sprites.weaponGem.angle; the glow and rays stay upright).
+- Potion pickup ring: the old ring was a 9 px picture scaled up to 54 px, so its line was about 6 px thick. Now a thin ring (2 px) drawn at its full size that starts at a quarter of its size and grows to 76 px, in teal (config feel.potionRing: diameter, thick, color; remove the key for the old green ring). The spark burst and the level-up flash on the witch are still green: say if they should turn teal too.
+- Verified in the browser: potion tilted and teal, thin ring grows around the witch, shot 17.5 px. UNVERIFIED on the phone: shot feel at the slower speed, ring size.

@@ -990,6 +990,12 @@ export class PlayScene extends Phaser.Scene {
       rows.forEach((r, y) => [...r].forEach((ch, x) => { if (ch !== '.') { ctx.fillStyle = pal[ch]; ctx.fillRect(x, y, 1, 1); } }));
       cv.refresh();
     };
+    const PR = C.feel.potionRing; // a thin big ring for the weapon pickup: a 1-2 px line drawn at its full size (the old ring picture was 9 px scaled up, so its line got thick)
+    if (PR && !this.textures.exists('fxRingFine')) {
+      const n = PR.diameter + 2, cv = this.textures.createCanvas('fxRingFine', n, n), ctx = cv.getContext('2d'); ctx.fillStyle = '#ffffff';
+      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const d = Math.hypot(x + 0.5 - n / 2, y + 0.5 - n / 2); if (Math.abs(d - PR.diameter / 2) <= PR.thick / 2) ctx.fillRect(x, y, 1, 1); }
+      cv.refresh();
+    }
     const fire = { y: '#bfe9ff', o: '#4aa3ff', w: '#ffffff' }; // the muzzle burst matches the blue shot
     pix('muzzleA', ['..y..', '.yoy.', 'yowoy', '.yoy.', '..y..'], fire); // smaller than before: the old 7x7 burst on every shot looked like flashing
     pix('muzzleB', ['...', '.y.', '...'].map((r, i) => i === 1 ? 'ywy' : '.y.'), fire);
@@ -1234,6 +1240,7 @@ export class PlayScene extends Phaser.Scene {
     const p = this.spawn(group, gem ? (this.textures.exists('sp_gem_g') ? 'sp_gem_g' : 'sp_gem') : sp ? 'sp_heart_drop' : key, Phaser.Math.Clamp(x, m, W - m), y, sp ? sp.scale : PX);
     if (!p) return;
     p.setDepth(C.pickup.depth); // above the colour wash
+    if (gem && gem.angle) p.setAngle(gem.angle); // the weapon potion is tilted to the right
     const hb = 2 * C.coin.pickupRadius / (sp ? sp.scale : PX);
     p.body.setSize(hb, hb);
     p.dropping = !!sp && !gem;
@@ -1247,7 +1254,8 @@ export class PlayScene extends Phaser.Scene {
     this.hud.setLevel(this.weaponLevel);
     this.shipFlashUntil = this.time.now + C.feel.levelFlashMs;
     this.burst(this.ship.x, this.ship.y, C.feel.levelSparkCount, GREEN_TINTS, 1, 3);
-    if (C.feel.deathRing) this.ring(this.ship.x, this.ship.y, 0x2ee86a, C.feel.bigDeathRingScale, C.feel.deathRingMs + C.feel.pickupRingExtraMs);
+    if (C.feel.potionRing) this.ring(this.ship.x, this.ship.y, C.feel.potionRing.color, 1, C.feel.deathRingMs + C.feel.pickupRingExtraMs + 80, 0.9, 'fxRingFine'); // thin ring that grows big
+    else if (C.feel.deathRing) this.ring(this.ship.x, this.ship.y, 0x2ee86a, C.feel.bigDeathRingScale, C.feel.deathRingMs + C.feel.pickupRingExtraMs);
   }
 
   heartUp(px, py) {
@@ -1406,11 +1414,11 @@ export class PlayScene extends Phaser.Scene {
   }
 
   // An expanding, fading ring. size = final scale in art pixels (PX each).
-  ring(x, y, tint, size, ms, alpha = 0.9) {
+  ring(x, y, tint, size, ms, alpha = 0.9, tex = null) { // tex: another ring picture (then size is its final scale, not x PX)
     const r = this.rings.get(x, y, 'fxRing');
     if (!r) return;
-    r.setActive(true).setVisible(true).setPosition(x, y).setTint(tint).setDepth(C.feel.ringDepth).setAlpha(alpha);
-    r.s1 = size * PX; r.a0 = alpha; r.life = r.max = ms / 1000;
+    r.setTexture(tex || 'fxRing').setActive(true).setVisible(true).setPosition(x, y).setTint(tint).setDepth(C.feel.ringDepth).setAlpha(alpha);
+    r.s1 = tex ? size : size * PX; r.a0 = alpha; r.life = r.max = ms / 1000;
   }
 
   // Floating text that drifts up and fades.
