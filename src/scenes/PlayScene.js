@@ -709,8 +709,10 @@ export class PlayScene extends Phaser.Scene {
       this.stickV.y += (w2 * (this.stopT.y - s.y) - c * this.stickV.y) * sd;
       if (Math.abs(this.stickV.x) < 1 && Math.abs(this.stickV.y) < 1 && Math.hypot(this.stopT.x - s.x, this.stopT.y - s.y) < 0.5) this.stickV.set(0, 0);
     }
-    this.target.x = Phaser.Math.Clamp(s.x + this.stickV.x * dt, S.margin, W - S.margin);
-    this.target.y = Phaser.Math.Clamp(s.y + this.stickV.y * dt, S.margin, H - S.margin);
+    // Soft walls: flying TOWARD an edge she slows down smoothly inside edgeZone px of it (down to edgeSpeed at the wall); flying away or along is not slowed.
+    const soft = (pos, v, lo, hi) => { if (!(T.edgeZone > 0) || T.edgeSpeed >= 1 || !v) return 1; const d = v > 0 ? hi - pos : pos - lo, k = Phaser.Math.Clamp(d / T.edgeZone, 0, 1); return T.edgeSpeed + (1 - T.edgeSpeed) * k * k * (3 - 2 * k); };
+    this.target.x = Phaser.Math.Clamp(s.x + this.stickV.x * dt * soft(s.x, this.stickV.x, S.margin, W - S.margin), S.margin, W - S.margin);
+    this.target.y = Phaser.Math.Clamp(s.y + this.stickV.y * dt * soft(s.y, this.stickV.y, S.margin, H - S.margin), S.margin, H - S.margin);
     const k = len > T.radius ? T.radius / len : 1; // knob stays inside the ring
     this.stickRing.setPosition(this.stickC.x, this.stickC.y).setAlpha(held ? T.ringAlpha : T.restAlpha);
     this.stickKnob.setPosition(this.stickC.x + dx * k, this.stickC.y + dy * k).setAlpha(held ? T.ringAlpha + 0.1 : T.restAlpha);

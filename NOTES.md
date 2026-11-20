@@ -527,3 +527,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-20 v1.9.29: potion no longer bobs (branch v1929-no-potion-bob)
 - Omri: remove the bob from the potion. sprites.potionShine.bobAmp 14 -> 0 (the potion falls at its steady speed again; the tune row DROPS > POTION > BOB AMOUNT can bring it back). The heart still bobs.
+
+## 2026-11-20 v1.9.30: soft walls, the witch slows near the edges (branch v1930-edge-slow)
+- Omri: she should move slower near the edges and not fly to them so quickly. New in the stick control: when she flies TOWARD a wall she slows down smoothly inside config stick.edgeZone (50 px) of it, down to stick.edgeSpeed (0.35 = 35% of her speed) at the wall. Flying away from a wall or along it is not slowed. It only changes how far she moves each frame; the stick, the glide and the spring are untouched. edgeSpeed 1 or edgeZone 0 = off. Tune panel: STICK tab, EDGE SLOW-DOWN ZONE and SPEED AT THE WALL (X).
+- Less finger travel (Omri does not want to drag far): that is the existing STICK CIRCLE SIZE (stick.radius 47): a smaller circle reaches full speed with a shorter drag.
+- UNVERIFIED on the phone: all of the feel (zone size, how slow at the wall).

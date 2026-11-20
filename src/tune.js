@@ -33,7 +33,9 @@ const TABS = [
     ['STICK FOLLOW SNAP', 'stick.response', 2, 5, 100, 0],
     ['GLIDE AFTER RELEASE', 'stick.stopGlide', 0.02, 0, 0.4, 2],
     ['STOP SETTLE SPEED', 'stick.stopOmega', 1, 4, 40, 0],
-    ['STOP DAMPING (BRAKE)', 'stick.stopDamping', 0.05, 0.1, 1, 2]]],
+    ['STOP DAMPING (BRAKE)', 'stick.stopDamping', 0.05, 0.1, 1, 2],
+    ['EDGE SLOW-DOWN ZONE', 'stick.edgeZone', 5, 0, 120, 0],
+    ['SPEED AT THE WALL (X)', 'stick.edgeSpeed', 0.05, 0.1, 1, 2]]],
   ['SHOT', [
     ['WITCH SHOT SIZE', 'bullet.fire.scale', 0.05, 0.5, 3, 2],
     ['WITCH SHOT SPEED', 'bullet.speed', 10, 100, 900, 0],
