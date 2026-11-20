@@ -268,3 +268,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri's home-screen app has no address bar, so ?tune=1 could not be used there. Now: tap the version text at the bottom of the MENU 5 times quickly -> it says TUNE ON (or TUNE OFF) and the choice is remembered (localStorage 'ff_tune'). ?tune=1 also turns it on and remembers it; ?tune=0 turns it off. Code: tuneEnabled() / toggleTune() in src/tune.js, MenuScene version tap, PlayScene uses tuneEnabled().
 - Verified in the browser (phone-sized, touch): 5 taps -> next stage has the TUNE button, no console errors. UNVERIFIED on the phone/app: that the 5 taps are easy to hit (the area is about 80x24 px around the version text).
 - Remember: with the remembered flag on, no medals are saved (debug run). Turn it OFF again for normal play.
+
+## 2026-11-20 v1.6.2: stick numbers from Omri's phone tuning
+- Tuned with the TUNE panel on the phone, copied by Omri. config.stick: speed z(360)=240 -> 200, radius z(55)=37 -> 47, deadZone 0.1 (same), curve 1.4 -> 1 (even response), response 40 -> 44, stopGlide 0.12 (same), stopOmega 16 -> 11, stopDamping 0.3 -> 0.8 (almost no bounce, slower settle).
+- Speed and radius are now plain numbers (no z()); they were 240 and 37 before, so 200 and 47 are in the same game pixels.
+- UNVERIFIED beyond what Omri felt while tuning: nothing else changed. Next idea (Omri has not decided): ?ctl=mouse for desktop testing.
