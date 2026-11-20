@@ -551,3 +551,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-20 v1.9.34: fix for v1.9.33 (branch v1934-fix-syntax)
 - v1.9.33 had a typo (a comment swallowed part of a line in PlayScene.js moveShip) that stops the game from loading. v1.9.34 fixes it; it was live for a few minutes. Every file under src/ now passes a syntax check before pushing; from now on a push only happens if all the checks pass.
+
+## 2026-11-20 v1.9.35: new app icon, the light blue is gone (branch v1935-new-icon)
+- Omri still saw light blue now and then when updating. Searched the code: the page, the game canvas and the menu are all dark (#000 / #14161f / dark purple sky). The old light blue only lived in (1) icon.svg, still the OLD blue-sky jet icon (#2a7bd8 and #6fb4f2): the home-screen app shows the icon on its start-up (splash) screen, which is most likely what he saw when updating; (2) config background.skyTop / skyBottom, only used by the old ?bg=sky mode (not the default). Icon replaced by a pixel witch hat on the dark game colour (#14161f). The sky colours are left (only the ?bg=sky test mode).
+- Android keeps the icon saved from when the app was added to the home screen: Omri may need to remove the home-screen app and add it again (or clear its data) to see the new icon. UNVERIFIED: not seen; this is my best guess for what he saw. If light blue still shows, tell me exactly when (opening the app, pressing UPDATE, entering a stage).
