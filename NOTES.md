@@ -284,3 +284,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Verified in the browser (desktop): wisp shows and animates, chest depth -8.2 and moves 40 px/s = ground speed, chest freeze + fade works (frame 14 held, alpha 1 -> 0, then gone), stunned stars sit above the hat, tint looks subtle, swamp runs, no console errors.
 - UNVERIFIED on the phone: wisp size and hitbox, whether the stars are big enough, whether 0.12 tint is too much or too little, the sway speed.
 - NOT DONE / open: "shooter outline not lined with sprite": shooters never carry a weapon/heart in any wave, so the glow outline cannot show on them in the current waves. Omri to say when he saw it. New projectile packs (fox717 shot sheet, SovDigital arrow+fire) are catalogued but not used yet.
+
+## 2026-11-20 gallery cleanup (local tool, nothing in the game; same branch)
+- New `art-packs/_tools/gallery/apply-deletes.mjs` (real deletion of marked cards: dry run, then --yes, files go to art-packs/_deleted), duplicate hiding by pixels in build.mjs, folding groups per cat colour. Details in art-packs/CATALOG.md. Projectile packs (fox717, SovDigital) catalogued. Tested: dry run + a real move of a throwaway file. UNVERIFIED: the clipboard read when run from Omri's own terminal (it uses PowerShell Get-Clipboard).
