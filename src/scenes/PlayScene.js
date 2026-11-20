@@ -552,7 +552,7 @@ export class PlayScene extends Phaser.Scene {
     // the shine follows its coin / potion / heart AFTER physics moved them (before, it was one frame behind: visible on fast coins)
     this.shinePost = () => { if (!this.coins) return; const t = this.time.now; this.updateShine(t); this.updatePotionShine(t); this.updateHeartShine(t); };
     this.events.on('postupdate', this.shinePost);
-    this.shineTarget = null; // the one coin that has the shine
+    this.coinShines = null; // one rays + glint picture per coin, made on demand (scene restarts get a fresh list)
     this.shineRays = C.sprites.coinShine ? this.add.image(0, 0, 'rays0').setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.5).setVisible(false) : null;
     this.heartTarget = null;
     this.heartGlint = C.sprites.heartShine ? this.add.image(0, 0, 'glint0').setDepth(C.pickup.depth + 0.1).setVisible(false) : null;
@@ -1044,23 +1044,25 @@ export class PlayScene extends Phaser.Scene {
     }
   }
 
-  // ONE coin at a time gets the shine (soft spinning rays behind it and a little twinkle): the first coin on screen; when it is gone the next one takes over.
-  // So a chest that spills six coins still shows just one shine.
+  // EVERY coin on screen gets the shine (soft spinning rays behind it and a little twinkle). One rays + glint picture per coin in the pool; each coin twinkles at its own moment.
   updateShine(time) {
     const S = C.sprites.coinShine;
     if (!S || !this.shineRays) return;
-    // the coin in FRONT (lowest on screen) has the shine; it keeps it until it is gone or another coin is clearly further down
-    const cur = this.shineTarget && this.shineTarget.active && this.shineTarget.y < H + 10 ? this.shineTarget : null;
-    let front = cur;
-    this.coins.children.iterate(c => { if (c && c.active && c.y > 0 && c.y < H && (!front || c.y > front.y + 10)) front = c; });
-    this.shineTarget = front;
-    const c = this.shineTarget;
-    this.shineRays.setVisible(!!c); this.shineGlint.setVisible(false);
-    if (!c) return;
-    const x = Math.round(c.x), y = Math.round(c.y);
-    this.shineRays.setTexture('rays' + (Math.floor(time / 1000 * S.fps) % 3)).setPosition(x, y).setAlpha(S.alpha);
-    const t = time % S.glintEveryMs; // the twinkle: bigger for a moment, then smaller, then gone
-    if (t < S.glintMs) this.shineGlint.setTexture(t < S.glintMs / 2 ? 'glint0' : 'glint1').setPosition(x + S.glintDx, y + S.glintDy).setVisible(true);
+    if (!this.coinShines) this.coinShines = [];
+    let n = 0;
+    this.coins.children.iterate(c => {
+      if (!c || !c.active || c.y <= 0 || c.y >= H) return;
+      let sh = this.coinShines[n];
+      if (!sh) sh = this.coinShines[n] = n === 0 ? { rays: this.shineRays, glint: this.shineGlint }
+        : { rays: this.add.image(0, 0, 'rays0').setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.5), glint: this.add.image(0, 0, 'glint0').setDepth(C.pickup.depth + 0.1) };
+      n++;
+      const x = Math.round(c.x), y = Math.round(c.y);
+      sh.rays.setVisible(true).setTexture('rays' + (Math.floor(time / 1000 * S.fps) % 3)).setPosition(x, y).setAlpha(S.alpha);
+      const t = (time + n * 370) % S.glintEveryMs; // the twinkle: bigger for a moment, then smaller, then gone
+      if (t < S.glintMs) sh.glint.setTexture(t < S.glintMs / 2 ? 'glint0' : 'glint1').setPosition(x + S.glintDx, y + S.glintDy).setVisible(true);
+      else sh.glint.setVisible(false);
+    });
+    for (let i = n; i < this.coinShines.length; i++) { this.coinShines[i].rays.setVisible(false); this.coinShines[i].glint.setVisible(false); }
   }
 
   // The falling heart pickup: every heart bobs (its fall speed swings a little up and down), and the first one on screen gets a yellow glow and spinning rays.

@@ -431,3 +431,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Potion: more teal (hueShift -70 -> -85) and tilted 15 degrees to the right (sprites.weaponGem.angle; the glow and rays stay upright).
 - Potion pickup ring: the old ring was a 9 px picture scaled up to 54 px, so its line was about 6 px thick. Now a thin ring (2 px) drawn at its full size that starts at a quarter of its size and grows to 76 px, in teal (config feel.potionRing: diameter, thick, color; remove the key for the old green ring). The spark burst and the level-up flash on the witch are still green: say if they should turn teal too.
 - Verified in the browser: potion tilted and teal, thin ring grows around the witch, shot 17.5 px. UNVERIFIED on the phone: shot feel at the slower speed, ring size.
+
+## 2026-11-20 v1.9.11: every coin has the shine (branch v1911-all-coins-shine)
+- Omri: coins dropped by an enemy or a box should ALL have the glow and spinning rays, not just one. Every coin on screen now gets its own rays and twinkle (one picture pair per coin, made when needed; each coin twinkles at a slightly different moment). The old "front coin only" rule is gone.
+- Omri also said: the green sparks and level-up flash stay colourful (not teal). Nothing changed there.
+- NOT done: the heart's pack shine layer (outline_shine) is still missing; waiting for Omri's go.
+- UNVERIFIED: not run in the browser (the preview pane would not open), so nothing was seen on screen. Check on the phone: a chest spill shows rays on every coin, and it does not slow the game.
