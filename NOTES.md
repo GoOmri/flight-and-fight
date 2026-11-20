@@ -273,3 +273,14 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Tuned with the TUNE panel on the phone, copied by Omri. config.stick: speed z(360)=240 -> 200, radius z(55)=37 -> 47, deadZone 0.1 (same), curve 1.4 -> 1 (even response), response 40 -> 44, stopGlide 0.12 (same), stopOmega 16 -> 11, stopDamping 0.3 -> 0.8 (almost no bounce, slower settle).
 - Speed and radius are now plain numbers (no z()); they were 240 and 37 before, so 200 and 47 are in the same game pixels.
 - UNVERIFIED beyond what Omri felt while tuning: nothing else changed. Next idea (Omri has not decided): ?ctl=mouse for desktop testing.
+
+## 2026-11-20 v1.7.0: polish pass (branch v1700-polish-pass)
+- Shooter is now the fire wisp (assets/enemies/wisp.png, 10 frames, scale 0.5, hitbox 22x26). Vulture and dino stay unused.
+- Chests are on the ground: they scroll at the ground speed (config.crate.onGround) and are drawn UNDER the tree tops (crate.depth -8.2), so they can no longer float above trees. A chest under a canopy is hidden until it passes. Opened chest: freezes on its last frame, waits crate.fadeHoldMs (150), fades out over crate.fadeMs (600).
+- Forest sway steps 3 -> 1.5 per second; swamp animated props 5 -> 2.5 frames per second.
+- Coin and green gem scale 1 -> 1.2.
+- Stunned stars (assets/fx/stunned.png) circle over the witch's head for 1.1 s after a hit (config.sprites.stunned; not shown on the hit that kills her).
+- Tint: a flat colour wash over the play field (config.tint: forest purple, swamp teal, alpha 0.12; shots, HUD and enemy bullets stay above). Turn off with ?tint=0, or tint.on = false.
+- Verified in the browser (desktop): wisp shows and animates, chest depth -8.2 and moves 40 px/s = ground speed, chest freeze + fade works (frame 14 held, alpha 1 -> 0, then gone), stunned stars sit above the hat, tint looks subtle, swamp runs, no console errors.
+- UNVERIFIED on the phone: wisp size and hitbox, whether the stars are big enough, whether 0.12 tint is too much or too little, the sway speed.
+- NOT DONE / open: "shooter outline not lined with sprite": shooters never carry a weapon/heart in any wave, so the glow outline cannot show on them in the current waves. Omri to say when he saw it. New projectile packs (fox717 shot sheet, SovDigital arrow+fire) are catalogued but not used yet.

@@ -46,6 +46,7 @@ export class PlayScene extends Phaser.Scene {
     if (K.crate) { strip('sp_crate_idle', K.crate.idle); strip('sp_crate_break', K.crate.break); }
     if (K.poof) strip('sp_poof', K.poof);
     if (K.weaponGem) strip('sp_gem', K.weaponGem);
+    if (K.stunned) strip('sp_stunned', K.stunned);
     if (this.bg === 'swamp') { // swamp pictures (assets/swamp, pack "Murky Swamp", see CREDITS.md): only the ones listed in config are loaded
       const A = C.background.swamp.files;
       new Set([...A.trees, ...A.bushes, ...A.smalls, ...A.rocks, ...A.bigRocks]).forEach(n => this.load.image('sw-' + n, 'assets/swamp/' + n + '.png'));
@@ -65,6 +66,7 @@ export class PlayScene extends Phaser.Scene {
     const K = C.sprites, mkAnim = (key, tex, d, repeat) => { // pickup / fx animations, made once
       if (!this.anims.exists(key)) this.anims.create({ key, frames: this.anims.generateFrameNumbers(tex, { start: 0, end: d.frames - 1 }), frameRate: d.fps, repeat });
     };
+    if (K.stunned) mkAnim('stunned', 'sp_stunned', K.stunned, -1);
     if (K.coin) mkAnim('coin_spin', 'sp_coin', K.coin, -1);
     if (K.heartPickup) { mkAnim('heart_idle', 'sp_heart_idle', K.heartPickup.idle, -1); mkAnim('heart_drop', 'sp_heart_drop', K.heartPickup.drop, 0); mkAnim('heart_collect', 'sp_heart_collect', K.heartPickup.collect, 0); }
     if (K.crate) { mkAnim('crate_idle', 'sp_crate_idle', K.crate.idle, -1); mkAnim('crate_break', 'sp_crate_break', K.crate.break, 0); }
@@ -526,10 +528,17 @@ export class PlayScene extends Phaser.Scene {
     // screen flash: one reused rectangle, below the enemy shots so it never hides them
     this.flash = this.add.rectangle(W / 2, H / 2, W, H, C.feel.flashColor, 1).setDepth(C.feel.flashDepth).setAlpha(0);
     this.flashT = 0;
+    // colour wash over the whole play field so art from different packs looks like one palette (a flat colour at low strength; shots, coins and the HUD stay above it). ?tint=0 turns it off.
+    const TN = C.tint, tq = new URLSearchParams(window.location.search).get('tint');
+    if (TN && TN.on && tq !== '0' && TN[this.stageTheme]) this.add.rectangle(W / 2, H / 2, W, H, TN[this.stageTheme].color, TN[this.stageTheme].alpha).setDepth(TN.depth);
     this.rings = this.add.group({ defaultKey: 'fxRing', maxSize: C.feel.ringPoolSize });  // expanding ring puffs
     const K = C.sprites, mkFx = (n, tex) => { // one-shot animation sprites, made once; each hides itself when its animation ends
       const a = [];
-      for (let i = 0; i < n; i++) a.push(this.add.sprite(0, 0, tex, 0).setActive(false).setVisible(false).on('animationcomplete', function () { this.setActive(false).setVisible(false); }));
+      for (let i = 0; i < n; i++) a.push(this.add.sprite(0, 0, tex, 0).setActive(false).setVisible(false).on('animationcomplete', (anim, frame, sp) => { // a broken chest stays on its last frame, then fades out (crate.fadeHoldMs / fadeMs); everything else hides at once
+        const hide = () => sp.setActive(false).setVisible(false);
+        if (anim.key === 'crate_break' && C.crate.fadeMs > 0) this.tweens.add({ targets: sp, alpha: 0, delay: C.crate.fadeHoldMs, duration: C.crate.fadeMs, onComplete: hide });
+        else hide();
+      }));
       return a;
     };
     this.poofPool = K.poof ? mkFx(K.poof.poolSize, 'sp_poof') : [];
@@ -554,6 +563,9 @@ export class PlayScene extends Phaser.Scene {
     this.witchAnim = 'witch_n';
     this.ship = this.physics.add.sprite(W / 2, C.ship.startY, 'witch', 1).setScale(SS).setDepth(10);
     this.ship.play('witch_n');
+    const ST = C.sprites.stunned; // stars and sparks circling over her head for a moment after a hit
+    this.stunUntil = 0;
+    this.stunFx = ST ? this.add.sprite(0, 0, 'sp_stunned', 0).setScale(ST.scale).setDepth(12).setVisible(false) : null;
     const hb = 2 * C.ship.hitRadius / SS; // body size is in art pixels; centred on the sprite (hitbox stays tiny whatever the sprite size)
     this.ship.body.setSize(hb, hb);
     this.target = new Phaser.Math.Vector2(this.ship.x, this.ship.y); // where the finger wants the ship
@@ -809,7 +821,8 @@ export class PlayScene extends Phaser.Scene {
     const c = this.spawn(this.crates, sp ? 'sp_crate_idle' : 'crate', cc.p.sx, cc.p.sy, sp ? sp.scale : PX);
     if (!c) return;
     if (sp) { c.body.setSize(sp.hitW, sp.hitH); c.play('crate_idle'); c.anims.setCurrentFrame(c.anims.currentAnim.frames[Phaser.Math.Between(0, sp.idle.frames - 1)]); } else c.anims.stop();
-    initPath(c, cc.p, cc.c.spd);
+    c.setDepth(C.crate.depth); // on the ground: under the tree tops (they are at -8 and up), above shadows and rocks
+    initPath(c, cc.p, C.crate.onGround ? this.bgF.scroll : cc.c.spd); // on the ground: moves exactly like the ground scrolls
     c.hp = cc.c.hp; c.coins = cc.c.coins; c.flashUntil = 0; c.onScreen = false;
   }
 
@@ -1000,6 +1013,7 @@ export class PlayScene extends Phaser.Scene {
     this.medals.playerHit(); this.syncMedals();
     if (!this.god) { this.hearts--; this.hud.setHearts(this.hearts); }
     this.invulnUntil = this.time.now + C.ship.invulnMs;
+    if (this.stunFx && this.hearts > 0) { this.stunUntil = this.time.now + C.sprites.stunned.showMs; this.stunFx.play('stunned'); }
     this.cameras.main.shake(C.ship.hitShakeMs, C.ship.hitShakeAmount);
     this.explode(this.ship.x, this.ship.y, false, WITCH_TINTS, false); // no smoke puff for the witch
     if (C.feel.hitFlashMs > 0) this.flashT = 1; // white-pink screen flash (own rectangle, fades out in updateFx)
@@ -1034,6 +1048,11 @@ export class PlayScene extends Phaser.Scene {
   }
 
   updateFx(dt) {
+    if (this.stunFx) { // stars over the witch's head, fading out at the end
+      const left = this.stunUntil - this.time.now, on = left > 0 && !this.over;
+      this.stunFx.setVisible(on);
+      if (on) this.stunFx.setPosition(this.ship.x, this.ship.y + C.sprites.stunned.offsetY).setAlpha(Math.min(1, left / C.sprites.stunned.fadeMs));
+    }
     for (const grp of this.fxGroups) grp.children.iterate(s => {
       if (!s || !s.active) return;
       s.life -= dt;

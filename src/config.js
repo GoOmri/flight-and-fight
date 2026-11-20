@@ -26,7 +26,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.6.2", // bump on every push so the player/Omri can see the build
+  version: "1.7.0", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -116,7 +116,7 @@ export const CONFIG = {
         shadowCount: 3, shadowVariants: 3, shadowSize: 64, shadowCell: 3, shadowGapY: 300, shadowSpeedMul: 1.6, shadowDrift: 6, shadowAlpha: 0.12, shadowColor: 0x0d1f12, // shadows: how many, shapes, size in texels, game px per texel, gap above the screen, scroll speed vs floor, sideways px/s, strength, colour
         shaftCount: 3, shaftScale: [1.5, 1.8], shaftAngleDeg: 18, shaftAlpha: [0.02, 0.09], shaftPulse: 0.5, shaftDrift: 3 }, // shafts: how many, size, tilt, faintest and strongest, fade speed, sideways px/s
       treeLaneHalf: 55, treeEdge: 40, rockLaneHalf: 35, rockEdge: 52, // rocks like trees: centre at least rockLaneHalf px from the middle line, at least rockEdge px from the screen edge
-      sway: { on: true, px: 4, curve: 1.6, fps: 3 }, // tree sway: top of the tree shifts up to px source-pixels left/right (whole pixels, rows shifted by (1-y/h)^curve); steps per second
+      sway: { on: true, px: 4, curve: 1.6, fps: 1.5 }, // tree sway: top of the tree shifts up to px source-pixels left/right (whole pixels, rows shifted by (1-y/h)^curve); steps per second
       treeShadow: { on: true, angleDeg: 55, lenMul: 0.6, alpha: 0.18, color: 0x0d1f12, depth: -9 }, // tree shadows: tipped over from the base by this angle (clockwise = up and to the right), length as a share of the tree height, strength, colour
       // big trees: the tree centre stays at least treeLaneHalf px from the middle line (always to the sides) and at least treeEdge px from the screen edge
       propGap: 8, zigzag: 0.8, bushUnderTreeChance: 0.25, // path props: min gap between pictures (px), chance the next prop goes to the other side (zigzag/diagonal), chance a bush may sit under a tree
@@ -160,7 +160,7 @@ export const CONFIG = {
       // Bat 1.3 (purple, never the red files), row S (flying towards the player), cut out as bat-S.png (3 frames = one wing flap: up, flat, down). Ping-pong 0,1,2,1.
       grunt:   { file: 'bat-S.png', frameW: 48, frameH: 64, frames: [0, 1, 2, 1], fps: 8, scale: 1.1, hitW: 27, hitH: 22, faceVelocity: false },
       // Dino IDLE sheet (4 frames = one breathing/bobbing loop, side view facing right). The long dino.png is a jump (crouch, leap, land), not a loop, so it is not used.
-      shooter: { file: 'vulture.png', frameW: 39, frameH: 39, frames: [1, 3, 2, 3], fps: 8, scale: 1.0, hitW: 24, hitH: 24, faceVelocity: true },
+      shooter: { file: 'wisp.png', frameW: 96, frameH: 96, frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], fps: 12, scale: 0.5, hitW: 44, hitH: 52, faceVelocity: false }, // fire wisp (10 frames of 96 px, drawn at half size)
       // Vulture (not used in waves yet). Frames of vulture.png: 0 = folded, 1 = wings up, 2 = wings flat/low, 3 = half. Flap loop: up, half, low, half. (Cleanest guess; check it.)
       vulture: { file: 'vulture.png', frameW: 39, frameH: 39, frames: [1, 3, 2, 3], fps: 8, scale: 0.8, hitW: 22, hitH: 22, faceVelocity: true }
     },
@@ -173,7 +173,7 @@ export const CONFIG = {
   // cell size and centre, so switching animations never jumps. hitW/hitH = hitbox in sheet pixels (times scale on screen). Pickup grab radius stays coin.pickupRadius.
   sprites: {
     // Gold coin, 24 frames = one full spin, loops while it falls. Each coin starts at a random frame.
-    coin: { file: 'pickups/coin.png', frameW: 18, frameH: 18, frames: 24, fps: 30, scale: 1 },
+    coin: { file: 'pickups/coin.png', frameW: 18, frameH: 18, frames: 24, fps: 30, scale: 1.2 },
     // Falling heart (carrier drop): Drop plays once when it appears, then Idle loops while it falls; Collect plays once at the witch when she grabs it.
     heartPickup: { scale: 1, collectDepth: 12, // collectDepth: drawn over the witch (10)
       idle:    { file: 'pickups/heart-idle.png',    frameW: 26, frameH: 62, frames: 24, fps: 12 },
@@ -184,18 +184,23 @@ export const CONFIG = {
     heartHud: { scale: 0.6, desync: 8, emptyTint: 0x4a4f63, emptyAlpha: 0.6 },
     // Chest: Idle loops while it falls; Break plays once at its place when it is destroyed (coins burst at the same moment).
     // tint: the pack chest is yellow-orange, which looks like a coin, so it is multiplied toward muted brown (0xffffff = untouched, null = no tint). hit = trimmed body.
-    crate: { scale: 0.75, tint: 0x9a98a8, hitW: 24, hitH: 28, breakDepth: -0.2, // breakDepth: the bursting chest is drawn just under the coins and enemies (0)
+    crate: { scale: 0.75, tint: 0x9a98a8, hitW: 24, hitH: 28, breakDepth: -8.1, // breakDepth: the bursting chest is drawn just under the coins and enemies (0)
       idle:  { file: 'pickups/crate-idle.png',  frameW: 88, frameH: 40, frames: 18, fps: 12 },
       break: { file: 'pickups/crate-break.png', frameW: 88, frameH: 40, frames: 15, fps: 20 } },
     // Death puff under the sparks: 30 frames of the pack's "poof" (white pop, smoke balls, thinning; the thin tail was left out) played once.
     // scale = size, bigMul = extra size for the shooter and the chest, poolSize = puffs at once, depth = under the sparks (20) and rings (19).
     poof: { file: 'fx/poof.png', frameW: 82, frameH: 72, frames: 30, fps: 60, scale: 0.6, bigMul: 1.5, poolSize: 8, depth: 18 },
     // Weapon-upgrade pickup = green gem (4 frames of 16x16, loops, random start frame). scale 1 = 16 px (3 screen pixels per art pixel; stays even). The grab radius stays coin.pickupRadius on screen.
-    weaponGem: { file: 'pickups/gem-green.png', frameW: 16, frameH: 16, frames: 4, fps: 8, scale: 1 },
+    // Stars circling over her head after a hit ("stunned" of the free spell pack, MIT, 60 frames of 60x64, loops). offsetY = from her centre (negative = up), showMs = how long, fadeMs = fade-out at the end.
+    stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -16, showMs: 1100, fadeMs: 300 },
+    weaponGem: { file: 'pickups/gem-green.png', frameW: 16, frameH: 16, frames: 4, fps: 8, scale: 1.2 },
     fxPoolSize: 8 // chest-break and heart-collect animations playing at once
   },
 
   // Enemy shots: slow red orbs. speed is the default; the wave data may set its own. hitSize = art pixels of the orb core.
+  // Colour wash (easy tint): one flat colour over the play field at low strength, so pictures from different packs sit closer together. Per stage: color, alpha (0 = none, 0.2 = strong).
+  // depth 33: over the play field and its effects, under the enemy shots (35), coins' pop texts are under it too, and the HUD (50). Try off with ?tint=0.
+  tint: { on: true, depth: 33, forest: { color: 0x7a4fd0, alpha: 0.12 }, swamp: { color: 0x2a9a8a, alpha: 0.12 } },
   enemyBullet: { poolSize: 30, speed: 100, hitSize: 3, depth: 35 }, // depth 35: above all effects (sparks 20, texts 30), below the HUD (50)
 
   // pickupRadius: how close the ship must be to grab a coin (logical px). Bigger than the ship hitbox on purpose.
@@ -203,7 +208,9 @@ export const CONFIG = {
 
   // Crates: hp, coins and speed are set per crate in src/waves.js. coinSpread = sideways speed between coins.
   // coinFadeSec: the sideways burst fades to 0 in this many seconds. poolSize: max crates at once.
-  crate: { coinSpread: 4, coinFadeSec: 0.4, poolSize: 4 }, // (crate size = its art in src/sprites.js, CRATE, 7x7 art px = 21 px)
+  crate: { coinSpread: 4, coinFadeSec: 0.4, poolSize: 4,
+    depth: -8.2, onGround: true, // depth: under the tree tops, above shadows and rocks. onGround: the chest scrolls at the ground speed (false = its own speed from waves.js)
+    fadeHoldMs: 150, fadeMs: 600 }, // opened chest: stays on its last frame this long, then fades out over fadeMs (0 = vanish at once) // (crate size = its art in src/sprites.js, CRATE, 7x7 art px = 21 px)
 
   // Pickups dropped by marked carrier enemies (drop: 'weapon' / 'heart' in src/waves.js).
   // Pickup grab radius is coin.pickupRadius. heartScoreIfFull: score given for a heart when already at full hearts.
@@ -289,7 +296,7 @@ CONFIG.background.swamp = {
     rocks: ['moss_lump_0', 'moss_lump_1', 'moss_boulder_0', 'moss_boulder_1'],   // small rocks
     bigRocks: ['frog_rock_0', 'frog_rock_1', 'moss_boulder_0', 'moss_boulder_1'] // rare big rocks (cat spots)
   },
-  animFps: 5, animFrames: 8, // animated strips: pictures per second, frames per strip (each one starts at a random frame)
+  animFps: 2.5, animFrames: 8, // animated strips: pictures per second, frames per strip (each one starts at a random frame)
   midBushScale: [1, 1.3], midSmallScale: [1, 1.2], // swamp props keep their own size (a log stays longer than a lily pad): size multiplier (min, max) instead of a fixed width
   midBushCount: 2, midSmallCount: 1,
   rockScale: [1, 1.4], bigRockScale: 1.5,
