@@ -26,6 +26,7 @@ const TABS = [
     ['POTION LONG', 'sprites.potionShine.radius', 1, 4, 40, 0, true],
     ['SHOT SIZE', 'bullet.fire.scale', 0.05, 0.5, 3, 2],
     ['SHOT SPEED', 'bullet.speed', 10, 100, 900, 0],
+    ['SHOT GAP', 'bullet.gap', 0.1, 0.3, 3, 1],
     ['BEAM TIP FADE', 'sprites.coinShine.alphaEnd', 0.05, 0, 1, 2, true]]], // the fade changes all three rays together (see set())
   ['PICKUPS', [
     ['HEART FALL', 'pickup.heartFallSpeed', 5, 10, 200, 0],
@@ -45,7 +46,7 @@ const TABS = [
 
 ];
 // New drops use the fall / grab / tilt numbers (things already falling keep the old ones).
-const HINTS = ['HOLD + OR - TO REPEAT', 'BEAMS = SPINNING LIGHT LINES', 'NEW DROPS ONLY (FALL, GRAB, TILT)', 'X1 = NORMAL. SHOT DELAY: MORE = EASIER']; // one plain line under each tab
+const HINTS = ['HOLD + OR - TO REPEAT', 'BEAMS = LIGHT LINES. GAP 1 = NORMAL', 'NEW DROPS ONLY (FALL, GRAB, TILT)', 'X1 = NORMAL. SHOT DELAY: MORE = EASIER']; // one plain line under each tab
 const ALL = TABS.flatMap(t => t[1]);
 const getp = path => path.split('.').reduce((o, k) => o[k], C);
 const setp = (path, v) => { const ks = path.split('.'), last = ks.pop(); ks.reduce((o, k) => o[k], C)[last] = v; };

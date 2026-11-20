@@ -27,7 +27,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.9.17", // bump on every push so the player/Omri can see the build
+  version: "1.9.18", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -95,6 +95,7 @@ export const CONFIG = {
   // Player shots. Which shots, how fast and how hard come from weaponLevels below.
   bullet: {
     speed: z(333), // witch shot speed (was z(620), z(520), z(416))
+    refSpeed: z(333), gap: 1, // gap = spacing between shots (1 = normal). The time between volleys is fireRateMs x gap x refSpeed / speed, so a faster or slower shot keeps the same spacing unless you change gap; keep refSpeed equal to the normal speed above
     // The witch's shot: one orange fire bolt straight up ("flight_smooth" of the SovDigital fire pack, north row, shrunk 5x and cut to 6 fire colours). Delete this entry to get the old twin code-drawn shots back (then set pattern TWIN).
     fire: { file: 'shots/fox-shot-6.png', frameW: 13, frameH: 19, frames: 1, fps: 1, scale: 1.35, hitW: 6, hitH: 14 }, // the witch's shot: Fox shot 6, colour 5 (a blue teardrop, one picture) from the FoX71 shot sheet. Old fire strip: fx/fire-shot.png (frameW 8, frameH 22, frames 12, fps 24, hueShift 195)
     poolSize: 90         // level 10 fires 7 shots every 145 ms and they live about 1 s: about 50 alive at once

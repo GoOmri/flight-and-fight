@@ -467,3 +467,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Left out on purpose: wave spawn timing (needs the wave schedule changed; say if you want it) and "jump to wave / god mode" (idea 4, not built).
 - Normal play is unchanged (all dials 1). COPY lists changed values, e.g. `difficulty.enemyHp = 1.5`.
 - Checked: 30 tune paths exist; syntax checks pass. UNVERIFIED: not seen on screen or played; check the 4 tabs fit in the panel, and that each dial changes the game the right way.
+
+## 2026-11-20 v1.9.18: SHOT GAP dial linked to shot speed (branch v1918-shot-gap)
+- Omri: a slower shot did not give bigger gaps between shots (the shots fire on a fixed timer, so slower = closer together). New LOOK row SHOT GAP (config bullet.gap, 1 = normal). The time between volleys is now fireRateMs x gap x refSpeed / speed, so changing only the SHOT SPEED keeps the spacing the same (a slower shot also fires less often, a faster one more often) and SHOT GAP changes the spacing: more = bigger gaps and fewer shots. At the defaults (speed = refSpeed, gap 1) nothing changes.
+- Side effect to know: damage per second now follows spacing (bigger gap = fewer shots = less damage; slower speed with the same gap = fewer shots too). MY DAMAGE on the HARD tab can balance it.
+- UNVERIFIED: not seen or played (the browser preview would not open). Check the spacing and feel on the phone.

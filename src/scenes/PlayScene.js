@@ -877,7 +877,7 @@ export class PlayScene extends Phaser.Scene {
   autoFire(time) {
     if (time < this.nextShot) return;
     const lv = C.weaponLevels[this.weaponLevel], sp = C.bullet.speed;
-    this.nextShot = time + lv.fireRateMs;
+    this.nextShot = time + lv.fireRateMs * C.bullet.gap * C.bullet.refSpeed / sp; // spacing stays the same when only the speed changes
     for (const sh of lv.pattern) {
       const fs = C.bullet.fire;
       const b = this.spawn(this.bullets, fs ? (this.textures.exists('sp_fire_b') ? 'sp_fire_b' : 'sp_fire') : 'pbullet', this.ship.x + sh.dx, this.ship.y - C.ship.shotY, fs ? fs.scale : PX);
