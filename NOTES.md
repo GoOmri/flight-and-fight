@@ -493,3 +493,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 v1.9.22: Omri's tuned numbers (branch v1922-tuned-numbers)
 - From the tune panel COPY: stick.stopDamping 0.8 -> 0.5; shared drop shine: beam opacity 0.4 -> 0.2, beam length 17 -> 13, glow size 0.67 -> 0.52, glow opacity 1 -> 0.6 (SHINE in config.js, applies to coin, heart and potion); witch shot size 1.35 -> 1 (13x19 px).
 - UNVERIFIED on the phone: how it all looks together.
+
+## 2026-11-20 v1.9.23: size multiplier per drop (branch v1923-drop-size-mul)
+- Omri: the beams and glow can not be exactly the same on every drop, because the potion is a bigger picture than the coin. Each drop now has a sizeMul that scales its beam length and its glow: coin 1, heart 1.25, potion 1.5 (config sprites.coinShine / heartShine / potionShine .sizeMul; the shared numbers stay shared). Tune panel LOOK tab: new rows HEART BEAM+GLOW X and POTION BEAM+GLOW X. I read Omri's "1/5" as 1.5; change it in the panel if he meant something else.
+- New art file added by Omri: Fire Pixel Bullet 16x16 (bdragon1727), moved from the repo root into art-packs/effects-vfx/bdragon-fire-bullet-16x16/ (git-ignored) and listed in CATALOG.md; licence not checked yet, not used in the game.
+- UNVERIFIED: not run (preview would not open).

@@ -963,7 +963,7 @@ export class PlayScene extends Phaser.Scene {
   // Spinning rays: 8 wedges drawn as whole pixels. Next to the sprite a ray is S.widthStart px wide, at the tip S.widthEnd px, and it fades toward the tip (S.alphaEnd).
   // A pixel belongs to a ray when it lies along the ray (between inner and radius) and within half the ray's width at that distance. f = 0..2 turns the rays a bit further each picture.
   drawRays(ctx, S, f, color) {
-    const n = ctx.canvas.width, M = (n - 1) / 2, R = Math.min(S.radius, M), w0 = S.widthStart || 2, w1 = S.widthEnd || 6, a1 = S.alphaEnd === undefined ? 0.2 : S.alphaEnd; // M = centre pixel of the fixed-size picture (so the tune panel can change the length live)
+    const n = ctx.canvas.width, M = (n - 1) / 2, R = Math.min(Math.round(S.radius * (S.sizeMul || 1)), M), w0 = S.widthStart || 2, w1 = S.widthEnd || 6, a1 = S.alphaEnd === undefined ? 0.2 : S.alphaEnd; // M = centre pixel of the fixed-size picture (so the tune panel can change the length live)
     ctx.clearRect(0, 0, n, n);
     for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
       const dx = x + 0.5 - (M + 0.5), dy = y + 0.5 - (M + 0.5), r = Math.hypot(dx, dy);
@@ -1021,7 +1021,7 @@ export class PlayScene extends Phaser.Scene {
     const G = S.glow, n = ctx.canvas.width, M = (n - 1) / 2;
     ctx.clearRect(0, 0, n, n);
     for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-      const dd = Math.hypot(x - M, y - M), i = G.rings.findIndex(r => dd <= r.r * G.size);
+      const dd = Math.hypot(x - M, y - M), i = G.rings.findIndex(r => dd <= r.r * G.size * (S.sizeMul || 1));
       if (i >= 0) { ctx.fillStyle = hex(S.glowColors[i]); ctx.globalAlpha = Math.min(1, G.rings[i].a * G.opacity); ctx.fillRect(x, y, 1, 1); }
     }
     ctx.globalAlpha = 1;

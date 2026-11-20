@@ -23,6 +23,8 @@ const TABS = [
     ['BEAM TIP FADE-OUT', 'sprites.coinShine.alphaEnd', 0.05, 0, 1, 2, true, true],
     ['DROP GLOW SIZE', 'sprites.coinShine.glow.size', 0.05, 0.3, 1.8, 2, true, true],
     ['DROP GLOW OPACITY', 'sprites.coinShine.glow.opacity', 0.1, 0, 2, 1, true, true],
+    ['HEART BEAM+GLOW X', 'sprites.heartShine.sizeMul', 0.05, 0.5, 2.5, 2, true],
+    ['POTION BEAM+GLOW X', 'sprites.potionShine.sizeMul', 0.05, 0.5, 2.5, 2, true],
     ['WITCH SHOT SIZE', 'bullet.fire.scale', 0.05, 0.5, 3, 2],
     ['WITCH SHOT SPEED', 'bullet.speed', 10, 100, 900, 0],
     ['GAP BETWEEN SHOTS', 'bullet.gap', 0.1, 0.3, 3, 1],]],
