@@ -156,6 +156,11 @@ export class PlayScene extends Phaser.Scene {
     this.input.on('pointerup', release);
     this.input.on('pointerupoutside', release);
 
+    // ?debug=1: a small line under the version (drawing mode, speed, controls) so a problem on one device can be read off the screen
+    this.dbg = q.get('debug') ? this.add.text(4, 38, '', { fontSize: '8px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }).setDepth(90) : null;
+    this.dbgAt = 0;
+    this.dbgInfo = () => 'v' + C.version + ' ' + (this.game.config.renderType === Phaser.WEBGL ? 'WEBGL' : 'CANVAS') + ' ' + Math.round(this.game.loop.actualFps) + 'fps ' + (this.mouseMode ? 'mouse' : (this.stickMode ? 'stick' : 'drag'));
+
     // Collisions
     this.physics.add.overlap(this.bullets, this.enemies, (b, e) => this.bulletHitsEnemy(b, e));
     this.physics.add.overlap(this.bullets, this.crates, (b, c) => this.bulletHitsCrate(b, c));
@@ -760,8 +765,14 @@ export class PlayScene extends Phaser.Scene {
     }
     const dt = Math.min(delta, 50) / 1000;
     this.scrollBackground(dt);
+    this.updateLanterns(dt, time); // world things scroll with the ground ALWAYS (also on the game over screen)
     this.hud.update(dt, time);
-    if (this.over) { this.updateFx(dt); return; }
+    if (this.dbg && time > this.dbgAt) { this.dbgAt = time + 500; this.dbg.setText(this.dbgInfo()); }
+    if (this.over) { // game over: the world keeps scrolling, so chests (not pickups, not enemies) keep moving with it too
+      const ground = this.bgF.scroll * this.cloudMul * dt;
+      this.crates.children.iterate(c => { if (c && c.active) { c.y += ground; c.body.reset(c.x, c.y); } });
+      this.updateFx(dt); return;
+    }
 
     this.moveShip(dt);
     this.updateShipFeel(dt);
@@ -774,7 +785,6 @@ export class PlayScene extends Phaser.Scene {
     if (!this.clearAt && this.runner.finished && this.enemyCount === 0 && this.crates.countActive(true) === 0 && this.coins.countActive(true) === 0 && this.weaponUps.countActive(true) === 0 && this.heartUps.countActive(true) === 0) this.clearAt = time + C.stage.endDelayMs;
     if (this.clearAt && time >= this.clearAt) { this.stageClear(); return; }
     this.updateFx(dt);
-    this.updateLanterns(dt, time);
 
     // invulnerability blink
     if (time < this.invulnUntil) {

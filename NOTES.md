@@ -314,3 +314,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Coin scale 1.2 -> 1.0.
 - Hit flash: simulated 900 frames with the witch under a ghost: 12 hits gave white flashes of 7 frames (110 ms) each; a flash starts on the first hit only if the enemy survives it, and hits closer than 110 ms merge into one flash. The sprite now turns white at once when hit (before, on the next update). If Omri still sees none on the phone: check the phone really runs v1.8.2 (UPDATE button), and say which enemy.
 - UNVERIFIED on the phone: ghost size, coin size, flash visibility.
+
+## 2026-11-20 v1.8.3: world keeps scrolling on game over, ?debug=1 (branch v1820-world-flash)
+- Bug: on the game over screen the lanterns (and chests) froze while the ground kept scrolling, because the lantern update sat after the game-over return in update(). Now the lanterns update right after scrollBackground (always), and on game over the chests also move with the ground. Rule stays: everything that is not a pickup or an enemy belongs to the world. Verified: after gameOver() a lantern and a ground prop both moved 40.08 px in 1 s.
+- New ?debug=1: a small line under the version: version, drawing mode (WEBGL or CANVAS), fps, controls (mouse/stick/drag). Purpose: Omri sees NO enemy hit flash on desktop. The flash (and the tint wash, the lantern glow) need WebGL; a browser that falls back to CANVAS would show none of them. Next step depends on what that line says on his desktop.
+- UNVERIFIED: why the flash is missing on Omri's desktop.
