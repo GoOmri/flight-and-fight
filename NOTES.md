@@ -304,6 +304,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Lanterns: scale 1.2 -> 0.75 and now drawn under the tree tops like the chests (depth -8.2). The glow now sits on the lamp itself (position found from each picture's brightest green pixels, flips with the picture), smaller (3 rings, 2 px texels, about 14 px radius); the 3 bugs circle closer (4 to 9 px).
 - Chests: they now follow the ground's real speed, including the speed-up when she flies up (before they kept a fixed speed). The opened chest (freeze + fade) keeps scrolling with the ground.
 - Witch shot scale 1 -> 1.6 (about 13x35 px; hitbox grows with it).
-- Ghost: the swaying ghost is now the Halloween set ghost from the menu (assets/menu/ghost.png, 5 frames played 1-2-3-4-5-4-3-2, config.enemies.sprites.zigzag, hitbox 18x20). Credit is already in CREDITS (menu art).
+- Ghost: the swaying ghost is now the green pixel ghost (gosth.png column 3, 4 frames of 25x25, assets/enemies/ghost-sway.png, scale 1.3, hitbox 14x16); credit in CREDITS. (First tried the pink Halloween ghost by mistake.)
 - Hit flash: an enemy that is hit (not killed) flashes solid white for 110 ms (was 70). The flash code was already there; checked it works on the ghost.
 - Verified in the browser (swamp, wave 3): ghost shows, white flash on hit, lantern small with the glow on the lamp, big shots. UNVERIFIED on the phone: ghost size and hitbox, shot size, whether 110 ms reads as a flash at full speed.

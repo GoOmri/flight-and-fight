@@ -164,8 +164,8 @@ export const CONFIG = {
       // Bat 1.3 (purple, never the red files), row S (flying towards the player), cut out as bat-S.png (3 frames = one wing flap: up, flat, down). Ping-pong 0,1,2,1.
       grunt:   { file: 'bat-S.png', frameW: 48, frameH: 64, frames: [0, 1, 2, 1], fps: 8, scale: 1.1, hitW: 27, hitH: 22, faceVelocity: false },
       // Dino IDLE sheet (4 frames = one breathing/bobbing loop, side view facing right). The long dino.png is a jump (crouch, leap, land), not a loop, so it is not used.
-      // Ghost = the Halloween set ghost from the start menu (assets/menu/ghost.png, 5 frames of 29x31 = one float loop), replaces the code-drawn swaying ghost.
-    zigzag:  { file: '../menu/ghost.png', frameW: 29, frameH: 31, frames: [0, 1, 2, 3, 4, 3, 2, 1], fps: 6, scale: 1.0, hitW: 18, hitH: 20, faceVelocity: false },
+      // Ghost = the green pixel ghost, animation 'column 3' of gosth.png (4 frames of 25x25, read top to bottom), replaces the code-drawn swaying ghost.
+    zigzag:  { file: 'ghost-sway.png', frameW: 25, frameH: 25, frames: [0, 1, 2, 3], fps: 8, scale: 1.3, hitW: 14, hitH: 16, faceVelocity: false },
     shooter: { file: 'wisp.png', frameW: 96, frameH: 96, frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], fps: 12, scale: 0.5, hitW: 44, hitH: 52, faceVelocity: false }, // fire wisp (10 frames of 96 px, drawn at half size)
       // Vulture (not used in waves yet). Frames of vulture.png: 0 = folded, 1 = wings up, 2 = wings flat/low, 3 = half. Flap loop: up, half, low, half. (Cleanest guess; check it.)
       vulture: { file: 'vulture.png', frameW: 39, frameH: 39, frames: [1, 3, 2, 3], fps: 8, scale: 0.8, hitW: 22, hitH: 22, faceVelocity: true }
