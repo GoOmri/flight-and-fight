@@ -27,7 +27,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.8.9", // bump on every push so the player/Omri can see the build
+  version: "1.9.0", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -201,7 +201,7 @@ export const CONFIG = {
     // Coin shine (only ONE coin at a time has it): spinning rays behind it (3 pictures at `fps`, alpha = strength) and a little white twinkle now and then.
     coinShine: { radius: 12, inner: 6, fps: 6, alpha: 0.55, glintEveryMs: 1300, glintMs: 200, glintDx: 5, glintDy: -6 },
     stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -7, fadeMs: 300 },
-    weaponGem: { file: 'pickups/gem-green.png', frameW: 16, frameH: 16, frames: 4, fps: 8, scale: 1.2 },
+    weaponGem: { file: 'pickups/potion-violet.png', frameW: 32, frameH: 32, frames: 1, fps: 1, scale: 0.9 }, // weapon upgrade = the twinkling violet potion (one 32x32 picture with sparkles drawn in). The old green gem strip is gem-green.png (4 frames of 16x16, scale 1.2)
     fxPoolSize: 8 // chest-break and heart-collect animations playing at once
   },
 

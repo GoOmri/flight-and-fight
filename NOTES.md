@@ -362,3 +362,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 boss choices (docs only, no version change)
 - Omri chose: FOREST boss = Final boss flying strip (spr_enemy_finalboss_flying_strip6.png, liz cheong, credit needed). SWAMP boss = Necromancer sheet, starting with the idle row (CreativeKind; files must not be distributed: ask before pushing any of its pictures). Boss fights use shot patterns (spirals, walls). Building a boss comes after more polish (Omri's answer). Needs the in-game credit when built (the credits question was "not yet").
 - The Fox shot sheet is one picture of many bullet shapes in colour rows, not an animation; the gallery now cuts it into one card per shape row (about 11 cards; the ring rows are cut by a rough guess).
+
+## 2026-11-20 v1.9.0: violet potion for weapon upgrades (branch v1900-gallery-redesign)
+- Omri: use Twinkling_Violet_Potion.png for weapon upgrades. The falling weapon pickup is now that 32x32 potion (assets/pickups/potion-violet.png, scale 0.9, one picture with its sparkles drawn in) instead of the green gem strip (still in assets, unused). The green outline on weapon CARRIER enemies stays green. Licence: none stated in the pack; Omri confirmed; credit in CREDITS.md.
+- UNVERIFIED on the phone: potion size (29 px) and whether violet reads as "weapon" next to the green carrier outline and the green HUD bars.
+- Gallery redesign (local tool, not in git): one card per creature / shape; dropdowns for animation (direction) and colour / style; tight crops; compact header. Details in art-packs/CATALOG.md.
