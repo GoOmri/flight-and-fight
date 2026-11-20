@@ -548,3 +548,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 v1.9.33: no overshoot after lifting the thumb (branch v1933-overshoot-thumb-down)
 - Omri: swiping made the witch overshoot, which is not wanted; he meant the overshoot while the thumb stays DOWN. Now the soft bouncy spring is used only when the thumb is down and has rested for 50 ms. When the thumb is lifted (the end of a swipe) the quick calm spring is used, so she stops where the swipe put her (under 1 px of overshoot). Moving the finger again is quick as before.
 - UNVERIFIED on the phone: that a swipe now ends cleanly and the thumb-down overshoot still feels right.
+
+## 2026-11-20 v1.9.34: fix for v1.9.33 (branch v1934-fix-syntax)
+- v1.9.33 had a typo (a comment swallowed part of a line in PlayScene.js moveShip) that stops the game from loading. v1.9.34 fixes it; it was live for a few minutes. Every file under src/ now passes a syntax check before pushing; from now on a push only happens if all the checks pass.
