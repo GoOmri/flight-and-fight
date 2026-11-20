@@ -394,3 +394,11 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Potion: less dark (valueMul 0.82 -> 0.95).
 - PARKED (Omri: "put it to the side, don't work on it now"): some elements such as explosions stay on the pause screen and the game over screen. We need a way to tell "world" things from "effects that should stop or clear". Not worked on.
 - UNVERIFIED on the phone: the orb's size next to the shots and the ghost; ray width.
+
+## 2026-11-20 v1.9.5: wedge rays, orb size bug, saturated potion with twinkle (branch v1950-rays-wedge)
+- BUG found: cullOffscreen's "gentle swell" (feel.enemyShotPulse) reset every enemy shot to PX (3x) each frame, so the shot's own scale was ignored: the 16 px orb showed at 48 px (and the earlier 7x7 pink one at 21 px). The swell now works around the shot's own scale. Orb scale set to 1.5 = 24 px = half of what Omri saw (config enemyBullet.scale).
+- Rays are now true wedges rasterised to whole pixels (like the gallery's smooth ones): 2 px wide next to the sprite, 6 px at the tip, opacity fading to 0.2 at the tip (config widthStart / widthEnd / alphaEnd per shine: coinShine, potionShine, heartShine).
+- "Taper doesn't bob with the coin": I read it as the rays lagging behind the coin. The shine objects were positioned in update(), BEFORE physics moved the sprites (one frame behind, noticeable on fast / magnet coins). They now follow in a postupdate listener (this.shinePost). Verified lag 0 in a test. If Omri meant something else (rays should bob / pulse), ask him.
+- Potion: blue more saturated (satMul 1.4), plus a white twinkle every 1.1 s like the coin and the gallery recipe (config potionShine.glint*). Glow and rays were already there.
+- Gallery rays look better because they are smooth CSS wedges; the game rays are whole pixels, now shaped the same way.
+- UNVERIFIED on the phone: ray look at full speed, orb size (24 px).
