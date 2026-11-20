@@ -489,3 +489,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Idea 4 from the tune-tool list. New 5th tab TEST with: START AT WAVE (1-10), START WEAPON LEVEL (-1 = by wave as before, else 0-10) and NO DAMAGE (1 = ON, works at once), plus a RESTART button that plays the stage again with those numbers; the other tuned numbers stay (scene restart, no page reload). Same as ?wave= and ?god=1 but on the phone. The tab PICKUPS is now called DROPS (5 tabs need short names). config.testing = { wave: 1, level: -1, god: 0 } = normal play.
 - Bosses are not in the game yet, so there is no "jump to boss"; waves only.
 - Checked: 32 tune paths exist, syntax passes. UNVERIFIED: not run (preview would not open): the 5 tabs fit, RESTART really restarts while the panel is open, no-damage works.
+
+## 2026-11-20 v1.9.22: Omri's tuned numbers (branch v1922-tuned-numbers)
+- From the tune panel COPY: stick.stopDamping 0.8 -> 0.5; shared drop shine: beam opacity 0.4 -> 0.2, beam length 17 -> 13, glow size 0.67 -> 0.52, glow opacity 1 -> 0.6 (SHINE in config.js, applies to coin, heart and potion); witch shot size 1.35 -> 1 (13x19 px).
+- UNVERIFIED on the phone: how it all looks together.

@@ -28,12 +28,12 @@ function weaponLevels() {
 
 // Shared shine look of coins, hearts and potions (see sprites.coinShine / heartShine / potionShine). glow.size scales the glow (1 = rings of 5, 8, 11 pixels; the potion's glow was 50% too big, so 0.67),
 // glow.opacity scales how strong it is. The glow object is shared, so changing it changes all three.
-const SHINE = { radius: 17, inner: 1, widthStart: 1, widthEnd: 5, alphaEnd: 0.2, fps: 6, alpha: 0.4, glintEveryMs: 1200, glintMs: 200,
-  glow: { cell: 2, size: 0.67, opacity: 1, rings: [{ r: 5, a: 0.55 }, { r: 8, a: 0.38 }, { r: 11, a: 0.2 }], flicker: [1, 0.85, 1, 0.7, 0.95], stepFps: 6 } };
+const SHINE = { radius: 13, inner: 1, widthStart: 1, widthEnd: 5, alphaEnd: 0.2, fps: 6, alpha: 0.2, glintEveryMs: 1200, glintMs: 200,
+  glow: { cell: 2, size: 0.52, opacity: 0.6, rings: [{ r: 5, a: 0.55 }, { r: 8, a: 0.38 }, { r: 11, a: 0.2 }], flicker: [1, 0.85, 1, 0.7, 0.95], stepFps: 6 } };
 const shine = own => ({ ...SHINE, ...own });
 
 export const CONFIG = {
-  version: "1.9.21", // bump on every push so the player/Omri can see the build
+  version: "1.9.22", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -96,14 +96,14 @@ export const CONFIG = {
   },
 
   // Virtual stick (controls "stick"). The ring appears where the thumb lands. Sizes in logical px.
-  stick: { show: false, radius: 47, knobRadius: z(22), deadZone: 0.1, curve: 1, response: 44, speed: 200, stopGlide: 0.12, stopOmega: 11, stopDamping: 0.8, restY: z(590), ringAlpha: 0.28, restAlpha: 0.14, depth: 55 }, // speed = witch speed at full push (px/s)
+  stick: { show: false, radius: 47, knobRadius: z(22), deadZone: 0.1, curve: 1, response: 44, speed: 200, stopGlide: 0.12, stopOmega: 11, stopDamping: 0.5, restY: z(590), ringAlpha: 0.28, restAlpha: 0.14, depth: 55 }, // speed = witch speed at full push (px/s)
 
   // Player shots. Which shots, how fast and how hard come from weaponLevels below.
   bullet: {
     speed: z(333), // witch shot speed (was z(620), z(520), z(416))
     refSpeed: z(333), gap: 1, // gap = spacing between shots (1 = normal). The time between volleys is fireRateMs x gap x refSpeed / speed, so a faster or slower shot keeps the same spacing unless you change gap; keep refSpeed equal to the normal speed above
     // The witch's shot: one orange fire bolt straight up ("flight_smooth" of the SovDigital fire pack, north row, shrunk 5x and cut to 6 fire colours). Delete this entry to get the old twin code-drawn shots back (then set pattern TWIN).
-    fire: { file: 'shots/fox-shot-6.png', frameW: 13, frameH: 19, frames: 1, fps: 1, scale: 1.35, hitW: 6, hitH: 14 }, // the witch's shot: Fox shot 6, colour 5 (a blue teardrop, one picture) from the FoX71 shot sheet. Old fire strip: fx/fire-shot.png (frameW 8, frameH 22, frames 12, fps 24, hueShift 195)
+    fire: { file: 'shots/fox-shot-6.png', frameW: 13, frameH: 19, frames: 1, fps: 1, scale: 1, hitW: 6, hitH: 14 }, // the witch's shot: Fox shot 6, colour 5 (a blue teardrop, one picture) from the FoX71 shot sheet. Old fire strip: fx/fire-shot.png (frameW 8, frameH 22, frames 12, fps 24, hueShift 195)
     poolSize: 90         // level 10 fires 7 shots every 145 ms and they live about 1 s: about 50 alive at once
   },
 
