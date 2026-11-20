@@ -457,3 +457,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - COPY now puts only the numbers you changed on the clipboard, one line, e.g. `sprites.coinShine.alpha = 0.3, bullet.speed = 300`; paste it to Claude. RESET puts every tab back.
 - New drops use the new fall / grab / tilt numbers; things already falling keep the old ones.
 - Checked: all 25 config paths exist and are numbers; both files pass a syntax check. UNVERIFIED: nothing was seen on screen (the browser preview would not open), so the panel layout (3 tabs, 9 rows on LOOK) and the live ray redraw are untested.
+
+## 2026-11-20 v1.9.16: clearer tune labels (branch v1916-clear-labels)
+- Omri asked what HEART LENGTH / COIN LENGTH meant. Renamed: COIN/HEART/POTION RAYS -> BRIGHT, LENGTH -> LONG (how far the spinning light beams reach), RAY TIP FADE -> BEAM TIP FADE, and the stick rows are now STICK SPEED, STICK SIZE, DEAD ZONE, STICK CURVE, STICK SNAP, STOP GLIDE, STOP SETTLE, STOP DAMPING. A one-line hint sits under each tab (LOOK: "BEAMS = SPINNING LIGHT LINES"; PICKUPS: "NEW DROPS ONLY").
+- UNVERIFIED: not seen on screen; check that no label touches its number and the hint fits the panel.

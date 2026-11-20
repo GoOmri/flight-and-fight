@@ -9,24 +9,24 @@ const P = C.menu.pal;
 // Tabs. Each row: label, path in CONFIG, step, min, max, decimals, [rebuild = the ray pictures must be drawn again]
 const TABS = [
   ['STICK', [
-    ['SPEED', 'stick.speed', 10, 60, 600, 0],
-    ['RADIUS', 'stick.radius', 2, 10, 120, 0],
-    ['DEADZONE', 'stick.deadZone', 0.02, 0, 0.4, 2],
-    ['CURVE', 'stick.curve', 0.1, 0.5, 3, 1],
-    ['RESPONSE', 'stick.response', 2, 5, 100, 0],
-    ['GLIDE', 'stick.stopGlide', 0.02, 0, 0.4, 2],
-    ['SETTLE', 'stick.stopOmega', 1, 4, 40, 0],
-    ['DAMPING', 'stick.stopDamping', 0.05, 0.1, 1, 2]]],
+    ['STICK SPEED', 'stick.speed', 10, 60, 600, 0],
+    ['STICK SIZE', 'stick.radius', 2, 10, 120, 0],
+    ['DEAD ZONE', 'stick.deadZone', 0.02, 0, 0.4, 2],
+    ['STICK CURVE', 'stick.curve', 0.1, 0.5, 3, 1],
+    ['STICK SNAP', 'stick.response', 2, 5, 100, 0],
+    ['STOP GLIDE', 'stick.stopGlide', 0.02, 0, 0.4, 2],
+    ['STOP SETTLE', 'stick.stopOmega', 1, 4, 40, 0],
+    ['STOP DAMPING', 'stick.stopDamping', 0.05, 0.1, 1, 2]]],
   ['LOOK', [
-    ['COIN RAYS', 'sprites.coinShine.alpha', 0.05, 0, 1, 2],
-    ['COIN LENGTH', 'sprites.coinShine.radius', 1, 4, 40, 0, true],
-    ['HEART RAYS', 'sprites.heartShine.alpha', 0.05, 0, 1, 2],
-    ['HEART LENGTH', 'sprites.heartShine.radius', 1, 4, 40, 0, true],
-    ['POTION RAYS', 'sprites.potionShine.alpha', 0.05, 0, 1, 2],
-    ['POTION LENGTH', 'sprites.potionShine.radius', 1, 4, 40, 0, true],
+    ['COIN BRIGHT', 'sprites.coinShine.alpha', 0.05, 0, 1, 2],
+    ['COIN LONG', 'sprites.coinShine.radius', 1, 4, 40, 0, true],
+    ['HEART BRIGHT', 'sprites.heartShine.alpha', 0.05, 0, 1, 2],
+    ['HEART LONG', 'sprites.heartShine.radius', 1, 4, 40, 0, true],
+    ['POTION BRIGHT', 'sprites.potionShine.alpha', 0.05, 0, 1, 2],
+    ['POTION LONG', 'sprites.potionShine.radius', 1, 4, 40, 0, true],
     ['SHOT SIZE', 'bullet.fire.scale', 0.05, 0.5, 3, 2],
     ['SHOT SPEED', 'bullet.speed', 10, 100, 900, 0],
-    ['RAY TIP FADE', 'sprites.coinShine.alphaEnd', 0.05, 0, 1, 2, true]]], // the fade changes all three rays together (see set())
+    ['BEAM TIP FADE', 'sprites.coinShine.alphaEnd', 0.05, 0, 1, 2, true]]], // the fade changes all three rays together (see set())
   ['PICKUPS', [
     ['HEART FALL', 'pickup.heartFallSpeed', 5, 10, 200, 0],
     ['POTION FALL', 'pickup.weaponFallSpeed', 5, 10, 300, 0],
@@ -38,6 +38,7 @@ const TABS = [
     ['POTION TILT', 'sprites.weaponGem.angle', 5, -45, 45, 0]]]
 ];
 // New drops use the fall / grab / tilt numbers (things already falling keep the old ones).
+const HINTS = ['HOLD + OR - TO REPEAT', 'BEAMS = SPINNING LIGHT LINES', 'NEW DROPS ONLY (FALL, GRAB, TILT)']; // one plain line under each tab
 const ALL = TABS.flatMap(t => t[1]);
 const getp = path => path.split('.').reduce((o, k) => o[k], C);
 const setp = (path, v) => { const ks = path.split('.'), last = ks.pop(); ks.reduce((o, k) => o[k], C)[last] = v; };
@@ -124,7 +125,7 @@ export class Tune {
     if (!this.open) { this.hits = this.hits.slice(0, 1); return; }
     // panel
     const ROWS = TABS[this.tab][1], TABH = 18;
-    const h = PANEL.pad * 2 + TABH + ROWS.length * PANEL.rowH + 24;
+    const h = PANEL.pad * 2 + TABH + ROWS.length * PANEL.rowH + 36;
     g.fillStyle(P.dark, 0.92).fillRect(PANEL.x, PANEL.y, PANEL.w, h);
     g.lineStyle(2, P.pink, 1).strokeRect(PANEL.x, PANEL.y, PANEL.w, h);
     const tw = (PANEL.w - 12) / TABS.length; // tab buttons
@@ -140,6 +141,7 @@ export class Tune {
     button(PANEL.x + 8, by, 52, BTN.h + 2, 'COPY', () => this.copy(), false);
     button(PANEL.x + 66, by, 52, BTN.h + 2, 'RESET', () => this.reset(), false);
     T(PANEL.x + 128, by + 8, this.note || '', 8, P.orange, 0);
+    T(PANEL.x + 8, by + BTN.h + 14, HINTS[this.tab], 8, P.cream, 0);
   }
 
   toggle() {
