@@ -553,16 +553,16 @@ export class PlayScene extends Phaser.Scene {
     this.shinePost = () => { if (!this.coins) return; const t = this.time.now; this.updateShine(t); this.updatePotionShine(t); this.updateHeartShine(t); };
     this.events.on('postupdate', this.shinePost);
     this.shineTarget = null; // the one coin that has the shine
-    this.shineRays = C.sprites.coinShine ? this.add.image(0, 0, 'rays0').setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.05).setVisible(false) : null;
+    this.shineRays = C.sprites.coinShine ? this.add.image(0, 0, 'rays0').setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.5).setVisible(false) : null;
     this.heartTarget = null;
-    this.heartGlint = C.sprites.heartShine ? this.add.image(0, 0, 'glint0').setDepth(0.05).setVisible(false) : null;
-    this.heartGlow = C.sprites.heartShine && C.sprites.heartShine.glow ? this.add.image(0, 0, 'heartGlow').setScale(C.sprites.heartShine.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.07).setVisible(false) : null;
-    this.heartRays = C.sprites.heartShine ? this.add.image(0, 0, 'raysh0').setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.05).setVisible(false) : null;
-    this.potionGlint = C.sprites.potionShine ? this.add.image(0, 0, 'glint0').setDepth(0.05).setVisible(false) : null;
+    this.heartGlint = C.sprites.heartShine ? this.add.image(0, 0, 'glint0').setDepth(C.pickup.depth + 0.1).setVisible(false) : null;
+    this.heartGlow = C.sprites.heartShine && C.sprites.heartShine.glow ? this.add.image(0, 0, 'heartGlow').setScale(C.sprites.heartShine.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.6).setVisible(false) : null;
+    this.heartRays = C.sprites.heartShine ? this.add.image(0, 0, 'raysh0').setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.5).setVisible(false) : null;
+    this.potionGlint = C.sprites.potionShine ? this.add.image(0, 0, 'glint0').setDepth(C.pickup.depth + 0.1).setVisible(false) : null;
     this.potionTarget = null;
-    this.potionGlow = C.sprites.potionShine ? this.add.image(0, 0, 'potionGlow').setScale(C.sprites.potionShine.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.07).setVisible(false) : null;
-    this.potionRays = C.sprites.potionShine ? this.add.image(0, 0, 'praysg0').setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.05).setVisible(false) : null;
-    this.shineGlint = C.sprites.coinShine ? this.add.image(0, 0, 'glint0').setDepth(0.05).setVisible(false) : null;
+    this.potionGlow = C.sprites.potionShine ? this.add.image(0, 0, 'potionGlow').setScale(C.sprites.potionShine.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.6).setVisible(false) : null;
+    this.potionRays = C.sprites.potionShine ? this.add.image(0, 0, 'praysg0').setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.5).setVisible(false) : null;
+    this.shineGlint = C.sprites.coinShine ? this.add.image(0, 0, 'glint0').setDepth(C.pickup.depth + 0.1).setVisible(false) : null;
     this.crates = mk('crate', C.crate.poolSize);
     this.weaponUps = mk('weaponUp', C.pickup.weaponPoolSize);
     this.heartUps = mk('heartUp', C.pickup.heartPoolSize);
@@ -1212,6 +1212,7 @@ export class PlayScene extends Phaser.Scene {
     const sp = C.sprites.coin;
     const c = this.spawn(this.coins, sp ? 'sp_coin' : 'coin', Phaser.Math.Clamp(x, m, W - m), y, sp ? sp.scale : PX);
     if (!c) return;
+    c.setDepth(C.pickup.depth); // above the colour wash
     if (sp) { c.play('coin_spin'); c.anims.setCurrentFrame(c.anims.currentAnim.frames[Phaser.Math.Between(0, sp.frames - 1)]); } else c.anims.stop(); // each coin starts at a random frame
     const hb = 2 * C.coin.pickupRadius / (sp ? sp.scale : PX); // generous pickup area (same size on screen whatever the picture)
     c.body.setSize(hb, hb);
@@ -1230,6 +1231,7 @@ export class PlayScene extends Phaser.Scene {
     const sp = group === this.heartUps ? C.sprites.heartPickup : gem; // animated heart (Drop, then Idle), gem, or the code-drawn picture
     const p = this.spawn(group, gem ? (this.textures.exists('sp_gem_g') ? 'sp_gem_g' : 'sp_gem') : sp ? 'sp_heart_drop' : key, Phaser.Math.Clamp(x, m, W - m), y, sp ? sp.scale : PX);
     if (!p) return;
+    p.setDepth(C.pickup.depth); // above the colour wash
     const hb = 2 * C.coin.pickupRadius / (sp ? sp.scale : PX);
     p.body.setSize(hb, hb);
     p.dropping = !!sp && !gem;
