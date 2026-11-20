@@ -555,7 +555,8 @@ export class PlayScene extends Phaser.Scene {
     this.shineTarget = null; // the one coin that has the shine
     this.shineRays = C.sprites.coinShine ? this.add.image(0, 0, 'rays0').setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.05).setVisible(false) : null;
     this.heartTarget = null;
-    this.heartGlow = C.sprites.heartShine ? this.add.image(0, 0, 'heartGlow').setScale(C.sprites.heartShine.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.07).setVisible(false) : null;
+    this.heartGlint = C.sprites.heartShine ? this.add.image(0, 0, 'glint0').setDepth(0.05).setVisible(false) : null;
+    this.heartGlow = C.sprites.heartShine && C.sprites.heartShine.glow ? this.add.image(0, 0, 'heartGlow').setScale(C.sprites.heartShine.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.07).setVisible(false) : null;
     this.heartRays = C.sprites.heartShine ? this.add.image(0, 0, 'raysh0').setBlendMode(Phaser.BlendModes.ADD).setDepth(-0.05).setVisible(false) : null;
     this.potionGlint = C.sprites.potionShine ? this.add.image(0, 0, 'glint0').setDepth(0.05).setVisible(false) : null;
     this.potionTarget = null;
@@ -1011,12 +1012,14 @@ export class PlayScene extends Phaser.Scene {
         this.drawRays(ctx, HS, f, HS.rayColor || '#fff0a0');
         cv.refresh();
       }
+      if (HS.glow) {
       const gn = HS.glow.rings[HS.glow.rings.length - 1].r * 2 + 1, gc = this.textures.createCanvas('heartGlow', gn, gn), gx = gc.getContext('2d');
       for (let y = 0; y < gn; y++) for (let x = 0; x < gn; x++) {
         const dd = Math.hypot(x - (gn - 1) / 2, y - (gn - 1) / 2), ring = HS.glow.rings.find(r => dd <= r.r);
         if (ring) { gx.fillStyle = hex(ring.color); gx.globalAlpha = ring.alpha; gx.fillRect(x, y, 1, 1); }
       }
       gc.refresh();
+      }
     }
     const PS = C.sprites.potionShine; // the same kind of shine for the weapon potion, in green, plus a soft glow made of flat rings
     if (PS && !this.textures.exists('praysg0')) {
@@ -1059,10 +1062,12 @@ export class PlayScene extends Phaser.Scene {
     this.heartUps.children.iterate(p => { if (p && p.active && p.baseV) p.body.setVelocityY(p.baseV + HS.bobAmp * Math.sin(time / 1000 * HS.bobSpeed + p.bobPh)); });
     if (!this.heartTarget || !this.heartTarget.active || this.heartTarget.y > H + 20) this.heartTarget = this.heartUps.getChildren().find(p => p.active && p.y > -10 && p.y < H) || null;
     const c = this.heartTarget;
-    this.heartRays.setVisible(!!c); this.heartGlow.setVisible(!!c);
+    this.heartRays.setVisible(!!c); if (this.heartGlow) this.heartGlow.setVisible(!!c); this.heartGlint.setVisible(false);
     if (!c) return;
     const x = Math.round(c.x), y = Math.round(c.y);
-    this.heartGlow.setPosition(x, y).setAlpha(HS.glow.flicker[Math.floor(time / 1000 * HS.glow.stepFps) % HS.glow.flicker.length]);
+    if (this.heartGlow) this.heartGlow.setPosition(x, y).setAlpha(HS.glow.flicker[Math.floor(time / 1000 * HS.glow.stepFps) % HS.glow.flicker.length]);
+    const tw = time % HS.glintEveryMs; // twinkle
+    if (tw < HS.glintMs) this.heartGlint.setTexture(tw < HS.glintMs / 2 ? 'glint0' : 'glint1').setPosition(x + HS.glintDx, y + HS.glintDy).setVisible(true);
     this.heartRays.setTexture('raysh' + (Math.floor(time / 1000 * HS.fps) % 3)).setPosition(x, y).setAlpha(HS.alpha);
   }
 

@@ -402,3 +402,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Potion: blue more saturated (satMul 1.4), plus a white twinkle every 1.1 s like the coin and the gallery recipe (config potionShine.glint*). Glow and rays were already there.
 - Gallery rays look better because they are smooth CSS wedges; the game rays are whole pixels, now shaped the same way.
 - UNVERIFIED on the phone: ray look at full speed, orb size (24 px).
+
+## 2026-11-20 v1.9.6: heart recipe, no shot pulse, slower shots (branch v1960-heart-recipe)
+- Enemy shot swell off (feel.enemyShotPulse 0): Omri did not like it.
+- Heart pickup follows his gallery recipe (plump-heart, lit + outline, rays, bob, twinkle, pink): the glow is removed, rays are pink, a white twinkle every 1.1 s, the bob stays. config.sprites.heartShine (glow key removed).
+- Rays: tip width 6 -> 5 px. Ray geometry now starts at the sprite's edge so they look alike on coin, potion and heart: coin inner 8 / radius 15, potion 13 / 20, heart 11 / 17 (before, the potion's rays barely stuck out past its big sprite, so they looked different).
+- Witch shot speed z(620) -> z(520) (about 16% slower). The shot strip is the SMOOTH version of the fire pack (12 frames at 24 fps = double the frames of the original 6 at 12 fps).
+- Verified in the browser: heart without glow and with pink rays, coin and potion rays stick out about the same. UNVERIFIED on the phone: shot feel at the lower speed, twinkle look.
