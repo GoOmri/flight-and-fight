@@ -304,6 +304,13 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Lanterns: scale 1.2 -> 0.75 and now drawn under the tree tops like the chests (depth -8.2). The glow now sits on the lamp itself (position found from each picture's brightest green pixels, flips with the picture), smaller (3 rings, 2 px texels, about 14 px radius); the 3 bugs circle closer (4 to 9 px).
 - Chests: they now follow the ground's real speed, including the speed-up when she flies up (before they kept a fixed speed). The opened chest (freeze + fade) keeps scrolling with the ground.
 - Witch shot scale 1 -> 1.6 (about 13x35 px; hitbox grows with it).
-- Ghost: the swaying ghost is now the green pixel ghost (gosth.png column 3, 4 frames of 25x25, assets/enemies/ghost-sway.png, scale 1.3, hitbox 14x16); credit in CREDITS. (First tried the pink Halloween ghost by mistake.)
+- Ghost: the swaying ghost is now the green pixel ghost (gosth.png column 3 (gallery numbering), 4 frames of 25x25, assets/enemies/ghost-sway.png, scale 1.3, hitbox 14x16); credit in CREDITS. (First tried the pink Halloween ghost by mistake.)
 - Hit flash: an enemy that is hit (not killed) flashes solid white for 110 ms (was 70). The flash code was already there; checked it works on the ghost.
 - Verified in the browser (swamp, wave 3): ghost shows, white flash on hit, lantern small with the glow on the lamp, big shots. UNVERIFIED on the phone: ghost size and hitbox, shot size, whether 110 ms reads as a flash at full speed.
+
+## 2026-11-20 v1.8.2: lanterns really stick to the ground, ghost column 3, sizes (branch v1810-ground-flash)
+- Rule (Omri): anything that is not a pickup or an enemy belongs to the world and scrolls with the ground. Lanterns did not: each frame I wrote the ROUNDED position back into the sprite, so the slow scroll (0.67 px/frame) got rounded to a different speed and they drifted. Now the exact position is kept in L.fx / L.fy and the sprite only gets the rounded copy. Measured: lantern and ground prop move 40.08 px each in 1 s of game time. Chests, the opened chest and tree shadows already follow the ground.
+- Ghost: I had cut column 4 of gosth.png (x=75); Omri meant column 3 in the gallery numbering (x=50). Fixed (assets/enemies/ghost-sway.png). Ghost scale 1.3 -> 1.7.
+- Coin scale 1.2 -> 1.0.
+- Hit flash: simulated 900 frames with the witch under a ghost: 12 hits gave white flashes of 7 frames (110 ms) each; a flash starts on the first hit only if the enemy survives it, and hits closer than 110 ms merge into one flash. The sprite now turns white at once when hit (before, on the next update). If Omri still sees none on the phone: check the phone really runs v1.8.2 (UPDATE button), and say which enemy.
+- UNVERIFIED on the phone: ghost size, coin size, flash visibility.

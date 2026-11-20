@@ -621,17 +621,17 @@ export class PlayScene extends Phaser.Scene {
     L.spr.setScale(LN.scale).setFlipX(Math.random() < 0.5);
     L.side = -L.side;
     const lane = LN.laneX[L.side < 0 ? 0 : 1];
-    L.spr.x = Phaser.Math.Between(lane[0], lane[1]);
-    L.spr.y = first ? H * (0.15 + 0.35 * i) + Phaser.Math.Between(-20, 20) : -f.h * LN.scale - Phaser.Math.Between(LN.gapY[0], LN.gapY[1]);
+    L.fx = Phaser.Math.Between(lane[0], lane[1]);
+    L.fy = first ? H * (0.15 + 0.35 * i) + Phaser.Math.Between(-20, 20) : -f.h * LN.scale - Phaser.Math.Between(LN.gapY[0], LN.gapY[1]);
   }
 
   updateLanterns(dt, time) {
     const LN = C.background.swamp.lanterns, G = LN.glow;
     const step = Math.floor(time / 1000 * LN.stepFps); // everything that wiggles changes in steps, like pixel art frames
     for (const L of this.lanterns) {
-      L.spr.y += this.bgF.scroll * this.cloudMul * dt;
-      if (L.spr.y > H + L.f.h * LN.scale) this.placeLantern(L, false);
-      const x = Math.round(L.spr.x), y = Math.round(L.spr.y), gy = Math.round(y + L.f.glowDy * LN.scale), gx = Math.round(x + L.f.glowDx * LN.scale * (L.spr.flipX ? -1 : 1));
+      L.fy += this.bgF.scroll * this.cloudMul * dt; // the exact position is kept here: the sprite only gets the rounded one (writing it back made the lantern drift against the ground)
+      if (L.fy > H + L.f.h * LN.scale) this.placeLantern(L, false);
+      const x = Math.round(L.fx), y = Math.round(L.fy), gy = Math.round(y + L.f.glowDy * LN.scale), gx = Math.round(x + L.f.glowDx * LN.scale * (L.spr.flipX ? -1 : 1));
       L.spr.setPosition(x, y);
       L.glow.setPosition(gx, gy).setAlpha(G.flicker[(step + Math.floor(L.ph)) % G.flicker.length]);
       for (const b of L.bugs) {
@@ -1043,7 +1043,7 @@ export class PlayScene extends Phaser.Scene {
   damageEnemy(e, dmg, flash) {
     if (!e.active) return;
     e.hp -= dmg;
-    if (e.hp > 0) { if (flash) e.flashUntil = this.time.now + C.enemies.hitFlashMs; if (C.feel.hitKickPx > 0) e.kick = 1; return; }
+    if (e.hp > 0) { if (flash) { e.flashUntil = this.time.now + C.enemies.hitFlashMs; e.setTintFill(0xffffff); } if (C.feel.hitKickPx > 0) e.kick = 1; return; } // white at once, not only on the next update
     const big = e.kind === 'shooter';
     this.explode(e.x, e.y, big, DEATH_TINTS[e.kind]);
     this.pop(e.x, e.y - 6, '+' + C.enemies[e.kind].score);

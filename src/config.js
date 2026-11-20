@@ -27,7 +27,7 @@ function weaponLevels() {
 }
 
 export const CONFIG = {
-  version: "1.8.1", // bump on every push so the player/Omri can see the build
+  version: "1.8.2", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -164,8 +164,8 @@ export const CONFIG = {
       // Bat 1.3 (purple, never the red files), row S (flying towards the player), cut out as bat-S.png (3 frames = one wing flap: up, flat, down). Ping-pong 0,1,2,1.
       grunt:   { file: 'bat-S.png', frameW: 48, frameH: 64, frames: [0, 1, 2, 1], fps: 8, scale: 1.1, hitW: 27, hitH: 22, faceVelocity: false },
       // Dino IDLE sheet (4 frames = one breathing/bobbing loop, side view facing right). The long dino.png is a jump (crouch, leap, land), not a loop, so it is not used.
-      // Ghost = the green pixel ghost, animation 'column 3' of gosth.png (4 frames of 25x25, read top to bottom), replaces the code-drawn swaying ghost.
-    zigzag:  { file: 'ghost-sway.png', frameW: 25, frameH: 25, frames: [0, 1, 2, 3], fps: 8, scale: 1.3, hitW: 14, hitH: 16, faceVelocity: false },
+      // Ghost = the green pixel ghost, animation 'column 3' of gosth.png (gallery numbering, x=50) (4 frames of 25x25, read top to bottom), replaces the code-drawn swaying ghost.
+    zigzag:  { file: 'ghost-sway.png', frameW: 25, frameH: 25, frames: [0, 1, 2, 3], fps: 8, scale: 1.7, hitW: 14, hitH: 16, faceVelocity: false },
     shooter: { file: 'wisp.png', frameW: 96, frameH: 96, frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], fps: 12, scale: 0.5, hitW: 44, hitH: 52, faceVelocity: false }, // fire wisp (10 frames of 96 px, drawn at half size)
       // Vulture (not used in waves yet). Frames of vulture.png: 0 = folded, 1 = wings up, 2 = wings flat/low, 3 = half. Flap loop: up, half, low, half. (Cleanest guess; check it.)
       vulture: { file: 'vulture.png', frameW: 39, frameH: 39, frames: [1, 3, 2, 3], fps: 8, scale: 0.8, hitW: 22, hitH: 22, faceVelocity: true }
@@ -179,7 +179,7 @@ export const CONFIG = {
   // cell size and centre, so switching animations never jumps. hitW/hitH = hitbox in sheet pixels (times scale on screen). Pickup grab radius stays coin.pickupRadius.
   sprites: {
     // Gold coin, 24 frames = one full spin, loops while it falls. Each coin starts at a random frame.
-    coin: { file: 'pickups/coin.png', frameW: 18, frameH: 18, frames: 24, fps: 30, scale: 1.2 },
+    coin: { file: 'pickups/coin.png', frameW: 18, frameH: 18, frames: 24, fps: 30, scale: 1.0 },
     // Falling heart (carrier drop): Drop plays once when it appears, then Idle loops while it falls; Collect plays once at the witch when she grabs it.
     heartPickup: { scale: 1, collectDepth: 12, // collectDepth: drawn over the witch (10)
       idle:    { file: 'pickups/heart-idle.png',    frameW: 26, frameH: 62, frames: 24, fps: 12 },
