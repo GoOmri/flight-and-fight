@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.30", // bump on every push so the player/Omri can see the build
+  version: "1.9.31", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -68,13 +68,14 @@ export const CONFIG = {
   ship: {
     startY: z(520),
     dragSensitivity: 1.2, // ship moves this many times the finger movement (1 = 1:1, 1.5 = faster)
+    dragSlopPx: 4,        // touch dead zone: after the thumb lands it must move this far before the witch follows (a resting thumb never moves her)
     // Weight: the ship eases toward the finger. Lag is about 1000/followRate ms (20 = 50 ms).
     // LOWER number = heavier, slower to catch up. HIGHER = lighter, closer to glued. 60+ is almost no weight.
     followRate: 28,
     glueRate: 2.5,        // per second: how fast the witch settles to the spot just above the finger (0 = pure relative drag, drift stays). Higher = stricter
     fingerOffsetY: z(45), // that spot is this far above the finger
     mouseOnDesktop: true, // on a desktop browser (a real mouse) the witch follows the mouse pointer automatically; phones keep "controls" below. ?ctl=mouse / stick / drag overrides
-    controls: "stick",    // "stick" = virtual stick (ring on screen, witch flies where you push) | "drag" = move by finger movement. Try both with ?ctl=stick / ?ctl=drag after the web address
+    controls: "drag",     // "stick" = virtual stick (ring on screen, witch flies where you push) | "drag" = move by finger movement. Try both with ?ctl=stick / ?ctl=drag after the web address
     bankDeg: 8,          // max tilt in degrees when moving sideways (0 = no tilt)
     bankSpeed: z(400),   // sideways speed (units/s) that gives the full tilt
     bankEase: 14,        // how fast the tilt comes and goes (higher = snappier)

@@ -128,6 +128,7 @@ export class PlayScene extends Phaser.Scene {
     // Touching somewhere else does not move the ship. Only one pointer steers; others are ignored.
     this.dragId = null;
     this.dragFrom = new Phaser.Math.Vector2();  // finger position at touch start
+    this.lastFinger = new Phaser.Math.Vector2(); this.dragLive = false; // drag control: finger position last frame, and whether the touch dead zone has been left
     this.shipFrom = new Phaser.Math.Vector2();  // ship position at touch start
     this.finger = new Phaser.Math.Vector2();    // finger position now
     // Controls: 'stick' = virtual stick (the ring appears where the thumb lands, the witch flies where you push),
@@ -160,13 +161,14 @@ export class PlayScene extends Phaser.Scene {
       this.dragFrom.set(p.x / R, p.y / R); // pointer is in canvas pixels, the game is R times smaller
       this.finger.copy(this.dragFrom);
       this.shipFrom.set(this.target.x, this.target.y); // from the target, so no jump while the ship is still catching up
+      this.lastFinger.copy(this.finger); this.dragLive = false; // drag: the witch only follows after the thumb has moved dragSlopPx
       if (this.stickMode) this.stickC.copy(this.finger); // the ring appears under the thumb
     });
     this.input.on('pointermove', p => {
       if (this.mouseMode) { this.mouseSeen = true; return; }
       if (p.id !== this.dragId || !p.isDown || this.over) return;
       this.finger.set(p.x / R, p.y / R);
-      if (!this.stickMode) this.aimTarget();
+      // (drag: the witch is moved in moveShip from the finger's movement each frame)
     });
     const release = p => { if (this.tune) this.tune.release(); if (p.id === this.dragId) { this.dragId = null; if (this.stickMode) this.stickC.set(W / 2, C.stick.restY); } };
     this.input.on('pointerup', release);
@@ -679,6 +681,9 @@ export class PlayScene extends Phaser.Scene {
     this.stickRing.setVisible(this.stickMode && T.show); this.stickKnob.setVisible(this.stickMode && T.show); // T.show false = invisible stick (it still works)
   }
 
+  // Soft walls: 1 = full speed; flying toward a wall (v points at it) inside stick.edgeZone px of it the speed eases down to stick.edgeSpeed at the wall. Used by the stick and by the drag.
+  softWall(pos, v, lo, hi) { const T = C.stick; if (!(T.edgeZone > 0) || T.edgeSpeed >= 1 || !v) return 1; const d = v > 0 ? hi - pos : pos - lo, k = Phaser.Math.Clamp(d / T.edgeZone, 0, 1); return T.edgeSpeed + (1 - T.edgeSpeed) * k * k * (3 - 2 * k); }
+
   // Stick: pushing the knob away from the ring centre sets a speed. The ship's easing and tilt below still apply.
   stickTarget(dt) {
     const T = C.stick, S = C.ship, held = this.dragId !== null && !this.over;
@@ -710,7 +715,7 @@ export class PlayScene extends Phaser.Scene {
       if (Math.abs(this.stickV.x) < 1 && Math.abs(this.stickV.y) < 1 && Math.hypot(this.stopT.x - s.x, this.stopT.y - s.y) < 0.5) this.stickV.set(0, 0);
     }
     // Soft walls: flying TOWARD an edge she slows down smoothly inside edgeZone px of it (down to edgeSpeed at the wall); flying away or along is not slowed.
-    const soft = (pos, v, lo, hi) => { if (!(T.edgeZone > 0) || T.edgeSpeed >= 1 || !v) return 1; const d = v > 0 ? hi - pos : pos - lo, k = Phaser.Math.Clamp(d / T.edgeZone, 0, 1); return T.edgeSpeed + (1 - T.edgeSpeed) * k * k * (3 - 2 * k); };
+    const soft = (pos, v, lo, hi) => this.softWall(pos, v, lo, hi);
     this.target.x = Phaser.Math.Clamp(s.x + this.stickV.x * dt * soft(s.x, this.stickV.x, S.margin, W - S.margin), S.margin, W - S.margin);
     this.target.y = Phaser.Math.Clamp(s.y + this.stickV.y * dt * soft(s.y, this.stickV.y, S.margin, H - S.margin), S.margin, H - S.margin);
     const k = len > T.radius ? T.radius / len : 1; // knob stays inside the ring
@@ -723,13 +728,16 @@ export class PlayScene extends Phaser.Scene {
     if (this.stickMode) this.stickTarget(dt);
     else if (this.mouseMode) {
       if (this.mouseSeen && !this.over) { const m = this.input.activePointer; this.target.x = Phaser.Math.Clamp(m.x / R, S.margin, W - S.margin); this.target.y = Phaser.Math.Clamp(m.y / R, S.margin, H - S.margin); }
-    } else if (this.dragId !== null && !this.over && S.glueRate > 0) {
-      // Slowly slide the start point so the target settles just above the finger: the drift (finger far from the ship) heals itself.
-      const g = 1 - Math.exp(-S.glueRate * dt);
-      const ix = Phaser.Math.Clamp(this.finger.x, S.margin, W - S.margin), iy = Phaser.Math.Clamp(this.finger.y - S.fingerOffsetY, S.margin, H - S.margin);
-      this.shipFrom.x += (ix - this.target.x) * g;
-      this.shipFrom.y += (iy - this.target.y) * g;
-      this.aimTarget();
+    } else if (this.dragId !== null && !this.over) {
+      // RELATIVE DRAG: the witch moves by the finger's movement x dragSensitivity (touch anywhere, swipe to reposition, a resting thumb moves nothing),
+      // slowed near the walls when she flies toward them. No pull toward the finger, so she never drifts by herself.
+      if (!this.dragLive) { if (Math.hypot(this.finger.x - this.dragFrom.x, this.finger.y - this.dragFrom.y) > S.dragSlopPx) this.dragLive = true; this.lastFinger.copy(this.finger); }
+      else {
+        const fx = (this.finger.x - this.lastFinger.x) * S.dragSensitivity, fy = (this.finger.y - this.lastFinger.y) * S.dragSensitivity;
+        this.lastFinger.copy(this.finger);
+        this.target.x = Phaser.Math.Clamp(this.target.x + fx * this.softWall(this.target.x, fx, S.margin, W - S.margin), S.margin, W - S.margin);
+        this.target.y = Phaser.Math.Clamp(this.target.y + fy * this.softWall(this.target.y, fy, S.margin, H - S.margin), S.margin, H - S.margin);
+      }
     }
     const k = this.stickMode ? 1 : 1 - Math.exp(-S.followRate * dt); // stick: no extra easing, the stick already sets the speed
     const px = s.x, py = s.y;

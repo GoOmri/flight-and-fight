@@ -24,8 +24,7 @@ const dropRows = k => [
   ['EFFECTS MOVE DOWN', `sprites.${k}Shine.offsetY`, 1, -10, 15, 0],
   ['GRAB SIZE (ALL DROPS)', 'coin.pickupRadius', 1, 4, 40, 0]
 ];
-const TABS = [
-  ['STICK', [
+const STICK_ROWS = [
     ['SHIP MOVE SPEED', 'stick.speed', 10, 60, 600, 0],
     ['STICK CIRCLE SIZE', 'stick.radius', 2, 10, 120, 0],
     ['DEAD ZONE (NO MOVE)', 'stick.deadZone', 0.02, 0, 0.4, 2],
@@ -35,7 +34,15 @@ const TABS = [
     ['STOP SETTLE SPEED', 'stick.stopOmega', 1, 4, 40, 0],
     ['STOP DAMPING (BRAKE)', 'stick.stopDamping', 0.05, 0.1, 1, 2],
     ['EDGE SLOW-DOWN ZONE', 'stick.edgeZone', 5, 0, 120, 0],
-    ['SPEED AT THE WALL (X)', 'stick.edgeSpeed', 0.05, 0.1, 1, 2]]],
+    ['SPEED AT THE WALL (X)', 'stick.edgeSpeed', 0.05, 0.1, 1, 2]];
+const DRAG_ROWS = [
+    ['FINGER TO WITCH (X)', 'ship.dragSensitivity', 0.1, 0.5, 3, 1],
+    ['WITCH WEIGHT (LAG)', 'ship.followRate', 2, 6, 80, 0],
+    ['TOUCH DEAD ZONE (PX)', 'ship.dragSlopPx', 1, 0, 20, 0],
+    ['EDGE SLOW-DOWN ZONE', 'stick.edgeZone', 5, 0, 120, 0],
+    ['SPEED AT THE WALL (X)', 'stick.edgeSpeed', 0.05, 0.1, 1, 2]];
+const TABS = [
+  ['MOVE', null],
   ['SHOT', [
     ['WITCH SHOT SIZE', 'bullet.fire.scale', 0.05, 0.5, 3, 2],
     ['WITCH SHOT SPEED', 'bullet.speed', 10, 100, 900, 0],
@@ -54,8 +61,8 @@ const TABS = [
 ];
 const DROPS_TAB = 2;
 const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'WITCH SHOT: SIZE, SPEED, SPACING', 'TAP THE DROP NAME TO SWITCH DROP', '(X) 1 = NORMAL. DELAY MORE = EASIER', 'PRESS RESTART. LEVEL -1 = BY WAVE'];
-const rowsOf = (tab, pick) => tab === DROPS_TAB ? dropRows(KINDS[pick]) : TABS[tab][1];
-const ALL = TABS.flatMap((t, i) => i === DROPS_TAB ? KINDS.flatMap(dropRows) : t[1]);
+const rowsOf = (tab, pick) => tab === DROPS_TAB ? dropRows(KINDS[pick]) : tab === 0 ? (C.ship.controls === 'stick' ? STICK_ROWS : DRAG_ROWS) : TABS[tab][1];
+const ALL = [...STICK_ROWS, ...DRAG_ROWS, ...TABS.flatMap((t, i) => i === DROPS_TAB ? KINDS.flatMap(dropRows) : t[1] || [])];
 const getp = path => path.split('.').reduce((o, k) => o[k], C);
 const setp = (path, v) => { const ks = path.split('.'), last = ks.pop(); ks.reduce((o, k) => o[k], C)[last] = v; };
 const GEAR = { x: W - 16, y: 34, w: 22, h: 20 };          // gear button (centre), just under the hearts
