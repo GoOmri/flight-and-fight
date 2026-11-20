@@ -19,8 +19,9 @@ const dropRows = k => [
   ...{
     coin: [['MAGNET RANGE', 'feel.magnetRadius', 2, 0, 120, 0], ['MAGNET SPEED', 'feel.magnetSpeed', 10, 50, 900, 0]],
     heart: [['BOB AMOUNT', 'sprites.heartShine.bobAmp', 1, 0, 40, 0]],
-    potion: [['TILT ANGLE', 'sprites.weaponGem.angle', 5, -45, 45, 0]]
+    potion: [['TILT ANGLE', 'sprites.weaponGem.angle', 5, -45, 45, 0], ['BOB AMOUNT', 'sprites.potionShine.bobAmp', 1, 0, 40, 0]]
   }[k],
+  ['EFFECTS MOVE DOWN', `sprites.${k}Shine.offsetY`, 1, -10, 15, 0],
   ['GRAB SIZE (ALL DROPS)', 'coin.pickupRadius', 1, 4, 40, 0]
 ];
 const TABS = [

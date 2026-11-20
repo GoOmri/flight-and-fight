@@ -28,12 +28,12 @@ function weaponLevels() {
 
 // Shared shine look of coins, hearts and potions (see sprites.coinShine / heartShine / potionShine). glow.size scales the glow (1 = rings of 5, 8, 11 pixels; the potion's glow was 50% too big, so 0.67),
 // glow.opacity scales how strong it is. Each drop has its own beam length (radius), opacity (alpha), tip fade (alphaEnd) and glow numbers: change them per drop in the tune panel (DROPS tab).
-const SHINE = { radius: 13, inner: 1, widthStart: 1, widthEnd: 5, alphaEnd: 0.25, fps: 6, alpha: 0.2, glintEveryMs: 1200, glintMs: 200,
+const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, alphaEnd: 0.25, fps: 6, alpha: 0.2, glintEveryMs: 1200, glintMs: 200,
   glow: { cell: 2, size: 0.52, opacity: 0.6, rings: [{ r: 5, a: 0.55 }, { r: 8, a: 0.38 }, { r: 11, a: 0.2 }], flicker: [1, 0.85, 1, 0.7, 0.95], stepFps: 6 } };
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.25", // bump on every push so the player/Omri can see the build
+  version: "1.9.26", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -209,10 +209,10 @@ export const CONFIG = {
     // SHINE of every drop (coin, heart, potion): ONE shared look (SHINE above): spinning beams (3 pictures at fps, alpha = opacity, radius = length, widths in px) and a soft glow of flat rings behind it,
     // plus a little white twinkle. Only the colours and the twinkle spot differ per drop. Every drop on screen has it. The tune panel changes the shared numbers for all three at once.
     coinShine: shine({ rayColor: '#ffe9a0', glowColors: [0xfff3c0, 0xffd04a, 0xc98a1a], glintDx: 5, glintDy: -6 }),
-    potionShine: shine({ radius: 14, glowOver: { size: 0.55 }, rayColor: '#cfe4ff', glowColors: [0xb8d8ff, 0x4f8fe0, 0x2f5fbf], glintDx: 6, glintDy: -9 }),
+    potionShine: shine({ radius: 14, glowOver: { size: 0.55 }, bobAmp: 14, bobSpeed: 5, offsetY: 3, rayColor: '#cfe4ff', glowColors: [0xb8d8ff, 0x4f8fe0, 0x2f5fbf], glintDx: 6, glintDy: -9 }),
     heartShine: shine({ radius: 14, glowOver: { size: 0.55 }, rayColor: '#ffc4e2', glowColors: [0xffe3f0, 0xff8fc0, 0xc0407a], glintDx: 6, glintDy: -8, bobAmp: 14, bobSpeed: 5 }), // bobAmp px/s fall-speed swing, bobSpeed radians/s
     stunned: { file: 'fx/stunned.png', frameW: 60, frameH: 64, frames: 60, fps: 30, scale: 0.8, offsetY: -7, fadeMs: 300 },
-    weaponGem: { file: 'pickups/potion-flask.png', frameW: 64, frameH: 64, frames: 24, fps: 12, scale: 0.45, angle: 0 }, // the weapon potion: round blue flask of the Alchemy pack (Frakassets, 64 px, no outline, lit; 24 frames at 12 fps). scale 0.45 = about the old size. angle = tilt in degrees
+    weaponGem: { file: 'pickups/potion-flask.png', frameW: 64, frameH: 64, frames: 24, fps: 12, scale: 0.45, angle: 25 }, // the weapon potion: round blue flask of the Alchemy pack (Frakassets, 64 px, no outline, lit; 24 frames at 12 fps). scale 0.45 = about the old size. angle = tilt in degrees
     fxPoolSize: 8 // chest-break and heart-collect animations playing at once
   },
 
@@ -227,7 +227,7 @@ export const CONFIG = {
   enemyBullet: { poolSize: 30, speed: 100, hitSize: 3, depth: 35, scale: 1.5, file: 'shots/orb-red.png' }, // the red orb of the "Shmup Shots, Explosions and Pickups 16x16" pack (16x16 drawn at 1.5x = 24 px, half of the 48 px it was shown at by mistake: the swell effect forced every shot to 3x). Remove `file` to get the code-drawn pink orb back (it then uses scale 2) // depth 35: above all effects (sparks 20, texts 30), below the HUD (50)
 
   // pickupRadius: how close the ship must be to grab a coin (logical px). Bigger than the ship hitbox on purpose.
-  coin: { fallSpeed: z(90), value: 5, poolSize: 40, pickupRadius: 10 },
+  coin: { fallSpeed: 50, value: 5, poolSize: 40, pickupRadius: 10 },
 
   // Crates: hp, coins and speed are set per crate in src/waves.js. coinSpread = sideways speed between coins.
   // coinFadeSec: the sideways burst fades to 0 in this many seconds. poolSize: max crates at once.
@@ -239,7 +239,7 @@ export const CONFIG = {
   // Pickup grab radius is coin.pickupRadius. heartScoreIfFull: score given for a heart when already at full hearts.
   pickup: {
     depth: 34, // coins, hearts and the potion (and their shine) draw above the colour wash (33) so the wash does not dim them; enemy shots are at 35
-    weaponFallSpeed: z(130), heartFallSpeed: z(55), heartScoreIfFull: 50, maxLevel: 10,
+    weaponFallSpeed: 67, heartFallSpeed: z(55), heartScoreIfFull: 50, maxLevel: 10,
     weaponPoolSize: 4, heartPoolSize: 4, // pickups on screen at once
     haloPoolSize: 48,  // glow pictures alive at once (an animated carrier uses 4, a code-drawn one 1)
     haloPulseMs: 500    // one pulse of the carrier glow

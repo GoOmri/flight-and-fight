@@ -1042,7 +1042,7 @@ export class PlayScene extends Phaser.Scene {
           glow: this.add.image(0, 0, kind + 'Glow').setScale(S.glow.cell).setBlendMode(Phaser.BlendModes.ADD).setDepth(C.pickup.depth - 0.6),
           glint: this.add.image(0, 0, 'glint0').setDepth(C.pickup.depth + 0.1) };
         n++;
-        const x = Math.round(c.x), y = Math.round(c.y);
+        const x = Math.round(c.x), y = Math.round(c.y) + (S.offsetY || 0); // offsetY: move beams and glow down/up (the potion's cap makes it look taller than it is)
         sh.glow.setVisible(true).setPosition(x, y).setAlpha(S.glow.flicker[Math.floor(time / 1000 * S.glow.stepFps) % S.glow.flicker.length]);
         sh.rays.setVisible(true).setTexture(pre + (Math.floor(time / 1000 * S.fps) % 3)).setPosition(x, y).setAlpha(S.alpha);
         const t = (time + n * 370) % S.glintEveryMs; // the twinkle: bigger for a moment, then smaller, then gone
@@ -1059,6 +1059,8 @@ export class PlayScene extends Phaser.Scene {
     if (!HS) return;
     const shSp = C.sprites.heartPickup && C.sprites.heartPickup.shine ? (this.heartShineSp = this.heartShineSp || []) : null; // the pack's own shine layer: glints crossing the heart, same frame as the heart's Idle loop
     let ns = 0;
+    const PB = C.sprites.potionShine; // the potion bobs like the heart
+    if (PB && PB.bobAmp) this.weaponUps.children.iterate(p => { if (p && p.active && p.baseV) p.body.setVelocityY(p.baseV + PB.bobAmp * Math.sin(time / 1000 * PB.bobSpeed + p.bobPh)); });
     this.heartUps.children.iterate(p => {
       if (!p || !p.active) return;
       if (p.baseV) p.body.setVelocityY(p.baseV + HS.bobAmp * Math.sin(time / 1000 * HS.bobSpeed + p.bobPh));
