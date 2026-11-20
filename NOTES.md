@@ -409,3 +409,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Rays: tip width 6 -> 5 px. Ray geometry now starts at the sprite's edge so they look alike on coin, potion and heart: coin inner 8 / radius 15, potion 13 / 20, heart 11 / 17 (before, the potion's rays barely stuck out past its big sprite, so they looked different).
 - Witch shot speed z(620) -> z(520) (about 16% slower). The shot strip is the SMOOTH version of the fire pack (12 frames at 24 fps = double the frames of the original 6 at 12 fps).
 - Verified in the browser: heart without glow and with pink rays, coin and potion rays stick out about the same. UNVERIFIED on the phone: shot feel at the lower speed, twinkle look.
+
+## 2026-11-20 v1.9.7: pickups above the colour wash, rays from the centre (branch v1970-pickups-above-tint)
+- Omri: the potion looks dim. Cause: the colour wash (tint rectangle, depth 33) lay over everything below enemy shots, and pickups were at depth 0, so coins, hearts and the potion were washed (swamp teal) and dimmed. Now pickups and their shine pictures draw at config.pickup.depth 34 (above the wash, below enemy shots at 35).
+- Rays now start at the middle of the sprite (inner 1) and reach further (coin 20, potion 26, heart 24 px), opacity 0.8 (was 0.55); potion glow rings stronger; potion value 1.0 (was 0.95). Closer to the gallery preview, which is the CSS approximation: smooth wedges and a drop-shadow glow, shown with no tint over them.
+- Shots (answer to Omri): witch shot = SovDigital "Free Projectile Effects" fire, flight_smooth north row, 12 frames of 8x22 at 24 fps, turned blue by hue shift; enemy shot = red orb (capttainjack "Shmup Shots" pack, 16x16); muzzle burst = code-drawn pixels (blue); impact sparks = code squares.
+- UNVERIFIED on the phone: whether the rays are now too long or too bright (they are big in the preview screenshot): tune coinShine / potionShine / heartShine radius and alpha.
