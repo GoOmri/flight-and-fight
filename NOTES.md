@@ -498,3 +498,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri: the beams and glow can not be exactly the same on every drop, because the potion is a bigger picture than the coin. Each drop now has a sizeMul that scales its beam length and its glow: coin 1, heart 1.25, potion 1.5 (config sprites.coinShine / heartShine / potionShine .sizeMul; the shared numbers stay shared). Tune panel LOOK tab: new rows HEART BEAM+GLOW X and POTION BEAM+GLOW X. I read Omri's "1/5" as 1.5; change it in the panel if he meant something else.
 - New art file added by Omri: Fire Pixel Bullet 16x16 (bdragon1727), moved from the repo root into art-packs/effects-vfx/bdragon-fire-bullet-16x16/ (git-ignored) and listed in CATALOG.md; licence not checked yet, not used in the game.
 - UNVERIFIED: not run (preview would not open).
+
+## 2026-11-20 v1.9.24: separate beam and glow multipliers, faster heart, tidier panel (branch v1924-beam-glow-mul)
+- Omri: potion beams looked much longer than the coin's while the glow was fine; he set the potion multiplier to 1.15. One multiplier moved both, so it is split: beamMul (beam length) and glowMul (glow size) per drop. Coin 1 / 1, heart 1.1 / 1.25, potion 1.15 / 1.5 (his 1.15 now goes to the potion beams, the glow keeps 1.5). Old key sizeMul is gone.
+- Heart pickup animation quicker, 50%: idle 12 -> 18 fps, drop 14 -> 21, collect 14 -> 21. The hearts in the top bar use the same idle loop, so they speed up too; the pack's shine layer follows the idle frames.
+- Tune panel: Omri could not see the two rows I added last time (names with "+" in them, or crowded). The four multiplier rows now sit on the DROPS tab with plain names (HEART / POTION BEAM LENGTH X, GLOW SIZE X); LOOK is back to 8 rows. Rows are 15 px high now (were 17) so 12 rows fit.
+- UNVERIFIED: not run (preview would not open). Check the DROPS tab shows 12 rows and fits.

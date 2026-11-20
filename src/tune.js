@@ -23,8 +23,6 @@ const TABS = [
     ['BEAM TIP FADE-OUT', 'sprites.coinShine.alphaEnd', 0.05, 0, 1, 2, true, true],
     ['DROP GLOW SIZE', 'sprites.coinShine.glow.size', 0.05, 0.3, 1.8, 2, true, true],
     ['DROP GLOW OPACITY', 'sprites.coinShine.glow.opacity', 0.1, 0, 2, 1, true, true],
-    ['HEART BEAM+GLOW X', 'sprites.heartShine.sizeMul', 0.05, 0.5, 2.5, 2, true],
-    ['POTION BEAM+GLOW X', 'sprites.potionShine.sizeMul', 0.05, 0.5, 2.5, 2, true],
     ['WITCH SHOT SIZE', 'bullet.fire.scale', 0.05, 0.5, 3, 2],
     ['WITCH SHOT SPEED', 'bullet.speed', 10, 100, 900, 0],
     ['GAP BETWEEN SHOTS', 'bullet.gap', 0.1, 0.3, 3, 1],]],
@@ -36,7 +34,11 @@ const TABS = [
     ['COIN MAGNET SPEED', 'feel.magnetSpeed', 10, 50, 900, 0],
     ['PICKUP GRAB SIZE', 'coin.pickupRadius', 1, 4, 40, 0],
     ['HEART BOB AMOUNT', 'sprites.heartShine.bobAmp', 1, 0, 40, 0],
-    ['POTION TILT ANGLE', 'sprites.weaponGem.angle', 5, -45, 45, 0]]],
+    ['POTION TILT ANGLE', 'sprites.weaponGem.angle', 5, -45, 45, 0],
+    ['HEART BEAM LENGTH X', 'sprites.heartShine.beamMul', 0.05, 0.5, 2.5, 2, true],
+    ['HEART GLOW SIZE X', 'sprites.heartShine.glowMul', 0.05, 0.5, 2.5, 2, true],
+    ['POTION BEAM LENGTH X', 'sprites.potionShine.beamMul', 0.05, 0.5, 2.5, 2, true],
+    ['POTION GLOW SIZE X', 'sprites.potionShine.glowMul', 0.05, 0.5, 2.5, 2, true]]],
   ['HARD', [
     ['ENEMY HEALTH (X)', 'difficulty.enemyHp', 0.25, 0.25, 4, 2],
     ['ENEMY FLY SPEED (X)', 'difficulty.enemySpeed', 0.1, 0.5, 2, 1],
@@ -50,13 +52,13 @@ const TABS = [
 
 ];
 // New drops use the fall / grab / tilt numbers (things already falling keep the old ones).
-const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'BEAM = LIGHT LINE, GLOW = SOFT HALO', 'NEW DROPS ONLY (FALL, GRAB, TILT)', '(X) 1 = NORMAL. DELAY MORE = EASIER', 'PRESS RESTART. LEVEL -1 = BY WAVE']; // one plain line under each tab
+const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'BEAM = LIGHT LINE, GLOW = SOFT HALO', 'NEW DROPS ONLY. X = BIGGER THAN COIN', '(X) 1 = NORMAL. DELAY MORE = EASIER', 'PRESS RESTART. LEVEL -1 = BY WAVE']; // one plain line under each tab
 const ALL = TABS.flatMap(t => t[1]);
 const getp = path => path.split('.').reduce((o, k) => o[k], C);
 const setp = (path, v) => { const ks = path.split('.'), last = ks.pop(); ks.reduce((o, k) => o[k], C)[last] = v; };
 const GEAR = { x: W - 16, y: 34, w: 22, h: 20 };          // gear button (centre), just under the hearts
-const PANEL = { x: 6, y: 46, w: W - 12, rowH: 17, pad: 6 };
-const BTN = { w: 22, h: 14 };
+const PANEL = { x: 6, y: 46, w: W - 12, rowH: 15, pad: 6 };
+const BTN = { w: 22, h: 13 };
 const DEPTH = 70;
 
 // Is the tuning panel on? ?tune=1 turns it on and remembers it, ?tune=0 turns it off, otherwise the remembered choice is used.
