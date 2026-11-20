@@ -472,3 +472,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri: a slower shot did not give bigger gaps between shots (the shots fire on a fixed timer, so slower = closer together). New LOOK row SHOT GAP (config bullet.gap, 1 = normal). The time between volleys is now fireRateMs x gap x refSpeed / speed, so changing only the SHOT SPEED keeps the spacing the same (a slower shot also fires less often, a faster one more often) and SHOT GAP changes the spacing: more = bigger gaps and fewer shots. At the defaults (speed = refSpeed, gap 1) nothing changes.
 - Side effect to know: damage per second now follows spacing (bigger gap = fewer shots = less damage; slower speed with the same gap = fewer shots too). MY DAMAGE on the HARD tab can balance it.
 - UNVERIFIED: not seen or played (the browser preview would not open). Check the spacing and feel on the phone.
+
+## 2026-11-20 v1.9.19: wider tune rows, longer names (branch v1919-wide-tune-rows)
+- Omri: free space on the right of the tune panel. The - and + buttons moved to the right edge, the value sits next to them, and every row has a longer plain name (up to 20 letters), e.g. COIN BEAM OPACITY, COIN BEAM LENGTH, WITCH SHOT SPEED, GAP BETWEEN SHOTS, ENEMY SHOT DELAY (X), PICKUP GRAB SIZE. Hints reworded.
+- UNVERIFIED: not seen on screen (the browser preview would not open). If a long name touches its number, tell me which one.

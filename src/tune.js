@@ -9,44 +9,44 @@ const P = C.menu.pal;
 // Tabs. Each row: label, path in CONFIG, step, min, max, decimals, [rebuild = the ray pictures must be drawn again]
 const TABS = [
   ['STICK', [
-    ['STICK SPEED', 'stick.speed', 10, 60, 600, 0],
-    ['STICK SIZE', 'stick.radius', 2, 10, 120, 0],
-    ['DEAD ZONE', 'stick.deadZone', 0.02, 0, 0.4, 2],
-    ['STICK CURVE', 'stick.curve', 0.1, 0.5, 3, 1],
-    ['STICK SNAP', 'stick.response', 2, 5, 100, 0],
-    ['STOP GLIDE', 'stick.stopGlide', 0.02, 0, 0.4, 2],
-    ['STOP SETTLE', 'stick.stopOmega', 1, 4, 40, 0],
-    ['STOP DAMPING', 'stick.stopDamping', 0.05, 0.1, 1, 2]]],
+    ['SHIP MOVE SPEED', 'stick.speed', 10, 60, 600, 0],
+    ['STICK CIRCLE SIZE', 'stick.radius', 2, 10, 120, 0],
+    ['DEAD ZONE (NO MOVE)', 'stick.deadZone', 0.02, 0, 0.4, 2],
+    ['STICK RESPONSE CURVE', 'stick.curve', 0.1, 0.5, 3, 1],
+    ['STICK FOLLOW SNAP', 'stick.response', 2, 5, 100, 0],
+    ['GLIDE AFTER RELEASE', 'stick.stopGlide', 0.02, 0, 0.4, 2],
+    ['STOP SETTLE SPEED', 'stick.stopOmega', 1, 4, 40, 0],
+    ['STOP DAMPING (BRAKE)', 'stick.stopDamping', 0.05, 0.1, 1, 2]]],
   ['LOOK', [
-    ['COIN BRIGHT', 'sprites.coinShine.alpha', 0.05, 0, 1, 2],
-    ['COIN LONG', 'sprites.coinShine.radius', 1, 4, 40, 0, true],
-    ['HEART BRIGHT', 'sprites.heartShine.alpha', 0.05, 0, 1, 2],
-    ['HEART LONG', 'sprites.heartShine.radius', 1, 4, 40, 0, true],
-    ['POTION BRIGHT', 'sprites.potionShine.alpha', 0.05, 0, 1, 2],
-    ['POTION LONG', 'sprites.potionShine.radius', 1, 4, 40, 0, true],
-    ['SHOT SIZE', 'bullet.fire.scale', 0.05, 0.5, 3, 2],
-    ['SHOT SPEED', 'bullet.speed', 10, 100, 900, 0],
-    ['SHOT GAP', 'bullet.gap', 0.1, 0.3, 3, 1],
-    ['BEAM TIP FADE', 'sprites.coinShine.alphaEnd', 0.05, 0, 1, 2, true]]], // the fade changes all three rays together (see set())
+    ['COIN BEAM OPACITY', 'sprites.coinShine.alpha', 0.05, 0, 1, 2],
+    ['COIN BEAM LENGTH', 'sprites.coinShine.radius', 1, 4, 40, 0, true],
+    ['HEART BEAM OPACITY', 'sprites.heartShine.alpha', 0.05, 0, 1, 2],
+    ['HEART BEAM LENGTH', 'sprites.heartShine.radius', 1, 4, 40, 0, true],
+    ['POTION BEAM OPACITY', 'sprites.potionShine.alpha', 0.05, 0, 1, 2],
+    ['POTION BEAM LENGTH', 'sprites.potionShine.radius', 1, 4, 40, 0, true],
+    ['WITCH SHOT SIZE', 'bullet.fire.scale', 0.05, 0.5, 3, 2],
+    ['WITCH SHOT SPEED', 'bullet.speed', 10, 100, 900, 0],
+    ['GAP BETWEEN SHOTS', 'bullet.gap', 0.1, 0.3, 3, 1],
+    ['BEAM TIP FADE-OUT', 'sprites.coinShine.alphaEnd', 0.05, 0, 1, 2, true]]], // the fade changes all three rays together (see set())
   ['PICKUPS', [
-    ['HEART FALL', 'pickup.heartFallSpeed', 5, 10, 200, 0],
-    ['POTION FALL', 'pickup.weaponFallSpeed', 5, 10, 300, 0],
-    ['COIN FALL', 'coin.fallSpeed', 5, 10, 300, 0],
-    ['MAGNET RANGE', 'feel.magnetRadius', 2, 0, 120, 0],
-    ['MAGNET SPEED', 'feel.magnetSpeed', 10, 50, 900, 0],
-    ['GRAB SIZE', 'coin.pickupRadius', 1, 4, 40, 0],
-    ['HEART BOB', 'sprites.heartShine.bobAmp', 1, 0, 40, 0],
-    ['POTION TILT', 'sprites.weaponGem.angle', 5, -45, 45, 0]]],
+    ['HEART FALL SPEED', 'pickup.heartFallSpeed', 5, 10, 200, 0],
+    ['POTION FALL SPEED', 'pickup.weaponFallSpeed', 5, 10, 300, 0],
+    ['COIN FALL SPEED', 'coin.fallSpeed', 5, 10, 300, 0],
+    ['COIN MAGNET RANGE', 'feel.magnetRadius', 2, 0, 120, 0],
+    ['COIN MAGNET SPEED', 'feel.magnetSpeed', 10, 50, 900, 0],
+    ['PICKUP GRAB SIZE', 'coin.pickupRadius', 1, 4, 40, 0],
+    ['HEART BOB AMOUNT', 'sprites.heartShine.bobAmp', 1, 0, 40, 0],
+    ['POTION TILT ANGLE', 'sprites.weaponGem.angle', 5, -45, 45, 0]]],
   ['HARD', [
-    ['ENEMY HEALTH', 'difficulty.enemyHp', 0.25, 0.25, 4, 2],
-    ['ENEMY SPEED', 'difficulty.enemySpeed', 0.1, 0.5, 2, 1],
-    ['SHOT SPEED', 'difficulty.shotSpeed', 0.1, 0.5, 2, 1],
-    ['SHOT DELAY', 'difficulty.shotDelay', 0.1, 0.5, 3, 1],
-    ['MY DAMAGE', 'difficulty.myDamage', 0.25, 0.25, 4, 2]]]
+    ['ENEMY HEALTH (X)', 'difficulty.enemyHp', 0.25, 0.25, 4, 2],
+    ['ENEMY FLY SPEED (X)', 'difficulty.enemySpeed', 0.1, 0.5, 2, 1],
+    ['ENEMY SHOT SPEED (X)', 'difficulty.shotSpeed', 0.1, 0.5, 2, 1],
+    ['ENEMY SHOT DELAY (X)', 'difficulty.shotDelay', 0.1, 0.5, 3, 1],
+    ['MY SHOT DAMAGE (X)', 'difficulty.myDamage', 0.25, 0.25, 4, 2]]]
 
 ];
 // New drops use the fall / grab / tilt numbers (things already falling keep the old ones).
-const HINTS = ['HOLD + OR - TO REPEAT', 'BEAMS = LIGHT LINES. GAP 1 = NORMAL', 'NEW DROPS ONLY (FALL, GRAB, TILT)', 'X1 = NORMAL. SHOT DELAY: MORE = EASIER']; // one plain line under each tab
+const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'BEAM = SPINNING LIGHT LINE. 1 = NORMAL', 'NEW DROPS ONLY (FALL, GRAB, TILT)', '(X) 1 = NORMAL. DELAY MORE = EASIER']; // one plain line under each tab
 const ALL = TABS.flatMap(t => t[1]);
 const getp = path => path.split('.').reduce((o, k) => o[k], C);
 const setp = (path, v) => { const ks = path.split('.'), last = ks.pop(); ks.reduce((o, k) => o[k], C)[last] = v; };
@@ -141,9 +141,9 @@ export class Tune {
     ROWS.forEach((r, i) => {
       const y = PANEL.y + PANEL.pad + TABH + i * PANEL.rowH, cy = y + PANEL.rowH / 2;
       T(PANEL.x + 8, cy, r[0], 8, P.cream, 0);
-      T(PANEL.x + 112, cy, this.val(r), 8, P.cyan, 1);
-      button(PANEL.x + 120, y + 1, BTN.w, BTN.h, '-', () => this.change(r, -1), true);
-      button(PANEL.x + 148, y + 1, BTN.w, BTN.h, '+', () => this.change(r, 1), true);
+      T(PANEL.x + 166, cy, this.val(r), 8, P.cyan, 1);
+      button(PANEL.x + 172, y + 1, BTN.w, BTN.h, '-', () => this.change(r, -1), true);
+      button(PANEL.x + 198, y + 1, BTN.w, BTN.h, '+', () => this.change(r, 1), true);
     });
     const by = PANEL.y + PANEL.pad + TABH + ROWS.length * PANEL.rowH + 2;
     button(PANEL.x + 8, by, 52, BTN.h + 2, 'COPY', () => this.copy(), false);
