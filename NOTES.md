@@ -484,3 +484,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Code: beams and glow are fixed-size canvas pictures redrawn by rebuildRays() (a CanvasTexture needs getContext() + refresh(); the first version used a source .canvas that Phaser does not have, found before the push). One pool of beams + glow + twinkle per drop kind (updateShine), replaces the old coin / heart / potion specific code.
 - Side effects: potion beams are shorter now (19 -> 17), coin beams longer (14 -> 17).
 - UNVERIFIED: never run (the browser preview would not open). RISK: a code mistake here could stop the game from starting; if the menu or game will not load, tell me at once and I revert to v1.9.19.
+
+## 2026-11-20 v1.9.21: TEST tab in the tune panel (branch v1921-test-tab)
+- Idea 4 from the tune-tool list. New 5th tab TEST with: START AT WAVE (1-10), START WEAPON LEVEL (-1 = by wave as before, else 0-10) and NO DAMAGE (1 = ON, works at once), plus a RESTART button that plays the stage again with those numbers; the other tuned numbers stay (scene restart, no page reload). Same as ?wave= and ?god=1 but on the phone. The tab PICKUPS is now called DROPS (5 tabs need short names). config.testing = { wave: 1, level: -1, god: 0 } = normal play.
+- Bosses are not in the game yet, so there is no "jump to boss"; waves only.
+- Checked: 32 tune paths exist, syntax passes. UNVERIFIED: not run (preview would not open): the 5 tabs fit, RESTART really restarts while the panel is open, no-damage works.

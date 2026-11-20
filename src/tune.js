@@ -26,7 +26,7 @@ const TABS = [
     ['WITCH SHOT SIZE', 'bullet.fire.scale', 0.05, 0.5, 3, 2],
     ['WITCH SHOT SPEED', 'bullet.speed', 10, 100, 900, 0],
     ['GAP BETWEEN SHOTS', 'bullet.gap', 0.1, 0.3, 3, 1],]],
-  ['PICKUPS', [
+  ['DROPS', [
     ['HEART FALL SPEED', 'pickup.heartFallSpeed', 5, 10, 200, 0],
     ['POTION FALL SPEED', 'pickup.weaponFallSpeed', 5, 10, 300, 0],
     ['COIN FALL SPEED', 'coin.fallSpeed', 5, 10, 300, 0],
@@ -40,11 +40,15 @@ const TABS = [
     ['ENEMY FLY SPEED (X)', 'difficulty.enemySpeed', 0.1, 0.5, 2, 1],
     ['ENEMY SHOT SPEED (X)', 'difficulty.shotSpeed', 0.1, 0.5, 2, 1],
     ['ENEMY SHOT DELAY (X)', 'difficulty.shotDelay', 0.1, 0.5, 3, 1],
-    ['MY SHOT DAMAGE (X)', 'difficulty.myDamage', 0.25, 0.25, 4, 2]]]
+    ['MY SHOT DAMAGE (X)', 'difficulty.myDamage', 0.25, 0.25, 4, 2]]],
+  ['TEST', [
+    ['START AT WAVE', 'testing.wave', 1, 1, 10, 0],
+    ['START WEAPON LEVEL', 'testing.level', 1, -1, 10, 0],
+    ['NO DAMAGE (1 = ON)', 'testing.god', 1, 0, 1, 0]]]
 
 ];
 // New drops use the fall / grab / tilt numbers (things already falling keep the old ones).
-const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'BEAM = LIGHT LINE, GLOW = SOFT HALO', 'NEW DROPS ONLY (FALL, GRAB, TILT)', '(X) 1 = NORMAL. DELAY MORE = EASIER']; // one plain line under each tab
+const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'BEAM = LIGHT LINE, GLOW = SOFT HALO', 'NEW DROPS ONLY (FALL, GRAB, TILT)', '(X) 1 = NORMAL. DELAY MORE = EASIER', 'PRESS RESTART. LEVEL -1 = BY WAVE']; // one plain line under each tab
 const ALL = TABS.flatMap(t => t[1]);
 const getp = path => path.split('.').reduce((o, k) => o[k], C);
 const setp = (path, v) => { const ks = path.split('.'), last = ks.pop(); ks.reduce((o, k) => o[k], C)[last] = v; };
@@ -97,6 +101,8 @@ export class Tune {
 
   change(r, dir) { this.set(r, getp(r[1]) + dir * r[2]); this.draw(); }
 
+  restart() { this.scene.physics.world.resume(); this.scene.scene.restart(this.scene.startData); } // play again with the TEST tab numbers (the other tuned numbers stay)
+
   reset() { ALL.forEach(r => this.set(r, this.start[r[1]])); this.draw(); }
 
   // Only the numbers you changed, ready to paste to Claude
@@ -146,7 +152,8 @@ export class Tune {
     const by = PANEL.y + PANEL.pad + TABH + ROWS.length * PANEL.rowH + 2;
     button(PANEL.x + 8, by, 52, BTN.h + 2, 'COPY', () => this.copy(), false);
     button(PANEL.x + 66, by, 52, BTN.h + 2, 'RESET', () => this.reset(), false);
-    T(PANEL.x + 128, by + 8, this.note || '', 8, P.orange, 0);
+    if (this.tab === 4) button(PANEL.x + 124, by, 60, BTN.h + 2, 'RESTART', () => this.restart(), false, P.pink);
+    T(PANEL.x + 190, by + 8, this.note || '', 8, P.orange, 0);
     T(PANEL.x + 8, by + BTN.h + 14, HINTS[this.tab], 8, P.cream, 0);
   }
 

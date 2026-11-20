@@ -105,9 +105,9 @@ export class PlayScene extends Phaser.Scene {
     // Debug helpers (type them after the web address): ?wave=N starts the stage at wave N (1-10); ?god=1 = no damage (hits still counted).
     const q = new URLSearchParams(window.location.search);
     this.god = q.get('god') === '1';
-    const startWave = Phaser.Math.Clamp(parseInt(q.get('wave'), 10) || 1, 1, STAGE1.length) - 1;
-    this.debug = this.god || startWave > 0 || tuneEnabled(); // debug runs do not touch the saved medals
-    this.weaponLevel = Math.min(C.pickup.maxLevel, startWave); // wave=N starts with weapon level N-1 so later waves can be tried fairly
+    const startWave = Phaser.Math.Clamp(parseInt(q.get('wave'), 10) || C.testing.wave, 1, STAGE1.length) - 1; // ?wave=N, or the tune panel's TEST tab
+    this.debug = this.god || C.testing.god > 0 || startWave > 0 || tuneEnabled(); // debug runs do not touch the saved medals
+    this.weaponLevel = C.testing.level >= 0 ? Math.min(C.pickup.maxLevel, C.testing.level) : Math.min(C.pickup.maxLevel, startWave); // wave=N starts with weapon level N-1 so later waves can be tried fairly
     this.runner = new WaveRunner(STAGE1, startWave, C.stage.firstWaveDelay);
     this.hooks = { enemy: (cg, i) => this.spawnEnemy(cg, i), crate: cc => this.spawnCrate(cc) };
     this.enemyCount = 0;  // enemies alive now
@@ -1306,7 +1306,7 @@ export class PlayScene extends Phaser.Scene {
     if (this.over || this.time.now < this.invulnUntil) return false;
     this.hitsTaken++;
     this.medals.playerHit(); this.syncMedals();
-    if (!this.god) { this.hearts--; this.hud.setHearts(this.hearts); }
+    if (!this.god && !(C.testing.god > 0)) { this.hearts--; this.hud.setHearts(this.hearts); }
     this.invulnUntil = this.time.now + C.ship.invulnMs;
     if (this.stunFx && this.hearts > 0) { this.stunUntil = this.time.now + C.ship.invulnMs; this.stunFx.play('stunned'); } // stars last as long as she blinks
     this.cameras.main.shake(C.ship.hitShakeMs, C.ship.hitShakeAmount);
