@@ -1,6 +1,6 @@
 import { CONFIG as C, hex } from '../config.js';
 import { makeAllTextures } from '../sprites.js';
-import { FONT, fpx, drawPlate, packFontOn, savePackFont } from '../hud.js';
+import { FONT, fpx, drawPlate } from '../hud.js';
 import { MEDAL_KEYS, loadMedals, loadBest } from '../medals.js';
 import { latestVersion, refreshFiles } from '../update.js';
 import { toggleTune, tuneEnabled } from '../tune.js';
@@ -10,6 +10,7 @@ const M = C.menu;
 const DEBUG_PARAMS = ['wave', 'god', 'bg', 'ctl']; // any of these in the web address: skip the menu (old behaviour)
 const P = M.pal;
 const CTL_KEY = 'ff_controls'; // saved choice of the settings panel: 'drag' or 'stick'
+const FX_KEY = 'ff_fx'; // 'low' = reduced effects
 
 // Start menu: a path of stage bubbles going up the screen (Forest at the bottom, then Swamp, then Stage 3, still locked), the logo and UPDATE at the bottom,
 // a gear in the top right corner that opens the settings. Press = brighter, release on the same bubble = start that stage.
@@ -31,6 +32,7 @@ export class MenuScene extends Phaser.Scene {
     const q = new URLSearchParams(window.location.search);
     if (DEBUG_PARAMS.some(k => q.has(k))) { this.scene.start('Play'); return; }
     try { const s = localStorage.getItem(CTL_KEY); if (s === 'drag' || s === 'stick') C.ship.controls = s; } catch (e) { /* no saved choice */ }
+    this.fxLow = false; try { this.fxLow = localStorage.getItem(FX_KEY) === 'low'; } catch (e) { /* full effects */ } // settings: EFFECTS LOW keeps the menu calm (no sparks, bubbles, fireflies, shooting stars, tilt)
     makeAllTextures(this); // medal pictures (made once, skipped when they exist)
     this.cameras.main.setZoom(R).centerOn(W / 2, H / 2).setBackgroundColor(M.bgColor);
     this.addArt();
@@ -75,7 +77,7 @@ export class MenuScene extends Phaser.Scene {
     // When the menu opens it asks the server for the newest version number; if it is newer the button turns orange.
     const art = this.textures.exists('ui_med-button'), UB = M.updateBtn; // the tan button of the Medieval UI pack (9-slice: the round ends stay, the middle stretches); without the picture the old drawn plate is used
     const ubw = art ? UB.w : M.updateW, ubh = art ? 25 : M.updateH, bx = (W - ubw) / 2, by = M.updateTop;
-    const btn = { btn: true, x: bx, y: by, w: ubw, h: ubh, g: this.add.graphics(), down: false, hot: false, busy: false };
+    const btn = { btn: true, x: bx - 8, y: by - 4, w: ubw + 16, h: ubh + 8, g: this.add.graphics(), down: false, hot: false, busy: false }; // x / y / w / h = the touch area, bigger than the picture (a thumb needs about 44 phone px)
     btn.img = art ? this.add.nineslice(bx, by, 'ui_med-button', undefined, ubw, 25, 10, 10, 0, 0).setOrigin(0, 0) : null;
     btn.label = this.add.text(W / 2, by + ubh / 2, 'UPDATE', { ...FONT, fontSize: fpx(M.updateSize) + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5);
     btn.draw = () => {
@@ -249,14 +251,14 @@ export class MenuScene extends Phaser.Scene {
       (L.decorParts || []).forEach((r, i) => {
         const key = 'decor' + i; if (!tex.has(key)) tex.add(key, 0, r[0], r[1], r[2], r[3]);
         const im = this.add.image(L.x + (r[0] + r[2] / 2 - src.width / 2) * L.scale, L.y + (r[1] + r[3] / 2) * L.scale, 'menu_logo_decor', key).setScale(0);
-        this.tweens.add({ targets: im, scale: L.scale, duration: 420, delay: L.decorDelay + i * L.decorStepMs, ease: 'Back.easeOut' });
+        if (L.decorPop) this.tweens.add({ targets: im, scale: L.scale, duration: 420, delay: L.decorDelay + i * L.decorStepMs, ease: 'Back.easeOut' }); else im.setScale(L.scale); // off: the moon and stars are simply there
       });
       if (!L.decorParts) this.add.image(L.x, L.y, 'menu_logo_decor').setOrigin(0.5, 0).setScale(L.scale);
     }
     const parts = ['fight', 'amp', 'flight'].map(k => 'menu_logo_' + k).filter(k => this.textures.exists(k)); // the words fly in one after the other; without the parts the whole logo rises at once
     const words = (parts.length === 3 ? parts : ['menu_logo']).map(k => this.add.image(L.x, H + 10, k).setOrigin(0.5, 0).setScale(L.scale));
     const keys = [];
-    try {
+    if (SH.on) try {
       const w = src.width, h = src.height, base = document.createElement('canvas'); base.width = w; base.height = h;
       const bx = base.getContext('2d'); bx.drawImage(src, 0, 0);
       const px = bx.getImageData(0, 0, w, h).data, span = w + h * 0.5 + SH.band * 2;
@@ -308,7 +310,7 @@ export class MenuScene extends Phaser.Scene {
     T(S.x + S.w / 2, S.y + 36, 'SETTINGS', S.titleSize, 0.5, art ? ink : P.cream);
     this.panelButtons = [];
     const mkBtn = (x, y, w, label, action) => { // a copper button: 9-slice picture (normal / pressed) with dark text
-      const h = 25, bt = { btn: true, x, y, w, h, down: false, action, shown: false };
+      const h = 25, bt = { btn: true, x: x - 4, y: y - 3, w: w + 8, h: h + 6, down: false, action, shown: false }; // the touch area is a little bigger than the picture
       bt.img = art ? keep(this.add.nineslice(x, y, 'ui_med-button', undefined, w, h, 10, 10, 0, 0).setOrigin(0, 0)) : null;
       bt.g = keep(this.add.graphics());
       bt.label = T(x + w / 2, y + h / 2, label, S.btnSize, 0.5, P.cream, 3);
@@ -335,9 +337,9 @@ export class MenuScene extends Phaser.Scene {
     // TUNE PANEL
     T(left, S.y + 126, 'TUNE PANEL', S.btnSize, 0, lc);
     const tn = mkBtn(right - bwid, S.y + 114, bwid, tuneEnabled() ? 'ON' : 'OFF', () => { tn.label.setText(toggleTune() ? 'ON' : 'OFF'); });
-    // FONT (the page reloads to use the other one)
-    T(left, S.y + 156, 'FONT', S.btnSize, 0, lc);
-    mkBtn(right - bwid - 20, S.y + 144, bwid + 20, packFontOn() ? 'PACK' : 'CLASSIC', () => { savePackFont(!packFontOn()); window.location.reload(); });
+    // EFFECTS (the menu starts again with the new setting)
+    T(left, S.y + 156, 'EFFECTS', S.btnSize, 0, lc);
+    mkBtn(right - bwid - 20, S.y + 144, bwid + 20, this.fxLow ? 'LOW' : 'FULL', () => { try { localStorage.setItem(FX_KEY, this.fxLow ? 'full' : 'low'); } catch (e) { /* not saved */ } this.scene.restart(); });
     // SOUND
     T(left, S.y + 186, 'SOUND', S.btnSize, 0, hc);
     T(right - bwid / 2, S.y + 186, 'SOON', S.btnSize, 0.5, hc);
@@ -395,6 +397,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   startEffects() {
+    if (this.fxLow) return;
     const B = M.bits, rnd = (a, b) => Phaser.Math.Between(a, b), pick = arr => arr[Math.floor(Math.random() * arr.length)];
     const boiler = this.decorItems.find(i => i.key === 'boiler'), witch = this.decorItems.find(i => i.key === 'witch');
     if (boiler) this.time.addEvent({ delay: B.cauldron.every, loop: true, callback: () => { // bubbles rise from the cauldron
@@ -426,6 +429,7 @@ export class MenuScene extends Phaser.Scene {
 
   // A burst of little sparks where the player touches.
   sparks(x, y) {
+    if (this.fxLow) return;
     const T = M.bits.tap;
     for (let i = 0; i < T.count; i++) {
       const a = (i / T.count) * Math.PI * 2 + Math.random() * 0.6, dist = Phaser.Math.Between(T.dist[0], T.dist[1]), speed = dist / (T.ms / 1000);
@@ -443,7 +447,7 @@ export class MenuScene extends Phaser.Scene {
   setupTilt() {
     const T = M.tilt;
     this.tilt = { x: 0, y: 0 }; this.tiltTarget = { x: 0, y: 0 }; this.tiltRef = null;
-    if (!T.on || typeof window === 'undefined' || !window.addEventListener) return;
+    if (!T.on || this.fxLow || typeof window === 'undefined' || !window.addEventListener) return;
     const on = e => {
       if (e.gamma == null || e.beta == null) return;
       if (!this.tiltRef) this.tiltRef = { g: e.gamma, b: e.beta };

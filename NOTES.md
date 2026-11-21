@@ -723,3 +723,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-21 v1.9.68: the line and the stages dissolve in a gradient at the bottom (branch v1968-line-gradient)
 - Omri: the middle line and the stages can hide behind a simple gradient fade; it was visible all the way to the bottom (v1.9.66). Now the line and its glow fade out smoothly between y 226 (fadeStart) and y 258 (lineBottom), just above the logo; the bubbles fade by their middle over the same range; at the top the line still has no end. The spark still starts at lineBottom. Path items are still behind the logo (depth -1).
+
+## 2026-11-21 v1.9.69: calmer menu, gold trim, bigger tap areas, EFFECTS switch (branch v1969-menu-cleanup)
+- Omri (design check): the menu is busy. He chose to remove the logo glint and the star pop-ins: config menu.logoShine.on false (not even made), menu.logo.decorPop false (the moon, stars and bats are just there; the words still fly in). Gold is OK to use more: the button outline is now gold (a pure colour swap of the pink pixels, 176 pixels, nothing added) so buttons, panel corners, path line, halo and gear all share one gold; BEST is gold (was cyan: cyan is reserved for the spell bolts).
+- Bigger tap areas: the touch box of UPDATE is 8 px wider on each side and 4 px taller above and below its picture (about 50 phone px high), the settings buttons 3 px above and below and 4 px at the sides (a thumb needs about 44 phone px). The pictures did not change.
+- Settings: the FONT row is replaced by EFFECTS (FULL / LOW, saved on the phone, the menu restarts): LOW switches off the cauldron bubbles, broom trail, fireflies, shooting stars, tap sparks and the tilt. (The game's own effects are not affected.) The font switch is gone: there will be one font (next version).
+- Checked with the stand-in script (taps, settings, the effects run). UNVERIFIED: the look.

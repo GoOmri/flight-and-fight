@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.68", // bump on every push so the player/Omri can see the build
+  version: "1.9.69", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -41,7 +41,7 @@ export const CONFIG = {
     plateDrop: 4, plateDownShift: 2, plateBorderW: 3, plateRadius: 10, tabW: 6, // chunky button plate: bottom edge height, how far a pressed plate sinks, border, corner, stage colour tab
     tabColors: { forest: 0xff9a2e, swamp: 0x3df2ff },
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4, // titleY..titleStroke: the old plain-text title (used only if the logo picture is missing)
-    logo: { file: 'menu/logo-text.png', decor: 'menu/logo-decor.png', decorParts: [[2,1,7,8],[26,8,1,1],[39,3,5,5],[52,7,1,1],[64,2,5,5],[81,6,1,1],[102,2,11,5],[111,73,5,5],[4,67,11,5],[8,53,5,5]], decorDelay: 1500, decorStepMs: 140, wordStepMs: 100, riseMs: 1200, overshoot: 0.6, x: 120, y: 252, scale: 1.7 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
+    logo: { file: 'menu/logo-text.png', decor: 'menu/logo-decor.png', decorParts: [[2,1,7,8],[26,8,1,1],[39,3,5,5],[52,7,1,1],[64,2,5,5],[81,6,1,1],[102,2,11,5],[111,73,5,5],[4,67,11,5],[8,53,5,5]], decorPop: false, decorDelay: 1500, decorStepMs: 140, wordStepMs: 100, riseMs: 1200, overshoot: 0.6, x: 120, y: 252, scale: 1.7 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
     // Small effects of the menu (src/scenes/MenuScene.js startEffects): cauldron bubbles, sparks behind the witch's broom (dx, dy from her centre), fireflies, shooting stars (every ms [min, max],
     // start x / y ranges, travel dx / dy, ms) and the sparks on a touch (count, how far, ms). tilt: the sky and the friends shift when the phone is tilted (range = degrees for the full shift, sky = px).
     bits: {
@@ -53,7 +53,7 @@ export const CONFIG = {
     },
     tilt: { on: true, range: 20, sky: 4 },
     intro: { bubbles: false }, // true: the stage bubbles slide in from the sides when the menu opens (the witch does it with decor witch introX, a number of px to fly in from, 0 = off). Off: only the logo moves in; everything else is just there
-    logoShine: { frames: 14, band: 26, strength: 0.45, frameMs: 45, everyMs: 4200, firstMs: 2600, float: 2, floatMs: 2800 }, // glint sweep over the logo (frames, band width in art px, brightness 0..1, ms per frame, ms between sweeps, ms until the first one) and the float (px, ms for a full swing)
+    logoShine: { on: false, frames: 14, band: 26, strength: 0.45, frameMs: 45, everyMs: 4200, firstMs: 2600, float: 2, floatMs: 2800 }, // glint sweep over the logo (frames, band width in art px, brightness 0..1, ms per frame, ms between sweeps, ms until the first one) and the float (px, ms for a full swing)
     // Stage path (the main menu): a line up the middle, a bubble left or right of it at height cy. side L / R. A node with locked: true is faded, says SOON and takes no taps.
     // Stage path (the main menu): a line up the middle, a bubble left or right of it. nodes go from the LOWEST stage up (stage 1 first); bubble i sits step px above the one below,
     // starting at bottomCy. A node with locked: true is faded, says SOON and takes no taps. With more nodes than fit the path scrolls (drag up / down, mouse wheel): topStop = where the highest bubble
@@ -65,7 +65,7 @@ export const CONFIG = {
       { theme: 'stage3', name: 'STAGE 3', side: 'L', locked: true },
       { theme: 'stage4', name: 'STAGE 4', side: 'R', locked: true },
       { theme: 'stage5', name: 'STAGE 5', side: 'L', locked: true }] },
-    bubble: { lockedTint: 0x9a9a9a, ink: 0xfff3c4, bestInk: 0x3df2ff, lockedInk: 0x8a80a8, inset: 0x1a0830, nameSize: 10, medalScale: 1.333, medalGap: 3, bestSize: 8 }, // text and medal sizes inside a stage bubble
+    bubble: { lockedTint: 0x9a9a9a, ink: 0xfff3c4, bestInk: 0xf2b632, lockedInk: 0x8a80a8, inset: 0x1a0830, nameSize: 10, medalScale: 1.333, medalGap: 3, bestSize: 8 }, // text and medal sizes inside a stage bubble
     lockedFill: 0x241c3a, lockedBorder: 0x6b5a90, lockedText: 0x9a90b8, // a locked stage bubble
     gear: { x: 215, y: 24, hit: 32, scale: 1, art: 12, px: 2, color: 0x38b6f5, shade: 0x1c6fb5 }, // settings gear: the medallion picture at scale (the art / px / colour numbers are only for the code-drawn fallback cog)
     settings: { x: 20, y: 84, w: 200, h: 262, btnW: 60, btnSize: 10, titleSize: 16, ink: 0x3b2410, hintInk: 0x7a5a3a, depth: 100 }, // settings panel (parchment): position, size, button width, text sizes, ink colours
