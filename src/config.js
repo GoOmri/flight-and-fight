@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.71", // bump on every push so the player/Omri can see the build
+  version: "1.9.72", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -85,7 +85,7 @@ export const CONFIG = {
       { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 198, y: 236,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 6, bobMs: 3400, swayX: 4, swayMs: 5200, fade: [0.7, 1], fadeMs: 2800, par: 8 },
       { key: 'bat',    file: 'menu/bat.png',    frameW: 32, frameH: 28, frames: 4, fps: 5, x: 160, y: 0,   originX: 0.5, originY: 0,   scale: 1,     bob: 0, bobMs: 1000 },
       { key: 'cat',    file: 'menu/cat.png',    frameW: 21, frameH: 25, frames: 5, fps: 4, x: 32,  y: 392, originX: 0.5, originY: 1,   scale: 1.333, depth: 50, bob: 0, bobMs: 1000, par: 6 },
-      { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 205, y: 422, originX: 0.5, originY: 1,   scale: 1.333, depth: 50, bob: 0, bobMs: 1000, par: 6 }
+      { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 215, y: 422, originX: 0.5, originY: 1,   scale: 1.667, depth: 50, bob: 0, bobMs: 1000, par: 6 }
     ]
   },
   endMenuBtn: { w: 96, h: 30, bottom: 36, size: 10, color: 0x3b1478, border: 0xff5ac8 }, // MENU button on the end screen (bottom = its middle's distance from the bottom edge)
