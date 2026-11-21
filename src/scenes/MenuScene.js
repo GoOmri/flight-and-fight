@@ -179,7 +179,7 @@ export class MenuScene extends Phaser.Scene {
   // The logo: drops in with a bounce, then floats up and down; every few seconds a bright band sweeps over its letters (pre-drawn frames made from the logo itself, so it works in WebGL and CANVAS).
   makeLogo() {
     const L = M.logo, SH = M.logoShine, src = this.textures.get('menu_logo').getSourceImage();
-    const logo = this.add.image(L.x, -120, 'menu_logo').setOrigin(0.5, 0).setScale(L.scale);
+    const logo = this.add.image(L.x, H + 10, 'menu_logo').setOrigin(0.5, 0).setScale(L.scale);
     const keys = [];
     try {
       const w = src.width, h = src.height, base = document.createElement('canvas'); base.width = w; base.height = h;
@@ -198,8 +198,9 @@ export class MenuScene extends Phaser.Scene {
         ctx.putImageData(out, 0, 0); cv.refresh();
       }
     } catch (e) { keys.length = 0; } // no shine if the picture cannot be read
-    const shine = keys.length ? this.add.image(L.x, -120, keys[0]).setOrigin(0.5, 0).setScale(L.scale).setVisible(false) : null;
-    this.tweens.add({ targets: shine ? [logo, shine] : [logo], y: L.y, duration: 800, delay: 150, ease: 'Bounce.easeOut',
+    const shine = keys.length ? this.add.image(L.x, H + 10, keys[0]).setOrigin(0.5, 0).setScale(L.scale).setVisible(false) : null;
+    this.tweens.add({ targets: shine ? [logo, shine] : [logo], y: L.y, duration: 900, delay: 150, ease: 'Back.easeOut', // rises from below the screen and settles with a little overshoot
+     
       onComplete: () => this.tweens.add({ targets: shine ? [logo, shine] : [logo], y: L.y + SH.float, duration: SH.floatMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }) });
     if (shine) this.time.addEvent({ delay: SH.everyMs, startAt: SH.everyMs - SH.firstMs, loop: true, callback: () => {
       let k = 0; shine.setVisible(true).setTexture(keys[0]);

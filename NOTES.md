@@ -658,3 +658,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Fix found on the way: the dark medal strip behind the medals was created before the panel picture so it was hidden behind it. Each bubble is now a container (panel, halo, strip, texts and medals in that order), which also makes the slide-in easy.
 - Checked with the stand-in script (taps, modal, the whole create runs). NOT checked: any of the looks or timings (never run in a browser); the glint pixel code needs a real browser (it is wrapped so a failure only means no glint).
 - UNVERIFIED: speed and strength of everything; tune logoShine and the tween times.
+
+## 2026-11-21 v1.9.56: logo glint softer, logo rises from below (branch v1956-logo-from-below)
+- Omri: lower the shine opacity and the logo should come from below. logoShine.strength 0.8 -> 0.45 (how white the sweeping band gets). The logo now starts just below the screen and rises with a small overshoot (Back.easeOut, 900 ms) instead of dropping from above with a bounce.
