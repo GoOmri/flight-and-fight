@@ -15,8 +15,10 @@ export const FONT_CLASSIC = CLASSIC; // the tune panel always uses the classic f
 export const packFontOn = () => packOn;
 export const useClassicFont = () => { packOn = false; Object.assign(FONT, CLASSIC); };
 export const savePackFont = on => { try { localStorage.setItem('ff_font', on ? 'pack' : 'classic'); } catch (e) { /* not saved */ } };
-// A text size in game px for the pixel font: whole steps only (8, 16 or 24), so every art pixel is the same size. Classic fonts keep the size they were given.
-export const fpx = size => (!packOn ? size : (size <= 14 ? 8 : size <= 20 ? 16 : 24));
+// A text size in game px for the pixel font. PackFont has 11 art pixels per em, so a size S draws every art pixel S * 3 / 11 canvas px wide (render x3):
+// only sizes with a WHOLE number of canvas px per art pixel stay sharp. fpx() picks p = whole canvas px per art pixel from the size the code asked for
+// (p = size * C.fontScale, at least 3) and returns S = 11 * p / 3: asked 8 -> p 3 (S 11), 10 -> 4 (14.7), 12 -> 5 (18.3), 16 -> 6 (22), 20 -> 8, 24 -> 9 (33). Classic fonts keep the size they were given.
+export const fpx = size => (!packOn ? size : +(11 * Math.max(3, Math.round(size * C.fontScale)) / 3).toFixed(3));
 const W = C.game.width;
 
 // Chunky button plate (flat, no glow): dark bottom edge, plate with a border on top. down = pressed: plate sinks, bottom edge shrinks, fill lighter.

@@ -607,3 +607,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-21 v1.9.45: stone stage bubbles (branch v1945-stone-bubbles)
 - Omri: try the stone panels. All stage bubbles are now the stone panel (dark bricks, blue corner gems). The locked Stage 3 is the same panel tinted darker (config menu.bubble.lockedTint). One setting picks the look: menu.bubble.panel 'stone' or 'wood' (both pictures are in assets/ui).
 - UNVERIFIED: how the cream text reads on the stone, and whether the locked one still looks locked enough.
+
+## 2026-11-21 v1.9.46: bigger font, sharp sizes (branch v1946-bigger-font)
+- Omri: make the font bigger. Found a mistake of mine in v1.9.44: PackFont has 11 art pixels per em (not 8), so the sizes 8 / 16 / 24 I chose gave art pixels of 2.2 / 4.4 / 6.5 canvas px: small AND uneven (blurry). Now fpx() (hud.js) works out whole canvas pixels per art pixel: p = round(asked size x config fontScale 0.38), at least 3, and returns 11 x p / 3. Asked 8 -> 11 px text (3 canvas px per art pixel), 10 -> 14.7, 12 -> 18.3, 16 -> 22, 20 -> 29.3, 24 -> 33. So all text is about 1.5 to 2.3 times bigger than in v1.9.44. fontScale is the one number to turn all text up or down (a step at a time: 0.30 = smaller, 0.45 = bigger).
+- Sizes inside the menu were set so it still fits: bubble names 10 (-> 14.7), UPDATE text 10, settings labels and buttons 10, hints 8, titles 16.
+- UNVERIFIED: not seen. Watch: bubble names against the stone corner gems, CONTROLS label against its button, NEW VERSION inside UPDATE, the HUD score width, the end screens.
