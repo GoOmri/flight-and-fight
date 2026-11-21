@@ -702,3 +702,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-21 v1.9.65: thinner glow, endless line (branch v1965-endless-line)
 - Omri: take one pixel off the middle line's glow and make the line endless so the player never sees its end. Glow: the outer layer 8 -> 6 px wider than the line (1 px less each side), the inner layer 4 -> 2 px wider. Line: it used to start a little above the highest bubble, so pulling the path down past its end (the bounce) showed the line's top end; it now runs up past the top of the screen at any scroll (applyScroll worldTop). The bottom still fades out at the witch's hat on purpose (the fade you asked for).
+
+## 2026-11-21 v1.9.66: the line has no end at the bottom either (branch v1966-line-to-bottom)
+- Omri: the line must be endless at the bottom too. The line and its glow now run from the top to the bottom of the screen at any scroll, with no fade at either end (config path.lineBottom / fadeTop no longer used for the line; the bubbles still fade by their own centre near the witch's hat). The line, its glow and the spark moved to depth -1: above the sky, behind the logo, the bubbles and the foreground friends, so it passes BEHIND the logo letters (it can show through gaps between the letters) and behind UPDATE.
+- UNVERIFIED: how it looks behind the logo; if it clashes there, the options are to end the line under the logo with a short fade or to keep it endless only above it.

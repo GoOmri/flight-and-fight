@@ -46,9 +46,9 @@ export class MenuScene extends Phaser.Scene {
     const lastOpen = nodes.reduce((m, nd, i) => (nd.locked ? m : i), 0), farthest = Math.min(nodes.length - 1, lastOpen + PA.lookAhead); // a player can look PA.lookAhead stages beyond the highest open one, no further
     this.scrollMax = Math.max(0, PA.topStop - (PA.bottomCy - farthest * PA.step)); // how far the path can be pulled down (0 = everything fits, no scrolling)
     this.scroll = 0; this.scrollV = 0; this.drag = null;
-    const glow = this.add.graphics().setBlendMode(Phaser.BlendModes.ADD); // a soft gold glow along the line, breathing slowly
+    const glow = this.add.graphics().setBlendMode(Phaser.BlendModes.ADD).setDepth(-1); // a soft gold glow along the line, breathing slowly (depth -1: behind the logo and the bubbles, above the sky)
     this.tweens.add({ targets: glow, alpha: 0.55, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    const line = this.add.graphics();
+    const line = this.add.graphics().setDepth(-1);
     this.pathGfx = { glow, line };
     this.bubbles = nodes.map((nd, i) => {
       const cy = PA.bottomCy - i * PA.step, left = nd.side === 'L', x = left ? PA.x - PA.gap - bw : PA.x + PA.gap, y = cy - bh / 2;
@@ -59,7 +59,7 @@ export class MenuScene extends Phaser.Scene {
     this.applyScroll(); // draws the line, places and fades the bubbles
     // a little spark runs up the line now and then
     if (!this.textures.exists('menu_spark')) { const cv = this.textures.createCanvas('menu_spark', 5, 5), cx = cv.getContext(); cx.fillStyle = '#ffffff'; cx.fillRect(2, 0, 1, 5); cx.fillRect(0, 2, 5, 1); cv.refresh(); }
-    const spark = this.add.image(PA.x, PA.lineBottom, 'menu_spark').setBlendMode(Phaser.BlendModes.ADD).setAlpha(0);
+    const spark = this.add.image(PA.x, PA.lineBottom, 'menu_spark').setBlendMode(Phaser.BlendModes.ADD).setAlpha(0).setDepth(-1);
     this.tweens.add({ targets: spark, y: PA.lineTop + 6, duration: 2600, repeat: -1, repeatDelay: 1800, delay: 1500, ease: 'Sine.easeInOut', onUpdate: tw => spark.setAlpha(Math.sin(Math.PI * tw.progress)) });
     // the next stage to play (the lowest open stage that does not have all medals yet) pulses with a gold edge
     const next = this.bubbles.find(b => !b.locked && !b.complete);
@@ -169,15 +169,10 @@ export class MenuScene extends Phaser.Scene {
     const bottomAt = y => (y < PA.fadeStart ? 1 : Math.max(0, 1 - (y - PA.fadeStart) / (PA.lineBottom - PA.fadeStart))); // 1 = full, 0 = gone
     const topAt = (y, len) => Math.min(1, Math.max(0, y / len));
     g.clear(); gl.clear();
-    const worldTop = -1e5; // the line never ends upward: whatever the player pulls, no top end is visible
-    for (let y = PA.lineTop; y < PA.lineBottom; y += 2) {
-      const wy = y - S; // position on the path itself
-      if (wy < worldTop || wy >= PA.lineBottom) continue;
-      const k = bottomAt(y + 1) * topAt(y + 1, PA.fadeTop);
-      if (k <= 0.01) continue;
-      g.fillStyle(PA.lineColor, k).fillRect(PA.x - PA.lineW / 2, y, PA.lineW, 2);
-      gl.fillStyle(PA.lineColor, 0.14 * k).fillRect(PA.x - PA.lineW / 2 - 3, y, PA.lineW + 6, 2); // glow: 1 px less on each side than before
-      gl.fillStyle(PA.lineColor, 0.22 * k).fillRect(PA.x - PA.lineW / 2 - 1, y, PA.lineW + 2, 2);
+    for (let y = 0; y < H; y += 2) { // the line runs the whole height of the screen at any scroll: it has no visible end, top or bottom (the logo and the friends are in front of it)
+      g.fillStyle(PA.lineColor, 1).fillRect(PA.x - PA.lineW / 2, y, PA.lineW, 2);
+      gl.fillStyle(PA.lineColor, 0.14).fillRect(PA.x - PA.lineW / 2 - 3, y, PA.lineW + 6, 2); // glow: 1 px less on each side than before
+      gl.fillStyle(PA.lineColor, 0.22).fillRect(PA.x - PA.lineW / 2 - 1, y, PA.lineW + 2, 2);
     }
     for (const b of this.bubbles) {
       const cy = b.cy + S, a = bottomAt(cy) * topAt(cy, PA.fadeTopBubble);
