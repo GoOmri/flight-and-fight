@@ -646,3 +646,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-21 v1.9.53: smaller UPDATE, ghost twice as big, cat in front (branch v1953-update-ghost-cat)
 - Omri (screenshot of 1.9.52): shrink UPDATE, make the ghost 2 times bigger, something blocks the cat. UPDATE button 104 -> 80 px wide (the picture's own width, so nothing is stretched; its height stays 25 because the pixel art can not be shrunk evenly) and its text size 10 -> 8 (drawn at 11 px) so NEW VERSION still fits. Ghost scale 1 -> 2, at x 198, y 236. Cat and cauldron now have depth 25 (in front of everything in the sky): the thing over the cat's ears was most likely one of the lilac bats of the animated sky art; I could not see it move, so if it is still there, tell me exactly what it is.
 - UNVERIFIED: not seen.
+
+## 2026-11-21 v1.9.54: the four animated friends are the foreground (branch v1954-foreground-sprites)
+- Omri: the 4 animated sprites (witch, ghost, cat, cauldron) are the foreground; nothing may be in front of them. They now all have depth 50 in config.menu.decor (the bubbles, logo, UPDATE button, gear and texts are at 0; the animated sky is at -10). The settings panel (depth 99 / 100) is still above them on purpose (it opens over the whole menu).
