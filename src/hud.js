@@ -4,17 +4,13 @@ import { CONFIG as C, z, hex } from './config.js';
 import { PX } from './sprites.js';
 import { MEDAL_KEYS } from './medals.js';
 
-// Two looks. PACK (default): the pixel font of the Fantasy UI pack ("PackFont", made from its glyph sheet, 11 px cell, one art pixel = 1/8 em here so
-// sizes 8 / 16 / 24 give whole pixels). CLASSIC: the old Pixelify Sans + Jersey 10. ?font=classic or the settings button switch; if PackFont cannot be loaded the game falls back to classic by itself.
-const wantPack = () => { try { const q = new URLSearchParams(window.location.search).get('font'); if (q) return q !== 'classic'; return localStorage.getItem('ff_font') !== 'classic'; } catch (e) { return true; } };
-let packOn = wantPack();
+// ONE font for the whole game: PackFont (the pixel font of the Fantasy UI pack, made from its glyph sheet, see CREDITS.md). Only if the file cannot be loaded at all the old
+// Pixelify Sans + Jersey 10 take over by themselves (main.js checks), so text never disappears.
+let packOn = true;
 const CLASSIC = { fontFamily: '"GameFont", monospace', fontStyle: 'bold', resolution: C.game.render };
-const PACKED = { fontFamily: '"PackFont", "GameFont", monospace', fontStyle: 'normal', resolution: C.game.render };
-export const FONT = { ...(packOn ? PACKED : CLASSIC) }; // text drawn at canvas resolution = sharp
-export const FONT_CLASSIC = CLASSIC; // the tune panel always uses the classic font (long English labels)
+export const FONT = { fontFamily: '"PackFont", "GameFont", monospace', fontStyle: 'normal', resolution: C.game.render }; // text drawn at canvas resolution = sharp
 export const packFontOn = () => packOn;
 export const useClassicFont = () => { packOn = false; Object.assign(FONT, CLASSIC); };
-export const savePackFont = on => { try { localStorage.setItem('ff_font', on ? 'pack' : 'classic'); } catch (e) { /* not saved */ } };
 // A text size in game px for the pixel font. PackFont has 11 art pixels per em, so a size S draws every art pixel S * 3 / 11 canvas px wide (render x3):
 // only sizes with a WHOLE number of canvas px per art pixel stay sharp. fpx() picks p = whole canvas px per art pixel from the size the code asked for
 // (p = size * C.fontScale, at least 3) and returns S = 11 * p / 3: asked 8 -> p 3 (S 11), 10 -> 4 (14.7), 12 -> 5 (18.3), 16 -> 6 (22), 20 -> 8, 24 -> 9 (33). Classic fonts keep the size they were given.

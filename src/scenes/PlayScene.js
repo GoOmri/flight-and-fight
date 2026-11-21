@@ -42,6 +42,7 @@ export class PlayScene extends Phaser.Scene {
     const SP = C.enemies.sprites; // animated enemy sheets (assets/enemies); types without an entry keep the code-drawn picture
     for (const t in SP) this.load.spritesheet('en_' + t, 'assets/enemies/' + SP[t].file, { frameWidth: SP[t].frameW, frameHeight: SP[t].frameH });
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
+    if (!this.textures.exists('ui_med-button')) this.load.image('ui_med-button', 'assets/ui/ui-med-button.png?v=' + C.version); // the menu's button (a stage started from the menu has it already)
     const K = C.sprites; // coin / heart / chest / puff strips (assets/pickups, assets/fx); a thing without an entry keeps its code-drawn picture
     const strip = (key, d) => this.load.spritesheet(key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
     if (K.coin) strip('sp_coin', K.coin);
@@ -1492,10 +1493,11 @@ export class PlayScene extends Phaser.Scene {
     fade.pop(); // the tap text blinks on its own
     const M = C.endMenuBtn, my = H - M.bottom; // MENU button: back to the stage menu
     this.menuBtn = { x: W / 2, y: my, w: M.w, h: M.h };
-    const plate = this.add.graphics().setDepth(61); // same purple plate with pink border and dark bottom edge as the menu buttons
-    drawPlate(plate, W / 2 - M.w / 2, my - M.h / 2, M.w, M.h, { fill: M.color, border: M.border, down: false });
-    fade.push(plate);
-    t(my - C.menu.plateDrop / 2, 'MENU', M.size, CR, 2);
+    let btnPic; // the same button picture as the menu (9-slice: round ends stay, the middle stretches); without it the old drawn plate
+    if (this.textures.exists('ui_med-button')) btnPic = this.add.nineslice(W / 2 - M.w / 2, my - 12, 'ui_med-button', undefined, M.w, 25, 10, 10, 0, 0).setOrigin(0, 0).setDepth(61);
+    else { btnPic = this.add.graphics().setDepth(61); drawPlate(btnPic, W / 2 - M.w / 2, my - M.h / 2, M.w, M.h, { fill: M.color, border: M.border, down: false }); }
+    fade.push(btnPic);
+    t(my, 'MENU', M.size, CR, 3);
     if (ease > 0) {
       veil.setAlpha(0); fade.forEach(o => o.setAlpha(0)); tap.setAlpha(0);
       this.tweens.add({ targets: veil, alpha: 0.55, duration: ease });

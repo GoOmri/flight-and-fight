@@ -2,7 +2,7 @@
 // at the top and PAUSES the game. Each row has - and + buttons (hold to repeat). Changes apply at once to the live CONFIG.stick numbers.
 // COPY puts all values on the clipboard (and shows them in the panel) so they can be pasted into src/config.js.
 import { CONFIG as C, hex } from './config.js';
-import { FONT_CLASSIC as FONT, drawPlate } from './hud.js'; // the tune panel keeps the classic font
+import { FONT, fpx, drawPlate } from './hud.js';
 
 const W = C.game.width; // logical width (240)
 const P = C.menu.pal;
@@ -68,7 +68,7 @@ const rowsOf = (tab, pick) => tab === DROPS_TAB ? dropRows(KINDS[pick]) : tab ==
 const ALL = [...STICK_ROWS, ...DRAG_ROWS, ...TABS.flatMap((t, i) => i === DROPS_TAB ? KINDS.flatMap(dropRows) : t[1] || [])];
 const getp = path => path.split('.').reduce((o, k) => o[k], C);
 const setp = (path, v) => { const ks = path.split('.'), last = ks.pop(); ks.reduce((o, k) => o[k], C)[last] = v; };
-const GEAR = { x: W - 16, y: 34, w: 22, h: 20 };          // gear button (centre), just under the hearts
+const GEAR = { x: W - 18, y: 34, w: 32, h: 20 };          // gear button (centre), just under the hearts
 const PANEL = { x: 6, y: 46, w: W - 12, rowH: 15, pad: 6 };
 const BTN = { w: 22, h: 13 };
 const DEPTH = 70;
@@ -102,7 +102,7 @@ export class Tune {
   }
 
   text(x, y, s, size, color, ox = 0) {
-    const t = this.scene.add.text(x, y, s, { ...FONT, fontSize: size + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 2 }).setOrigin(ox, 0.5).setDepth(DEPTH + 1);
+    const t = this.scene.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 2 }).setOrigin(ox, 0.5).setDepth(DEPTH + 1);
     this.texts.push(t); return t;
   }
 
@@ -138,7 +138,7 @@ export class Tune {
     const T = (x, y, s, size, color, ox) => { // reuse text objects by index
       const t = this.texts[this.tn + 1] || this.text(0, 0, '', size, color, ox); // index 0 is the gear label
       this.tn++;
-      t.setPosition(x, y).setText(s).setFontSize(size + 'px').setColor(hex(color)).setOrigin(ox, 0.5).setVisible(true); return t;
+      t.setPosition(x, y).setText(s).setFontSize(fpx(size) + 'px').setColor(hex(color)).setOrigin(ox, 0.5).setVisible(true); return t;
     };
     const button = (x, y, w, h, label, fn, hold, fill = P.purple) => {
       g.fillStyle(P.dark, 1).fillRect(x, y + 2, w, h);
