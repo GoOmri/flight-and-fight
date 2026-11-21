@@ -746,3 +746,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-21 v1.9.73: the sky follows the stage scroll (branch v1973-sky-parallax)
 - Omri: the background should scroll a bit with the stages, slowly, for parallax. The animated sky now moves down by 0.08 px for every px the path is pulled down (config menu.sky.scrollPar; at the furthest scroll of 142 px that is about 11 px, in the rubber band up to 15 px), with the tilt shift added. To have room the sky picture is 10% bigger than the screen (menu.sky.cover 1.1, was 1.05; the shift can be at most about 21 px up or down before an edge would show). The friends, logo, line and tiles do not move with it.
 - UNVERIFIED: how it feels; a bigger scrollPar (not above about 0.12 with cover 1.1) makes a stronger depth effect.
+
+## 2026-11-21 v1.9.74: cauldron bigger and away from the right edge (branch v1974-cauldron-left)
+- Omri (screenshot of 1.9.72): the cauldron can be bigger, and it was too close to the right edge. Scale 1.667 -> 2.0 (58 px wide, 60 high), centre x 215 -> 204: it spans about x 175 to 233 (7 px from the right edge, about 16 px from UPDATE) and rises to about y 362; its top left corner may touch the bottom right of the "t" of Flight (the cauldron is in front). From the screenshot the letters end at x about 178 at that height.
