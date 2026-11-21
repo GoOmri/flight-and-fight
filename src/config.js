@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.51", // bump on every push so the player/Omri can see the build
+  version: "1.9.52", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -41,7 +41,7 @@ export const CONFIG = {
     plateDrop: 4, plateDownShift: 2, plateBorderW: 3, plateRadius: 10, tabW: 6, // chunky button plate: bottom edge height, how far a pressed plate sinks, border, corner, stage colour tab
     tabColors: { forest: 0xff9a2e, swamp: 0x3df2ff },
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4, // titleY..titleStroke: the old plain-text title (used only if the logo picture is missing)
-    logo: { file: 'menu/logo.png', x: 120, y: 252, scale: 1.4 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
+    logo: { file: 'menu/logo.png', x: 120, y: 252, scale: 1.7 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
     // Stage path (the main menu): a line up the middle, a bubble left or right of it at height cy. side L / R. A node with locked: true is faded, says SOON and takes no taps.
     path: { x: 120, lineColor: 0xf2b632, lineW: 4, lineTop: 0, lineBottom: 232, gap: 8, bubbleW: 100, bubbleH: 68, nodes: [
       { theme: 'stage3', name: 'STAGE 3', side: 'L', cy: 50, locked: true, tab: 0x6b5a90 },
@@ -56,8 +56,8 @@ export const CONFIG = {
     numberSize: 32, nameSize: 20, bestSize: 12, // text sizes (px): pixel font looks best at multiples of 4
     medalScale: 2, medalGap: 8,   // medal icons in the row (scale of the art, px between icons)
     updateBtn: { w: 104, textColor: 0xfff3c4 }, // UPDATE button: the button of the Medieval UI pack (recoloured to the game's purple and pink) (assets/ui), 25 px high, w px wide (the middle stretches), dark brown text
-    updateW: 120, updateH: 26, updateTop: 376, updateSize: 10, updateColor: 0x3b1478, updateHotColor: 0xff9a2e, updateHotBorder: 0x1a0830, // UPDATE button: size, top edge, text size, plate colour, plate colour + border when a newer version is waiting
-    versionSize: 8, versionAlpha: 0.9, versionBottom: 12, // version text: distance of its middle from the bottom edge
+    updateW: 120, updateH: 26, updateTop: 384, updateSize: 10, updateColor: 0x3b1478, updateHotColor: 0xff9a2e, updateHotBorder: 0x1a0830, // UPDATE button: size, top edge, text size, plate colour, plate colour + border when a newer version is waiting
+    versionSize: 8, versionAlpha: 0.9, versionBottom: 9, // version text: distance of its middle from the bottom edge
     // Halloween menu art (assets/menu, Spooktober set). Sky = animated background (cells in a grid of `cols`), scaled to cover the screen width.
     sky: { file: 'menu/sky.png', frameW: 202, frameH: 360, frames: 18, cols: 6, fps: 5 },
     // Decorations around the cards (never over cards, medals, UPDATE or version; they take no input). file in assets/, frameW/frameH = one cell,

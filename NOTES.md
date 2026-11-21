@@ -636,3 +636,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-21 v1.9.51: the phone kept the old panel picture (branch v1951-fresh-ui-pictures)
 - Omri's screenshot on 1.9.50 showed the thick pink border of v1.9.49. The file in assets/ui was already the right one (checked); his phone kept an old copy of the picture because its file name did not change (the UPDATE button only refreshes the code files, not pictures). The menu now loads the UI pictures with ?v=<version> added, so every new version loads them fresh. Other pictures keep their names: if one is ever changed in place, rename it or add the same ?v= when loading.
+
+## 2026-11-21 v1.9.52: gold panel corners, bigger logo, UPDATE lower (branch v1952-gold-corners-logo)
+- Omri: the panel's pink corner marks should be the gold of the middle line. Colour swap only (outline -> 0xf2b632, the path line colour); the transparency of every pixel is identical to the original (checked). The button keeps its pink outline.
+- Logo scale 1.4 -> 1.7 with the top fixed (y 252), so it grows down toward UPDATE; UPDATE top 376 -> 384; version text a little lower (versionBottom 12 -> 9).
+- Omri also asked about a scrollable stage path with a fade near the witch's hat. Not built: with 3 stages nothing needs to scroll. Plan for when there are 4 or more stages: drag up/down on the path area, a little inertia, the bubbles and line fade out towards the bottom (about the hat height, y 215) and the top; medium size (one version). Say "build the scroll" then.
+- UNVERIFIED: how the logo and UPDATE sit now (the logo may touch UPDATE; tune menu.logo.scale and menu.updateTop).
