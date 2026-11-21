@@ -2,7 +2,7 @@ import { CONFIG as C, z, hex, snap4 } from '../config.js';
 import { makeAllTextures, PX } from '../sprites.js';
 import { STAGE1 } from '../waves.js';
 import { WaveRunner, initPath, followPath } from '../waves-runner.js';
-import { Hud, FONT, drawPlate } from '../hud.js';
+import { Hud, FONT, fpx, drawPlate } from '../hud.js';
 import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
 import { Tune, tuneEnabled } from '../tune.js';
@@ -586,7 +586,7 @@ export class PlayScene extends Phaser.Scene {
     this.fxPool = K.crate || K.heartPickup ? mkFx(K.fxPoolSize, K.crate ? 'sp_crate_break' : 'sp_heart_collect') : [];
     this.pops = []; // floating score texts, made once and reused
     for (let i = 0; i < C.feel.popPoolSize; i++) {
-      this.pops.push(this.add.text(0, 0, '', { ...FONT, fontSize: C.feel.popTextSize + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: 3 })
+      this.pops.push(this.add.text(0, 0, '', { ...FONT, fontSize: fpx(C.feel.popTextSize) + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: 3 })
         .setOrigin(0.5).setDepth(30).setVisible(false));
     }
     // muzzle flash: two small white pixels at the nose, shown for a few ms on every volley
@@ -1467,7 +1467,7 @@ export class PlayScene extends Phaser.Scene {
     const veil = this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.55).setDepth(60);
     const P = C.menu.pal, CR = hex(P.cream);
     const t = (y, s, size, c, stroke = z(5)) => {
-      const o = this.add.text(W / 2, y, s, { ...FONT, fontSize: snap4(z(size)) + 'px', color: c, stroke: hex(P.shadow), strokeThickness: stroke, align: 'center' }).setOrigin(0.5).setDepth(61);
+      const o = this.add.text(W / 2, y, s, { ...FONT, fontSize: fpx(snap4(z(size))) + 'px', color: c, stroke: hex(P.shadow), strokeThickness: stroke, align: 'center' }).setOrigin(0.5).setDepth(61);
       fade.push(o); return o;
     };
     let tapY = H / 2 + z(60);

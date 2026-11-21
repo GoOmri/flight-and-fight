@@ -2,7 +2,7 @@
 // at the top and PAUSES the game. Each row has - and + buttons (hold to repeat). Changes apply at once to the live CONFIG.stick numbers.
 // COPY puts all values on the clipboard (and shows them in the panel) so they can be pasted into src/config.js.
 import { CONFIG as C, hex } from './config.js';
-import { FONT, drawPlate } from './hud.js';
+import { FONT_CLASSIC as FONT, drawPlate } from './hud.js'; // the tune panel keeps the classic font
 
 const W = C.game.width; // logical width (240)
 const P = C.menu.pal;

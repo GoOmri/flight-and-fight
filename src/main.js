@@ -1,13 +1,19 @@
 import { CONFIG, hex } from './config.js';
+import { useClassicFont, packFontOn } from './hud.js';
 import { MenuScene } from './scenes/MenuScene.js';
 import { PlayScene } from './scenes/PlayScene.js';
 
 // Phaser draws text on a canvas, so the pixel font must be ready before the first scene makes text (2 s limit: start anyway).
 const fontReady = Promise.race([
-  document.fonts.load('700 16px "GameFont"', 'A0').then(() => document.fonts.load('400 16px "GameFont"', 'A0')).catch(() => null),
+  Promise.all([ // both fonts: the pixel font of the UI pack and the old one (the fallback)
+    document.fonts.load('700 16px "GameFont"', 'A0').then(() => document.fonts.load('400 16px "GameFont"', 'A0')).catch(() => null),
+    document.fonts.load('400 16px "PackFont"', 'A0').catch(() => null)
+  ]),
   new Promise(r => setTimeout(r, 2000))
 ]);
-fontReady.then(() => { window.__game = new Phaser.Game({
+fontReady.then(() => {
+  if (packFontOn() && !document.fonts.check('16px "PackFont"', 'A')) useClassicFont(); // the new font did not load: the old one it is
+  window.__game = new Phaser.Game({
   type: new URLSearchParams(window.location.search).get('render') === 'canvas' ? Phaser.CANVAS : Phaser.AUTO, // ?render=canvas forces the older drawing mode (to test browsers without WebGL)
   width: CONFIG.game.width * CONFIG.game.render,
   height: CONFIG.game.height * CONFIG.game.render,

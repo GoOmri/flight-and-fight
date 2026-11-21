@@ -1,6 +1,6 @@
 import { CONFIG as C, hex } from '../config.js';
 import { makeAllTextures } from '../sprites.js';
-import { FONT, drawPlate } from '../hud.js';
+import { FONT, fpx, drawPlate, packFontOn, savePackFont } from '../hud.js';
 import { MEDAL_KEYS, loadMedals, loadBest } from '../medals.js';
 import { latestVersion, refreshFiles } from '../update.js';
 import { toggleTune, tuneEnabled } from '../tune.js';
@@ -32,7 +32,7 @@ export class MenuScene extends Phaser.Scene {
     makeAllTextures(this); // medal pictures (made once, skipped when they exist)
     this.cameras.main.setZoom(R).centerOn(W / 2, H / 2).setBackgroundColor(M.bgColor);
     this.addArt();
-    const txt = (x, y, s, size, stroke, align = 0.5, color = P.cream) => this.add.text(x, y, s, { ...FONT, fontSize: size + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: stroke }).setOrigin(align, 0.5);
+    const txt = (x, y, s, size, stroke, align = 0.5, color = P.cream) => this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: stroke }).setOrigin(align, 0.5);
     this.txt = txt;
     if (this.textures.exists('menu_logo')) this.add.image(M.logo.x, M.logo.y, 'menu_logo').setOrigin(0.5, 0).setScale(M.logo.scale); // pixel logo: "Fight & Flight", tilted up in perspective
     else txt(W / 2, M.titleY, 'Flight and Fight', M.titleSize, M.titleStroke);
@@ -57,7 +57,7 @@ export class MenuScene extends Phaser.Scene {
     const ubw = art ? UB.w : M.updateW, ubh = art ? 22 : M.updateH, bx = (W - ubw) / 2, by = M.updateTop;
     const btn = { btn: true, x: bx, y: by, w: ubw, h: ubh, g: this.add.graphics(), down: false, hot: false, busy: false };
     btn.img = art ? this.add.nineslice(bx, by, 'ui_button-normal', undefined, ubw, 22, 12, 12, 0, 0).setOrigin(0, 0) : null;
-    btn.label = this.add.text(W / 2, by + ubh / 2, 'UPDATE', { ...FONT, fontSize: M.updateSize + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5);
+    btn.label = this.add.text(W / 2, by + ubh / 2, 'UPDATE', { ...FONT, fontSize: fpx(M.updateSize) + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5);
     btn.draw = () => {
       btn.g.clear();
       if (art) { // normal, pressed, or hover (a newer version is waiting); dark brown text
@@ -167,7 +167,7 @@ export class MenuScene extends Phaser.Scene {
   makeSettings() {
     const S = M.settings, objs = [], ink = S.ink;
     const keep = o => { o.setDepth(S.depth).setVisible(false); objs.push(o); return o; };
-    const art = this.textures.exists('ui_panel-parchment'), T = (x, y, s, size, align = 0.5, color = ink) => keep(this.add.text(x, y, s, { ...FONT, fontSize: size + 'px', color: hex(color) }).setOrigin(align, 0.5));
+    const art = this.textures.exists('ui_panel-parchment'), T = (x, y, s, size, align = 0.5, color = ink) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color) }).setOrigin(align, 0.5));
     // a dark veil over the menu, then the parchment (9-slice: the 24 px ragged border stays, the middle stretches); without the picture a drawn dark plate
     const veil = keep(this.add.graphics()); veil.fillStyle(0x000000, 0.55).fillRect(0, 0, W, H); veil.setDepth(S.depth - 1);
     if (art) keep(this.add.nineslice(S.x, S.y, 'ui_panel-parchment', undefined, S.w, S.h, 24, 24, 24, 24).setOrigin(0, 0));
@@ -202,9 +202,12 @@ export class MenuScene extends Phaser.Scene {
     // TUNE PANEL
     T(left, S.y + 125, 'TUNE PANEL', S.btnSize, 0, lc);
     const tn = mkBtn(right - bwid, S.y + 114, bwid, tuneEnabled() ? 'ON' : 'OFF', () => { tn.label.setText(toggleTune() ? 'ON' : 'OFF'); });
+    // FONT (the page reloads to use the other one)
+    T(left, S.y + 155, 'FONT', S.btnSize, 0, lc);
+    mkBtn(right - bwid - 20, S.y + 144, bwid + 20, packFontOn() ? 'PACK' : 'CLASSIC', () => { savePackFont(!packFontOn()); window.location.reload(); });
     // SOUND
-    T(left, S.y + 158, 'SOUND', S.btnSize, 0, hc);
-    T(right - bwid / 2, S.y + 158, 'SOON', S.btnSize, 0.5, hc);
+    T(left, S.y + 186, 'SOUND', S.btnSize, 0, hc);
+    T(right - bwid / 2, S.y + 186, 'SOON', S.btnSize, 0.5, hc);
     // CLOSE
     mkBtn(S.x + (S.w - 90) / 2, S.y + S.h - 56, 90, 'CLOSE', () => this.openSettings(false));
     this.panelObjs = objs;

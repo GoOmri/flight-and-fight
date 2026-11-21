@@ -4,7 +4,19 @@ import { CONFIG as C, z, hex } from './config.js';
 import { PX } from './sprites.js';
 import { MEDAL_KEYS } from './medals.js';
 
-export const FONT = { fontFamily: '"GameFont", monospace', fontStyle: 'bold', resolution: C.game.render }; // text drawn at canvas resolution = sharp
+// Two looks. PACK (default): the pixel font of the Fantasy UI pack ("PackFont", made from its glyph sheet, 11 px cell, one art pixel = 1/8 em here so
+// sizes 8 / 16 / 24 give whole pixels). CLASSIC: the old Pixelify Sans + Jersey 10. ?font=classic or the settings button switch; if PackFont cannot be loaded the game falls back to classic by itself.
+const wantPack = () => { try { const q = new URLSearchParams(window.location.search).get('font'); if (q) return q !== 'classic'; return localStorage.getItem('ff_font') !== 'classic'; } catch (e) { return true; } };
+let packOn = wantPack();
+const CLASSIC = { fontFamily: '"GameFont", monospace', fontStyle: 'bold', resolution: C.game.render };
+const PACKED = { fontFamily: '"PackFont", "GameFont", monospace', fontStyle: 'normal', resolution: C.game.render };
+export const FONT = { ...(packOn ? PACKED : CLASSIC) }; // text drawn at canvas resolution = sharp
+export const FONT_CLASSIC = CLASSIC; // the tune panel always uses the classic font (long English labels)
+export const packFontOn = () => packOn;
+export const useClassicFont = () => { packOn = false; Object.assign(FONT, CLASSIC); };
+export const savePackFont = on => { try { localStorage.setItem('ff_font', on ? 'pack' : 'classic'); } catch (e) { /* not saved */ } };
+// A text size in game px for the pixel font: whole steps only (8, 16 or 24), so every art pixel is the same size. Classic fonts keep the size they were given.
+export const fpx = size => (!packOn ? size : (size <= 14 ? 8 : size <= 20 ? 16 : 24));
 const W = C.game.width;
 
 // Chunky button plate (flat, no glow): dark bottom edge, plate with a border on top. down = pressed: plate sinks, bottom edge shrinks, fill lighter.
@@ -33,10 +45,10 @@ export class Hud {
     this.medalImgs = MEDAL_KEYS.map((k, i) =>
       scene.add.image(H.margin + i * (H.medalSize + H.medalGap), H.margin, 'medal_' + k + '_pending').setOrigin(0, 0).setDepth(depth));
     this.medalLook = MEDAL_KEYS.map(() => 'pending');
-    this.versionText = scene.add.text(H.margin, H.margin + H.medalSize + H.versionGap, 'v' + C.version, { ...FONT, fontSize: H.versionSize + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: H.versionStroke }).setAlpha(H.versionAlpha).setDepth(depth);
+    this.versionText = scene.add.text(H.margin, H.margin + H.medalSize + H.versionGap, 'v' + C.version, { ...FONT, fontSize: fpx(H.versionSize) + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: H.versionStroke }).setAlpha(H.versionAlpha).setDepth(depth);
 
     // CENTRE: score, weapon bars under it
-    this.scoreText = scene.add.text(W / 2, H.margin, 'SCORE 0', { ...FONT, fontSize: z(18) + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: z(4) }).setOrigin(0.5, 0.5).setDepth(depth);
+    this.scoreText = scene.add.text(W / 2, H.margin, 'SCORE 0', { ...FONT, fontSize: fpx(z(18)) + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: z(4) }).setOrigin(0.5, 0.5).setDepth(depth);
     this.scoreText.y = H.margin + this.scoreText.height / 2; // anchored at its middle so the pop grows in place
     this.pop = 0; // 1 right after the score changed, falls to 0
     this.rowY = H.margin + H.rowOffset; // the bars and the pips share this line
