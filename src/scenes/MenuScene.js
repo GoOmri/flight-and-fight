@@ -22,7 +22,7 @@ export class MenuScene extends Phaser.Scene {
     this.load.spritesheet('menu_sky', 'assets/' + sky.file, { frameWidth: sky.frameW, frameHeight: sky.frameH });
     for (const d of M.decor) this.load.spritesheet('menu_' + d.key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
     this.load.image('menu_logo', 'assets/' + M.logo.file);
-    for (const k of ['panel-parchment', 'med-panel', 'med-button', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png'); // UI pictures: parchment panel and gear (Fantasy UI pack, catau-games), tan panel and button (Medieval UI pack, Doktoresco)
+    for (const k of ['panel-parchment', 'med-panel', 'med-button', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png?v=' + C.version); // ?v= = the phone must load the newest picture after an update (it kept an old copy of a picture with the same file name) // UI pictures: parchment panel and gear (Fantasy UI pack, catau-games), tan panel and button (Medieval UI pack, Doktoresco)
   }
 
   create() {
