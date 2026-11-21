@@ -22,6 +22,7 @@ export class MenuScene extends Phaser.Scene {
     this.load.spritesheet('menu_sky', 'assets/' + sky.file, { frameWidth: sky.frameW, frameHeight: sky.frameH });
     for (const d of M.decor) this.load.spritesheet('menu_' + d.key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
     this.load.image('menu_logo', 'assets/' + M.logo.file);
+    for (const k of ['normal', 'clicked', 'hover']) this.load.image('btn_gold_' + k, 'assets/ui/button-gold-' + k + '.png'); // pixel-art UPDATE button (ok_lavender pack, 48x16)
   }
 
   create() {
@@ -52,11 +53,19 @@ export class MenuScene extends Phaser.Scene {
 
     // ---- UPDATE button: gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser or the installed app).
     // When the menu opens it asks the server for the newest version number; if it is newer the button turns orange.
-    const bx = (W - M.updateW) / 2, by = M.updateTop;
-    const btn = { btn: true, x: bx, y: by, w: M.updateW, h: M.updateH, g: this.add.graphics(), down: false, hot: false, busy: false };
-    btn.label = this.add.text(W / 2, by + M.updateH / 2, 'UPDATE', { ...FONT, fontSize: M.updateSize + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5);
+    const art = this.textures.exists('btn_gold_normal'), K = M.updateBtn.scale; // the pixel-art button (art 48x16 drawn at K x); without the pictures the old drawn plate is used
+    const ubw = art ? 48 * K : M.updateW, ubh = art ? 16 * K : M.updateH, bx = (W - ubw) / 2, by = M.updateTop;
+    const btn = { btn: true, x: bx, y: by, w: ubw, h: ubh, g: this.add.graphics(), down: false, hot: false, busy: false };
+    btn.img = art ? this.add.image(bx, by, 'btn_gold_normal').setOrigin(0, 0).setScale(K) : null;
+    btn.label = this.add.text(W / 2, by + ubh / 2, 'UPDATE', { ...FONT, fontSize: M.updateSize + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5);
     btn.draw = () => {
       btn.g.clear();
+      if (art) { // gold button: normal, pressed (the picture sits 2 art px lower) or hover (a newer version is waiting); dark text
+        btn.img.setTexture('btn_gold_' + (btn.down ? 'clicked' : (btn.hot ? 'hover' : 'normal')));
+        btn.label.setColor(hex(M.updateBtn.textColor)).setStroke(hex(P.shadow), 0);
+        btn.label.setY(by + ubh / 2 - K + (btn.down ? 2 * K : 0));
+        return;
+      }
       const sink = drawPlate(btn.g, bx, by, M.updateW, M.updateH, { fill: btn.hot ? M.updateHotColor : M.updateColor, border: btn.hot ? M.updateHotBorder : P.pink, down: btn.down, radius: 8 });
       btn.label.setColor(btn.hot ? hex(P.dark) : hex(P.cream)).setStroke(hex(P.shadow), btn.hot ? 0 : 3); // dark text on the orange plate
       btn.label.setY(by + (M.updateH - M.plateDrop) / 2 + sink + 1);
