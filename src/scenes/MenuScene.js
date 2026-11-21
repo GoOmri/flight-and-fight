@@ -22,7 +22,7 @@ export class MenuScene extends Phaser.Scene {
     this.load.spritesheet('menu_sky', 'assets/' + sky.file, { frameWidth: sky.frameW, frameHeight: sky.frameH });
     for (const d of M.decor) this.load.spritesheet('menu_' + d.key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
     this.load.image('menu_logo', 'assets/' + M.logo.file);
-    for (const k of ['panel-parchment', 'button-normal', 'button-pressed', 'button-hover', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png'); // Fantasy UI pack (catau-games): parchment panel, copper button (3 looks), settings medallion
+    for (const k of ['panel-parchment', 'panel-wood', 'panel-stone', 'button-normal', 'button-pressed', 'button-hover', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png'); // Fantasy UI pack (catau-games): parchment panel, copper button (3 looks), settings medallion
   }
 
   create() {
@@ -124,26 +124,29 @@ export class MenuScene extends Phaser.Scene {
 
   // One stage bubble: a plate with a colour tab, the name, the earned medals and the best score. A locked stage is faded and says SOON.
   makeBubble(nd, x, y, w, h, txt) {
+    const key = nd.locked ? 'ui_panel-stone' : 'ui_panel-wood', art = this.textures.exists(key); // wood panel (stone when locked), 9-slice with the 24 px ornate border; without the picture the old drawn plate
     const g = this.add.graphics();
     const b = { st: { theme: nd.theme }, locked: !!nd.locked, x, y, w, h, g, down: false, items: [] };
+    const img = art ? this.add.nineslice(x, y, key, undefined, w, h, 24, 24, 24, 24).setOrigin(0, 0) : null;
     const add = (o, oy) => { b.items.push({ o, oy }); return o; }; // texts and medals sink with the plate when pressed
     const B = M.bubble, cx = x + w / 2;
     b.draw = () => {
       g.clear();
-      const sink = drawPlate(g, x, y, w, h, { fill: b.locked ? M.lockedFill : P.purple, border: b.locked ? M.lockedBorder : P.pink, down: b.down, radius: M.cardRadius });
+      const sink = art ? (b.down ? 1 : 0) : drawPlate(g, x, y, w, h, { fill: b.locked ? M.lockedFill : P.purple, border: b.locked ? M.lockedBorder : P.pink, down: b.down, radius: M.cardRadius });
+      if (art) { img.setTint(b.down ? 0xcccccc : 0xffffff); img.y = y + sink; }
       b.items.forEach(i => i.o.setY(i.oy + sink));
     };
     if (b.locked) {
-      add(txt(cx, y + 22, nd.name, B.nameSize, 3, 0.5, M.lockedText), y + 22);
-      add(txt(cx, y + 42, 'SOON', B.nameSize, 3, 0.5, M.lockedText), y + 42);
+      add(txt(cx, y + 24, nd.name, B.nameSize, 3, 0.5, M.lockedText), y + 24);
+      add(txt(cx, y + 44, 'SOON', B.nameSize, 3, 0.5, M.lockedText), y + 44);
     } else {
       add(txt(cx, y + 14, nd.name, B.nameSize, 3), y + 14);
       const medals = loadMedals(nd.theme), best = loadBest(nd.theme), n = MEDAL_KEYS.length;
       MEDAL_KEYS.forEach((k, j) => {
-        const img = add(this.add.image(0, y + 34, 'medal_' + k + '_' + (medals[k] ? 'earned' : 'pending')).setScale(B.medalScale), y + 34);
-        img.x = cx + (j - (n - 1) / 2) * (img.displayWidth + B.medalGap);
+        const im = add(this.add.image(0, y + 34, 'medal_' + k + '_' + (medals[k] ? 'earned' : 'pending')).setScale(B.medalScale), y + 34);
+        im.x = cx + (j - (n - 1) / 2) * (im.displayWidth + B.medalGap);
       });
-      if (best > 0) add(txt(cx, y + h - 12, 'BEST ' + best, B.bestSize, 2, 0.5, P.cyan), y + h - 12);
+      if (best > 0) add(txt(cx, y + h - 13, 'BEST ' + best, B.bestSize, 2, 0.5, P.cyan), y + h - 13);
     }
     b.draw();
     return b;

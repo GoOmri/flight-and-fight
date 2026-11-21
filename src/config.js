@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.42", // bump on every push so the player/Omri can see the build
+  version: "1.9.43", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -43,7 +43,7 @@ export const CONFIG = {
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4, // titleY..titleStroke: the old plain-text title (used only if the logo picture is missing)
     logo: { file: 'menu/logo.png', x: 120, y: 252, scale: 1.4 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
     // Stage path (the main menu): a line up the middle, a bubble left or right of it at height cy. side L / R. A node with locked: true is faded, says SOON and takes no taps.
-    path: { x: 120, lineColor: 0xff5ac8, lineW: 4, lineTop: 0, lineBottom: 232, gap: 8, bubbleW: 86, bubbleH: 62, nodes: [
+    path: { x: 120, lineColor: 0xf2b632, lineW: 4, lineTop: 0, lineBottom: 232, gap: 8, bubbleW: 100, bubbleH: 68, nodes: [
       { theme: 'stage3', name: 'STAGE 3', side: 'L', cy: 50, locked: true, tab: 0x6b5a90 },
       { theme: 'swamp', name: 'SWAMP', side: 'R', cy: 121, tab: 0x3df2ff },
       { theme: 'forest', name: 'FOREST', side: 'L', cy: 192, tab: 0xff9a2e }] },
