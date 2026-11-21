@@ -24,6 +24,7 @@ export class MenuScene extends Phaser.Scene {
     for (const d of M.decor) this.load.spritesheet('menu_' + d.key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
     this.load.image('menu_logo', 'assets/' + M.logo.file); // only the letters: they rise and float
     for (const k of ['fight', 'amp', 'flight']) this.load.image('menu_logo_' + k, 'assets/menu/logo-' + k + '.png'); // the three parts of the letters: "Fight", "&", "Flight" (together they are menu_logo)
+    for (const nd of M.path.nodes) if (!nd.locked) this.load.image('stage_' + nd.theme, 'assets/ui/stage-' + nd.theme + '.png?v=' + C.version); // a small picture of each open stage (shown dimmed inside its tile)
     if (M.logo.decor) this.load.image('menu_logo_decor', 'assets/' + M.logo.decor); // the moon, stars and bats of the logo picture: they stay in the background
     for (const k of ['panel-parchment', 'med-panel', 'med-button', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png?v=' + C.version); // ?v= = the phone must load the newest picture after an update (it kept an old copy of a picture with the same file name) // UI pictures: parchment panel and gear (Fantasy UI pack, catau-games), tan panel and button (Medieval UI pack, Doktoresco)
   }
@@ -212,6 +213,7 @@ export class MenuScene extends Phaser.Scene {
     const g = this.add.graphics();
     const b = { st: { theme: nd.theme }, locked: !!nd.locked, x, y, w, h, g, down: false, items: [] };
     const img = art ? this.add.nineslice(x, y, key, undefined, w, h, 6, 6, 6, 6).setOrigin(0, 0) : null;
+    const pic = art && !b.locked && this.textures.exists('stage_' + nd.theme) ? this.add.image(x + 6, y + 6, 'stage_' + nd.theme).setOrigin(0, 0).setAlpha(M.bubble.picAlpha).setTint(M.bubble.picTint) : null; // the stage picture fills the inside of the tile, dimmed so the text stays readable
     const add = (o, oy) => { b.items.push({ o, oy }); return o; }; // texts and medals sink with the plate when pressed
     const B = M.bubble, cx = x + w / 2, ink = art ? B.ink : P.cream, shadow = 3;
     b.draw = () => {
@@ -219,6 +221,7 @@ export class MenuScene extends Phaser.Scene {
       const sink = art ? (b.down ? 1 : 0) : drawPlate(g, x, y, w, h, { fill: b.locked ? M.lockedFill : P.purple, border: b.locked ? M.lockedBorder : P.pink, down: b.down, radius: M.cardRadius });
       if (art) {
         img.setTint(b.down ? 0xcccccc : (b.locked ? B.lockedTint : 0xffffff)); img.y = y + sink;
+        if (pic) pic.y = y + 6 + sink;
         if (!b.locked) g.fillStyle(B.inset, 1).fillRoundedRect(x + 8, y + 26 + sink, w - 16, 17, 3); // a dark strip behind the medals so the grey ones can be seen on the tan
       }
       b.items.forEach(i => i.o.setY(i.oy + sink));
@@ -238,7 +241,7 @@ export class MenuScene extends Phaser.Scene {
     b.complete = !b.locked && MEDAL_KEYS.every(k => loadMedals(nd.theme)[k]);
     b.halo = art && !b.locked ? this.add.graphics().setVisible(false) : null; // gold edge, shown only on the next stage to play
     if (b.halo) b.halo.lineStyle(3, M.path.lineColor, 1).strokeRoundedRect(x - 2, y - 2, w + 4, h + 4, 5);
-    b.cont = this.add.container(0, 0, [img, b.halo, g, ...b.items.map(i => i.o)].filter(Boolean)); // order: panel, halo, strip, texts and medals
+    b.cont = this.add.container(0, 0, [img, pic, b.halo, g, ...b.items.map(i => i.o)].filter(Boolean)); // order: panel, stage picture, halo, strip, texts and medals
     b.draw();
     return b;
   }
