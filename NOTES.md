@@ -762,3 +762,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-21 v1.9.78: moon bigger and a bit right (branch v1978-moon-right)
 - Omri: bigger moon, a bit to the right. Size 2.1 -> 2.8 (about 20 x 22 px), centre x 149 -> 157 (y 192 unchanged).
+
+## 2026-11-21 v1.9.79: forest purple, bigger explosions, bigger coins (branch v1979-tint-boom-coins)
+- Omri: (1) the Forest stage needs a purple tint (he chose: in the game): config tint.forest alpha 0.12 -> 0.22 (colour 0x7a4fd0 unchanged; the swamp keeps 0.12). The wash lies over everything except pickups and enemy shots (depth 33 under 34 / 35). (2) Enemy explosions a little bigger (about 20%): the smoke puff sprites.poof.scale 0.6 -> 0.72 (the big one follows through bigMul 1.5), the ring deathRingScale 1.2 -> 1.45 and bigDeathRingScale 2 -> 2.4. (3) Coins 10% bigger: sprites.coin.scale 1.0 -> 1.1 (the art is 18 px, so 19.8 px; the pixels are no longer all the same size, a little uneven; pickup radius unchanged).
+- UNVERIFIED on the phone: all three; the tint strength (0.22) and whether the coin edges look uneven.

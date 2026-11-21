@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.78", // bump on every push so the player/Omri can see the build
+  version: "1.9.79", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -219,7 +219,7 @@ export const CONFIG = {
   // cell size and centre, so switching animations never jumps. hitW/hitH = hitbox in sheet pixels (times scale on screen). Pickup grab radius stays coin.pickupRadius.
   sprites: {
     // Gold coin, 24 frames = one full spin, loops while it falls. Each coin starts at a random frame.
-    coin: { file: 'pickups/coin.png', frameW: 18, frameH: 18, frames: 24, fps: 30, scale: 1.0 },
+    coin: { file: 'pickups/coin.png', frameW: 18, frameH: 18, frames: 24, fps: 30, scale: 1.1 },
     // Falling heart (carrier drop): Drop plays once when it appears, then Idle loops while it falls; Collect plays once at the witch when she grabs it.
     heartPickup: { scale: 1, collectDepth: 12, // collectDepth: drawn over the witch (10)
       idle:    { file: 'pickups/heart-idle.png',    frameW: 26, frameH: 62, frames: 24, fps: 8 },
@@ -236,7 +236,7 @@ export const CONFIG = {
       break: { file: 'pickups/crate-break.png', frameW: 88, frameH: 40, frames: 15, fps: 20 } },
     // Death puff under the sparks: 30 frames of the pack's "poof" (white pop, smoke balls, thinning; the thin tail was left out) played once.
     // scale = size, bigMul = extra size for the shooter and the chest, poolSize = puffs at once, depth = under the sparks (20) and rings (19).
-    poof: { file: 'fx/poof.png', frameW: 82, frameH: 72, frames: 30, fps: 60, scale: 0.6, bigMul: 1.5, poolSize: 8, depth: 18, originX: 0.45, originY: 0.57 }, // origin = the middle of the smoke inside its picture (found from the pixels), so a random turn spins it in place
+    poof: { file: 'fx/poof.png', frameW: 82, frameH: 72, frames: 30, fps: 60, scale: 0.72, bigMul: 1.5, poolSize: 8, depth: 18, originX: 0.45, originY: 0.57 }, // origin = the middle of the smoke inside its picture (found from the pixels), so a random turn spins it in place
     // Weapon-upgrade pickup = green gem (4 frames of 16x16, loops, random start frame). scale 1 = 16 px (3 screen pixels per art pixel; stays even). The grab radius stays coin.pickupRadius on screen.
     // Stars circling over her head after a hit ("stunned" of the free spell pack, MIT, 60 frames of 60x64, loops). offsetY = from her centre (negative = up; the stars sit just above her head), fadeMs = fade-out at the end. It lasts as long as she blinks after a hit (ship.invulnMs).
     // SHINE of every drop (coin, heart, potion): ONE shared look (SHINE above): spinning beams (3 pictures at fps, alpha = opacity, radius = length, widths in px) and a soft glow of flat rings behind it,
@@ -252,7 +252,7 @@ export const CONFIG = {
   // Enemy shots: slow red orbs. speed is the default; the wave data may set its own. hitSize = art pixels of the orb core.
   // Colour wash (easy tint): one flat colour over the play field at low strength, so pictures from different packs sit closer together. Per stage: color, alpha (0 = none, 0.2 = strong).
   // depth 33: over the play field and its effects, under the enemy shots (35), coins' pop texts are under it too, and the HUD (50). Try off with ?tint=0.
-  tint: { on: true, depth: 33, forest: { color: 0x7a4fd0, alpha: 0.12 }, swamp: { color: 0x2a9a8a, alpha: 0.12 } },
+  tint: { on: true, depth: 33, forest: { color: 0x7a4fd0, alpha: 0.22 }, swamp: { color: 0x2a9a8a, alpha: 0.12 } },
   // Test helpers of the tune panel (TEST tab). wave = stage starts at this wave (1-10), level = weapon level at the start (-1 = by wave), god = 1: no damage taken. Normal play: 1, -1, 0.
   testing: { wave: 1, level: -1, god: 0 },
   // Difficulty dials (1 = normal). The tune panel (HARD tab) changes them. enemyHp / enemySpeed apply to enemies that spawn after the change; the rest apply at once.
@@ -313,7 +313,7 @@ export const CONFIG = {
     ringPoolSize: 16, ringDepth: 19, pickupRingExtraMs: 100, // rings at once; draw depth; pickup rings last this much longer
     potionRing: { diameter: 76, thick: 2, color: 0x56d6e0 }, // the ring when you grab the weapon potion: a thin (2 px) line that grows to 76 px, in the potion's teal-blue. Remove it for the old thick green ring
     deathRing: true, deathRingMs: 280,      // ring puff when something dies / is picked up
-    deathRingScale: 1.2, bigDeathRingScale: 2, // final ring size in art pixels x PX (small enemies / imp, crate, pickups)
+    deathRingScale: 1.45, bigDeathRingScale: 2.4, // final ring size in art pixels x PX (small enemies / imp, crate, pickups)
 
     popText: false, popTextMs: 650, popTextRise: z(26), popTextSize: 12, popPoolSize: 10, popTextEdge: 14, popTextOffsetY: 24, // floating "+10" at kills and coins
     magnetRadius: 34, magnetSpeed: z(300),  // coins fly to the witch from this far (0 = off)
