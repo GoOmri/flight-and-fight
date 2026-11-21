@@ -22,6 +22,7 @@ export class MenuScene extends Phaser.Scene {
     this.load.spritesheet('menu_sky', 'assets/' + sky.file, { frameWidth: sky.frameW, frameHeight: sky.frameH });
     for (const d of M.decor) this.load.spritesheet('menu_' + d.key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
     this.load.image('menu_logo', 'assets/' + M.logo.file); // only the letters: they rise and float
+    for (const k of ['fight', 'amp', 'flight']) this.load.image('menu_logo_' + k, 'assets/menu/logo-' + k + '.png'); // the three parts of the letters: "Fight", "&", "Flight" (together they are menu_logo)
     if (M.logo.decor) this.load.image('menu_logo_decor', 'assets/' + M.logo.decor); // the moon, stars and bats of the logo picture: they stay in the background
     for (const k of ['panel-parchment', 'med-panel', 'med-button', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png?v=' + C.version); // ?v= = the phone must load the newest picture after an update (it kept an old copy of a picture with the same file name) // UI pictures: parchment panel and gear (Fantasy UI pack, catau-games), tan panel and button (Medieval UI pack, Doktoresco)
   }
@@ -251,7 +252,8 @@ export class MenuScene extends Phaser.Scene {
       });
       if (!L.decorParts) this.add.image(L.x, L.y, 'menu_logo_decor').setOrigin(0.5, 0).setScale(L.scale);
     }
-    const logo = this.add.image(L.x, H + 10, 'menu_logo').setOrigin(0.5, 0).setScale(L.scale);
+    const parts = ['fight', 'amp', 'flight'].map(k => 'menu_logo_' + k).filter(k => this.textures.exists(k)); // the words fly in one after the other; without the parts the whole logo rises at once
+    const words = (parts.length === 3 ? parts : ['menu_logo']).map(k => this.add.image(L.x, H + 10, k).setOrigin(0.5, 0).setScale(L.scale));
     const keys = [];
     try {
       const w = src.width, h = src.height, base = document.createElement('canvas'); base.width = w; base.height = h;
@@ -271,9 +273,10 @@ export class MenuScene extends Phaser.Scene {
       }
     } catch (e) { keys.length = 0; } // no shine if the picture cannot be read
     const shine = keys.length ? this.add.image(L.x, H + 10, keys[0]).setOrigin(0.5, 0).setScale(L.scale).setVisible(false) : null;
-    this.tweens.add({ targets: shine ? [logo, shine] : [logo], y: L.y, duration: 900, delay: 150, ease: 'Back.easeOut', // rises from below the screen and settles with a little overshoot
-     
-      onComplete: () => this.tweens.add({ targets: shine ? [logo, shine] : [logo], y: L.y + SH.float, duration: SH.floatMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }) });
+    const all = shine ? [...words, shine] : words; // everything that floats together
+    words.forEach((im, i) => this.tweens.add({ targets: im, y: L.y, duration: 850, delay: 150 + i * L.wordStepMs, ease: 'Back.easeOut', // each word rises from below the screen and settles with a little overshoot
+      onComplete: () => { if (i === words.length - 1) this.tweens.add({ targets: all, y: L.y + SH.float, duration: SH.floatMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }); } }));
+    if (shine) shine.y = L.y; // (the glint picture sits at the final spot, hidden until the first sweep)
     if (shine) this.time.addEvent({ delay: SH.everyMs, startAt: SH.everyMs - SH.firstMs, loop: true, callback: () => {
       let k = 0; shine.setVisible(true).setTexture(keys[0]);
       this.time.addEvent({ delay: SH.frameMs, repeat: keys.length - 1, callback: () => { shine.setTexture(keys[Math.min(k++, keys.length - 1)]); } });
