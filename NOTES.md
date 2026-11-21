@@ -623,3 +623,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Stage bubbles: the tan block panel (9-slice, 6 px border), 100x68, ink-brown text (no outline), a dark strip behind the medals (so the grey pending medals show on the tan), BEST in dark red-brown. Locked Stage 3 = the same panel tinted grey with grey text. config menu.bubble: ink, bestInk, lockedInk, inset, lockedTint.
 - Settings: rows adjusted for the 25 px buttons; credits updated (Doktoresco line, catau now only parchment + gear + font).
 - UNVERIFIED: how it looks (tan on the stone-grey menu sky, ink text, button text centring, the medal strip).
+
+## 2026-11-21 v1.9.49: purple and pink UI, text centred (branch v1949-purple-ui)
+- Omri (from real screenshots): the tan did not fit the game, and the button text sat a little high. The two Medieval pictures use only 3 colours, so they were recoloured with a pixel swap (a script, files overwritten in assets/ui): fill -> the game's purple (0x3b1478), outline -> pink (0xff5ac8), shadow -> dark violet (0x1a0830); the panel also got a 2 px pink border all round (the original only had corner ticks). Text on them is cream (0xfff3c4) with the dark outline again (as the old plates had); BEST is cyan; the medal strip is dark violet; the locked Stage 3 is the same panel dimmed with grey-violet text. A newer version waiting: UPDATE text turns orange (it used a tint before, which went muddy on purple).
+- Button text: it was centred by its line box, which puts the capitals high (the font has room for accents above). Labels are now 2 px lower (y = middle of the button, was 2 px above it).
+- Parchment and gear unchanged.
+- UNVERIFIED: how it looks on the phone; the text position on the buttons (1 to 2 px either way) is the thing to check.

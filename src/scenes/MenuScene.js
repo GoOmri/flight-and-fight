@@ -61,9 +61,9 @@ export class MenuScene extends Phaser.Scene {
     btn.draw = () => {
       btn.g.clear();
       if (art) { // normal, pressed, or hover (a newer version is waiting); dark brown text
-        btn.img.setTint(btn.down ? 0xbbbbbb : (btn.hot ? 0xffd9a0 : 0xffffff)).setY(by + (btn.down ? 1 : 0)); // pressed: darker and 1 px lower; a newer version waiting: warmer
-        btn.label.setColor(hex(UB.textColor)).setStroke(hex(P.shadow), 0);
-        btn.label.setY(by + ubh / 2 - 2 + (btn.down ? 1 : 0));
+        btn.img.setTint(btn.down ? 0xbbbbbb : 0xffffff).setY(by + (btn.down ? 1 : 0)); // pressed: darker and 1 px lower
+        btn.label.setColor(btn.hot ? hex(M.updateHotColor) : hex(UB.textColor)).setStroke(hex(P.shadow), 3); // a newer version waiting: orange text
+        btn.label.setY(by + ubh / 2 + (btn.down ? 1 : 0));
         return;
       }
       const sink = drawPlate(btn.g, bx, by, M.updateW, M.updateH, { fill: btn.hot ? M.updateHotColor : M.updateColor, border: btn.hot ? M.updateHotBorder : P.pink, down: btn.down, radius: 8 });
@@ -129,7 +129,7 @@ export class MenuScene extends Phaser.Scene {
     const b = { st: { theme: nd.theme }, locked: !!nd.locked, x, y, w, h, g, down: false, items: [] };
     const img = art ? this.add.nineslice(x, y, key, undefined, w, h, 6, 6, 6, 6).setOrigin(0, 0) : null;
     const add = (o, oy) => { b.items.push({ o, oy }); return o; }; // texts and medals sink with the plate when pressed
-    const B = M.bubble, cx = x + w / 2, ink = art ? B.ink : P.cream, shadow = art ? 0 : 3;
+    const B = M.bubble, cx = x + w / 2, ink = art ? B.ink : P.cream, shadow = 3;
     b.draw = () => {
       g.clear();
       const sink = art ? (b.down ? 1 : 0) : drawPlate(g, x, y, w, h, { fill: b.locked ? M.lockedFill : P.purple, border: b.locked ? M.lockedBorder : P.pink, down: b.down, radius: M.cardRadius });
@@ -170,7 +170,7 @@ export class MenuScene extends Phaser.Scene {
   makeSettings() {
     const S = M.settings, objs = [], ink = S.ink;
     const keep = o => { o.setDepth(S.depth).setVisible(false); objs.push(o); return o; };
-    const art = this.textures.exists('ui_panel-parchment'), T = (x, y, s, size, align = 0.5, color = ink) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color) }).setOrigin(align, 0.5));
+    const art = this.textures.exists('ui_panel-parchment'), T = (x, y, s, size, align = 0.5, color = ink, stroke = 0) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: stroke }).setOrigin(align, 0.5));
     // a dark veil over the menu, then the parchment (9-slice: the 24 px ragged border stays, the middle stretches); without the picture a drawn dark plate
     const veil = keep(this.add.graphics()); veil.fillStyle(0x000000, 0.55).fillRect(0, 0, W, H); veil.setDepth(S.depth - 1);
     if (art) keep(this.add.nineslice(S.x, S.y, 'ui_panel-parchment', undefined, S.w, S.h, 24, 24, 24, 24).setOrigin(0, 0));
@@ -181,10 +181,10 @@ export class MenuScene extends Phaser.Scene {
       const h = 25, bt = { btn: true, x, y, w, h, down: false, action, shown: false };
       bt.img = art ? keep(this.add.nineslice(x, y, 'ui_med-button', undefined, w, h, 10, 10, 0, 0).setOrigin(0, 0)) : null;
       bt.g = keep(this.add.graphics());
-      bt.label = T(x + w / 2, y + h / 2 - 2, label, S.btnSize, 0.5, art ? ink : P.cream);
+      bt.label = T(x + w / 2, y + h / 2, label, S.btnSize, 0.5, P.cream, 3);
       bt.draw = () => {
         bt.g.clear();
-        if (art) { bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(y + (bt.down ? 1 : 0)); bt.label.setY(y + h / 2 - 2 + (bt.down ? 1 : 0)); return; }
+        if (art) { bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(y + (bt.down ? 1 : 0)); bt.label.setY(y + h / 2 + (bt.down ? 1 : 0)); return; }
         if (!bt.shown) return;
         const sink = drawPlate(bt.g, x, y, w, h, { fill: P.purple, border: P.pink, down: bt.down, radius: 6 });
         bt.label.setY(y + (h - M.plateDrop) / 2 + sink + 1);
