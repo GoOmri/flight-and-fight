@@ -255,7 +255,8 @@ export class MenuScene extends Phaser.Scene {
         const key = 'decor' + i; if (!tex.has(key)) tex.add(key, 0, r[0], r[1], r[2], r[3]);
         const at = L.decorAt && L.decorAt[i]; // a decoration can be moved to its own spot (screen x, y of its centre), e.g. the moon
         const im = this.add.image(at ? at[0] : L.x + (r[0] + r[2] / 2 - src.width / 2) * L.scale, at ? at[1] : L.y + (r[1] + r[3] / 2) * L.scale, 'menu_logo_decor', key).setScale(0);
-        if (L.decorPop) this.tweens.add({ targets: im, scale: L.scale, duration: 420, delay: L.decorDelay + i * L.decorStepMs, ease: 'Back.easeOut' }); else im.setScale(L.scale); // off: the moon and stars are simply there
+        const sc = (L.decorScale && L.decorScale[i]) || L.scale; // a piece can have its own size too (the moon)
+        if (L.decorPop) this.tweens.add({ targets: im, scale: sc, duration: 420, delay: L.decorDelay + i * L.decorStepMs, ease: 'Back.easeOut' }); else im.setScale(sc); // off: the moon and stars are simply there
       });
       if (!L.decorParts) this.add.image(L.x, L.y, 'menu_logo_decor').setOrigin(0.5, 0).setScale(L.scale);
     }

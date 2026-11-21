@@ -753,3 +753,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-21 v1.9.75: the moon moves (branch v1975-moon)
 - Omri circled an empty spot in a screenshot (to the right of the Forest tile, left of the ghost) and asked for the moon there. The moon is decoration 0 of the logo picture (the first of the 10 pieces); menu.logo.decorAt now lets any piece have its own screen position: { 0: [160, 203] } puts the moon's centre at x 160, y 203 (read from the screenshot: 4.37 screen px per game px, the visible part started at y 78). Other pieces stay where the logo picture has them.
 - UNVERIFIED: the exact spot; tell Claude which way to nudge it. The moon is small (about 12 x 14 px); it could be scaled up later.
+
+## 2026-11-21 v1.9.76: moon left, up and bigger (branch v1976-moon-bigger)
+- Omri: the moon a bit left and up, and a little bigger. Position (160, 203) -> (149, 192); size 1.7 (the logo scale) -> 2.1 (menu.logo.decorScale, a size per piece; the moon is about 15 x 17 px now).
