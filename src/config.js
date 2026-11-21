@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.76", // bump on every push so the player/Omri can see the build
+  version: "1.9.77", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -82,7 +82,7 @@ export const CONFIG = {
     // x/y = the point of the picture that sits at (x,y) (originX/originY 0..1), scale (multiples of 1/3 keep the pixels even), fps, bob = up-down swing in px (0 = still), bobMs = swing period, flipX.
     decor: [
       { key: 'witch',  file: 'menu/witch.png',  frameW: 61, frameH: 55, frames: 4, fps: 5, x: 52,  y: 266,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 3, bobMs: 3200, swayX: 3, swayDeg: 2, swayMs: 4200, introX: 0, par: 6 },
-      { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 198, y: 236,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 6, bobMs: 3400, swayX: 4, swayMs: 5200, fade: [0.7, 1], fadeMs: 2800, par: 8 },
+      { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 198, y: 246,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 6, bobMs: 3400, swayX: 4, swayMs: 5200, fade: [0.7, 1], fadeMs: 2800, par: 8 },
       { key: 'bat',    file: 'menu/bat.png',    frameW: 32, frameH: 28, frames: 4, fps: 5, x: 160, y: 0,   originX: 0.5, originY: 0,   scale: 1,     bob: 0, bobMs: 1000 },
       { key: 'cat',    file: 'menu/cat.png',    frameW: 21, frameH: 25, frames: 5, fps: 4, x: 32,  y: 392, originX: 0.5, originY: 1,   scale: 1.333, depth: 50, bob: 0, bobMs: 1000, par: 6 },
       { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 204, y: 422, originX: 0.5, originY: 1,   scale: 2, depth: 50, bob: 0, bobMs: 1000, par: 6 }

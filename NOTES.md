@@ -756,3 +756,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-21 v1.9.76: moon left, up and bigger (branch v1976-moon-bigger)
 - Omri: the moon a bit left and up, and a little bigger. Position (160, 203) -> (149, 192); size 1.7 (the logo scale) -> 2.1 (menu.logo.decorScale, a size per piece; the moon is about 15 x 17 px now).
+
+## 2026-11-21 v1.9.77: ghost 10 px lower (branch v1977-ghost-lower)
+- Omri: ghost lower by 10 px. Centre y 236 -> 246 (config menu.decor ghost). It floats +-6 px around that.
