@@ -169,15 +169,15 @@ export class MenuScene extends Phaser.Scene {
     const bottomAt = y => (y < PA.fadeStart ? 1 : Math.max(0, 1 - (y - PA.fadeStart) / (PA.lineBottom - PA.fadeStart))); // 1 = full, 0 = gone
     const topAt = (y, len) => Math.min(1, Math.max(0, y / len));
     g.clear(); gl.clear();
-    const worldTop = PA.bottomCy - (PA.nodes.length - 1) * PA.step - bh / 2 - 20; // the line starts a little above the highest bubble
+    const worldTop = -1e5; // the line never ends upward: whatever the player pulls, no top end is visible
     for (let y = PA.lineTop; y < PA.lineBottom; y += 2) {
       const wy = y - S; // position on the path itself
       if (wy < worldTop || wy >= PA.lineBottom) continue;
       const k = bottomAt(y + 1) * topAt(y + 1, PA.fadeTop);
       if (k <= 0.01) continue;
       g.fillStyle(PA.lineColor, k).fillRect(PA.x - PA.lineW / 2, y, PA.lineW, 2);
-      gl.fillStyle(PA.lineColor, 0.14 * k).fillRect(PA.x - PA.lineW / 2 - 4, y, PA.lineW + 8, 2);
-      gl.fillStyle(PA.lineColor, 0.22 * k).fillRect(PA.x - PA.lineW / 2 - 2, y, PA.lineW + 4, 2);
+      gl.fillStyle(PA.lineColor, 0.14 * k).fillRect(PA.x - PA.lineW / 2 - 3, y, PA.lineW + 6, 2); // glow: 1 px less on each side than before
+      gl.fillStyle(PA.lineColor, 0.22 * k).fillRect(PA.x - PA.lineW / 2 - 1, y, PA.lineW + 2, 2);
     }
     for (const b of this.bubbles) {
       const cy = b.cy + S, a = bottomAt(cy) * topAt(cy, PA.fadeTopBubble);

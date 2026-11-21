@@ -699,3 +699,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-21 v1.9.64: gentler logo landing (branch v1964-softer-settle)
 - Omri: lower overshoot and a lower settle speed for the words rising. Overshoot (the Back ease strength) 1.7 (default) -> 0.6: they go past their spot by about a third as much; rise time 850 -> 1200 ms (riseMs): slower settle. Config menu.logo.overshoot / riseMs. The first glint (2.6 s) and decorations (1.5 s) start while the last word is still landing (0.1 s apart + 1.2 s = about 1.5 s): if that looks crowded, raise decorDelay.
+
+## 2026-11-21 v1.9.65: thinner glow, endless line (branch v1965-endless-line)
+- Omri: take one pixel off the middle line's glow and make the line endless so the player never sees its end. Glow: the outer layer 8 -> 6 px wider than the line (1 px less each side), the inner layer 4 -> 2 px wider. Line: it used to start a little above the highest bubble, so pulling the path down past its end (the bounce) showed the line's top end; it now runs up past the top of the screen at any scroll (applyScroll worldTop). The bottom still fades out at the witch's hat on purpose (the fade you asked for).
