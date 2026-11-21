@@ -749,3 +749,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-21 v1.9.74: cauldron bigger and away from the right edge (branch v1974-cauldron-left)
 - Omri (screenshot of 1.9.72): the cauldron can be bigger, and it was too close to the right edge. Scale 1.667 -> 2.0 (58 px wide, 60 high), centre x 215 -> 204: it spans about x 175 to 233 (7 px from the right edge, about 16 px from UPDATE) and rises to about y 362; its top left corner may touch the bottom right of the "t" of Flight (the cauldron is in front). From the screenshot the letters end at x about 178 at that height.
+
+## 2026-11-21 v1.9.75: the moon moves (branch v1975-moon)
+- Omri circled an empty spot in a screenshot (to the right of the Forest tile, left of the ghost) and asked for the moon there. The moon is decoration 0 of the logo picture (the first of the 10 pieces); menu.logo.decorAt now lets any piece have its own screen position: { 0: [160, 203] } puts the moon's centre at x 160, y 203 (read from the screenshot: 4.37 screen px per game px, the visible part started at y 78). Other pieces stay where the logo picture has them.
+- UNVERIFIED: the exact spot; tell Claude which way to nudge it. The moon is small (about 12 x 14 px); it could be scaled up later.
