@@ -616,3 +616,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-21 v1.9.47: menu witch slower, with a subtle sway (branch v1947-witch-sway)
 - Omri: slow the witch animation and add a little sway in all directions, subtle. Menu witch: animation 8 -> 5 fps; up-down bob 1 -> 3 px (3.2 s), new sideways sway 3 px (4.2 s) and a tilt of +-2 degrees (about 2.9 s); the three run at different paces so the path does not repeat exactly. Config menu.decor witch: fps, bob / bobMs, swayX, swayDeg, swayMs (any decoration can use them). Smoke script still passes.
 - UNVERIFIED: how it looks; if it is too much or too little change swayX / swayDeg / bob.
+
+## 2026-11-21 v1.9.48: Medieval UI buttons and stage panels (branch v1948-medieval-ui)
+- Omri: use the Medieval UI (Doktoresco). Done as he chose: buttons (UPDATE and the settings buttons) and the stage bubbles; the parchment and the gear stay from the catau pack. The Medieval PNGs are exported 64x too big; shrunk 1/64 with nearest-neighbour and trimmed with PowerShell: assets/ui/ui-med-button.png (80x25, long button 8) and ui-med-panel.png (145x44, block 5). The catau copper buttons, wood and stone panels are removed from assets (still in git history; the pack is local).
+- Buttons: 9-slice (10 px round ends stay), 25 px high; pressed = darker and 1 px lower (the pack's "touch" pictures are not used); dark brown text. UPDATE 104x25 at y 376 (a newer version waiting = warmer tint).
+- Stage bubbles: the tan block panel (9-slice, 6 px border), 100x68, ink-brown text (no outline), a dark strip behind the medals (so the grey pending medals show on the tan), BEST in dark red-brown. Locked Stage 3 = the same panel tinted grey with grey text. config menu.bubble: ink, bestInk, lockedInk, inset, lockedTint.
+- Settings: rows adjusted for the 25 px buttons; credits updated (Doktoresco line, catau now only parchment + gear + font).
+- UNVERIFIED: how it looks (tan on the stone-grey menu sky, ink text, button text centring, the medal strip).

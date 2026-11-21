@@ -22,7 +22,7 @@ export class MenuScene extends Phaser.Scene {
     this.load.spritesheet('menu_sky', 'assets/' + sky.file, { frameWidth: sky.frameW, frameHeight: sky.frameH });
     for (const d of M.decor) this.load.spritesheet('menu_' + d.key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
     this.load.image('menu_logo', 'assets/' + M.logo.file);
-    for (const k of ['panel-parchment', 'panel-wood', 'panel-stone', 'button-normal', 'button-pressed', 'button-hover', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png'); // Fantasy UI pack (catau-games): parchment panel, copper button (3 looks), settings medallion
+    for (const k of ['panel-parchment', 'med-panel', 'med-button', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png'); // UI pictures: parchment panel and gear (Fantasy UI pack, catau-games), tan panel and button (Medieval UI pack, Doktoresco)
   }
 
   create() {
@@ -53,17 +53,17 @@ export class MenuScene extends Phaser.Scene {
 
     // ---- UPDATE button: gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser or the installed app).
     // When the menu opens it asks the server for the newest version number; if it is newer the button turns orange.
-    const art = this.textures.exists('ui_button-normal'), UB = M.updateBtn; // the copper button (9-slice: the ends stay, the middle stretches); without the pictures the old drawn plate is used
-    const ubw = art ? UB.w : M.updateW, ubh = art ? 22 : M.updateH, bx = (W - ubw) / 2, by = M.updateTop;
+    const art = this.textures.exists('ui_med-button'), UB = M.updateBtn; // the tan button of the Medieval UI pack (9-slice: the round ends stay, the middle stretches); without the picture the old drawn plate is used
+    const ubw = art ? UB.w : M.updateW, ubh = art ? 25 : M.updateH, bx = (W - ubw) / 2, by = M.updateTop;
     const btn = { btn: true, x: bx, y: by, w: ubw, h: ubh, g: this.add.graphics(), down: false, hot: false, busy: false };
-    btn.img = art ? this.add.nineslice(bx, by, 'ui_button-normal', undefined, ubw, 22, 12, 12, 0, 0).setOrigin(0, 0) : null;
+    btn.img = art ? this.add.nineslice(bx, by, 'ui_med-button', undefined, ubw, 25, 10, 10, 0, 0).setOrigin(0, 0) : null;
     btn.label = this.add.text(W / 2, by + ubh / 2, 'UPDATE', { ...FONT, fontSize: fpx(M.updateSize) + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5);
     btn.draw = () => {
       btn.g.clear();
       if (art) { // normal, pressed, or hover (a newer version is waiting); dark brown text
-        btn.img.setTexture('ui_button-' + (btn.down ? 'pressed' : (btn.hot ? 'hover' : 'normal')));
+        btn.img.setTint(btn.down ? 0xbbbbbb : (btn.hot ? 0xffd9a0 : 0xffffff)).setY(by + (btn.down ? 1 : 0)); // pressed: darker and 1 px lower; a newer version waiting: warmer
         btn.label.setColor(hex(UB.textColor)).setStroke(hex(P.shadow), 0);
-        btn.label.setY(by + ubh / 2 - 1 + (btn.down ? 1 : 0));
+        btn.label.setY(by + ubh / 2 - 2 + (btn.down ? 1 : 0));
         return;
       }
       const sink = drawPlate(btn.g, bx, by, M.updateW, M.updateH, { fill: btn.hot ? M.updateHotColor : M.updateColor, border: btn.hot ? M.updateHotBorder : P.pink, down: btn.down, radius: 8 });
@@ -124,29 +124,32 @@ export class MenuScene extends Phaser.Scene {
 
   // One stage bubble: a plate with a colour tab, the name, the earned medals and the best score. A locked stage is faded and says SOON.
   makeBubble(nd, x, y, w, h, txt) {
-    const key = 'ui_panel-' + M.bubble.panel, art = this.textures.exists(key); // the panel picture (config menu.bubble.panel: 'stone' or 'wood'), 9-slice with the 24 px ornate border; a locked stage is the same panel, darker; without the picture the old drawn plate
+    const key = 'ui_med-panel', art = this.textures.exists(key); // the tan panel of the Medieval UI pack, 9-slice (6 px border); a locked stage is the same panel, darker; without the picture the old drawn plate
     const g = this.add.graphics();
     const b = { st: { theme: nd.theme }, locked: !!nd.locked, x, y, w, h, g, down: false, items: [] };
-    const img = art ? this.add.nineslice(x, y, key, undefined, w, h, 24, 24, 24, 24).setOrigin(0, 0) : null;
+    const img = art ? this.add.nineslice(x, y, key, undefined, w, h, 6, 6, 6, 6).setOrigin(0, 0) : null;
     const add = (o, oy) => { b.items.push({ o, oy }); return o; }; // texts and medals sink with the plate when pressed
-    const B = M.bubble, cx = x + w / 2;
+    const B = M.bubble, cx = x + w / 2, ink = art ? B.ink : P.cream, shadow = art ? 0 : 3;
     b.draw = () => {
       g.clear();
       const sink = art ? (b.down ? 1 : 0) : drawPlate(g, x, y, w, h, { fill: b.locked ? M.lockedFill : P.purple, border: b.locked ? M.lockedBorder : P.pink, down: b.down, radius: M.cardRadius });
-      if (art) { img.setTint(b.down ? 0xcccccc : (b.locked ? M.bubble.lockedTint : 0xffffff)); img.y = y + sink; }
+      if (art) {
+        img.setTint(b.down ? 0xcccccc : (b.locked ? B.lockedTint : 0xffffff)); img.y = y + sink;
+        if (!b.locked) g.fillStyle(B.inset, 1).fillRoundedRect(x + 8, y + 26 + sink, w - 16, 17, 3); // a dark strip behind the medals so the grey ones can be seen on the tan
+      }
       b.items.forEach(i => i.o.setY(i.oy + sink));
     };
     if (b.locked) {
-      add(txt(cx, y + 24, nd.name, B.nameSize, 3, 0.5, M.lockedText), y + 24);
-      add(txt(cx, y + 44, 'SOON', B.nameSize, 3, 0.5, M.lockedText), y + 44);
+      add(txt(cx, y + 24, nd.name, B.nameSize, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 24);
+      add(txt(cx, y + 44, 'SOON', B.nameSize, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 44);
     } else {
-      add(txt(cx, y + 14, nd.name, B.nameSize, 3), y + 14);
+      add(txt(cx, y + 14, nd.name, B.nameSize, shadow, 0.5, ink), y + 14);
       const medals = loadMedals(nd.theme), best = loadBest(nd.theme), n = MEDAL_KEYS.length;
       MEDAL_KEYS.forEach((k, j) => {
         const im = add(this.add.image(0, y + 34, 'medal_' + k + '_' + (medals[k] ? 'earned' : 'pending')).setScale(B.medalScale), y + 34);
         im.x = cx + (j - (n - 1) / 2) * (im.displayWidth + B.medalGap);
       });
-      if (best > 0) add(txt(cx, y + h - 13, 'BEST ' + best, B.bestSize, 2, 0.5, P.cyan), y + h - 13);
+      if (best > 0) add(txt(cx, y + h - 13, 'BEST ' + best, B.bestSize, shadow, 0.5, art ? B.bestInk : P.cyan), y + h - 13);
     }
     b.draw();
     return b;
@@ -175,13 +178,13 @@ export class MenuScene extends Phaser.Scene {
     T(S.x + S.w / 2, S.y + 36, 'SETTINGS', S.titleSize, 0.5, art ? ink : P.cream);
     this.panelButtons = [];
     const mkBtn = (x, y, w, label, action) => { // a copper button: 9-slice picture (normal / pressed) with dark text
-      const h = 22, bt = { btn: true, x, y, w, h, down: false, action, shown: false };
-      bt.img = art ? keep(this.add.nineslice(x, y, 'ui_button-normal', undefined, w, h, 12, 12, 0, 0).setOrigin(0, 0)) : null;
+      const h = 25, bt = { btn: true, x, y, w, h, down: false, action, shown: false };
+      bt.img = art ? keep(this.add.nineslice(x, y, 'ui_med-button', undefined, w, h, 10, 10, 0, 0).setOrigin(0, 0)) : null;
       bt.g = keep(this.add.graphics());
-      bt.label = T(x + w / 2, y + h / 2 - 1, label, S.btnSize, 0.5, art ? ink : P.cream);
+      bt.label = T(x + w / 2, y + h / 2 - 2, label, S.btnSize, 0.5, art ? ink : P.cream);
       bt.draw = () => {
         bt.g.clear();
-        if (art) { bt.img.setTexture('ui_button-' + (bt.down ? 'pressed' : 'normal')); bt.label.setY(y + h / 2 - 1 + (bt.down ? 1 : 0)); return; }
+        if (art) { bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(y + (bt.down ? 1 : 0)); bt.label.setY(y + h / 2 - 2 + (bt.down ? 1 : 0)); return; }
         if (!bt.shown) return;
         const sink = drawPlate(bt.g, x, y, w, h, { fill: P.purple, border: P.pink, down: bt.down, radius: 6 });
         bt.label.setY(y + (h - M.plateDrop) / 2 + sink + 1);
@@ -191,7 +194,7 @@ export class MenuScene extends Phaser.Scene {
     };
     const left = S.x + 30, right = S.x + S.w - 30, bwid = S.btnW, lc = art ? ink : P.cream, hc = art ? S.hintInk : P.cyan;
     // CONTROLS
-    T(left, S.y + 66, 'CONTROLS', S.btnSize, 0, lc);
+    T(left, S.y + 67, 'CONTROLS', S.btnSize, 0, lc);
     const ctl = mkBtn(right - bwid, S.y + 55, bwid, C.ship.controls === 'stick' ? 'STICK' : 'DRAG', () => {
       const v = C.ship.controls === 'stick' ? 'drag' : 'stick';
       C.ship.controls = v;
@@ -200,10 +203,10 @@ export class MenuScene extends Phaser.Scene {
     });
     const hint = T(left, S.y + 92, C.ship.controls === 'stick' ? 'RING STICK UNDER YOUR THUMB' : 'SWIPE ANYWHERE TO MOVE', 8, 0, hc);
     // TUNE PANEL
-    T(left, S.y + 125, 'TUNE PANEL', S.btnSize, 0, lc);
+    T(left, S.y + 126, 'TUNE PANEL', S.btnSize, 0, lc);
     const tn = mkBtn(right - bwid, S.y + 114, bwid, tuneEnabled() ? 'ON' : 'OFF', () => { tn.label.setText(toggleTune() ? 'ON' : 'OFF'); });
     // FONT (the page reloads to use the other one)
-    T(left, S.y + 155, 'FONT', S.btnSize, 0, lc);
+    T(left, S.y + 156, 'FONT', S.btnSize, 0, lc);
     mkBtn(right - bwid - 20, S.y + 144, bwid + 20, packFontOn() ? 'PACK' : 'CLASSIC', () => { savePackFont(!packFontOn()); window.location.reload(); });
     // SOUND
     T(left, S.y + 186, 'SOUND', S.btnSize, 0, hc);
