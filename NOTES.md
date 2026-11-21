@@ -576,3 +576,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - The path line and its little arms are now the bubble outline pink (config menu.path.lineColor 0xff5ac8, was a stand-in cream). The coloured tab inside the left edge of the bubbles is gone. Logo bigger (scale 1.2 -> 1.4, y 258), UPDATE lower (top 362 -> 378), the menu witch about twice as big (scale 0.667 -> 1.333, now at x 42, y 250). The gear's teeth now have 8 points (it looked like a plus sign).
 - Omri is looking for pixel-art buttons to replace the code-drawn plates (not done; tell Claude the file names when they are in the folder).
 - UNVERIFIED: not seen. Possible overlaps: the big witch with the forest bubble and the logo, the logo against UPDATE.
+
+## 2026-11-21 v1.9.40: menu witch in front and bigger (branch v1940-witch-front)
+- Omri: the witch should be in front of everything and bigger, like his mockup. Menu decorations can now have a depth (config menu.decor[].depth, default -5 = behind); the witch has depth 30, so she is over the bubbles and the logo. Scale 1.333 -> 1.667 (about 100 px wide), at x 52, y 266.
+- UNVERIFIED: not seen; she may cover the bottom of the Forest bubble a little (hat tip) or part of the logo: move her with menu.decor witch x / y / scale.
