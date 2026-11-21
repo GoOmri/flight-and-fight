@@ -649,3 +649,12 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-21 v1.9.54: the four animated friends are the foreground (branch v1954-foreground-sprites)
 - Omri: the 4 animated sprites (witch, ghost, cat, cauldron) are the foreground; nothing may be in front of them. They now all have depth 50 in config.menu.decor (the bubbles, logo, UPDATE button, gear and texts are at 0; the animated sky is at -10). The settings panel (depth 99 / 100) is still above them on purpose (it opens over the whole menu).
+
+## 2026-11-21 v1.9.55: menu pop: logo glint and float, glowing path, spark, pulse, slide-in (branch v1.9.55 = v1955-menu-pop)
+- Omri agreed to ideas 1, 2 and 3. Built (all in src/scenes/MenuScene.js, numbers in config.menu):
+  1. Logo (makeLogo): drops in with a bounce, then floats up and down 2 px (logoShine.float / floatMs); every 4.2 s a bright band sweeps over the letters (14 pictures made from the logo's own pixels at start: only logo pixels inside the band are brightened, so it works in WebGL and CANVAS; logoShine.frames / band / strength / frameMs / everyMs / firstMs). If the logo picture cannot be read there is no glint.
+  2. Path: a soft gold glow under the line that breathes (alpha 1 -> 0.55 in 1.6 s); a small white spark runs up the line every 4.4 s; the next stage to play (the lowest open stage without all four medals) has a gold edge that pulses (bubble.halo).
+  3. Entry: the bubbles slide in from their sides with a small overshoot (lowest first), the witch flies in from the left (decor witch introX -130) and starts her sway when she arrives.
+- Fix found on the way: the dark medal strip behind the medals was created before the panel picture so it was hidden behind it. Each bubble is now a container (panel, halo, strip, texts and medals in that order), which also makes the slide-in easy.
+- Checked with the stand-in script (taps, modal, the whole create runs). NOT checked: any of the looks or timings (never run in a browser); the glint pixel code needs a real browser (it is wrapped so a failure only means no glint).
+- UNVERIFIED: speed and strength of everything; tune logoShine and the tween times.

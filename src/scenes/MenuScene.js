@@ -34,13 +34,17 @@ export class MenuScene extends Phaser.Scene {
     this.addArt();
     const txt = (x, y, s, size, stroke, align = 0.5, color = P.cream) => this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: stroke }).setOrigin(align, 0.5);
     this.txt = txt;
-    if (this.textures.exists('menu_logo')) this.add.image(M.logo.x, M.logo.y, 'menu_logo').setOrigin(0.5, 0).setScale(M.logo.scale); // pixel logo: "Fight & Flight", tilted up in perspective
+    if (this.textures.exists('menu_logo')) this.makeLogo(); // pixel logo: "Fight & Flight", tilted up in perspective: drops in, floats, and a glint sweeps over it now and then
     else txt(W / 2, M.titleY, 'Flight and Fight', M.titleSize, M.titleStroke);
     const verTxt = txt(W / 2, H - M.versionBottom, 'v' + C.version, M.versionSize, 2).setAlpha(M.versionAlpha);
     let verTaps = 0, verAt = 0; // 5 quick taps on the version text turn the tuning panel on or off (see tune.js)
 
     // ---- the path: a line up the middle, bubbles left and right of it
     const PA = M.path, bw = PA.bubbleW, bh = PA.bubbleH;
+    const glow = this.add.graphics().setBlendMode(Phaser.BlendModes.ADD); // a soft gold glow along the line, breathing slowly
+    glow.fillStyle(PA.lineColor, 0.14).fillRect(PA.x - PA.lineW / 2 - 4, PA.lineTop, PA.lineW + 8, PA.lineBottom - PA.lineTop);
+    glow.fillStyle(PA.lineColor, 0.22).fillRect(PA.x - PA.lineW / 2 - 2, PA.lineTop, PA.lineW + 4, PA.lineBottom - PA.lineTop);
+    this.tweens.add({ targets: glow, alpha: 0.55, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     const line = this.add.graphics();
     line.fillStyle(PA.lineColor, 1).fillRect(PA.x - PA.lineW / 2, PA.lineTop, PA.lineW, PA.lineBottom - PA.lineTop);
     this.bubbles = [];
@@ -50,6 +54,19 @@ export class MenuScene extends Phaser.Scene {
       const b = this.makeBubble(nd, x, y, bw, bh, txt);
       this.bubbles.push(b);
     }
+    // a little spark runs up the line now and then
+    if (!this.textures.exists('menu_spark')) { const cv = this.textures.createCanvas('menu_spark', 5, 5), cx = cv.getContext(); cx.fillStyle = '#ffffff'; cx.fillRect(2, 0, 1, 5); cx.fillRect(0, 2, 5, 1); cv.refresh(); }
+    const spark = this.add.image(PA.x, PA.lineBottom, 'menu_spark').setBlendMode(Phaser.BlendModes.ADD).setAlpha(0);
+    this.tweens.add({ targets: spark, y: PA.lineTop + 6, duration: 2600, repeat: -1, repeatDelay: 1800, delay: 1500, ease: 'Sine.easeInOut', onUpdate: tw => spark.setAlpha(Math.sin(Math.PI * tw.progress)) });
+    // the next stage to play (the lowest open stage that does not have all medals yet) pulses with a gold edge
+    const next = [...this.bubbles].reverse().find(b => !b.locked && !b.complete);
+    if (next && next.halo) { next.halo.setVisible(true); this.tweens.add({ targets: next.halo, alpha: 0.25, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }); }
+    // the bubbles slide in from their sides, the lowest one first
+    this.bubbles.forEach((b, i) => {
+      const left = i % 2 === 0 ? (PA.nodes[i].side === 'L') : (PA.nodes[i].side === 'L');
+      b.cont.x = left ? -140 : 140;
+      this.tweens.add({ targets: b.cont, x: 0, duration: 650, delay: 200 + (this.bubbles.length - 1 - i) * 140, ease: 'Back.easeOut' });
+    });
 
     // ---- UPDATE button: gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser or the installed app).
     // When the menu opens it asks the server for the newest version number; if it is newer the button turns orange.
@@ -151,8 +168,44 @@ export class MenuScene extends Phaser.Scene {
       });
       if (best > 0) add(txt(cx, y + h - 13, 'BEST ' + best, B.bestSize, shadow, 0.5, art ? B.bestInk : P.cyan), y + h - 13);
     }
+    b.complete = !b.locked && MEDAL_KEYS.every(k => loadMedals(nd.theme)[k]);
+    b.halo = art && !b.locked ? this.add.graphics().setVisible(false) : null; // gold edge, shown only on the next stage to play
+    if (b.halo) b.halo.lineStyle(3, M.path.lineColor, 1).strokeRoundedRect(x - 2, y - 2, w + 4, h + 4, 5);
+    b.cont = this.add.container(0, 0, [img, b.halo, g, ...b.items.map(i => i.o)].filter(Boolean)); // order: panel, halo, strip, texts and medals
     b.draw();
     return b;
+  }
+
+  // The logo: drops in with a bounce, then floats up and down; every few seconds a bright band sweeps over its letters (pre-drawn frames made from the logo itself, so it works in WebGL and CANVAS).
+  makeLogo() {
+    const L = M.logo, SH = M.logoShine, src = this.textures.get('menu_logo').getSourceImage();
+    const logo = this.add.image(L.x, -120, 'menu_logo').setOrigin(0.5, 0).setScale(L.scale);
+    const keys = [];
+    try {
+      const w = src.width, h = src.height, base = document.createElement('canvas'); base.width = w; base.height = h;
+      const bx = base.getContext('2d'); bx.drawImage(src, 0, 0);
+      const px = bx.getImageData(0, 0, w, h).data, span = w + h * 0.5 + SH.band * 2;
+      for (let f = 0; f < SH.frames; f++) {
+        const key = 'logo_shine_' + f; keys.push(key);
+        if (this.textures.exists(key)) continue;
+        const cv = this.textures.createCanvas(key, w, h), ctx = cv.getContext(), out = ctx.createImageData(w, h), c = -SH.band + span * f / (SH.frames - 1);
+        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+          const i = (y * w + x) * 4, a = px[i + 3], t = Math.abs(x + y * 0.5 - c) / (SH.band / 2);
+          if (a < 20 || t >= 1) continue; // only logo pixels inside the band
+          const k = (1 - t) * SH.strength;
+          out.data[i] = px[i] + (255 - px[i]) * k; out.data[i + 1] = px[i + 1] + (255 - px[i + 1]) * k; out.data[i + 2] = px[i + 2] + (255 - px[i + 2]) * k; out.data[i + 3] = a;
+        }
+        ctx.putImageData(out, 0, 0); cv.refresh();
+      }
+    } catch (e) { keys.length = 0; } // no shine if the picture cannot be read
+    const shine = keys.length ? this.add.image(L.x, -120, keys[0]).setOrigin(0.5, 0).setScale(L.scale).setVisible(false) : null;
+    this.tweens.add({ targets: shine ? [logo, shine] : [logo], y: L.y, duration: 800, delay: 150, ease: 'Bounce.easeOut',
+      onComplete: () => this.tweens.add({ targets: shine ? [logo, shine] : [logo], y: L.y + SH.float, duration: SH.floatMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }) });
+    if (shine) this.time.addEvent({ delay: SH.everyMs, startAt: SH.everyMs - SH.firstMs, loop: true, callback: () => {
+      let k = 0; shine.setVisible(true).setTexture(keys[0]);
+      this.time.addEvent({ delay: SH.frameMs, repeat: keys.length - 1, callback: () => { shine.setTexture(keys[Math.min(k++, keys.length - 1)]); } });
+      this.time.delayedCall(SH.frameMs * (keys.length + 1), () => shine.setVisible(false));
+    } });
   }
 
   // The gear: a small pixel-art cog drawn in code (art pixel = GE.px game px).
@@ -233,10 +286,13 @@ export class MenuScene extends Phaser.Scene {
       const s = this.add.sprite(d.x, d.y, 'menu_' + d.key).setOrigin(d.originX, d.originY).setScale(d.scale).setFlipX(!!d.flipX).setDepth(d.depth ?? -5); // depth: higher = in front (the witch is in front of everything)
       s.play('menu_' + d.key);
       s.anims.setCurrentFrame(s.anims.currentAnim.frames[Phaser.Math.Between(0, d.frames - 1)]);
-      if (d.bob) this.tweens.add({ targets: s, y: d.y + d.bob, duration: d.bobMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: Phaser.Math.Between(0, 600) });
-      // a little sway in every direction (sideways, tilt) on top of the up-down bob; each runs at its own pace so the path never repeats exactly. swayX = px, swayDeg = degrees, swayMs = full swing time.
-      if (d.swayX) this.tweens.add({ targets: s, x: d.x + d.swayX, duration: d.swayMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: Phaser.Math.Between(0, 600) });
-      if (d.swayDeg) { s.setAngle(-d.swayDeg); this.tweens.add({ targets: s, angle: d.swayDeg, duration: d.swayMs * 0.7, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }); }
+      const motion = () => { // the little constant motion (bob, sway, tilt); starts after a fly-in
+        if (d.bob) this.tweens.add({ targets: s, y: d.y + d.bob, duration: d.bobMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: Phaser.Math.Between(0, 600) });
+        // a little sway in every direction (sideways, tilt) on top of the up-down bob; each runs at its own pace so the path never repeats exactly. swayX = px, swayDeg = degrees, swayMs = full swing time.
+        if (d.swayX) this.tweens.add({ targets: s, x: d.x + d.swayX, duration: d.swayMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: Phaser.Math.Between(0, 600) });
+        if (d.swayDeg) { s.setAngle(-d.swayDeg); this.tweens.add({ targets: s, angle: d.swayDeg, duration: d.swayMs * 0.7, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }); }
+      };
+      if (d.introX) { s.x = d.x + d.introX; this.tweens.add({ targets: s, x: d.x, duration: 1100, delay: 350, ease: 'Cubic.easeOut', onComplete: motion }); } else motion();
     }
   }
 }
