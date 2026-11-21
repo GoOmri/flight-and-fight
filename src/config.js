@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.36", // bump on every push so the player/Omri can see the build
+  version: "1.9.37", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -286,7 +286,7 @@ export const CONFIG = {
     deathRing: true, deathRingMs: 280,      // ring puff when something dies / is picked up
     deathRingScale: 1.2, bigDeathRingScale: 2, // final ring size in art pixels x PX (small enemies / imp, crate, pickups)
 
-    popText: true, popTextMs: 650, popTextRise: z(26), popTextSize: 12, popPoolSize: 10, popTextEdge: 14, popTextOffsetY: 24, // floating "+10" at kills and coins
+    popText: false, popTextMs: 650, popTextRise: z(26), popTextSize: 12, popPoolSize: 10, popTextEdge: 14, popTextOffsetY: 24, // floating "+10" at kills and coins
     magnetRadius: 34, magnetSpeed: z(300),  // coins fly to the witch from this far (0 = off)
 
     hitFlashMs: 140,                        // white-pink screen flash when the witch is hit (0 = off)

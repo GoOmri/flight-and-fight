@@ -559,3 +559,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-20 v1.9.36: more rope for the witch (branch v1936-more-rope)
 - Omri: "more rope". Read as a looser leash: she trails the finger a bit more and swings further before settling (ship.spring: fastW 44 -> 36, fastZ 0.9 -> 0.85, slowW 5 -> 4.5, slowZ 0.5 -> 0.45). From the small simulation: about 12 px behind the finger at a steady 300 px/s (was 9), about 15 px overshoot when the thumb rests (was 10), back in about 0.8 s (was 0.73).
 - UNVERIFIED on the phone. If "rope" meant something else (e.g. she should be allowed to lag behind much further, or hang below the finger), say so. Quick dials in the MOVE tab: CATCH-UP STRENGTH (lower = more rope while moving), SETTLE STRENGTH (lower = slower return), BOUNCE (lower = more swing).
+
+## 2026-11-21 v1.9.37: no floating numbers (branch v1937-no-pop-numbers)
+- Omri: remove the numbers after shooting an enemy and picking up coins. config feel.popText true -> false: the floating "+10" / "+5" at kills, coins and a heart picked up at full health are gone. The score at the top still counts and pops. Set popText true to bring them back.
+- UNVERIFIED: not run. Check that nothing else (a heart at full health, a chest) still shows a number.
