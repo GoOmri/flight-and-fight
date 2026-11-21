@@ -42,7 +42,8 @@ export class MenuScene extends Phaser.Scene {
 
     // ---- the path: a line up the middle, bubbles left and right of it. Stage 1 is at the bottom; with more stages than fit, drag up / down to scroll (applyScroll).
     const PA = M.path, bw = PA.bubbleW, bh = PA.bubbleH, nodes = PA.nodes;
-    this.scrollMax = Math.max(0, PA.topStop - (PA.bottomCy - (nodes.length - 1) * PA.step)); // how far the path can be pulled down (0 = everything fits, no scrolling)
+    const lastOpen = nodes.reduce((m, nd, i) => (nd.locked ? m : i), 0), farthest = Math.min(nodes.length - 1, lastOpen + PA.lookAhead); // a player can look PA.lookAhead stages beyond the highest open one, no further
+    this.scrollMax = Math.max(0, PA.topStop - (PA.bottomCy - farthest * PA.step)); // how far the path can be pulled down (0 = everything fits, no scrolling)
     this.scroll = 0; this.scrollV = 0; this.drag = null;
     const glow = this.add.graphics().setBlendMode(Phaser.BlendModes.ADD); // a soft gold glow along the line, breathing slowly
     this.tweens.add({ targets: glow, alpha: 0.55, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
@@ -129,7 +130,8 @@ export class MenuScene extends Phaser.Scene {
         const py = p.y / R, dy = py - d.y0;
         if (!d.moved && Math.abs(dy) > 6) { d.moved = true; setPressed(null); } // dragged: it is a scroll, not a tap
         if (d.moved) {
-          this.scroll = Phaser.Math.Clamp(d.s0 + dy, 0, this.scrollMax);
+          const raw = d.s0 + dy, over = M.path.overMax; // past either end the path follows the finger only a third as far (a rubber band), and springs back on release
+          this.scroll = raw < 0 ? Math.max(-over, raw * 0.35) : (raw > this.scrollMax ? Math.min(this.scrollMax + over, this.scrollMax + (raw - this.scrollMax) * 0.35) : raw);
           const now = this.time.now, dt = (now - d.lastT) / 1000;
           if (dt > 0) this.scrollV = 0.6 * this.scrollV + 0.4 * ((py - d.last) / dt);
           d.last = py; d.lastT = now;
@@ -184,13 +186,19 @@ export class MenuScene extends Phaser.Scene {
     }
   }
 
-  // Every frame: after a drag the path keeps gliding and slows down; stops at both ends.
+  // Every frame (no finger down): the path keeps gliding after a drag and slows down; past an end it is pulled back to the end (the bounce).
   update(time, delta) {
-    if (!this.scrollMax || this.drag || Math.abs(this.scrollV) < 2) return;
-    const dt = Math.min(delta, 50) / 1000, PA = M.path;
-    this.scroll = Phaser.Math.Clamp(this.scroll + this.scrollV * dt, 0, this.scrollMax);
-    this.scrollV *= Math.exp(-PA.friction * dt);
-    if (this.scroll <= 0 || this.scroll >= this.scrollMax) this.scrollV = 0;
+    if (!this.scrollMax || this.drag) return;
+    const hi = this.scrollMax, out = this.scroll < 0 || this.scroll > hi;
+    if (!out && Math.abs(this.scrollV) < 2) return;
+    const dt = Math.min(delta, 50) / 1000;
+    this.scroll += this.scrollV * dt;
+    if (this.scroll < 0 || this.scroll > hi) {
+      const target = Phaser.Math.Clamp(this.scroll, 0, hi);
+      this.scrollV *= Math.exp(-14 * dt);
+      this.scroll += (target - this.scroll) * (1 - Math.exp(-10 * dt));
+      if (Math.abs(this.scroll - target) < 0.2) { this.scroll = target; this.scrollV = 0; }
+    } else this.scrollV *= Math.exp(-M.path.friction * dt);
     this.applyScroll();
   }
 
@@ -234,7 +242,15 @@ export class MenuScene extends Phaser.Scene {
   // The logo: drops in with a bounce, then floats up and down; every few seconds a bright band sweeps over its letters (pre-drawn frames made from the logo itself, so it works in WebGL and CANVAS).
   makeLogo() {
     const L = M.logo, SH = M.logoShine, src = this.textures.get('menu_logo').getSourceImage();
-    if (this.textures.exists('menu_logo_decor')) this.add.image(L.x, L.y, 'menu_logo_decor').setOrigin(0.5, 0).setScale(L.scale); // still: the stars, moon and bats belong to the background
+    if (this.textures.exists('menu_logo_decor')) { // the moon, stars, dots and bats of the logo picture: not part of the letters, they pop up one after the other in a circle (clockwise from the moon), then stay in the background
+      const tex = this.textures.get('menu_logo_decor');
+      (L.decorParts || []).forEach((r, i) => {
+        const key = 'decor' + i; if (!tex.has(key)) tex.add(key, 0, r[0], r[1], r[2], r[3]);
+        const im = this.add.image(L.x + (r[0] + r[2] / 2 - src.width / 2) * L.scale, L.y + (r[1] + r[3] / 2) * L.scale, 'menu_logo_decor', key).setScale(0);
+        this.tweens.add({ targets: im, scale: L.scale, duration: 420, delay: L.decorDelay + i * L.decorStepMs, ease: 'Back.easeOut' });
+      });
+      if (!L.decorParts) this.add.image(L.x, L.y, 'menu_logo_decor').setOrigin(0.5, 0).setScale(L.scale);
+    }
     const logo = this.add.image(L.x, H + 10, 'menu_logo').setOrigin(0.5, 0).setScale(L.scale);
     const keys = [];
     try {
