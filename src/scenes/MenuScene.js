@@ -41,11 +41,11 @@ export class MenuScene extends Phaser.Scene {
     // ---- the path: a line up the middle, bubbles left and right of it
     const PA = M.path, bw = PA.bubbleW, bh = PA.bubbleH;
     const line = this.add.graphics();
-    line.fillStyle(P.cream, 1).fillRect(PA.x - PA.lineW / 2, PA.lineTop, PA.lineW, PA.lineBottom - PA.lineTop);
+    line.fillStyle(PA.lineColor, 1).fillRect(PA.x - PA.lineW / 2, PA.lineTop, PA.lineW, PA.lineBottom - PA.lineTop);
     this.bubbles = [];
     for (const nd of PA.nodes) {
       const left = nd.side === 'L', x = left ? PA.x - PA.gap - bw : PA.x + PA.gap, y = nd.cy - bh / 2;
-      line.fillStyle(P.cream, 1).fillRect(left ? x + bw : PA.x, nd.cy - PA.lineW / 2, PA.gap, PA.lineW); // little arm from the line to the bubble
+      line.fillStyle(PA.lineColor, 1).fillRect(left ? x + bw : PA.x, nd.cy - PA.lineW / 2, PA.gap, PA.lineW); // little arm from the line to the bubble
       const b = this.makeBubble(nd, x, y, bw, bh, txt);
       this.bubbles.push(b);
     }
@@ -117,12 +117,10 @@ export class MenuScene extends Phaser.Scene {
     const g = this.add.graphics();
     const b = { st: { theme: nd.theme }, locked: !!nd.locked, x, y, w, h, g, down: false, items: [] };
     const add = (o, oy) => { b.items.push({ o, oy }); return o; }; // texts and medals sink with the plate when pressed
-    const B = M.bubble, cx = x + w / 2 + M.tabW / 2;
+    const B = M.bubble, cx = x + w / 2;
     b.draw = () => {
       g.clear();
       const sink = drawPlate(g, x, y, w, h, { fill: b.locked ? M.lockedFill : P.purple, border: b.locked ? M.lockedBorder : P.pink, down: b.down, radius: M.cardRadius });
-      const bd = M.plateBorderW, ph = h - M.plateDrop;
-      g.fillStyle(nd.tab, b.locked ? 0.5 : 1).fillRect(x + bd, y + sink + M.cardRadius, M.tabW, ph - 2 * M.cardRadius); // colour tab inside the left border
       b.items.forEach(i => i.o.setY(i.oy + sink));
     };
     if (b.locked) {
@@ -146,7 +144,7 @@ export class MenuScene extends Phaser.Scene {
     const n = GE.art, c = (n - 1) / 2, px = GE.px, x0 = GE.x - n * px / 2, y0 = GE.y - n * px / 2;
     for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
       const dx = i - c, dy = j - c, d = Math.hypot(dx, dy), a = Math.atan2(dy, dx);
-      const body = d <= n * 0.38 && d >= n * 0.16, tooth = d > n * 0.38 && d <= n * 0.5 && Math.cos(4 * a) > 0.3;
+      const body = d <= n * 0.38 && d >= n * 0.16, tooth = d > n * 0.38 && d <= n * 0.5 && Math.cos(8 * a) > 0.2;
       if (!body && !tooth) continue;
       g.fillStyle(dx + dy > 1 ? GE.shade : GE.color, 1).fillRect(x0 + i * px, y0 + j * px, px, px);
     }

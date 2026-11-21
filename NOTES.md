@@ -571,3 +571,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri said the pink button in the mockup is nothing (UPDATE only). The decorations moved: witch and ghost next to the logo, bat at the top (away from the gear).
 - Checked with a stand-in for Phaser (a script that runs create() with fake objects): bubbles at the right places, taps start forest and swamp, stage 3 and the rest are ignored while settings are open, the controls button toggles and saves, CLOSE works. NOT checked: how it LOOKS (never run in a browser): sizes, overlaps (path line vs sky art, logo size 1.2, the gear), text fit.
 - UNVERIFIED on the phone: all of the look; first things to tune are in config.menu: path.nodes cy, bubbleW / bubbleH, logo y and scale, decor x / y.
+
+## 2026-11-21 v1.9.39: menu tweaks from Omri's screenshot (branch v1939-menu-tweaks)
+- The path line and its little arms are now the bubble outline pink (config menu.path.lineColor 0xff5ac8, was a stand-in cream). The coloured tab inside the left edge of the bubbles is gone. Logo bigger (scale 1.2 -> 1.4, y 258), UPDATE lower (top 362 -> 378), the menu witch about twice as big (scale 0.667 -> 1.333, now at x 42, y 250). The gear's teeth now have 8 points (it looked like a plus sign).
+- Omri is looking for pixel-art buttons to replace the code-drawn plates (not done; tell Claude the file names when they are in the folder).
+- UNVERIFIED: not seen. Possible overlaps: the big witch with the forest bubble and the logo, the logo against UPDATE.
