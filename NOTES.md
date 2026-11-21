@@ -603,3 +603,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Sizes: the font is drawn in whole steps only (fpx() in hud.js): any size up to 14 becomes 8 (art pixel = 1 game px, capitals 7 px high), up to 20 becomes 16 (2x), bigger becomes 24 (3x). So text that was 12 is now 8, titles 16 stay 16, big end-screen text is 24. Bold is off for this font (it has no bold; the browser would smear it).
 - Safety: PackFont is the first font of the list and GameFont (the old Pixelify) the second, so if PackFont fails to load the old font shows; main.js also switches to the classic sizes in that case. Switches: settings gear > FONT button (PACK / CLASSIC, reloads the page, saved on the phone) and ?font=classic in the address. The tune panel always uses the classic font (its English labels are long).
 - UNVERIFIED (never run in a browser): how the text looks at 8 and 16 (thin 1 px strokes with the dark outline), the sizes of everything (HUD score, medals text, end screens, pop-up numbers are off), spacing on the parchment. Expect to tune sizes in fpx() (hud.js) and per text.
+
+## 2026-11-21 v1.9.45: stone stage bubbles (branch v1945-stone-bubbles)
+- Omri: try the stone panels. All stage bubbles are now the stone panel (dark bricks, blue corner gems). The locked Stage 3 is the same panel tinted darker (config menu.bubble.lockedTint). One setting picks the look: menu.bubble.panel 'stone' or 'wood' (both pictures are in assets/ui).
+- UNVERIFIED: how the cream text reads on the stone, and whether the locked one still looks locked enough.

@@ -124,7 +124,7 @@ export class MenuScene extends Phaser.Scene {
 
   // One stage bubble: a plate with a colour tab, the name, the earned medals and the best score. A locked stage is faded and says SOON.
   makeBubble(nd, x, y, w, h, txt) {
-    const key = nd.locked ? 'ui_panel-stone' : 'ui_panel-wood', art = this.textures.exists(key); // wood panel (stone when locked), 9-slice with the 24 px ornate border; without the picture the old drawn plate
+    const key = 'ui_panel-' + M.bubble.panel, art = this.textures.exists(key); // the panel picture (config menu.bubble.panel: 'stone' or 'wood'), 9-slice with the 24 px ornate border; a locked stage is the same panel, darker; without the picture the old drawn plate
     const g = this.add.graphics();
     const b = { st: { theme: nd.theme }, locked: !!nd.locked, x, y, w, h, g, down: false, items: [] };
     const img = art ? this.add.nineslice(x, y, key, undefined, w, h, 24, 24, 24, 24).setOrigin(0, 0) : null;
@@ -133,7 +133,7 @@ export class MenuScene extends Phaser.Scene {
     b.draw = () => {
       g.clear();
       const sink = art ? (b.down ? 1 : 0) : drawPlate(g, x, y, w, h, { fill: b.locked ? M.lockedFill : P.purple, border: b.locked ? M.lockedBorder : P.pink, down: b.down, radius: M.cardRadius });
-      if (art) { img.setTint(b.down ? 0xcccccc : 0xffffff); img.y = y + sink; }
+      if (art) { img.setTint(b.down ? 0xcccccc : (b.locked ? M.bubble.lockedTint : 0xffffff)); img.y = y + sink; }
       b.items.forEach(i => i.o.setY(i.oy + sink));
     };
     if (b.locked) {

@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.44", // bump on every push so the player/Omri can see the build
+  version: "1.9.45", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -47,7 +47,7 @@ export const CONFIG = {
       { theme: 'stage3', name: 'STAGE 3', side: 'L', cy: 50, locked: true, tab: 0x6b5a90 },
       { theme: 'swamp', name: 'SWAMP', side: 'R', cy: 121, tab: 0x3df2ff },
       { theme: 'forest', name: 'FOREST', side: 'L', cy: 192, tab: 0xff9a2e }] },
-    bubble: { nameSize: 12, medalScale: 1.333, medalGap: 3, bestSize: 8 }, // text and medal sizes inside a stage bubble
+    bubble: { panel: 'stone', lockedTint: 0x777777, nameSize: 12, medalScale: 1.333, medalGap: 3, bestSize: 8 }, // text and medal sizes inside a stage bubble
     lockedFill: 0x241c3a, lockedBorder: 0x6b5a90, lockedText: 0x9a90b8, // a locked stage bubble
     gear: { x: 215, y: 24, hit: 32, scale: 1, art: 12, px: 2, color: 0x38b6f5, shade: 0x1c6fb5 }, // settings gear: the medallion picture at scale (the art / px / colour numbers are only for the code-drawn fallback cog)
     settings: { x: 20, y: 84, w: 200, h: 262, btnW: 60, btnSize: 12, titleSize: 16, ink: 0x3b2410, hintInk: 0x7a5a3a, depth: 100 }, // settings panel (parchment): position, size, button width, text sizes, ink colours
