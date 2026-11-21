@@ -563,3 +563,11 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-21 v1.9.37: no floating numbers (branch v1937-no-pop-numbers)
 - Omri: remove the numbers after shooting an enemy and picking up coins. config feel.popText true -> false: the floating "+10" / "+5" at kills, coins and a heart picked up at full health are gone. The score at the top still counts and pops. Set popText true to bring them back.
 - UNVERIFIED: not run. Check that nothing else (a heart at full health, a chest) still shows a number.
+
+## 2026-11-21 v1.9.38: new main menu, a path of stages (branch v1938-path-menu)
+- Omri's mockup: a line goes up the middle of the screen with a stage bubble left or right of it (Forest at the bottom, Swamp above it, Stage 3 at the top), the logo moved to the bottom above UPDATE, a gear in the top right corner. Built: src/scenes/MenuScene.js rewritten (the two big cards are gone); layout numbers in config.menu (path, bubble, gear, settings, lockedFill / lockedBorder / lockedText, logo, decor positions).
+- Stage bubbles: name, the 4 medals and BEST score (as the cards had); a tap starts the stage (release on the same bubble). STAGE 3 is faded and says SOON, taps do nothing. Add a stage later by adding a node (and un-lock it) in config.menu.path.nodes.
+- Gear (a pixel cog drawn in code) opens SETTINGS: CONTROLS (DRAG or STICK, saved on the phone and used by the game and the tune panel), TUNE PANEL (ON or OFF, the same as 5 taps on the version text), SOUND (greyed SOON: the game has no sound yet), CLOSE. While it is open the rest of the menu ignores taps.
+- Omri said the pink button in the mockup is nothing (UPDATE only). The decorations moved: witch and ghost next to the logo, bat at the top (away from the gear).
+- Checked with a stand-in for Phaser (a script that runs create() with fake objects): bubbles at the right places, taps start forest and swamp, stage 3 and the rest are ignored while settings are open, the controls button toggles and saves, CLOSE works. NOT checked: how it LOOKS (never run in a browser): sizes, overlaps (path line vs sky art, logo size 1.2, the gear), text fit.
+- UNVERIFIED on the phone: all of the look; first things to tune are in config.menu: path.nodes cy, bubbleW / bubbleH, logo y and scale, decor x / y.

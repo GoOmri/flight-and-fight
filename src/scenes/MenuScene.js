@@ -3,18 +3,16 @@ import { makeAllTextures } from '../sprites.js';
 import { FONT, drawPlate } from '../hud.js';
 import { MEDAL_KEYS, loadMedals, loadBest } from '../medals.js';
 import { latestVersion, refreshFiles } from '../update.js';
+import { toggleTune, tuneEnabled } from '../tune.js';
 
 const W = C.game.width, H = C.game.height, R = C.game.render;
 const M = C.menu;
-import { toggleTune } from '../tune.js';
 const DEBUG_PARAMS = ['wave', 'god', 'bg', 'ctl']; // any of these in the web address: skip the menu (old behaviour)
 const P = M.pal;
-const STAGES = [
-  { theme: 'forest', name: 'FOREST', num: '1', tab: M.tabColors.forest },
-  { theme: 'swamp', name: 'SWAMP', num: '2', tab: M.tabColors.swamp }
-];
+const CTL_KEY = 'ff_controls'; // saved choice of the settings panel: 'drag' or 'stick'
 
-// Start menu: two big cards (Forest, Swamp). Press = brighter, release on the same card = start that stage.
+// Start menu: a path of stage bubbles going up the screen (Forest at the bottom, then Swamp, then Stage 3, still locked), the logo and UPDATE at the bottom,
+// a gear in the top right corner that opens the settings. Press = brighter, release on the same bubble = start that stage.
 export class MenuScene extends Phaser.Scene {
   constructor() { super('Menu'); }
 
@@ -29,41 +27,30 @@ export class MenuScene extends Phaser.Scene {
   create() {
     const q = new URLSearchParams(window.location.search);
     if (DEBUG_PARAMS.some(k => q.has(k))) { this.scene.start('Play'); return; }
+    try { const s = localStorage.getItem(CTL_KEY); if (s === 'drag' || s === 'stick') C.ship.controls = s; } catch (e) { /* no saved choice */ }
     makeAllTextures(this); // medal pictures (made once, skipped when they exist)
     this.cameras.main.setZoom(R).centerOn(W / 2, H / 2).setBackgroundColor(M.bgColor);
     this.addArt();
     const txt = (x, y, s, size, stroke, align = 0.5, color = P.cream) => this.add.text(x, y, s, { ...FONT, fontSize: size + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: stroke }).setOrigin(align, 0.5);
+    this.txt = txt;
     if (this.textures.exists('menu_logo')) this.add.image(M.logo.x, M.logo.y, 'menu_logo').setOrigin(0.5, 0).setScale(M.logo.scale); // pixel logo: "Fight & Flight", tilted up in perspective
     else txt(W / 2, M.titleY, 'Flight and Fight', M.titleSize, M.titleStroke);
     const verTxt = txt(W / 2, H - M.versionBottom, 'v' + C.version, M.versionSize, 2).setAlpha(M.versionAlpha);
     let verTaps = 0, verAt = 0; // 5 quick taps on the version text turn the tuning panel on or off (see tune.js)
 
-    this.cards = STAGES.map((st, i) => {
-      const x = (W - M.cardW) / 2, y = M.cardTop + i * (M.cardH + M.cardGap);
-      const g = this.add.graphics();
-      const card = { st, x, y, g, down: false, items: [] };
-      const add = (o, oy) => { card.items.push({ o, oy }); return o; }; // texts and medals sink with the plate when pressed
-      card.draw = () => {
-        g.clear();
-        const sink = drawPlate(g, x, y, M.cardW, M.cardH, { fill: P.purple, border: P.pink, down: card.down, radius: M.cardRadius });
-        const b = M.plateBorderW, ph = M.cardH - M.plateDrop;
-        g.fillStyle(st.tab, 1).fillRect(x + b, y + sink + M.cardRadius, M.tabW, ph - 2 * M.cardRadius); // colour tab inside the left border
-        card.items.forEach(i => i.o.setY(i.oy + sink));
-      };
-      add(txt(x + 24, y + 28, st.num, M.numberSize, 3, 0.5, P.orange), y + 28);
-      add(txt(x + 48, y + 28, st.name, M.nameSize, 3, 0), y + 28);
-      const medals = loadMedals(st.theme), best = loadBest(st.theme);
-      const n = MEDAL_KEYS.length;
-      MEDAL_KEYS.forEach((k, j) => {
-        const img = add(this.add.image(0, y + 66, 'medal_' + k + '_' + (medals[k] ? 'earned' : 'pending')).setScale(M.medalScale), y + 66);
-        img.x = W / 2 + (j - (n - 1) / 2) * (img.displayWidth + M.medalGap);
-      });
-      if (best > 0) add(txt(W / 2, y + M.cardH - 16, 'BEST ' + best, M.bestSize, 2, 0.5, P.cyan), y + M.cardH - 16);
-      card.draw();
-      return card;
-    });
+    // ---- the path: a line up the middle, bubbles left and right of it
+    const PA = M.path, bw = PA.bubbleW, bh = PA.bubbleH;
+    const line = this.add.graphics();
+    line.fillStyle(P.cream, 1).fillRect(PA.x - PA.lineW / 2, PA.lineTop, PA.lineW, PA.lineBottom - PA.lineTop);
+    this.bubbles = [];
+    for (const nd of PA.nodes) {
+      const left = nd.side === 'L', x = left ? PA.x - PA.gap - bw : PA.x + PA.gap, y = nd.cy - bh / 2;
+      line.fillStyle(P.cream, 1).fillRect(left ? x + bw : PA.x, nd.cy - PA.lineW / 2, PA.gap, PA.lineW); // little arm from the line to the bubble
+      const b = this.makeBubble(nd, x, y, bw, bh, txt);
+      this.bubbles.push(b);
+    }
 
-    // UPDATE button: gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser or the installed app).
+    // ---- UPDATE button: gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser or the installed app).
     // When the menu opens it asks the server for the newest version number; if it is newer the button turns orange.
     const bx = (W - M.updateW) / 2, by = M.updateTop;
     const btn = { btn: true, x: bx, y: by, w: M.updateW, h: M.updateH, g: this.add.graphics(), down: false, hot: false, busy: false };
@@ -85,14 +72,23 @@ export class MenuScene extends Phaser.Scene {
       if (!v || v === C.version || !btn.label.active) return; // same version, offline, or the menu was already left
       btn.hot = true; btn.label.setText('NEW VERSION'); btn.draw();
     });
-    this.buttons = [...this.cards, btn];
 
-    // Input: remember which card was pressed; release on the same card starts it. Handlers are removed on shutdown.
-    const hit = p => this.buttons.find(c => { const px = p.x / R, py = p.y / R; return px >= c.x && px <= c.x + (c.w || M.cardW) && py >= c.y && py <= c.y + (c.h || M.cardH); });
+    // ---- gear (top right): opens the settings panel
+    const GE = M.gear, gear = { btn: true, x: GE.x - GE.hit / 2, y: GE.y - GE.hit / 2, w: GE.hit, h: GE.hit, g: this.add.graphics(), down: false };
+    this.drawGear(gear.g, GE);
+    gear.draw = () => gear.g.setAlpha(gear.down ? 0.65 : 1);
+    gear.action = () => this.openSettings(true);
+
+    this.modal = false;
+    this.buttons = [...this.bubbles.filter(b => !b.locked), btn, gear];
+    this.makeSettings();
+
+    // Input: remember which button was pressed; release on the same button uses it. Handlers are removed on shutdown.
+    const hit = p => (this.modal ? this.panelButtons : this.buttons).find(c => { const px = p.x / R, py = p.y / R; return px >= c.x && px <= c.x + c.w && py >= c.y && py <= c.y + c.h; });
     this.pressed = null;
     const setPressed = c => { if (this.pressed) { this.pressed.down = false; this.pressed.draw(); } this.pressed = c; if (c) { c.down = true; c.draw(); } };
     const onDown = p => {
-      if (Math.abs(p.x / R - W / 2) < 40 && Math.abs(p.y / R - (H - M.versionBottom)) < 12) {
+      if (!this.modal && Math.abs(p.x / R - W / 2) < 40 && Math.abs(p.y / R - (H - M.versionBottom)) < 12) {
         verTaps = this.time.now - verAt < 800 ? verTaps + 1 : 1; verAt = this.time.now;
         if (verTaps >= 5) { verTaps = 0; verTxt.setText(toggleTune() ? 'TUNE ON' : 'TUNE OFF'); this.time.delayedCall(1500, () => verTxt.active && verTxt.setText('v' + C.version)); }
       }
@@ -102,7 +98,8 @@ export class MenuScene extends Phaser.Scene {
     const onUp = p => {
       const c = this.pressed, same = c && hit(p) === c;
       setPressed(null);
-      if (same) { if (c.btn) c.action(); else this.scene.start('Play', { theme: c.st.theme }); }
+      if (!same) return;
+      if (c.action) c.action(); else if (c.st) this.scene.start('Play', { theme: c.st.theme });
     };
     this.input.on('pointerdown', onDown);
     this.input.on('pointermove', onMove);
@@ -115,7 +112,95 @@ export class MenuScene extends Phaser.Scene {
     });
   }
 
-  // Animated sky and the little Halloween friends. They sit around the cards and take no input. Animations are made once.
+  // One stage bubble: a plate with a colour tab, the name, the earned medals and the best score. A locked stage is faded and says SOON.
+  makeBubble(nd, x, y, w, h, txt) {
+    const g = this.add.graphics();
+    const b = { st: { theme: nd.theme }, locked: !!nd.locked, x, y, w, h, g, down: false, items: [] };
+    const add = (o, oy) => { b.items.push({ o, oy }); return o; }; // texts and medals sink with the plate when pressed
+    const B = M.bubble, cx = x + w / 2 + M.tabW / 2;
+    b.draw = () => {
+      g.clear();
+      const sink = drawPlate(g, x, y, w, h, { fill: b.locked ? M.lockedFill : P.purple, border: b.locked ? M.lockedBorder : P.pink, down: b.down, radius: M.cardRadius });
+      const bd = M.plateBorderW, ph = h - M.plateDrop;
+      g.fillStyle(nd.tab, b.locked ? 0.5 : 1).fillRect(x + bd, y + sink + M.cardRadius, M.tabW, ph - 2 * M.cardRadius); // colour tab inside the left border
+      b.items.forEach(i => i.o.setY(i.oy + sink));
+    };
+    if (b.locked) {
+      add(txt(cx, y + 22, nd.name, B.nameSize, 3, 0.5, M.lockedText), y + 22);
+      add(txt(cx, y + 42, 'SOON', B.nameSize, 3, 0.5, M.lockedText), y + 42);
+    } else {
+      add(txt(cx, y + 14, nd.name, B.nameSize, 3), y + 14);
+      const medals = loadMedals(nd.theme), best = loadBest(nd.theme), n = MEDAL_KEYS.length;
+      MEDAL_KEYS.forEach((k, j) => {
+        const img = add(this.add.image(0, y + 34, 'medal_' + k + '_' + (medals[k] ? 'earned' : 'pending')).setScale(B.medalScale), y + 34);
+        img.x = cx + (j - (n - 1) / 2) * (img.displayWidth + B.medalGap);
+      });
+      if (best > 0) add(txt(cx, y + h - 12, 'BEST ' + best, B.bestSize, 2, 0.5, P.cyan), y + h - 12);
+    }
+    b.draw();
+    return b;
+  }
+
+  // The gear: a small pixel-art cog drawn in code (art pixel = GE.px game px).
+  drawGear(g, GE) {
+    const n = GE.art, c = (n - 1) / 2, px = GE.px, x0 = GE.x - n * px / 2, y0 = GE.y - n * px / 2;
+    for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
+      const dx = i - c, dy = j - c, d = Math.hypot(dx, dy), a = Math.atan2(dy, dx);
+      const body = d <= n * 0.38 && d >= n * 0.16, tooth = d > n * 0.38 && d <= n * 0.5 && Math.cos(4 * a) > 0.3;
+      if (!body && !tooth) continue;
+      g.fillStyle(dx + dy > 1 ? GE.shade : GE.color, 1).fillRect(x0 + i * px, y0 + j * px, px, px);
+    }
+  }
+
+  // The settings panel (closed at first): CONTROLS (drag / stick, saved), TUNE PANEL (on / off), SOUND (not in the game yet), CLOSE.
+  makeSettings() {
+    const S = M.settings, txt = this.txt, objs = [];
+    const keep = o => { o.setDepth(S.depth).setVisible(false); objs.push(o); return o; };
+    const back = keep(this.add.graphics());
+    back.fillStyle(P.dark, 0.96).fillRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius);
+    back.lineStyle(M.plateBorderW, P.pink, 1).strokeRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius);
+    keep(txt(S.x + S.w / 2, S.y + 16, 'SETTINGS', S.titleSize, 3));
+    this.panelButtons = [];
+    const mkBtn = (x, y, w, h, label, action, fill = P.purple, color = P.cream) => {
+      const bt = { btn: true, x, y, w, h, g: keep(this.add.graphics()), down: false, action, fill, shown: false };
+      bt.label = keep(txt(x + w / 2, y + h / 2, label, M.settings.btnSize, 3, 0.5, color));
+      bt.draw = () => {
+        bt.g.clear();
+        if (!bt.shown) return;
+        const sink = drawPlate(bt.g, x, y, w, h, { fill: bt.fill, border: P.pink, down: bt.down, radius: 6 });
+        bt.label.setY(y + (h - M.plateDrop) / 2 + sink + 1);
+      };
+      this.panelButtons.push(bt);
+      return bt;
+    };
+    const rowY = i => S.y + 40 + i * S.rowH;
+    // CONTROLS
+    keep(txt(S.x + 12, rowY(0) + 11, 'CONTROLS', M.settings.btnSize, 3, 0));
+    const ctl = mkBtn(S.x + S.w - 12 - S.btnW, rowY(0), S.btnW, 22, C.ship.controls === 'stick' ? 'STICK' : 'DRAG', () => {
+      const v = C.ship.controls === 'stick' ? 'drag' : 'stick';
+      C.ship.controls = v;
+      try { localStorage.setItem(CTL_KEY, v); } catch (e) { /* not saved */ }
+      ctl.label.setText(v === 'stick' ? 'STICK' : 'DRAG'); hint.setText(v === 'stick' ? 'RING STICK UNDER YOUR THUMB' : 'SWIPE ANYWHERE TO MOVE');
+    });
+    const hint = keep(txt(S.x + 12, rowY(0) + 32, C.ship.controls === 'stick' ? 'RING STICK UNDER YOUR THUMB' : 'SWIPE ANYWHERE TO MOVE', 8, 2, 0, P.cyan));
+    // TUNE PANEL
+    keep(txt(S.x + 12, rowY(1) + 11 + 10, 'TUNE PANEL', M.settings.btnSize, 3, 0));
+    const tn = mkBtn(S.x + S.w - 12 - S.btnW, rowY(1) + 10, S.btnW, 22, tuneEnabled() ? 'ON' : 'OFF', () => { tn.label.setText(toggleTune() ? 'ON' : 'OFF'); });
+    // SOUND
+    keep(txt(S.x + 12, rowY(2) + 11 + 10, 'SOUND', M.settings.btnSize, 3, 0, M.lockedText));
+    keep(txt(S.x + S.w - 12 - S.btnW / 2, rowY(2) + 11 + 10, 'SOON', M.settings.btnSize, 3, 0.5, M.lockedText));
+    // CLOSE
+    mkBtn(S.x + (S.w - 90) / 2, S.y + S.h - 34, 90, 24, 'CLOSE', () => this.openSettings(false), P.purple);
+    this.panelObjs = objs;
+  }
+
+  openSettings(on) {
+    this.modal = on;
+    this.panelObjs.forEach(o => o.setVisible(on));
+    this.panelButtons.forEach(b => { b.shown = on; b.label.setVisible(on); b.draw(); });
+  }
+
+  // Animated sky and the little Halloween friends. They sit around the path and take no input. Animations are made once.
   addArt() {
     const mk = (key, tex, fps, frames) => { if (!this.anims.exists(key)) this.anims.create({ key, frames: this.anims.generateFrameNumbers(tex, { start: 0, end: frames - 1 }), frameRate: fps, repeat: -1 }); };
     const sky = M.sky;

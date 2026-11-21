@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.37", // bump on every push so the player/Omri can see the build
+  version: "1.9.38", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -41,7 +41,16 @@ export const CONFIG = {
     plateDrop: 4, plateDownShift: 2, plateBorderW: 3, plateRadius: 10, tabW: 6, // chunky button plate: bottom edge height, how far a pressed plate sinks, border, corner, stage colour tab
     tabColors: { forest: 0xff9a2e, swamp: 0x3df2ff },
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4, // titleY..titleStroke: the old plain-text title (used only if the logo picture is missing)
-    logo: { file: 'menu/logo.png', x: 120, y: 4, scale: 1 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
+    logo: { file: 'menu/logo.png', x: 120, y: 260, scale: 1.2 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
+    // Stage path (the main menu): a line up the middle, a bubble left or right of it at height cy. side L / R. A node with locked: true is faded, says SOON and takes no taps.
+    path: { x: 120, lineW: 4, lineTop: 0, lineBottom: 232, gap: 8, bubbleW: 86, bubbleH: 62, nodes: [
+      { theme: 'stage3', name: 'STAGE 3', side: 'L', cy: 50, locked: true, tab: 0x6b5a90 },
+      { theme: 'swamp', name: 'SWAMP', side: 'R', cy: 121, tab: 0x3df2ff },
+      { theme: 'forest', name: 'FOREST', side: 'L', cy: 192, tab: 0xff9a2e }] },
+    bubble: { nameSize: 12, medalScale: 1.333, medalGap: 3, bestSize: 8 }, // text and medal sizes inside a stage bubble
+    lockedFill: 0x241c3a, lockedBorder: 0x6b5a90, lockedText: 0x9a90b8, // a locked stage bubble
+    gear: { x: 215, y: 24, hit: 32, art: 12, px: 2, color: 0x38b6f5, shade: 0x1c6fb5 }, // settings gear: centre, tap size, art pixels, game px per art pixel, colours
+    settings: { x: 20, y: 96, w: 200, h: 196, rowH: 36, btnW: 70, btnSize: 12, titleSize: 16, depth: 100 }, // settings panel
     cardW: 200, cardH: 110, cardGap: 18, cardTop: 100, // first card top edge; the second sits cardGap below it
     cardRadius: 10, pressBrighten: 0.15, // pressed: plate fill mixed this much towards white
     numberSize: 32, nameSize: 20, bestSize: 12, // text sizes (px): pixel font looks best at multiples of 4
@@ -53,9 +62,9 @@ export const CONFIG = {
     // Decorations around the cards (never over cards, medals, UPDATE or version; they take no input). file in assets/, frameW/frameH = one cell,
     // x/y = the point of the picture that sits at (x,y) (originX/originY 0..1), scale (multiples of 1/3 keep the pixels even), fps, bob = up-down swing in px (0 = still), bobMs = swing period, flipX.
     decor: [
-      { key: 'witch',  file: 'menu/witch.png',  frameW: 61, frameH: 55, frames: 4, fps: 8, x: 40,  y: 78,  originX: 0.5, originY: 0.5, scale: 0.667, bob: 1, bobMs: 2200 },
-      { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 204, y: 78,  originX: 0.5, originY: 0.5, scale: 1,     bob: 2, bobMs: 1800 },
-      { key: 'bat',    file: 'menu/bat.png',    frameW: 32, frameH: 28, frames: 4, fps: 5, x: 196, y: 0,   originX: 0.5, originY: 0,   scale: 1,     bob: 0, bobMs: 1000 },
+      { key: 'witch',  file: 'menu/witch.png',  frameW: 61, frameH: 55, frames: 4, fps: 8, x: 34,  y: 266,  originX: 0.5, originY: 0.5, scale: 0.667, bob: 1, bobMs: 2200 },
+      { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 206, y: 240,  originX: 0.5, originY: 0.5, scale: 1,     bob: 2, bobMs: 1800 },
+      { key: 'bat',    file: 'menu/bat.png',    frameW: 32, frameH: 28, frames: 4, fps: 5, x: 160, y: 0,   originX: 0.5, originY: 0,   scale: 1,     bob: 0, bobMs: 1000 },
       { key: 'cat',    file: 'menu/cat.png',    frameW: 21, frameH: 25, frames: 5, fps: 4, x: 32,  y: 392, originX: 0.5, originY: 1,   scale: 1.333, bob: 0, bobMs: 1000 },
       { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 205, y: 422, originX: 0.5, originY: 1,   scale: 1.333, bob: 0, bobMs: 1000 }
     ]
