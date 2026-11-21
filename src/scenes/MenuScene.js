@@ -231,6 +231,9 @@ export class MenuScene extends Phaser.Scene {
       s.play('menu_' + d.key);
       s.anims.setCurrentFrame(s.anims.currentAnim.frames[Phaser.Math.Between(0, d.frames - 1)]);
       if (d.bob) this.tweens.add({ targets: s, y: d.y + d.bob, duration: d.bobMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: Phaser.Math.Between(0, 600) });
+      // a little sway in every direction (sideways, tilt) on top of the up-down bob; each runs at its own pace so the path never repeats exactly. swayX = px, swayDeg = degrees, swayMs = full swing time.
+      if (d.swayX) this.tweens.add({ targets: s, x: d.x + d.swayX, duration: d.swayMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: Phaser.Math.Between(0, 600) });
+      if (d.swayDeg) { s.setAngle(-d.swayDeg); this.tweens.add({ targets: s, angle: d.swayDeg, duration: d.swayMs * 0.7, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }); }
     }
   }
 }
