@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.67", // bump on every push so the player/Omri can see the build
+  version: "1.9.68", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -58,7 +58,7 @@ export const CONFIG = {
     // Stage path (the main menu): a line up the middle, a bubble left or right of it. nodes go from the LOWEST stage up (stage 1 first); bubble i sits step px above the one below,
     // starting at bottomCy. A node with locked: true is faded, says SOON and takes no taps. With more nodes than fit the path scrolls (drag up / down, mouse wheel): topStop = where the highest bubble
     // stops, friction = how fast it stops gliding. Bubbles and line fade out below fadeStart (to nothing at lineBottom = about the witch's hat) and at the top (fadeTop px / fadeTopBubble px).
-    path: { x: 120, lineColor: 0xf2b632, lineW: 4, lineTop: 0, lineBottom: 250, fadeStart: 236, fadeTop: 6, fadeTopBubble: 14, viewBottom: 250, gap: 8, bubbleW: 100, bubbleH: 68,
+    path: { x: 120, lineColor: 0xf2b632, lineW: 4, lineTop: 0, lineBottom: 258, fadeStart: 226, fadeTop: 6, fadeTopBubble: 14, viewBottom: 250, gap: 8, bubbleW: 100, bubbleH: 68,
       lookAhead: 3, overMax: 40, step: 71, bottomCy: 192, topStop: 50, friction: 4, nodes: [
       { theme: 'forest', name: 'FOREST', side: 'L' },
       { theme: 'swamp', name: 'SWAMP', side: 'R' },

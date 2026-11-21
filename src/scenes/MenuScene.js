@@ -172,10 +172,12 @@ export class MenuScene extends Phaser.Scene {
     const bottomAt = y => (y < PA.fadeStart ? 1 : Math.max(0, 1 - (y - PA.fadeStart) / (PA.lineBottom - PA.fadeStart))); // 1 = full, 0 = gone
     const topAt = (y, len) => Math.min(1, Math.max(0, y / len));
     g.clear(); gl.clear();
-    for (let y = 0; y < H; y += 2) { // the line runs the whole height of the screen at any scroll: it has no visible end, top or bottom (the logo and the friends are in front of it)
-      g.fillStyle(PA.lineColor, 1).fillRect(PA.x - PA.lineW / 2, y, PA.lineW, 2);
-      gl.fillStyle(PA.lineColor, 0.14).fillRect(PA.x - PA.lineW / 2 - 3, y, PA.lineW + 6, 2); // glow: 1 px less on each side than before
-      gl.fillStyle(PA.lineColor, 0.22).fillRect(PA.x - PA.lineW / 2 - 1, y, PA.lineW + 2, 2);
+    for (let y = 0; y < PA.lineBottom; y += 2) { // the line has no top end (it runs off the screen); at the bottom it dissolves in a smooth gradient (fadeStart to lineBottom) just above the logo
+      const k = bottomAt(y + 1);
+      if (k <= 0.01) continue;
+      g.fillStyle(PA.lineColor, k).fillRect(PA.x - PA.lineW / 2, y, PA.lineW, 2);
+      gl.fillStyle(PA.lineColor, 0.14 * k).fillRect(PA.x - PA.lineW / 2 - 3, y, PA.lineW + 6, 2); // glow: 1 px less on each side than before
+      gl.fillStyle(PA.lineColor, 0.22 * k).fillRect(PA.x - PA.lineW / 2 - 1, y, PA.lineW + 2, 2);
     }
     for (const b of this.bubbles) {
       const cy = b.cy + S, a = bottomAt(cy) * topAt(cy, PA.fadeTopBubble);

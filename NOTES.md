@@ -720,3 +720,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - All little effects share one pool of 2x2 square pictures (makeBits): the cauldron bubbles, trail, stars and sparks (depth 51 / 49 / -3 / 60); no particle system needed (works in WebGL and CANVAS).
 - Checked with the stand-in script: every timer callback runs once without errors, the pool works (12 pictures for the first burst), the sparks, the shooting star's trail and the tilt step run, taps and scrolling still work. NOT checked: how any of it looks or feels, or the tilt on a real phone.
 - UNVERIFIED: positions (trail from the broom tail, cauldron mouth), amounts (too many sparks?), tilt direction (should feel like depth: if it feels backwards, tell Claude).
+
+## 2026-11-21 v1.9.68: the line and the stages dissolve in a gradient at the bottom (branch v1968-line-gradient)
+- Omri: the middle line and the stages can hide behind a simple gradient fade; it was visible all the way to the bottom (v1.9.66). Now the line and its glow fade out smoothly between y 226 (fadeStart) and y 258 (lineBottom), just above the logo; the bubbles fade by their middle over the same range; at the top the line still has no end. The spark still starts at lineBottom. Path items are still behind the logo (depth -1).
