@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.62", // bump on every push so the player/Omri can see the build
+  version: "1.9.63", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -41,7 +41,7 @@ export const CONFIG = {
     plateDrop: 4, plateDownShift: 2, plateBorderW: 3, plateRadius: 10, tabW: 6, // chunky button plate: bottom edge height, how far a pressed plate sinks, border, corner, stage colour tab
     tabColors: { forest: 0xff9a2e, swamp: 0x3df2ff },
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4, // titleY..titleStroke: the old plain-text title (used only if the logo picture is missing)
-    logo: { file: 'menu/logo-text.png', decor: 'menu/logo-decor.png', decorParts: [[2,1,7,8],[26,8,1,1],[39,3,5,5],[52,7,1,1],[64,2,5,5],[81,6,1,1],[102,2,11,5],[111,73,5,5],[4,67,11,5],[8,53,5,5]], decorDelay: 1500, decorStepMs: 140, wordStepMs: 300, x: 120, y: 252, scale: 1.7 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
+    logo: { file: 'menu/logo-text.png', decor: 'menu/logo-decor.png', decorParts: [[2,1,7,8],[26,8,1,1],[39,3,5,5],[52,7,1,1],[64,2,5,5],[81,6,1,1],[102,2,11,5],[111,73,5,5],[4,67,11,5],[8,53,5,5]], decorDelay: 1500, decorStepMs: 140, wordStepMs: 100, x: 120, y: 252, scale: 1.7 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
     intro: { bubbles: false }, // true: the stage bubbles slide in from the sides when the menu opens (the witch does it with decor witch introX, a number of px to fly in from, 0 = off). Off: only the logo moves in; everything else is just there
     logoShine: { frames: 14, band: 26, strength: 0.45, frameMs: 45, everyMs: 4200, firstMs: 2600, float: 2, floatMs: 2800 }, // glint sweep over the logo (frames, band width in art px, brightness 0..1, ms per frame, ms between sweeps, ms until the first one) and the float (px, ms for a full swing)
     // Stage path (the main menu): a line up the middle, a bubble left or right of it at height cy. side L / R. A node with locked: true is faded, says SOON and takes no taps.
