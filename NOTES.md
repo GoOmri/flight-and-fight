@@ -742,3 +742,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-21 v1.9.72: bigger cauldron (branch v1972-bigger-cauldron)
 - Omri asked for the cauldron 2x as big. Full x2 (scale 2.667, 77 px wide) does not fit: the logo letters end at about x 188, leaving about 45 px up to the screen edge. He chose "as big as fits": scale 1.333 -> 1.667 (48 px wide), centre x 205 -> 215, so it spans about x 191 to 239 with about 3 px to the letters. Bubbles still rise from its top (they follow its size). If he wants it bigger anyway: shrink the logo (menu.logo.scale) or let it overlap.
 - UNVERIFIED: the gap to the logo and the screen edge.
+
+## 2026-11-21 v1.9.73: the sky follows the stage scroll (branch v1973-sky-parallax)
+- Omri: the background should scroll a bit with the stages, slowly, for parallax. The animated sky now moves down by 0.08 px for every px the path is pulled down (config menu.sky.scrollPar; at the furthest scroll of 142 px that is about 11 px, in the rubber band up to 15 px), with the tilt shift added. To have room the sky picture is 10% bigger than the screen (menu.sky.cover 1.1, was 1.05; the shift can be at most about 21 px up or down before an edge would show). The friends, logo, line and tiles do not move with it.
+- UNVERIFIED: how it feels; a bigger scrollPar (not above about 0.12 with cover 1.1) makes a stronger depth effect.

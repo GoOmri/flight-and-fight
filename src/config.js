@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.72", // bump on every push so the player/Omri can see the build
+  version: "1.9.73", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -77,7 +77,7 @@ export const CONFIG = {
     updateW: 120, updateH: 26, updateTop: 384, updateSize: 8, updateColor: 0x3b1478, updateHotColor: 0xff9a2e, updateHotBorder: 0x1a0830, // UPDATE button: size, top edge, text size, plate colour, plate colour + border when a newer version is waiting
     versionSize: 8, versionAlpha: 0.9, versionBottom: 9, // version text: distance of its middle from the bottom edge
     // Halloween menu art (assets/menu, Spooktober set). Sky = animated background (cells in a grid of `cols`), scaled to cover the screen width.
-    sky: { file: 'menu/sky.png', frameW: 202, frameH: 360, frames: 18, cols: 6, fps: 5 },
+    sky: { file: 'menu/sky.png', frameW: 202, frameH: 360, frames: 18, cols: 6, fps: 5, cover: 1.1, scrollPar: 0.08 }, // cover = how much bigger than the screen (room to shift), scrollPar = how far the sky moves per px the stage path is scrolled (0.08 = slow)
     // Decorations around the cards (never over cards, medals, UPDATE or version; they take no input). file in assets/, frameW/frameH = one cell,
     // x/y = the point of the picture that sits at (x,y) (originX/originY 0..1), scale (multiples of 1/3 keep the pixels even), fps, bob = up-down swing in px (0 = still), bobMs = swing period, flipX.
     decor: [

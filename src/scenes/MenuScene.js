@@ -363,7 +363,7 @@ export class MenuScene extends Phaser.Scene {
     const mk = (key, tex, fps, frames) => { if (!this.anims.exists(key)) this.anims.create({ key, frames: this.anims.generateFrameNumbers(tex, { start: 0, end: frames - 1 }), frameRate: fps, repeat: -1 }); };
     const sky = M.sky;
     mk('menu_sky', 'menu_sky', sky.fps, sky.frames);
-    this.skySprite = this.add.sprite(W / 2, H / 2, 'menu_sky').setScale(W / sky.frameW * 1.05).setDepth(-10).play('menu_sky'); // a little bigger than the screen so the tilt can shift it
+    this.skySprite = this.add.sprite(W / 2, H / 2, 'menu_sky').setScale(W / sky.frameW * sky.cover).setDepth(-10).play('menu_sky'); // bigger than the screen (sky.cover) so the tilt and the stage scroll can shift it without showing an edge
     this.decorItems = [];
     for (const d of M.decor) {
       mk('menu_' + d.key, 'menu_' + d.key, d.fps, d.frames);
@@ -468,6 +468,6 @@ export class MenuScene extends Phaser.Scene {
     const T = M.tilt, k = 1 - Math.exp(-6 * Math.min(delta, 50) / 1000);
     this.tilt.x += (this.tiltTarget.x - this.tilt.x) * k; this.tilt.y += (this.tiltTarget.y - this.tilt.y) * k;
     for (const it of this.decorItems) it.s.setPosition(it.pos.x - this.tilt.x * it.par, it.pos.y - this.tilt.y * it.par);
-    if (this.skySprite) this.skySprite.setPosition(W / 2 + this.tilt.x * T.sky, H / 2 + this.tilt.y * T.sky);
+    if (this.skySprite) this.skySprite.setPosition(W / 2 + this.tilt.x * T.sky, H / 2 + this.tilt.y * T.sky + this.scroll * M.sky.scrollPar); // the sky follows the stage scroll, slowly: parallax
   }
 }
