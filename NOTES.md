@@ -665,3 +665,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-21 v1.9.57: only the logo moves in (branch v1957-no-flyins)
 - Omri: elements fly in together with the logo; they should just be on the background. v1.9.55 made the stage bubbles slide in from the sides and the witch fly in from the left (idea 3 of the pop list). Both are switched off now: config menu.intro.bubbles false and decor witch introX 0 (the code stays; set them back to bring the slide-in back). Only the logo rises from below. The path glow, the spark, the pulse on the next stage and the glint stay.
 - If something ELSE flew in with the logo (not the bubbles or the witch), Omri should say what it is: I could not see it run.
+
+## 2026-11-21 v1.9.58: the bottom of the path fades out (branch v1958-line-fade)
+- Omri: add a fade effect on the bottom of the stage selector. The path line (and its glow) now fades from full to nothing between y 198 (config menu.path.fadeStart) and y 250 (lineBottom, was 232): the line is drawn in 2 px slices, each with its own opacity. The stage bubbles themselves are NOT faded (the Forest bubble ends at y 226, inside the fade zone: it stays solid). A fade over the bubbles themselves needs a gradient mask over the whole path area; that belongs with the scrollable path (not built yet).
+- UNVERIFIED: how it looks; fadeStart / lineBottom set where it starts and ends (the witch's hat is about y 220).

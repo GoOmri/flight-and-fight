@@ -42,11 +42,15 @@ export class MenuScene extends Phaser.Scene {
     // ---- the path: a line up the middle, bubbles left and right of it
     const PA = M.path, bw = PA.bubbleW, bh = PA.bubbleH;
     const glow = this.add.graphics().setBlendMode(Phaser.BlendModes.ADD); // a soft gold glow along the line, breathing slowly
-    glow.fillStyle(PA.lineColor, 0.14).fillRect(PA.x - PA.lineW / 2 - 4, PA.lineTop, PA.lineW + 8, PA.lineBottom - PA.lineTop);
-    glow.fillStyle(PA.lineColor, 0.22).fillRect(PA.x - PA.lineW / 2 - 2, PA.lineTop, PA.lineW + 4, PA.lineBottom - PA.lineTop);
+    const fadeAt = y => (y < PA.fadeStart ? 1 : Math.max(0, 1 - (y - PA.fadeStart) / (PA.lineBottom - PA.fadeStart))); // the bottom of the path fades out (1 = full, 0 = gone)
+    for (let y = PA.lineTop; y < PA.lineBottom; y += 2) { // the line is drawn in thin slices so each can have its own opacity
+      const k = fadeAt(y + 1);
+      glow.fillStyle(PA.lineColor, 0.14 * k).fillRect(PA.x - PA.lineW / 2 - 4, y, PA.lineW + 8, 2);
+      glow.fillStyle(PA.lineColor, 0.22 * k).fillRect(PA.x - PA.lineW / 2 - 2, y, PA.lineW + 4, 2);
+    }
     this.tweens.add({ targets: glow, alpha: 0.55, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     const line = this.add.graphics();
-    line.fillStyle(PA.lineColor, 1).fillRect(PA.x - PA.lineW / 2, PA.lineTop, PA.lineW, PA.lineBottom - PA.lineTop);
+    for (let y = PA.lineTop; y < PA.lineBottom; y += 2) line.fillStyle(PA.lineColor, fadeAt(y + 1)).fillRect(PA.x - PA.lineW / 2, y, PA.lineW, 2);
     this.bubbles = [];
     for (const nd of PA.nodes) {
       const left = nd.side === 'L', x = left ? PA.x - PA.gap - bw : PA.x + PA.gap, y = nd.cy - bh / 2;
