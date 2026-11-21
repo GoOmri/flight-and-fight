@@ -642,3 +642,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Logo scale 1.4 -> 1.7 with the top fixed (y 252), so it grows down toward UPDATE; UPDATE top 376 -> 384; version text a little lower (versionBottom 12 -> 9).
 - Omri also asked about a scrollable stage path with a fade near the witch's hat. Not built: with 3 stages nothing needs to scroll. Plan for when there are 4 or more stages: drag up/down on the path area, a little inertia, the bubbles and line fade out towards the bottom (about the hat height, y 215) and the top; medium size (one version). Say "build the scroll" then.
 - UNVERIFIED: how the logo and UPDATE sit now (the logo may touch UPDATE; tune menu.logo.scale and menu.updateTop).
+
+## 2026-11-21 v1.9.53: smaller UPDATE, ghost twice as big, cat in front (branch v1953-update-ghost-cat)
+- Omri (screenshot of 1.9.52): shrink UPDATE, make the ghost 2 times bigger, something blocks the cat. UPDATE button 104 -> 80 px wide (the picture's own width, so nothing is stretched; its height stays 25 because the pixel art can not be shrunk evenly) and its text size 10 -> 8 (drawn at 11 px) so NEW VERSION still fits. Ghost scale 1 -> 2, at x 198, y 236. Cat and cauldron now have depth 25 (in front of everything in the sky): the thing over the cat's ears was most likely one of the lilac bats of the animated sky art; I could not see it move, so if it is still there, tell me exactly what it is.
+- UNVERIFIED: not seen.

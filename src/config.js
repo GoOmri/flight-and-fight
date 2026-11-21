@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.52", // bump on every push so the player/Omri can see the build
+  version: "1.9.53", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -55,8 +55,8 @@ export const CONFIG = {
     cardRadius: 10, pressBrighten: 0.15, // pressed: plate fill mixed this much towards white
     numberSize: 32, nameSize: 20, bestSize: 12, // text sizes (px): pixel font looks best at multiples of 4
     medalScale: 2, medalGap: 8,   // medal icons in the row (scale of the art, px between icons)
-    updateBtn: { w: 104, textColor: 0xfff3c4 }, // UPDATE button: the button of the Medieval UI pack (recoloured to the game's purple and pink) (assets/ui), 25 px high, w px wide (the middle stretches), dark brown text
-    updateW: 120, updateH: 26, updateTop: 384, updateSize: 10, updateColor: 0x3b1478, updateHotColor: 0xff9a2e, updateHotBorder: 0x1a0830, // UPDATE button: size, top edge, text size, plate colour, plate colour + border when a newer version is waiting
+    updateBtn: { w: 80, textColor: 0xfff3c4 }, // UPDATE button: the button of the Medieval UI pack (recoloured to the game's purple and pink) (assets/ui), 25 px high, w px wide (the middle stretches), dark brown text
+    updateW: 120, updateH: 26, updateTop: 384, updateSize: 8, updateColor: 0x3b1478, updateHotColor: 0xff9a2e, updateHotBorder: 0x1a0830, // UPDATE button: size, top edge, text size, plate colour, plate colour + border when a newer version is waiting
     versionSize: 8, versionAlpha: 0.9, versionBottom: 9, // version text: distance of its middle from the bottom edge
     // Halloween menu art (assets/menu, Spooktober set). Sky = animated background (cells in a grid of `cols`), scaled to cover the screen width.
     sky: { file: 'menu/sky.png', frameW: 202, frameH: 360, frames: 18, cols: 6, fps: 5 },
@@ -64,10 +64,10 @@ export const CONFIG = {
     // x/y = the point of the picture that sits at (x,y) (originX/originY 0..1), scale (multiples of 1/3 keep the pixels even), fps, bob = up-down swing in px (0 = still), bobMs = swing period, flipX.
     decor: [
       { key: 'witch',  file: 'menu/witch.png',  frameW: 61, frameH: 55, frames: 4, fps: 5, x: 52,  y: 266,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 30, bob: 3, bobMs: 3200, swayX: 3, swayDeg: 2, swayMs: 4200 },
-      { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 206, y: 240,  originX: 0.5, originY: 0.5, scale: 1,     bob: 2, bobMs: 1800 },
+      { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 198, y: 236,  originX: 0.5, originY: 0.5, scale: 2,     bob: 2, bobMs: 1800 },
       { key: 'bat',    file: 'menu/bat.png',    frameW: 32, frameH: 28, frames: 4, fps: 5, x: 160, y: 0,   originX: 0.5, originY: 0,   scale: 1,     bob: 0, bobMs: 1000 },
-      { key: 'cat',    file: 'menu/cat.png',    frameW: 21, frameH: 25, frames: 5, fps: 4, x: 32,  y: 392, originX: 0.5, originY: 1,   scale: 1.333, bob: 0, bobMs: 1000 },
-      { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 205, y: 422, originX: 0.5, originY: 1,   scale: 1.333, bob: 0, bobMs: 1000 }
+      { key: 'cat',    file: 'menu/cat.png',    frameW: 21, frameH: 25, frames: 5, fps: 4, x: 32,  y: 392, originX: 0.5, originY: 1,   scale: 1.333, depth: 25, bob: 0, bobMs: 1000 },
+      { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 205, y: 422, originX: 0.5, originY: 1,   scale: 1.333, depth: 25, bob: 0, bobMs: 1000 }
     ]
   },
   endMenuBtn: { w: 96, h: 30, bottom: 36, size: 16, color: 0x3b1478, border: 0xff5ac8 }, // MENU button on the end screen (bottom = its middle's distance from the bottom edge)
