@@ -661,3 +661,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-21 v1.9.56: logo glint softer, logo rises from below (branch v1956-logo-from-below)
 - Omri: lower the shine opacity and the logo should come from below. logoShine.strength 0.8 -> 0.45 (how white the sweeping band gets). The logo now starts just below the screen and rises with a small overshoot (Back.easeOut, 900 ms) instead of dropping from above with a bounce.
+
+## 2026-11-21 v1.9.57: only the logo moves in (branch v1957-no-flyins)
+- Omri: elements fly in together with the logo; they should just be on the background. v1.9.55 made the stage bubbles slide in from the sides and the witch fly in from the left (idea 3 of the pop list). Both are switched off now: config menu.intro.bubbles false and decor witch introX 0 (the code stays; set them back to bring the slide-in back). Only the logo rises from below. The path glow, the spark, the pulse on the next stage and the glint stay.
+- If something ELSE flew in with the logo (not the bubbles or the witch), Omri should say what it is: I could not see it run.

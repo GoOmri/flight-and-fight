@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.56", // bump on every push so the player/Omri can see the build
+  version: "1.9.57", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -42,6 +42,7 @@ export const CONFIG = {
     tabColors: { forest: 0xff9a2e, swamp: 0x3df2ff },
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4, // titleY..titleStroke: the old plain-text title (used only if the logo picture is missing)
     logo: { file: 'menu/logo.png', x: 120, y: 252, scale: 1.7 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
+    intro: { bubbles: false }, // true: the stage bubbles slide in from the sides when the menu opens (the witch does it with decor witch introX, a number of px to fly in from, 0 = off). Off: only the logo moves in; everything else is just there
     logoShine: { frames: 14, band: 26, strength: 0.45, frameMs: 45, everyMs: 4200, firstMs: 1700, float: 2, floatMs: 2800 }, // glint sweep over the logo (frames, band width in art px, brightness 0..1, ms per frame, ms between sweeps, ms until the first one) and the float (px, ms for a full swing)
     // Stage path (the main menu): a line up the middle, a bubble left or right of it at height cy. side L / R. A node with locked: true is faded, says SOON and takes no taps.
     path: { x: 120, lineColor: 0xf2b632, lineW: 4, lineTop: 0, lineBottom: 232, gap: 8, bubbleW: 100, bubbleH: 68, nodes: [
@@ -64,7 +65,7 @@ export const CONFIG = {
     // Decorations around the cards (never over cards, medals, UPDATE or version; they take no input). file in assets/, frameW/frameH = one cell,
     // x/y = the point of the picture that sits at (x,y) (originX/originY 0..1), scale (multiples of 1/3 keep the pixels even), fps, bob = up-down swing in px (0 = still), bobMs = swing period, flipX.
     decor: [
-      { key: 'witch',  file: 'menu/witch.png',  frameW: 61, frameH: 55, frames: 4, fps: 5, x: 52,  y: 266,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 3, bobMs: 3200, swayX: 3, swayDeg: 2, swayMs: 4200, introX: -130 },
+      { key: 'witch',  file: 'menu/witch.png',  frameW: 61, frameH: 55, frames: 4, fps: 5, x: 52,  y: 266,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 3, bobMs: 3200, swayX: 3, swayDeg: 2, swayMs: 4200, introX: 0 },
       { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 198, y: 236,  originX: 0.5, originY: 0.5, scale: 2, depth: 50,     bob: 2, bobMs: 1800 },
       { key: 'bat',    file: 'menu/bat.png',    frameW: 32, frameH: 28, frames: 4, fps: 5, x: 160, y: 0,   originX: 0.5, originY: 0,   scale: 1,     bob: 0, bobMs: 1000 },
       { key: 'cat',    file: 'menu/cat.png',    frameW: 21, frameH: 25, frames: 5, fps: 4, x: 32,  y: 392, originX: 0.5, originY: 1,   scale: 1.333, depth: 50, bob: 0, bobMs: 1000 },

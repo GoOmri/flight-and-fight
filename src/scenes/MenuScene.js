@@ -62,7 +62,7 @@ export class MenuScene extends Phaser.Scene {
     const next = [...this.bubbles].reverse().find(b => !b.locked && !b.complete);
     if (next && next.halo) { next.halo.setVisible(true); this.tweens.add({ targets: next.halo, alpha: 0.25, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }); }
     // the bubbles slide in from their sides, the lowest one first
-    this.bubbles.forEach((b, i) => {
+    if (M.intro.bubbles) this.bubbles.forEach((b, i) => {
       const left = i % 2 === 0 ? (PA.nodes[i].side === 'L') : (PA.nodes[i].side === 'L');
       b.cont.x = left ? -140 : 140;
       this.tweens.add({ targets: b.cont, x: 0, duration: 650, delay: 200 + (this.bubbles.length - 1 - i) * 140, ease: 'Back.easeOut' });
