@@ -39,37 +39,32 @@ export class MenuScene extends Phaser.Scene {
     const verTxt = txt(W / 2, H - M.versionBottom, 'v' + C.version, M.versionSize, 2).setAlpha(M.versionAlpha);
     let verTaps = 0, verAt = 0; // 5 quick taps on the version text turn the tuning panel on or off (see tune.js)
 
-    // ---- the path: a line up the middle, bubbles left and right of it
-    const PA = M.path, bw = PA.bubbleW, bh = PA.bubbleH;
+    // ---- the path: a line up the middle, bubbles left and right of it. Stage 1 is at the bottom; with more stages than fit, drag up / down to scroll (applyScroll).
+    const PA = M.path, bw = PA.bubbleW, bh = PA.bubbleH, nodes = PA.nodes;
+    this.scrollMax = Math.max(0, PA.topStop - (PA.bottomCy - (nodes.length - 1) * PA.step)); // how far the path can be pulled down (0 = everything fits, no scrolling)
+    this.scroll = 0; this.scrollV = 0; this.drag = null;
     const glow = this.add.graphics().setBlendMode(Phaser.BlendModes.ADD); // a soft gold glow along the line, breathing slowly
-    const fadeAt = y => (y < PA.fadeStart ? 1 : Math.max(0, 1 - (y - PA.fadeStart) / (PA.lineBottom - PA.fadeStart))); // the bottom of the path fades out (1 = full, 0 = gone)
-    for (let y = PA.lineTop; y < PA.lineBottom; y += 2) { // the line is drawn in thin slices so each can have its own opacity
-      const k = fadeAt(y + 1);
-      glow.fillStyle(PA.lineColor, 0.14 * k).fillRect(PA.x - PA.lineW / 2 - 4, y, PA.lineW + 8, 2);
-      glow.fillStyle(PA.lineColor, 0.22 * k).fillRect(PA.x - PA.lineW / 2 - 2, y, PA.lineW + 4, 2);
-    }
     this.tweens.add({ targets: glow, alpha: 0.55, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     const line = this.add.graphics();
-    for (let y = PA.lineTop; y < PA.lineBottom; y += 2) line.fillStyle(PA.lineColor, fadeAt(y + 1)).fillRect(PA.x - PA.lineW / 2, y, PA.lineW, 2);
-    this.bubbles = [];
-    for (const nd of PA.nodes) {
-      const left = nd.side === 'L', x = left ? PA.x - PA.gap - bw : PA.x + PA.gap, y = nd.cy - bh / 2;
-      line.fillStyle(PA.lineColor, 1).fillRect(left ? x + bw : PA.x, nd.cy - PA.lineW / 2, PA.gap, PA.lineW); // little arm from the line to the bubble
+    this.pathGfx = { glow, line };
+    this.bubbles = nodes.map((nd, i) => {
+      const cy = PA.bottomCy - i * PA.step, left = nd.side === 'L', x = left ? PA.x - PA.gap - bw : PA.x + PA.gap, y = cy - bh / 2;
       const b = this.makeBubble(nd, x, y, bw, bh, txt);
-      this.bubbles.push(b);
-    }
+      b.baseY = y; b.cy = cy; b.left = left; b.alpha = 1;
+      return b;
+    });
+    this.applyScroll(); // draws the line, places and fades the bubbles
     // a little spark runs up the line now and then
     if (!this.textures.exists('menu_spark')) { const cv = this.textures.createCanvas('menu_spark', 5, 5), cx = cv.getContext(); cx.fillStyle = '#ffffff'; cx.fillRect(2, 0, 1, 5); cx.fillRect(0, 2, 5, 1); cv.refresh(); }
     const spark = this.add.image(PA.x, PA.lineBottom, 'menu_spark').setBlendMode(Phaser.BlendModes.ADD).setAlpha(0);
     this.tweens.add({ targets: spark, y: PA.lineTop + 6, duration: 2600, repeat: -1, repeatDelay: 1800, delay: 1500, ease: 'Sine.easeInOut', onUpdate: tw => spark.setAlpha(Math.sin(Math.PI * tw.progress)) });
     // the next stage to play (the lowest open stage that does not have all medals yet) pulses with a gold edge
-    const next = [...this.bubbles].reverse().find(b => !b.locked && !b.complete);
+    const next = this.bubbles.find(b => !b.locked && !b.complete);
     if (next && next.halo) { next.halo.setVisible(true); this.tweens.add({ targets: next.halo, alpha: 0.25, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }); }
     // the bubbles slide in from their sides, the lowest one first
     if (M.intro.bubbles) this.bubbles.forEach((b, i) => {
-      const left = i % 2 === 0 ? (PA.nodes[i].side === 'L') : (PA.nodes[i].side === 'L');
-      b.cont.x = left ? -140 : 140;
-      this.tweens.add({ targets: b.cont, x: 0, duration: 650, delay: 200 + (this.bubbles.length - 1 - i) * 140, ease: 'Back.easeOut' });
+      b.cont.x = b.left ? -140 : 140;
+      this.tweens.add({ targets: b.cont, x: 0, duration: 650, delay: 200 + i * 140, ease: 'Back.easeOut' });
     });
 
     // ---- UPDATE button: gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser or the installed app).
@@ -115,7 +110,7 @@ export class MenuScene extends Phaser.Scene {
     this.makeSettings();
 
     // Input: remember which button was pressed; release on the same button uses it. Handlers are removed on shutdown.
-    const hit = p => (this.modal ? this.panelButtons : this.buttons).find(c => { const px = p.x / R, py = p.y / R; return px >= c.x && px <= c.x + c.w && py >= c.y && py <= c.y + c.h; });
+    const hit = p => (this.modal ? this.panelButtons : this.buttons).find(c => { const px = p.x / R, py = p.y / R; return px >= c.x && px <= c.x + c.w && py >= c.y && py <= c.y + c.h && (c.st === undefined || (c.alpha > 0.35 && py < PA.viewBottom)); }); // a stage bubble can only be hit while it is visible enough and above the fade
     this.pressed = null;
     const setPressed = c => { if (this.pressed) { this.pressed.down = false; this.pressed.draw(); } this.pressed = c; if (c) { c.down = true; c.draw(); } };
     const onDown = p => {
@@ -124,9 +119,29 @@ export class MenuScene extends Phaser.Scene {
         if (verTaps >= 5) { verTaps = 0; verTxt.setText(toggleTune() ? 'TUNE ON' : 'TUNE OFF'); this.time.delayedCall(1500, () => verTxt.active && verTxt.setText('v' + C.version)); }
       }
       setPressed(hit(p) || null);
+      this.scrollV = 0;
+      if (!this.modal && this.scrollMax > 0 && p.y / R < PA.viewBottom) this.drag = { y0: p.y / R, s0: this.scroll, moved: false, last: p.y / R, lastT: this.time.now }; // maybe the start of a scroll
     };
-    const onMove = p => { if (this.pressed && hit(p) !== this.pressed) setPressed(null); }; // finger slid off: cancel
+    const onMove = p => {
+      const d = this.drag;
+      if (d) {
+        const py = p.y / R, dy = py - d.y0;
+        if (!d.moved && Math.abs(dy) > 6) { d.moved = true; setPressed(null); } // dragged: it is a scroll, not a tap
+        if (d.moved) {
+          this.scroll = Phaser.Math.Clamp(d.s0 + dy, 0, this.scrollMax);
+          const now = this.time.now, dt = (now - d.lastT) / 1000;
+          if (dt > 0) this.scrollV = 0.6 * this.scrollV + 0.4 * ((py - d.last) / dt);
+          d.last = py; d.lastT = now;
+          this.applyScroll();
+          return;
+        }
+      }
+      if (this.pressed && hit(p) !== this.pressed) setPressed(null); // finger slid off: cancel
+    };
+    const onWheel = (p, over, dx, dy) => { if (!this.modal && this.scrollMax > 0) { this.scroll = Phaser.Math.Clamp(this.scroll - dy * 0.4, 0, this.scrollMax); this.applyScroll(); } }; // mouse wheel on a computer
     const onUp = p => {
+      const d = this.drag; this.drag = null;
+      if (d && d.moved) { if (this.time.now - d.lastT > 90) this.scrollV = 0; setPressed(null); return; } // the finger lifts: the path keeps gliding a little (update)
       const c = this.pressed, same = c && hit(p) === c;
       setPressed(null);
       if (!same) return;
@@ -135,12 +150,47 @@ export class MenuScene extends Phaser.Scene {
     this.input.on('pointerdown', onDown);
     this.input.on('pointermove', onMove);
     this.input.on('pointerup', onUp);
-    this.input.on('pointerupoutside', setPressed.bind(null, null));
+    this.input.on('wheel', onWheel);
+    this.input.on('pointerupoutside', () => { this.drag = null; setPressed(null); });
     this.events.once('shutdown', () => {
       this.input.off('pointerdown', onDown); this.input.off('pointermove', onMove);
-      this.input.off('pointerup', onUp); this.input.off('pointerupoutside');
+      this.input.off('pointerup', onUp); this.input.off('pointerupoutside'); this.input.off('wheel', onWheel);
       this.pressed = null;
     });
+  }
+
+  // Places everything that scrolls: the line (drawn in thin slices so each has its own opacity), the little arms and the bubbles. Anything near the top or the bottom (the witch's hat) fades out.
+  applyScroll() {
+    const PA = M.path, S = this.scroll, g = this.pathGfx.line, gl = this.pathGfx.glow, bh = PA.bubbleH;
+    const bottomAt = y => (y < PA.fadeStart ? 1 : Math.max(0, 1 - (y - PA.fadeStart) / (PA.lineBottom - PA.fadeStart))); // 1 = full, 0 = gone
+    const topAt = (y, len) => Math.min(1, Math.max(0, y / len));
+    g.clear(); gl.clear();
+    const worldTop = PA.bottomCy - (PA.nodes.length - 1) * PA.step - bh / 2 - 20; // the line starts a little above the highest bubble
+    for (let y = PA.lineTop; y < PA.lineBottom; y += 2) {
+      const wy = y - S; // position on the path itself
+      if (wy < worldTop || wy >= PA.lineBottom) continue;
+      const k = bottomAt(y + 1) * topAt(y + 1, PA.fadeTop);
+      if (k <= 0.01) continue;
+      g.fillStyle(PA.lineColor, k).fillRect(PA.x - PA.lineW / 2, y, PA.lineW, 2);
+      gl.fillStyle(PA.lineColor, 0.14 * k).fillRect(PA.x - PA.lineW / 2 - 4, y, PA.lineW + 8, 2);
+      gl.fillStyle(PA.lineColor, 0.22 * k).fillRect(PA.x - PA.lineW / 2 - 2, y, PA.lineW + 4, 2);
+    }
+    for (const b of this.bubbles) {
+      const cy = b.cy + S, a = bottomAt(cy) * topAt(cy, PA.fadeTopBubble);
+      b.cont.y = S; b.cont.setAlpha(a); b.cont.setVisible(a > 0.01);
+      b.y = b.baseY + S; b.alpha = a;
+      if (a > 0.01) g.fillStyle(PA.lineColor, a).fillRect(b.left ? b.x + b.w : PA.x, cy - PA.lineW / 2, PA.gap, PA.lineW); // little arm from the line to the bubble
+    }
+  }
+
+  // Every frame: after a drag the path keeps gliding and slows down; stops at both ends.
+  update(time, delta) {
+    if (!this.scrollMax || this.drag || Math.abs(this.scrollV) < 2) return;
+    const dt = Math.min(delta, 50) / 1000, PA = M.path;
+    this.scroll = Phaser.Math.Clamp(this.scroll + this.scrollV * dt, 0, this.scrollMax);
+    this.scrollV *= Math.exp(-PA.friction * dt);
+    if (this.scroll <= 0 || this.scroll >= this.scrollMax) this.scrollV = 0;
+    this.applyScroll();
   }
 
   // One stage bubble: a plate with a colour tab, the name, the earned medals and the best score. A locked stage is faded and says SOON.
