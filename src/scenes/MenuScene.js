@@ -34,6 +34,7 @@ export class MenuScene extends Phaser.Scene {
     makeAllTextures(this); // medal pictures (made once, skipped when they exist)
     this.cameras.main.setZoom(R).centerOn(W / 2, H / 2).setBackgroundColor(M.bgColor);
     this.addArt();
+    this.makeBits(); this.startEffects(); this.setupTilt(); // little pictures for the sparks, then cauldron bubbles, witch trail, fireflies, shooting stars, and the tilt parallax
     const txt = (x, y, s, size, stroke, align = 0.5, color = P.cream) => this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: stroke }).setOrigin(align, 0.5);
     this.txt = txt;
     if (this.textures.exists('menu_logo')) this.makeLogo(); // pixel logo: "Fight & Flight", tilted up in perspective: drops in, floats, and a glint sweeps over it now and then
@@ -121,6 +122,7 @@ export class MenuScene extends Phaser.Scene {
         verTaps = this.time.now - verAt < 800 ? verTaps + 1 : 1; verAt = this.time.now;
         if (verTaps >= 5) { verTaps = 0; verTxt.setText(toggleTune() ? 'TUNE ON' : 'TUNE OFF'); this.time.delayedCall(1500, () => verTxt.active && verTxt.setText('v' + C.version)); }
       }
+      if (!this.modal) this.sparks(p.x / R, p.y / R); // a small burst of sparks wherever the player touches
       setPressed(hit(p) || null);
       this.scrollV = 0;
       if (!this.modal && this.scrollMax > 0 && p.y / R < PA.viewBottom) this.drag = { y0: p.y / R, s0: this.scroll, moved: false, last: p.y / R, lastT: this.time.now }; // maybe the start of a scroll
@@ -149,6 +151,7 @@ export class MenuScene extends Phaser.Scene {
       const c = this.pressed, same = c && hit(p) === c;
       setPressed(null);
       if (!same) return;
+      if (c.btn && !this.modal) this.bounce(c); // a little pop on UPDATE and the gear
       if (c.action) c.action(); else if (c.st) this.scene.start('Play', { theme: c.st.theme });
     };
     this.input.on('pointerdown', onDown);
@@ -184,6 +187,7 @@ export class MenuScene extends Phaser.Scene {
 
   // Every frame (no finger down): the path keeps gliding after a drag and slows down; past an end it is pulled back to the end (the bounce).
   update(time, delta) {
+    this.tiltStep(delta);
     if (!this.scrollMax || this.drag) return;
     const hi = this.scrollMax, out = this.scroll < 0 || this.scroll > hi;
     if (!out && Math.abs(this.scrollV) < 2) return;
@@ -347,23 +351,114 @@ export class MenuScene extends Phaser.Scene {
   }
 
   // Animated sky and the little Halloween friends. They sit around the path and take no input. Animations are made once.
+  // Each friend moves through a small position object (pos): the bob / sway tweens change pos, and update() puts pos + the tilt shift on the sprite.
   addArt() {
     const mk = (key, tex, fps, frames) => { if (!this.anims.exists(key)) this.anims.create({ key, frames: this.anims.generateFrameNumbers(tex, { start: 0, end: frames - 1 }), frameRate: fps, repeat: -1 }); };
     const sky = M.sky;
     mk('menu_sky', 'menu_sky', sky.fps, sky.frames);
-    this.add.sprite(0, 0, 'menu_sky').setOrigin(0, 0).setScale(W / sky.frameW).setDepth(-10).play('menu_sky');
+    this.skySprite = this.add.sprite(W / 2, H / 2, 'menu_sky').setScale(W / sky.frameW * 1.05).setDepth(-10).play('menu_sky'); // a little bigger than the screen so the tilt can shift it
+    this.decorItems = [];
     for (const d of M.decor) {
       mk('menu_' + d.key, 'menu_' + d.key, d.fps, d.frames);
-      const s = this.add.sprite(d.x, d.y, 'menu_' + d.key).setOrigin(d.originX, d.originY).setScale(d.scale).setFlipX(!!d.flipX).setDepth(d.depth ?? -5); // depth: higher = in front (the witch is in front of everything)
+      const s = this.add.sprite(d.x, d.y, 'menu_' + d.key).setOrigin(d.originX, d.originY).setScale(d.scale).setFlipX(!!d.flipX).setDepth(d.depth ?? -5); // depth: higher = in front (the four friends are in front of everything)
       s.play('menu_' + d.key);
       s.anims.setCurrentFrame(s.anims.currentAnim.frames[Phaser.Math.Between(0, d.frames - 1)]);
-      const motion = () => { // the little constant motion (bob, sway, tilt); starts after a fly-in
-        if (d.bob) this.tweens.add({ targets: s, y: d.y + d.bob, duration: d.bobMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: Phaser.Math.Between(0, 600) });
+      const pos = { x: d.x, y: d.y };
+      this.decorItems.push({ s, pos, par: d.par || 0, key: d.key });
+      const motion = () => { // the little constant motion (bob, sway, tilt, fade); starts after a fly-in
+        if (d.bob) this.tweens.add({ targets: pos, y: d.y + d.bob, duration: d.bobMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: Phaser.Math.Between(0, 600) });
         // a little sway in every direction (sideways, tilt) on top of the up-down bob; each runs at its own pace so the path never repeats exactly. swayX = px, swayDeg = degrees, swayMs = full swing time.
-        if (d.swayX) this.tweens.add({ targets: s, x: d.x + d.swayX, duration: d.swayMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: Phaser.Math.Between(0, 600) });
+        if (d.swayX) this.tweens.add({ targets: pos, x: d.x + d.swayX, duration: d.swayMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: Phaser.Math.Between(0, 600) });
         if (d.swayDeg) { s.setAngle(-d.swayDeg); this.tweens.add({ targets: s, angle: d.swayDeg, duration: d.swayMs * 0.7, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }); }
+        if (d.fade) { s.setAlpha(d.fade[1]); this.tweens.add({ targets: s, alpha: d.fade[0], duration: d.fadeMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: Phaser.Math.Between(0, 800) }); } // fades in and out a little (the ghost)
       };
-      if (d.introX) { s.x = d.x + d.introX; this.tweens.add({ targets: s, x: d.x, duration: 1100, delay: 350, ease: 'Cubic.easeOut', onComplete: motion }); } else motion();
+      if (d.introX) { pos.x = d.x + d.introX; this.tweens.add({ targets: pos, x: d.x, duration: 1100, delay: 350, ease: 'Cubic.easeOut', onComplete: motion }); } else motion();
     }
+  }
+
+  // ---- little pictures and effects -------------------------------------------------------------------------------------------------
+  // One 2x2 white square, tinted and scaled for every spark, bubble, firefly and star (pooled: the same few pictures are used again and again).
+  makeBits() {
+    if (!this.textures.exists('menu_px')) { const cv = this.textures.createCanvas('menu_px', 2, 2), cx = cv.getContext(); cx.fillStyle = '#ffffff'; cx.fillRect(0, 0, 2, 2); cv.refresh(); }
+    this.bitPool = [];
+  }
+
+  // One bit flies from (x, y) with speed (vx, vy) px/s for life ms, shrinking from scale s0 to s1 and fading from alpha a0 to 0.
+  bit(x, y, o) {
+    let im = this.bitPool.find(b => !b.busy);
+    if (!im) { im = this.add.image(0, 0, 'menu_px'); im.busy = false; this.bitPool.push(im); }
+    im.busy = true;
+    im.setVisible(true).setPosition(x, y).setTint(o.tint).setScale(o.s0).setAlpha(o.a0).setDepth(o.depth === undefined ? 51 : o.depth).setBlendMode(o.add ? Phaser.BlendModes.ADD : Phaser.BlendModes.NORMAL);
+    this.tweens.add({ targets: im, x: x + o.vx * o.life / 1000, y: y + o.vy * o.life / 1000, alpha: 0, scale: o.s1, duration: o.life, ease: 'Sine.easeOut', onComplete: () => { im.busy = false; im.setVisible(false); } });
+  }
+
+  startEffects() {
+    const B = M.bits, rnd = (a, b) => Phaser.Math.Between(a, b), pick = arr => arr[Math.floor(Math.random() * arr.length)];
+    const boiler = this.decorItems.find(i => i.key === 'boiler'), witch = this.decorItems.find(i => i.key === 'witch');
+    if (boiler) this.time.addEvent({ delay: B.cauldron.every, loop: true, callback: () => { // bubbles rise from the cauldron
+      const s = boiler.s;
+      this.bit(s.x + rnd(-7, 7), s.y - s.displayHeight + B.cauldron.dy, { tint: pick(B.cauldron.tints), vx: rnd(-6, 6), vy: -rnd(20, 34), life: rnd(1200, 1900), s0: 1.6, s1: 0.5, a0: 0.9, add: true, depth: 51 });
+    } });
+    if (witch) this.time.addEvent({ delay: B.trail.every, loop: true, callback: () => { // sparks fall behind her broom
+      const s = witch.s;
+      this.bit(s.x + B.trail.dx + rnd(-3, 3), s.y + B.trail.dy + rnd(-3, 3), { tint: pick(B.trail.tints), vx: -rnd(8, 18), vy: rnd(4, 14), life: rnd(700, 1100), s0: 1.6, s1: 0.4, a0: 1, add: true, depth: 49 });
+    } });
+    // fireflies: a few dots wander slowly and blink
+    const F = B.fireflies;
+    for (let i = 0; i < F.count; i++) {
+      const f = this.add.image(rnd(F.area[0], F.area[2]), rnd(F.area[1], F.area[3]), 'menu_px').setTint(F.color).setScale(1.5).setDepth(-2).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.1);
+      const wander = () => this.tweens.add({ targets: f, x: Phaser.Math.Clamp(f.x + rnd(-34, 34), F.area[0], F.area[2]), y: Phaser.Math.Clamp(f.y + rnd(-34, 34), F.area[1], F.area[3]), duration: rnd(2200, 4200), ease: 'Sine.easeInOut', onComplete: wander });
+      wander();
+      this.tweens.add({ targets: f, alpha: 0.9, duration: rnd(700, 1500), yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: rnd(0, 1500) });
+    }
+    // a shooting star every now and then
+    const next = () => this.time.delayedCall(rnd(B.star.everyMs[0], B.star.everyMs[1]), () => { this.shootingStar(); next(); });
+    next();
+  }
+
+  // A streak across the sky: a bright head flies, and leaves a short trail that fades (behind the path line).
+  shootingStar() {
+    const S = M.bits.star, x0 = Phaser.Math.Between(S.x[0], S.x[1]), y0 = Phaser.Math.Between(S.y[0], S.y[1]), head = { t: 0 };
+    this.tweens.add({ targets: head, t: 1, duration: S.ms, ease: 'Sine.easeIn', onUpdate: () => this.bit(x0 + S.dx * head.t, y0 + S.dy * head.t, { tint: 0xffffff, vx: 0, vy: 0, life: 380, s0: 1.6, s1: 0.2, a0: 1, add: true, depth: -3 }) });
+  }
+
+  // A burst of little sparks where the player touches.
+  sparks(x, y) {
+    const T = M.bits.tap;
+    for (let i = 0; i < T.count; i++) {
+      const a = (i / T.count) * Math.PI * 2 + Math.random() * 0.6, dist = Phaser.Math.Between(T.dist[0], T.dist[1]), speed = dist / (T.ms / 1000);
+      this.bit(x, y, { tint: T.tints[i % T.tints.length], vx: Math.cos(a) * speed, vy: Math.sin(a) * speed, life: T.ms, s0: 1.8, s1: 0.4, a0: 1, add: true, depth: 60 });
+    }
+  }
+
+  // A small pop on a pressed button (UPDATE's text, the gear picture).
+  bounce(c) {
+    const t = [c.label, c.img && c.img.type !== 'NineSlice' ? c.img : null].filter(Boolean);
+    if (t.length) this.tweens.add({ targets: t, scale: 1.18, duration: 90, yoyo: true, ease: 'Sine.easeOut' });
+  }
+
+  // ---- tilt parallax: when the phone is tilted the friends and the sky shift a few pixels (near ones more, and the other way)
+  setupTilt() {
+    const T = M.tilt;
+    this.tilt = { x: 0, y: 0 }; this.tiltTarget = { x: 0, y: 0 }; this.tiltRef = null;
+    if (!T.on || typeof window === 'undefined' || !window.addEventListener) return;
+    const on = e => {
+      if (e.gamma == null || e.beta == null) return;
+      if (!this.tiltRef) this.tiltRef = { g: e.gamma, b: e.beta };
+      this.tiltRef.g += (e.gamma - this.tiltRef.g) * 0.02; this.tiltRef.b += (e.beta - this.tiltRef.b) * 0.02; // the reference follows slowly: how the phone is held does not matter, only the tilting
+      this.tiltTarget.x = Phaser.Math.Clamp((e.gamma - this.tiltRef.g) / T.range, -1, 1);
+      this.tiltTarget.y = Phaser.Math.Clamp((e.beta - this.tiltRef.b) / T.range, -1, 1);
+    };
+    window.addEventListener('deviceorientation', on);
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') this.input.once('pointerdown', () => { try { DeviceOrientationEvent.requestPermission().catch(() => {}); } catch (e) { /* no permission */ } }); // iPhones ask once
+    this.events.once('shutdown', () => window.removeEventListener('deviceorientation', on));
+  }
+
+  tiltStep(delta) {
+    if (!this.tilt || !this.decorItems) return;
+    const T = M.tilt, k = 1 - Math.exp(-6 * Math.min(delta, 50) / 1000);
+    this.tilt.x += (this.tiltTarget.x - this.tilt.x) * k; this.tilt.y += (this.tiltTarget.y - this.tilt.y) * k;
+    for (const it of this.decorItems) it.s.setPosition(it.pos.x - this.tilt.x * it.par, it.pos.y - this.tilt.y * it.par);
+    if (this.skySprite) this.skySprite.setPosition(W / 2 + this.tilt.x * T.sky, H / 2 + this.tilt.y * T.sky);
   }
 }

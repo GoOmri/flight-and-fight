@@ -706,3 +706,17 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-21 v1.9.66: the line has no end at the bottom either (branch v1966-line-to-bottom)
 - Omri: the line must be endless at the bottom too. The line and its glow now run from the top to the bottom of the screen at any scroll, with no fade at either end (config path.lineBottom / fadeTop no longer used for the line; the bubbles still fade by their own centre near the witch's hat). The line, its glow and the spark moved to depth -1: above the sky, behind the logo, the bubbles and the foreground friends, so it passes BEHIND the logo letters (it can show through gaps between the letters) and behind UPDATE.
 - UNVERIFIED: how it looks behind the logo; if it clashes there, the options are to end the line under the logo with a short fade or to keep it endless only above it.
+
+## 2026-11-21 v1.9.67: menu life: cauldron bubbles, witch trail, ghost, shooting star, fireflies, tap sparks, button pop, tilt parallax (branch v1967-menu-life)
+- Omri picked ideas 1, 2, 3, 5, 7, 8, 10 and 15 (12 "unlock moment" and 13 "bubble previews" come later). All in src/scenes/MenuScene.js (startEffects, bit, sparks, shootingStar, bounce, setupTilt, tiltStep), numbers in config.menu.bits and menu.tilt, decor entries (par, fade).
+  1. Cauldron: a pink / cyan / cream bubble rises from its mouth every 260 ms (bits.cauldron).
+  2. Witch: pink, white and lilac sparks fall behind her broom every 70 ms, from her centre + (-38, 26) (bits.trail dx / dy: move it if it does not come from the broom tail).
+  3. Ghost: a little smaller (scale 2 -> 1.667), floats wider (6 px up and down, 4 px sideways, slower) and fades in and out (alpha 0.7 to 1 over 2.8 s).
+  5. A shooting star crosses the upper sky every 8 to 14 s, behind the path line (bits.star).
+  7. Seven fireflies wander and blink around the path area (bits.fireflies), behind the line.
+  8. A burst of 9 gold / pink / cream sparks wherever the player touches (bits.tap), also on taps on bubbles and buttons.
+  10. UPDATE's text and the gear picture pop (scale 1.18 and back, 90 ms) when pressed.
+  15. Tilt parallax: DeviceOrientation (Android works directly; an iPhone asks once on the first touch). The four friends shift up to 6 to 8 px AGAINST the tilt (they are near), the sky up to 4 px WITH it; full shift at a tilt of 20 degrees (menu.tilt.range); the zero point follows how the phone is held, so only the tilting counts. Menu.tilt.on false switches it off. The sky picture is now 5% bigger and centred so it can shift without showing an edge. The friends move through a position object (pos) so their bob / sway tweens and the tilt shift add up.
+- All little effects share one pool of 2x2 square pictures (makeBits): the cauldron bubbles, trail, stars and sparks (depth 51 / 49 / -3 / 60); no particle system needed (works in WebGL and CANVAS).
+- Checked with the stand-in script: every timer callback runs once without errors, the pool works (12 pictures for the first burst), the sparks, the shooting star's trail and the tilt step run, taps and scrolling still work. NOT checked: how any of it looks or feels, or the tilt on a real phone.
+- UNVERIFIED: positions (trail from the broom tail, cauldron mouth), amounts (too many sparks?), tilt direction (should feel like depth: if it feels backwards, tell Claude).
