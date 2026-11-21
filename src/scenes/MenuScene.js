@@ -22,7 +22,7 @@ export class MenuScene extends Phaser.Scene {
     this.load.spritesheet('menu_sky', 'assets/' + sky.file, { frameWidth: sky.frameW, frameHeight: sky.frameH });
     for (const d of M.decor) this.load.spritesheet('menu_' + d.key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
     this.load.image('menu_logo', 'assets/' + M.logo.file);
-    for (const k of ['normal', 'clicked', 'hover']) this.load.image('btn_gold_' + k, 'assets/ui/button-gold-' + k + '.png'); // pixel-art UPDATE button (ok_lavender pack, 48x16)
+    for (const k of ['panel-parchment', 'button-normal', 'button-pressed', 'button-hover', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png'); // Fantasy UI pack (catau-games): parchment panel, copper button (3 looks), settings medallion
   }
 
   create() {
@@ -53,17 +53,17 @@ export class MenuScene extends Phaser.Scene {
 
     // ---- UPDATE button: gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser or the installed app).
     // When the menu opens it asks the server for the newest version number; if it is newer the button turns orange.
-    const art = this.textures.exists('btn_gold_normal'), K = M.updateBtn.scale; // the pixel-art button (art 48x16 drawn at K x); without the pictures the old drawn plate is used
-    const ubw = art ? 48 * K : M.updateW, ubh = art ? 16 * K : M.updateH, bx = (W - ubw) / 2, by = M.updateTop;
+    const art = this.textures.exists('ui_button-normal'), UB = M.updateBtn; // the copper button (9-slice: the ends stay, the middle stretches); without the pictures the old drawn plate is used
+    const ubw = art ? UB.w : M.updateW, ubh = art ? 22 : M.updateH, bx = (W - ubw) / 2, by = M.updateTop;
     const btn = { btn: true, x: bx, y: by, w: ubw, h: ubh, g: this.add.graphics(), down: false, hot: false, busy: false };
-    btn.img = art ? this.add.image(bx, by, 'btn_gold_normal').setOrigin(0, 0).setScale(K) : null;
+    btn.img = art ? this.add.nineslice(bx, by, 'ui_button-normal', undefined, ubw, 22, 12, 12, 0, 0).setOrigin(0, 0) : null;
     btn.label = this.add.text(W / 2, by + ubh / 2, 'UPDATE', { ...FONT, fontSize: M.updateSize + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5);
     btn.draw = () => {
       btn.g.clear();
-      if (art) { // gold button: normal, pressed (the picture sits 2 art px lower) or hover (a newer version is waiting); dark text
-        btn.img.setTexture('btn_gold_' + (btn.down ? 'clicked' : (btn.hot ? 'hover' : 'normal')));
-        btn.label.setColor(hex(M.updateBtn.textColor)).setStroke(hex(P.shadow), 0);
-        btn.label.setY(by + ubh / 2 - K + (btn.down ? 2 * K : 0));
+      if (art) { // normal, pressed, or hover (a newer version is waiting); dark brown text
+        btn.img.setTexture('ui_button-' + (btn.down ? 'pressed' : (btn.hot ? 'hover' : 'normal')));
+        btn.label.setColor(hex(UB.textColor)).setStroke(hex(P.shadow), 0);
+        btn.label.setY(by + ubh / 2 - 1 + (btn.down ? 1 : 0));
         return;
       }
       const sink = drawPlate(btn.g, bx, by, M.updateW, M.updateH, { fill: btn.hot ? M.updateHotColor : M.updateColor, border: btn.hot ? M.updateHotBorder : P.pink, down: btn.down, radius: 8 });
@@ -83,9 +83,10 @@ export class MenuScene extends Phaser.Scene {
     });
 
     // ---- gear (top right): opens the settings panel
-    const GE = M.gear, gear = { btn: true, x: GE.x - GE.hit / 2, y: GE.y - GE.hit / 2, w: GE.hit, h: GE.hit, g: this.add.graphics(), down: false };
-    this.drawGear(gear.g, GE);
-    gear.draw = () => gear.g.setAlpha(gear.down ? 0.65 : 1);
+    const GE = M.gear, gear = { btn: true, x: GE.x - GE.hit / 2, y: GE.y - GE.hit / 2, w: GE.hit, h: GE.hit, down: false };
+    gear.img = this.textures.exists('ui_gear') ? this.add.image(GE.x, GE.y, 'ui_gear').setScale(GE.scale) : null; // the medallion; without the picture a code-drawn cog
+    if (!gear.img) { gear.g = this.add.graphics(); this.drawGear(gear.g, GE); }
+    gear.draw = () => (gear.img || gear.g).setAlpha(gear.down ? 0.65 : 1);
     gear.action = () => this.openSettings(true);
 
     this.modal = false;
@@ -161,43 +162,48 @@ export class MenuScene extends Phaser.Scene {
 
   // The settings panel (closed at first): CONTROLS (drag / stick, saved), TUNE PANEL (on / off), SOUND (not in the game yet), CLOSE.
   makeSettings() {
-    const S = M.settings, txt = this.txt, objs = [];
+    const S = M.settings, objs = [], ink = S.ink;
     const keep = o => { o.setDepth(S.depth).setVisible(false); objs.push(o); return o; };
-    const back = keep(this.add.graphics());
-    back.fillStyle(P.dark, 0.96).fillRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius);
-    back.lineStyle(M.plateBorderW, P.pink, 1).strokeRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius);
-    keep(txt(S.x + S.w / 2, S.y + 16, 'SETTINGS', S.titleSize, 3));
+    const art = this.textures.exists('ui_panel-parchment'), T = (x, y, s, size, align = 0.5, color = ink) => keep(this.add.text(x, y, s, { ...FONT, fontSize: size + 'px', color: hex(color) }).setOrigin(align, 0.5));
+    // a dark veil over the menu, then the parchment (9-slice: the 24 px ragged border stays, the middle stretches); without the picture a drawn dark plate
+    const veil = keep(this.add.graphics()); veil.fillStyle(0x000000, 0.55).fillRect(0, 0, W, H); veil.setDepth(S.depth - 1);
+    if (art) keep(this.add.nineslice(S.x, S.y, 'ui_panel-parchment', undefined, S.w, S.h, 24, 24, 24, 24).setOrigin(0, 0));
+    else { const back = keep(this.add.graphics()); back.fillStyle(P.dark, 0.96).fillRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius); back.lineStyle(M.plateBorderW, P.pink, 1).strokeRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius); }
+    T(S.x + S.w / 2, S.y + 36, 'SETTINGS', S.titleSize, 0.5, art ? ink : P.cream);
     this.panelButtons = [];
-    const mkBtn = (x, y, w, h, label, action, fill = P.purple, color = P.cream) => {
-      const bt = { btn: true, x, y, w, h, g: keep(this.add.graphics()), down: false, action, fill, shown: false };
-      bt.label = keep(txt(x + w / 2, y + h / 2, label, M.settings.btnSize, 3, 0.5, color));
+    const mkBtn = (x, y, w, label, action) => { // a copper button: 9-slice picture (normal / pressed) with dark text
+      const h = 22, bt = { btn: true, x, y, w, h, down: false, action, shown: false };
+      bt.img = art ? keep(this.add.nineslice(x, y, 'ui_button-normal', undefined, w, h, 12, 12, 0, 0).setOrigin(0, 0)) : null;
+      bt.g = keep(this.add.graphics());
+      bt.label = T(x + w / 2, y + h / 2 - 1, label, S.btnSize, 0.5, art ? ink : P.cream);
       bt.draw = () => {
         bt.g.clear();
+        if (art) { bt.img.setTexture('ui_button-' + (bt.down ? 'pressed' : 'normal')); bt.label.setY(y + h / 2 - 1 + (bt.down ? 1 : 0)); return; }
         if (!bt.shown) return;
-        const sink = drawPlate(bt.g, x, y, w, h, { fill: bt.fill, border: P.pink, down: bt.down, radius: 6 });
+        const sink = drawPlate(bt.g, x, y, w, h, { fill: P.purple, border: P.pink, down: bt.down, radius: 6 });
         bt.label.setY(y + (h - M.plateDrop) / 2 + sink + 1);
       };
       this.panelButtons.push(bt);
       return bt;
     };
-    const rowY = i => S.y + 40 + i * S.rowH;
+    const left = S.x + 30, right = S.x + S.w - 30, bwid = S.btnW, lc = art ? ink : P.cream, hc = art ? S.hintInk : P.cyan;
     // CONTROLS
-    keep(txt(S.x + 12, rowY(0) + 11, 'CONTROLS', M.settings.btnSize, 3, 0));
-    const ctl = mkBtn(S.x + S.w - 12 - S.btnW, rowY(0), S.btnW, 22, C.ship.controls === 'stick' ? 'STICK' : 'DRAG', () => {
+    T(left, S.y + 66, 'CONTROLS', S.btnSize, 0, lc);
+    const ctl = mkBtn(right - bwid, S.y + 55, bwid, C.ship.controls === 'stick' ? 'STICK' : 'DRAG', () => {
       const v = C.ship.controls === 'stick' ? 'drag' : 'stick';
       C.ship.controls = v;
       try { localStorage.setItem(CTL_KEY, v); } catch (e) { /* not saved */ }
       ctl.label.setText(v === 'stick' ? 'STICK' : 'DRAG'); hint.setText(v === 'stick' ? 'RING STICK UNDER YOUR THUMB' : 'SWIPE ANYWHERE TO MOVE');
     });
-    const hint = keep(txt(S.x + 12, rowY(0) + 32, C.ship.controls === 'stick' ? 'RING STICK UNDER YOUR THUMB' : 'SWIPE ANYWHERE TO MOVE', 8, 2, 0, P.cyan));
+    const hint = T(left, S.y + 92, C.ship.controls === 'stick' ? 'RING STICK UNDER YOUR THUMB' : 'SWIPE ANYWHERE TO MOVE', 8, 0, hc);
     // TUNE PANEL
-    keep(txt(S.x + 12, rowY(1) + 11 + 10, 'TUNE PANEL', M.settings.btnSize, 3, 0));
-    const tn = mkBtn(S.x + S.w - 12 - S.btnW, rowY(1) + 10, S.btnW, 22, tuneEnabled() ? 'ON' : 'OFF', () => { tn.label.setText(toggleTune() ? 'ON' : 'OFF'); });
+    T(left, S.y + 125, 'TUNE PANEL', S.btnSize, 0, lc);
+    const tn = mkBtn(right - bwid, S.y + 114, bwid, tuneEnabled() ? 'ON' : 'OFF', () => { tn.label.setText(toggleTune() ? 'ON' : 'OFF'); });
     // SOUND
-    keep(txt(S.x + 12, rowY(2) + 11 + 10, 'SOUND', M.settings.btnSize, 3, 0, M.lockedText));
-    keep(txt(S.x + S.w - 12 - S.btnW / 2, rowY(2) + 11 + 10, 'SOON', M.settings.btnSize, 3, 0.5, M.lockedText));
+    T(left, S.y + 158, 'SOUND', S.btnSize, 0, hc);
+    T(right - bwid / 2, S.y + 158, 'SOON', S.btnSize, 0.5, hc);
     // CLOSE
-    mkBtn(S.x + (S.w - 90) / 2, S.y + S.h - 34, 90, 24, 'CLOSE', () => this.openSettings(false), P.purple);
+    mkBtn(S.x + (S.w - 90) / 2, S.y + S.h - 56, 90, 'CLOSE', () => this.openSettings(false));
     this.panelObjs = objs;
   }
 
