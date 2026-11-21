@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.59", // bump on every push so the player/Omri can see the build
+  version: "1.9.60", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -41,14 +41,14 @@ export const CONFIG = {
     plateDrop: 4, plateDownShift: 2, plateBorderW: 3, plateRadius: 10, tabW: 6, // chunky button plate: bottom edge height, how far a pressed plate sinks, border, corner, stage colour tab
     tabColors: { forest: 0xff9a2e, swamp: 0x3df2ff },
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4, // titleY..titleStroke: the old plain-text title (used only if the logo picture is missing)
-    logo: { file: 'menu/logo.png', x: 120, y: 252, scale: 1.7 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
+    logo: { file: 'menu/logo-text.png', decor: 'menu/logo-decor.png', x: 120, y: 252, scale: 1.7 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
     intro: { bubbles: false }, // true: the stage bubbles slide in from the sides when the menu opens (the witch does it with decor witch introX, a number of px to fly in from, 0 = off). Off: only the logo moves in; everything else is just there
     logoShine: { frames: 14, band: 26, strength: 0.45, frameMs: 45, everyMs: 4200, firstMs: 1700, float: 2, floatMs: 2800 }, // glint sweep over the logo (frames, band width in art px, brightness 0..1, ms per frame, ms between sweeps, ms until the first one) and the float (px, ms for a full swing)
     // Stage path (the main menu): a line up the middle, a bubble left or right of it at height cy. side L / R. A node with locked: true is faded, says SOON and takes no taps.
     // Stage path (the main menu): a line up the middle, a bubble left or right of it. nodes go from the LOWEST stage up (stage 1 first); bubble i sits step px above the one below,
     // starting at bottomCy. A node with locked: true is faded, says SOON and takes no taps. With more nodes than fit the path scrolls (drag up / down, mouse wheel): topStop = where the highest bubble
     // stops, friction = how fast it stops gliding. Bubbles and line fade out below fadeStart (to nothing at lineBottom = about the witch's hat) and at the top (fadeTop px / fadeTopBubble px).
-    path: { x: 120, lineColor: 0xf2b632, lineW: 4, lineTop: 0, lineBottom: 250, fadeStart: 198, fadeTop: 16, fadeTopBubble: 40, viewBottom: 250, gap: 8, bubbleW: 100, bubbleH: 68,
+    path: { x: 120, lineColor: 0xf2b632, lineW: 4, lineTop: 0, lineBottom: 250, fadeStart: 224, fadeTop: 10, fadeTopBubble: 24, viewBottom: 250, gap: 8, bubbleW: 100, bubbleH: 68,
       step: 71, bottomCy: 192, topStop: 50, friction: 4, nodes: [
       { theme: 'forest', name: 'FOREST', side: 'L' },
       { theme: 'swamp', name: 'SWAMP', side: 'R' },

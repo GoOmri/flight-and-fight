@@ -21,7 +21,8 @@ export class MenuScene extends Phaser.Scene {
     const sky = M.sky;
     this.load.spritesheet('menu_sky', 'assets/' + sky.file, { frameWidth: sky.frameW, frameHeight: sky.frameH });
     for (const d of M.decor) this.load.spritesheet('menu_' + d.key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
-    this.load.image('menu_logo', 'assets/' + M.logo.file);
+    this.load.image('menu_logo', 'assets/' + M.logo.file); // only the letters: they rise and float
+    if (M.logo.decor) this.load.image('menu_logo_decor', 'assets/' + M.logo.decor); // the moon, stars and bats of the logo picture: they stay in the background
     for (const k of ['panel-parchment', 'med-panel', 'med-button', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png?v=' + C.version); // ?v= = the phone must load the newest picture after an update (it kept an old copy of a picture with the same file name) // UI pictures: parchment panel and gear (Fantasy UI pack, catau-games), tan panel and button (Medieval UI pack, Doktoresco)
   }
 
@@ -233,6 +234,7 @@ export class MenuScene extends Phaser.Scene {
   // The logo: drops in with a bounce, then floats up and down; every few seconds a bright band sweeps over its letters (pre-drawn frames made from the logo itself, so it works in WebGL and CANVAS).
   makeLogo() {
     const L = M.logo, SH = M.logoShine, src = this.textures.get('menu_logo').getSourceImage();
+    if (this.textures.exists('menu_logo_decor')) this.add.image(L.x, L.y, 'menu_logo_decor').setOrigin(0.5, 0).setScale(L.scale); // still: the stars, moon and bats belong to the background
     const logo = this.add.image(L.x, H + 10, 'menu_logo').setOrigin(0.5, 0).setScale(L.scale);
     const keys = [];
     try {
