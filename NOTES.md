@@ -629,3 +629,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Button text: it was centred by its line box, which puts the capitals high (the font has room for accents above). Labels are now 2 px lower (y = middle of the button, was 2 px above it).
 - Parchment and gear unchanged.
 - UNVERIFIED: how it looks on the phone; the text position on the buttons (1 to 2 px either way) is the thing to check.
+
+## 2026-11-21 v1.9.50: panel restored, recolour = colour swap only (branch v1950-panel-fix)
+- Omri: the v1.9.49 panels were ruined; "don't change any pixels when recolouring". In v1.9.49 I had painted an extra 2 px pink border onto the panel. The panel is now rebuilt from the pack's untouched picture (block 5, shrunk 1/64) with ONLY the 3-colour swap (fill -> purple, outline -> pink, shadow -> dark violet); checked: the transparency of every pixel is identical to the original, no pixel added, moved or removed. Same check for the button (0 differences). The panel has only the pack's own little corner marks (now pink) and no border; if it needs more contrast against the sky, change the colour map (fill lighter, for instance), not the pixels.
+- UNVERIFIED: how it looks.
