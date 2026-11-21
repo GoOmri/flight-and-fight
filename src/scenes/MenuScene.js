@@ -274,7 +274,7 @@ export class MenuScene extends Phaser.Scene {
     } catch (e) { keys.length = 0; } // no shine if the picture cannot be read
     const shine = keys.length ? this.add.image(L.x, H + 10, keys[0]).setOrigin(0.5, 0).setScale(L.scale).setVisible(false) : null;
     const all = shine ? [...words, shine] : words; // everything that floats together
-    words.forEach((im, i) => this.tweens.add({ targets: im, y: L.y, duration: 850, delay: 150 + i * L.wordStepMs, ease: 'Back.easeOut', // each word rises from below the screen and settles with a little overshoot
+    words.forEach((im, i) => this.tweens.add({ targets: im, y: L.y, duration: L.riseMs, delay: 150 + i * L.wordStepMs, ease: 'Back.easeOut', easeParams: [L.overshoot], // each word rises from below the screen and settles with a little overshoot
       onComplete: () => { if (i === words.length - 1) this.tweens.add({ targets: all, y: L.y + SH.float, duration: SH.floatMs / 2, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' }); } }));
     if (shine) shine.y = L.y; // (the glint picture sits at the final spot, hidden until the first sweep)
     if (shine) this.time.addEvent({ delay: SH.everyMs, startAt: SH.everyMs - SH.firstMs, loop: true, callback: () => {

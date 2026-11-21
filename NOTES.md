@@ -696,3 +696,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-21 v1.9.63: words 0.1 s apart (branch v1963-word-step)
 - Omri: the gap between Fight, & and Flight rising from 0.3 s to 0.1 s (config menu.logo.wordStepMs 300 -> 100). With each word taking 850 ms, they now overlap a lot; the floating starts about 1.0 s after the menu opens (was 1.4 s). Decorations (1.5 s) and the first glint (2.6 s) unchanged.
+
+## 2026-11-21 v1.9.64: gentler logo landing (branch v1964-softer-settle)
+- Omri: lower overshoot and a lower settle speed for the words rising. Overshoot (the Back ease strength) 1.7 (default) -> 0.6: they go past their spot by about a third as much; rise time 850 -> 1200 ms (riseMs): slower settle. Config menu.logo.overshoot / riseMs. The first glint (2.6 s) and decorations (1.5 s) start while the last word is still landing (0.1 s apart + 1.2 s = about 1.5 s): if that looks crowded, raise decorDelay.
