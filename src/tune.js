@@ -68,7 +68,7 @@ const rowsOf = (tab, pick) => tab === DROPS_TAB ? dropRows(KINDS[pick]) : tab ==
 const ALL = [...STICK_ROWS, ...DRAG_ROWS, ...TABS.flatMap((t, i) => i === DROPS_TAB ? KINDS.flatMap(dropRows) : t[1] || [])];
 const getp = path => path.split('.').reduce((o, k) => o[k], C);
 const setp = (path, v) => { const ks = path.split('.'), last = ks.pop(); ks.reduce((o, k) => o[k], C)[last] = v; };
-const GEAR = { x: W - 18, y: 34, w: 32, h: 20 };          // gear button (centre), just under the hearts
+const GEAR = { x: W - 18, y: 62, w: 32, h: 20 };          // gear button (centre), just under the hearts
 const PANEL = { x: 6, y: 46, w: W - 12, rowH: 15, pad: 6 };
 const BTN = { w: 22, h: 13 };
 const DEPTH = 70;

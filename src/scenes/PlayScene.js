@@ -148,8 +148,14 @@ export class PlayScene extends Phaser.Scene {
     this.tune = tuneEnabled() ? new Tune(this,
       () => { this.physics.world.pause(); this.dragId = null; this.stickV.set(0, 0); this.stopping = false; this.stickC.set(W / 2, C.stick.restY); },
       () => this.physics.world.resume()) : null;
+    this.paused = false; this.pauseUi = null;
+    this.makePauseButton();
+    this.game.events.on('hidden', this.pauseGame, this); // the phone app goes to the background: pause by itself
+    this.events.once('shutdown', () => { this.game.events.off('hidden', this.pauseGame, this); this.anims.resumeAll(); });
     this.input.on('pointerdown', p => {
+      if (this.paused) { this.pauseTap(p.x / R, p.y / R); return; } // the pause screen takes every touch
       if (this.tune && this.tune.press(p.x / R, p.y / R)) return; // the panel used this touch
+      if (!this.over && this.pauseHit(p.x / R, p.y / R)) { this.pauseGame(); return; }
       if (this.over) {
       if (this.time.now <= this.restartAt) return;
       const b = this.menuBtn; // the MENU button is checked first, so it never also restarts the stage
@@ -806,11 +812,56 @@ export class PlayScene extends Phaser.Scene {
     return null;
   }
 
+  // ---------- pause ----------
+  makePauseButton() {
+    const B = C.pauseBtn, P = C.menu.pal, s = B.size;
+    const g = this.add.graphics().setDepth(52);
+    g.fillStyle(B.fill, 0.85).fillRoundedRect(B.x - s / 2, B.y - s / 2, s, s, 4);
+    g.lineStyle(1, B.border, 1).strokeRoundedRect(B.x - s / 2 + 0.5, B.y - s / 2 + 0.5, s - 1, s - 1, 4);
+    g.fillStyle(B.ink, 1).fillRect(B.x - 4, B.y - 4, 3, 8).fillRect(B.x + 1, B.y - 4, 3, 8); // two bars
+    this.pauseBtnGfx = g;
+  }
+
+  pauseHit(x, y) { const B = C.pauseBtn; return Math.abs(x - B.x) <= B.hit / 2 && Math.abs(y - B.y) <= B.hit / 2; }
+
+  pauseGame() {
+    if (this.paused || this.over) return;
+    this.paused = true; this.pauseAt = this.time.now;
+    this.physics.world.pause(); this.tweens.pauseAll(); this.anims.pauseAll();
+    this.dragId = null; this.stickV.set(0, 0); this.stopping = false; this.stickC.set(W / 2, C.stick.restY);
+    const B = C.pauseBtn, P = C.menu.pal, CR = hex(P.cream), ui = [];
+    ui.push(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.6).setDepth(70));
+    ui.push(this.add.text(W / 2, H / 2 - 70, 'PAUSED', { ...FONT, fontSize: fpx(snap4(z(36))) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(71));
+    const btn = (y, label) => {
+      if (this.textures.exists('ui_med-button')) ui.push(this.add.nineslice(W / 2 - B.btnW / 2, y - 12, 'ui_med-button', undefined, B.btnW, 25, 10, 10, 0, 0).setOrigin(0, 0).setDepth(71));
+      else { const gg = this.add.graphics().setDepth(71); drawPlate(gg, W / 2 - B.btnW / 2, y - B.btnH / 2, B.btnW, B.btnH, { fill: B.fill, border: B.border, down: false }); ui.push(gg); }
+      ui.push(this.add.text(W / 2, y, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: 3, align: 'center' }).setOrigin(0.5).setDepth(72));
+      return { x: W / 2, y, w: B.btnW, h: B.btnH };
+    };
+    this.pauseUi = { objs: ui, cont: btn(H / 2 - 5, 'CONTINUE'), menu: btn(H / 2 - 5 + B.btnH + B.gap, 'MENU') };
+  }
+
+  pauseTap(x, y) {
+    const hit = b => Math.abs(x - b.x) <= b.w / 2 && Math.abs(y - b.y) <= b.h / 2;
+    if (hit(this.pauseUi.cont)) this.resumeGame();
+    else if (hit(this.pauseUi.menu)) { this.anims.resumeAll(); this.scene.start('Menu'); } // a pause never saves anything: leaving loses the run
+  }
+
+  resumeGame() {
+    if (!this.paused) return;
+    const d = this.time.now - this.pauseAt; // time deadlines move by the time spent paused
+    this.invulnUntil += d; this.stunUntil += d; this.shipFlashUntil += d;
+    this.pauseUi.objs.forEach(o => o.destroy()); this.pauseUi = null;
+    this.physics.world.resume(); this.tweens.resumeAll(); this.anims.resumeAll();
+    this.paused = false;
+  }
+
   addScore(n) { this.score += n; this.hud.setScore(this.score, true); }
   syncMedals() { this.hud.setMedals(this.medals.state); }
 
   // ---------- gameplay ----------
   update(time, delta) {
+    if (this.paused) return; // pause screen open: everything waits
     if (this.tune) { this.tune.update(time); if (this.tune.open) return; } // panel open = game paused
     if (this.freezeMs > 0 && !this.over) { // hit-stop: everything waits
       this.freezeMs -= delta;

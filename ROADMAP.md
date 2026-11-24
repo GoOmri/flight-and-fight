@@ -1,6 +1,6 @@
 # Flight and Fight: roadmap
 
-Kept short on purpose. Per-version history is in NOTES.md, the look rules are in DESIGN.md (section CURRENT LOOK). Last updated 24 Nov 2026 (v1.9.81).
+Kept short on purpose. Per-version history is in NOTES.md, the look rules are in DESIGN.md (section CURRENT LOOK). Last updated 24 Nov 2026 (v1.9.82).
 
 ## Next up (order agreed with Omri, 24 Nov 2026)
 1. **Stars part 1:** DONE in v1.9.81 (look unverified).
@@ -11,6 +11,9 @@ Kept short on purpose. Per-version history is in NOTES.md, the look rules are in
 6. **Power-up bar at the top:** blue pixel-art pills (weapon level, 10 levels), src/hud.js.
 7. **Sound** and vibration, effects switch for the game, pause and game-over leftovers.
 8. **New enemy shots: DELAYED** (Omri: the shots in stages 1 and 2 are good now). The design is kept below. Swamp enemy patterns go with it.
+
+## Fix soon
+- **Enemy aura looks like a dark SHADOW, not a glow** (Omri, 24 Nov, v1.9.80). The aura is a rust-maroon ring set (config enemies.glow). Change it to a real soft glow (lighter, warm, maybe additive) or remove it. Keep bosses without it.
 
 ## Smaller open items
 - Sound (none yet) and vibration (short buzz on hit and pickup).

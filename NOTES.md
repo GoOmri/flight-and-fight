@@ -785,3 +785,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Menu tiles: 3 stars (scale 1.5) in a bigger dark strip; HUD top left: 3 stars (medalSize 13); STAGE CLEAR screen shows the 3 stars big and NEW under new ones.
 - Checked: tools\check.py all green, menu smoke test runs (the swamp is locked in it, as it has no stars). UNVERIFIED: how the star pictures look at small size (the picture may be hard to read: tell Claude), the locked tile, the HUD spacing.
 - Phone check: see the Forest tile (3 grey stars), play and clear it, see the stars on the end screen and the tile; with 2 stars the Swamp opens.
+
+## 2026-11-24 v1.9.82: PAUSE menu (branch v1982-pause-menu)
+- New pause button (two bars, purple square with gold edge) at the top right under the hearts (config pauseBtn, 36 px touch box). It opens PAUSED with two buttons: CONTINUE and MENU (the same button picture as the end screen). While paused the world, shots, animations and tweens all stand still; the pause screen takes every touch, so a tap beside the buttons does nothing. CONTINUE moves the "invulnerable / stunned / flash" deadlines by the paused time. MENU goes back to the stage menu and the run is lost (nothing is saved, no best score). The game also pauses by itself when the app goes to the background (Phaser "hidden").
+- The tune panel gear moved down from y 34 to y 62 so it does not sit on the pause button.
+- Roadmap: added "Fix soon: enemy aura looks like a dark shadow, not a glow" (Omri, v1.9.80).
+- Checked: syntax of all files, tests (tools\check.py) and the menu smoke test pass. NOT run: the game itself (no way to open it here). UNVERIFIED: button position and look, that nothing keeps moving while paused (e.g. a tween or timer I did not know about), the pause when the app is in the background.
+- Phone check: tap the pause button during play; see PAUSED; CONTINUE resumes exactly where it was; pause again and tap MENU: back at the stage menu; tapping beside the buttons does nothing; the button also works near the hearts without moving the witch.
