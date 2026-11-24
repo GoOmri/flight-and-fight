@@ -951,3 +951,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.115: the ring looks like it is about to burst (branch v1115-about-to-burst)
 - Omri: not powerful enough. Shake up to 7 px (grows with fill squared, from 25% fill) and the cat shakes half as much (catShake). Sparks: 8x rate multiplier, rise speed up to 6.5x, suck-in speed 9000 (very sharp), strips up to 11x long (streak 10), cap 70.
 - Tested in the browser pane with the ring forced to 93%: long coloured strips stream into the witch. The shake was checked by the numbers only (about 5.7 px at 93%). UNVERIFIED on a phone.
+
+## 2026-11-25 v1.9.116: sparks fly their own spiral into the witch (branch v1116-spiral-sparks)
+- Omri: too basic, uniform, straight and thick. Research (game-juice guides: charge-and-release pattern, anticipation, tight fast particles) said: layered build-up, anticipation before release, variety.
+- Every pulled spark now has its OWN flight: random pop-up height/speed, a short random hang (anticipation), then a spiral around the witch (random direction, 0.5 to 1.6 turns, random size) that tightens with ease-in (radius 1 - v^2.6, angle v^1.7) and is faster the fuller the ring is (duration shrinks up to 55%). Thin (scaleY 0.5), stretched along the real speed (up to 8x, only when really fast), so lengths vary. Free sparks stretch less (streak 7, half strength) and are thinner.
+- Tested in the browser pane (ring forced to 85%): many thin curved streaks of different lengths and colours spiral into the witch. Cat was far from the witch in that test, so the close-up look is UNVERIFIED, also on a phone.
+- Idea not built: a flash and expanding ring when the ring completes (release).
