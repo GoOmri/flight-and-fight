@@ -11,11 +11,13 @@
 <link rel="preload" href="assets/fonts/PixelifySans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/Jersey10-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/PackFont.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="assets/fonts/DungeonFont.ttf" as="font" type="font/ttf" crossorigin>
 <style>
   /* One family, two files: Pixelify Sans for letters, Jersey 10 for the digits 0-9 (Pixelify draws 5 like S and 2 like 8). size-adjust makes the digits as tall as the letters. */
   @font-face { font-family: "GameFont"; src: url('assets/fonts/PixelifySans-latin.woff2') format('woff2'); font-weight: 400 700; font-display: block; unicode-range: U+0000-002F, U+003A-10FFFF; }
   @font-face { font-family: "GameFont"; src: url('assets/fonts/Jersey10-latin.woff2') format('woff2'); font-weight: 400 700; font-display: block; unicode-range: U+0030-0039; size-adjust: 125%; }
   @font-face { font-family: "PackFont"; src: url('assets/fonts/PackFont.ttf') format('truetype'); font-weight: 400; font-display: block; } /* pixel font made from the Fantasy UI pack glyph sheet */
+  @font-face { font-family: "DungeonFont"; src: url('assets/fonts/DungeonFont.ttf') format('truetype'); font-weight: 400; font-display: block; } /* ornate title font: big titles only (24 px and up) */
   html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; touch-action: none; overscroll-behavior: none; -webkit-user-select: none; user-select: none; }
   /* The game is drawn small and stretched to the phone. Keep hard pixel edges, no smoothing (smoothing = blurry). */
   canvas { display: block; touch-action: none; image-rendering: auto !important; } /* the canvas is already drawn at 3x, so the browser may smooth the last small stretch */

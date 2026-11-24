@@ -1,12 +1,12 @@
 # Flight and Fight: roadmap
 
-Kept short on purpose. Per-version history is in NOTES.md, the look rules are in DESIGN.md (section CURRENT LOOK). Last updated 24 Nov 2026 (v1.9.87).
+Kept short on purpose. Per-version history is in NOTES.md, the look rules are in DESIGN.md (section CURRENT LOOK). Last updated 24 Nov 2026 (v1.9.88).
 
 ## Next up (order agreed with Omri, 24 Nov 2026)
 1. **Stars part 1:** DONE in v1.9.81 (look unverified).
 2. **Stars part 2:** DONE in v1.9.81 (unlock 2, 5, 8, 11).
 3. **Cats:** rescue cats, plus a cat star (spec in DESIGN.md section 5, "Cat rescue"). A big mechanic, so right after stars.
-4. **DungeonFont for big titles** (SETTINGS, STAGE CLEAR, GAME OVER, stage names), only if Omri wants it. NOT done yet; everything uses PackFont.
+4. **DungeonFont for big titles:** DONE in v1.9.88 (look unverified).
 5. **Boss:** one per stage. Art candidates in art-packs/characters-and-enemies: wizard-summoner-unknown, floating-skull (zip), mud-enemy-unknown. Bosses get NO enemy glow (noGlow: true).
 6. **Power-up bar at the top:** blue pixel-art pills (weapon level, 10 levels), src/hud.js.
 7. **Sound** and vibration, effects switch for the game, pause and game-over leftovers.

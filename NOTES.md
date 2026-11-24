@@ -821,3 +821,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Old saves: kill-all, all-coins and no-hit medals are kept; the old "kill 70%" and the finish star are not counted any more (stars drop by one for players who had them: unlock numbers may need a look).
 - Checked: syntax, tools\check.py, the menu smoke test plus a new one for the box (scratch\lightbox-smoke.mjs: opens, BACK closes, PLAY starts the stage). NOT run: the game itself. UNVERIFIED: how everything looks (box layout, cat icon colours, skull, end screen rows).
 - Phone check: tap Forest: the box opens; PLAY starts; BACK closes; the cat and skull icons are readable; the Swamp tile shows ??? until Forest is cleared.
+
+## 2026-11-24 v1.9.88: equal icon sizes, white box text, DungeonFont for big titles (branch v1988-icons-titles)
+- Omri's screenshot of the goals box: coin and heart were big, the skull tiny, text dark. Now every goal icon is fitted into the same square (sprites.js goalScale; the tiny skull is first enlarged by whole pixels): box 22 px in the goals box (config lightbox.iconBox), 16 px top left in the game (hud.goalBox, the life hearts use the same size), 20 px on the end screen. The text in the goals box is white with a dark outline.
+- DungeonFont (promised earlier, only now built): FONT_TITLE in hud.js, loaded in index.html and main.js. Used for STAGE CLEAR, GAME OVER, PAUSED, SETTINGS and the stage name in the goals box (24 px and up; everything else stays PackFont). Licence unknown (CREDITS.md).
+- Checked: syntax, tools\check.py, menu + goals box smoke test. NOT run: the game. UNVERIFIED: how DungeonFont reads at these sizes (SETTINGS at 24 may be too wide or tight), icon sizes, the box height.

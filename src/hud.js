@@ -1,6 +1,7 @@
 // The HUD: medals + version (left), score + weapon bars (centre), hearts + wave pips (right).
 // Everything is created once. Graphics are only redrawn when something changed.
 import { CONFIG as C, z, hex } from './config.js';
+import { goalScale } from './sprites.js';
 import { PX } from './sprites.js';
 const GOAL_TEX = { pending: 'open', earned: 'earned', failed: 'failed' }; // goal icon look per state
 
@@ -10,6 +11,8 @@ let packOn = true;
 const CLASSIC = { fontFamily: '"GameFont", monospace', fontStyle: 'bold', resolution: C.game.render };
 export const FONT = { fontFamily: '"PackFont", "GameFont", monospace', fontStyle: 'normal', resolution: C.game.render }; // text drawn at canvas resolution = sharp
 export const packFontOn = () => packOn;
+// The ornate title font (big titles only, 24 px and up: STAGE CLEAR, GAME OVER, PAUSED, SETTINGS, the goals box). Plain px sizes (not fpx).
+export const FONT_TITLE = { fontFamily: '"DungeonFont", "PackFont", monospace', fontStyle: 'normal', resolution: C.game.render };
 export const useClassicFont = () => { packOn = false; Object.assign(FONT, CLASSIC); };
 // A text size in game px for the pixel font. PackFont has 11 art pixels per em, so a size S draws every art pixel S * 3 / 11 canvas px wide (render x3):
 // only sizes with a WHOLE number of canvas px per art pixel stay sharp. fpx() picks p = whole canvas px per art pixel from the size the code asked for
@@ -43,7 +46,7 @@ export class Hud {
     let gx = H.margin; // the 3 goal icons in a row (witch hat, coin, heart), each centred in the row
     this.goalKeys = scene.goalKeys;
     this.medalImgs = this.goalKeys.map(k => {
-      const im = scene.add.image(0, H.margin + H.medalSize / 2, 'goal_' + k + '_open').setOrigin(0, 0.5).setScale(H.goalScale).setDepth(depth);
+      const im = scene.add.image(0, H.margin + H.medalSize / 2, 'goal_' + k + '_open').setOrigin(0, 0.5).setScale(goalScale(scene, k, H.goalBox)).setDepth(depth);
       im.x = gx; gx += im.displayWidth + H.medalGap; return im;
     });
     this.medalLook = this.goalKeys.map(() => 'pending');
@@ -63,7 +66,7 @@ export class Hud {
     this.hs = !this.still && C.sprites.heartPickup && C.sprites.heartHud ? C.sprites.heartHud : null; // (fallback) animated hearts or the old code-drawn ones
     for (let i = 0; i < C.ship.hearts; i++) {
       const x = W - H.margin - i * H.heartStep, y = H.margin + H.heartY;
-      const ic = this.still ? scene.add.image(x, y, 'goal_noHit_earned').setScale(H.goalScale) : this.hs ? scene.add.sprite(x, y, 'sp_heart_idle', 0).setScale(this.hs.scale) : scene.add.image(x, y, 'heart').setScale(PX / C.game.zoom);
+      const ic = this.still ? scene.add.image(x, y, 'goal_noHit_earned').setScale(goalScale(scene, 'noHit', H.goalBox)) : this.hs ? scene.add.sprite(x, y, 'sp_heart_idle', 0).setScale(this.hs.scale) : scene.add.image(x, y, 'heart').setScale(PX / C.game.zoom);
       ic.setOrigin(1, 0.5).setDepth(depth);
       if (this.hs) { ic.play('heart_idle'); ic.anims.setCurrentFrame(ic.anims.currentAnim.frames[(i * this.hs.desync) % C.sprites.heartPickup.idle.frames]); } // each heart beats a little out of step
       ic.full = true;

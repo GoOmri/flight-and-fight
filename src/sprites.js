@@ -210,6 +210,8 @@ function makeStarIcons(scene) {
 // GOAL icons (what the player does): the menu cat = all cats, the game's coin = all coins, a skull (BTL pack) = defeat every enemy, the game's heart = no hit. Textures goal_<key>_<open|earned|failed>:
 // open = white silhouette, earned = full colour, failed = grey (no cross). Cut from pictures the game already loads (coin and heart sheets) and the hat (assets/ui/goal-hat.png),
 // trimmed to the visible pixels. The black cat's colours are swapped to purples (a colour swap only).
+// goalScale(scene, key, box) = the scale that fits a goal icon into a box x box px square (so coin, skull and heart look equally big).
+export const goalScale = (scene, key, box) => { const k = 'goal_' + key + '_open', f = scene.textures.exists(k) ? scene.textures.get(k).get() : null; return f && typeof f.width === 'number' && f.width > 0 ? box / Math.max(f.width, f.height) : 1; };
 // Both scenes load the pictures with loadGoalArt (textures are shared, so the menu and the game use the same icons).
 export function loadGoalArt(scene, v) {
   const L = scene.load, T = scene.textures, S = CONFIG.sprites;
@@ -236,7 +238,13 @@ export function makeGoalIcons(scene) {
     let x1 = c0.width, y1 = c0.height, x2 = -1, y2 = -1;
     for (let y = 0; y < c0.height; y++) for (let x = 0; x < c0.width; x++) if (d0[(y * c0.width + x) * 4 + 3] > 20) { x1 = Math.min(x1, x); y1 = Math.min(y1, y); x2 = Math.max(x2, x); y2 = Math.max(y2, y); }
     if (x2 < 0) continue;
-    const w = x2 - x1 + 1, h = y2 - y1 + 1, px = x0.getImageData(x1, y1, w, h).data;
+    let w = x2 - x1 + 1, h = y2 - y1 + 1, px = x0.getImageData(x1, y1, w, h).data;
+    const k = Math.max(w, h) <= 12 ? Math.round(18 / Math.max(w, h)) : 1; // a tiny picture (the skull) is enlarged by whole pixels so every icon is about the same size
+    if (k > 1) {
+      const w2 = w * k, h2 = h * k, p2 = new Uint8ClampedArray(w2 * h2 * 4);
+      for (let y = 0; y < h2; y++) for (let x = 0; x < w2; x++) for (let c = 0; c < 4; c++) p2[(y * w2 + x) * 4 + c] = px[(Math.floor(y / k) * w + Math.floor(x / k)) * 4 + c];
+      px = p2; w = w2; h = h2;
+    }
     for (const st of ['open', 'earned', 'failed']) {
       const cv = scene.textures.createCanvas('goal_' + key + '_' + st, w, h), cx = cv.getContext(), out = cx.createImageData(w, h), o = out.data;
       for (let i = 0; i < px.length; i += 4) {

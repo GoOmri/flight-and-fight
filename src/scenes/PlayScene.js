@@ -1,8 +1,8 @@
 import { CONFIG as C, z, hex, snap4 } from '../config.js';
-import { makeAllTextures, makeGoalIcons, loadGoalArt, PX } from '../sprites.js';
+import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale, PX } from '../sprites.js';
 import { STAGE1 } from '../waves.js';
 import { WaveRunner, initPath, followPath } from '../waves-runner.js';
-import { Hud, FONT, fpx, drawPlate } from '../hud.js';
+import { Hud, FONT, FONT_TITLE, fpx, drawPlate } from '../hud.js';
 import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
 import { Tune, tuneEnabled } from '../tune.js';
@@ -834,7 +834,7 @@ export class PlayScene extends Phaser.Scene {
     this.dragId = null; this.stickV.set(0, 0); this.stopping = false; this.stickC.set(W / 2, C.stick.restY);
     const B = C.pauseBtn, P = C.menu.pal, CR = hex(P.cream), ui = [];
     ui.push(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.6).setDepth(70));
-    ui.push(this.add.text(W / 2, H / 2 - 80, 'PAUSED', { ...FONT, fontSize: fpx(snap4(z(36))) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(71));
+    ui.push(this.add.text(W / 2, H / 2 - 80, 'PAUSED', { ...FONT_TITLE, fontSize: '36px', color: CR, stroke: hex(P.shadow), strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(71));
     const btn = (y, label) => {
       if (this.textures.exists('ui_med-button')) ui.push(this.add.nineslice(W / 2 - B.btnW / 2, y - 12, 'ui_med-button', undefined, B.btnW, 25, 10, 10, 0, 0).setOrigin(0, 0).setDepth(71));
       else { const gg = this.add.graphics().setDepth(71); drawPlate(gg, W / 2 - B.btnW / 2, y - B.btnH / 2, B.btnW, B.btnH, { fill: B.fill, border: B.border, down: false }); ui.push(gg); }
@@ -1543,16 +1543,16 @@ export class PlayScene extends Phaser.Scene {
     const ease = C.feel.endEaseMs, fade = []; // everything on the end screen fades in
     const veil = this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.55).setDepth(60);
     const P = C.menu.pal, CR = hex(P.cream);
-    const t = (y, s, size, c, stroke = z(5)) => {
-      const o = this.add.text(W / 2, y, s, { ...FONT, fontSize: fpx(snap4(z(size))) + 'px', color: c, stroke: hex(P.shadow), strokeThickness: stroke, align: 'center' }).setOrigin(0.5).setDepth(61);
+    const t = (y, s, size, c, stroke = z(5), title = false) => {
+      const o = this.add.text(W / 2, y, s, title ? { ...FONT_TITLE, fontSize: size + 'px', color: c, stroke: hex(P.shadow), strokeThickness: stroke, align: 'center' } : { ...FONT, fontSize: fpx(snap4(z(size))) + 'px', color: c, stroke: hex(P.shadow), strokeThickness: stroke, align: 'center' }).setOrigin(0.5).setDepth(61);
       fade.push(o); return o;
     };
     let tapY = H / 2 + z(60);
     if (!stats) {
-      t(H / 2 - z(70), title, 36, col);
+      t(H / 2 - z(70), title, 36, col, z(5), true);
       t(H / 2 - z(10), 'SCORE ' + this.score, 26, CR);
     } else {
-      t(100, title, 36, col);
+      t(100, title, 36, col, z(5), true);
       t(138, 'SCORE ' + this.score, 26, CR);
       const names = { cats: 'ALL CATS', allCoins: 'ALL COINS', killAll: 'ALL ENEMIES', noHit: 'NO HIT' }, rowTxt = (x, y, str, color) => { // goal rows: goal icon, its name, and a star for every goal done
         const o = this.add.text(x, y, str, { ...FONT, fontSize: fpx(12) + 'px', color, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0, 0.5).setDepth(61); fade.push(o); return o;
@@ -1560,7 +1560,7 @@ export class PlayScene extends Phaser.Scene {
       const gap = this.goalKeys.length > 3 ? 24 : 28;
       this.goalKeys.forEach((k, i) => {
         const y = 176 + i * gap, done = this.medals.state[k] === 'earned';
-        fade.push(this.add.image(W / 2 - 84, y, 'goal_' + k + '_' + (done ? 'earned' : 'failed')).setScale(1.3).setDepth(61));
+        fade.push(this.add.image(W / 2 - 84, y, 'goal_' + k + '_' + (done ? 'earned' : 'failed')).setScale(goalScale(this, k, 20)).setDepth(61));
         rowTxt(W / 2 - 62, y, names[k], done ? CR : '#8a80a8');
         const star = this.add.image(W / 2 + 62, y, done ? 'star_earned' : 'star_off').setScale(1.3).setDepth(61);
         fade.push(star);

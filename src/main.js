@@ -9,7 +9,8 @@ import { PlayScene } from './scenes/PlayScene.js';
 const fontReady = Promise.race([
   Promise.all([ // both fonts: the pixel font of the UI pack and the old one (the fallback)
     document.fonts.load('700 16px "GameFont"', 'A0').then(() => document.fonts.load('400 16px "GameFont"', 'A0')).catch(() => null),
-    document.fonts.load('400 16px "PackFont"', 'A0').catch(() => null)
+    document.fonts.load('400 16px "PackFont"', 'A0').catch(() => null),
+    document.fonts.load('400 32px "DungeonFont"', 'A').catch(() => null)
   ]),
   new Promise(r => setTimeout(r, 2000))
 ]);

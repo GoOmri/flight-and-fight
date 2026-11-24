@@ -1,6 +1,6 @@
 import { CONFIG as C, hex } from '../config.js';
-import { makeAllTextures, makeGoalIcons, loadGoalArt } from '../sprites.js';
-import { FONT, fpx, drawPlate } from '../hud.js';
+import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale } from '../sprites.js';
+import { FONT, FONT_TITLE, fpx, drawPlate } from '../hud.js';
 import { goalsOf, loadMedals, loadBest, totalStars, isCleared } from '../medals.js';
 import { latestVersion, refreshFiles } from '../update.js';
 import { toggleTune, tuneEnabled } from '../tune.js';
@@ -319,7 +319,7 @@ export class MenuScene extends Phaser.Scene {
     const veil = keep(this.add.graphics()); veil.fillStyle(0x000000, 0.55).fillRect(0, 0, W, H); veil.setDepth(S.depth - 1);
     if (art) keep(this.add.nineslice(S.x, S.y, 'ui_panel-parchment', undefined, S.w, S.h, 24, 24, 24, 24).setOrigin(0, 0));
     else { const back = keep(this.add.graphics()); back.fillStyle(P.dark, 0.96).fillRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius); back.lineStyle(M.plateBorderW, P.pink, 1).strokeRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius); }
-    T(S.x + S.w / 2, S.y + 36, 'SETTINGS', S.titleSize, 0.5, art ? ink : P.cream);
+    keep(this.add.text(S.x + S.w / 2, S.y + 36, 'SETTINGS', { ...FONT_TITLE, fontSize: '24px', color: hex(art ? ink : P.cream), stroke: hex(P.shadow), strokeThickness: 0 }).setOrigin(0.5)); // the ornate title font
     this.panelButtons = [];
     const mkBtn = (x, y, w, label, action) => { // a copper button: 9-slice picture (normal / pressed) with dark text
       const h = 25, bt = { btn: true, x: x - 4, y: y - 3, w: w + 8, h: h + 6, down: false, action, shown: false }; // the touch area is a little bigger than the picture
@@ -364,17 +364,17 @@ export class MenuScene extends Phaser.Scene {
   openGoals(theme) {
     if (this.modal) return;
     const L = C.lightbox, node = M.path.nodes.find(n => n.theme === theme), keys = goalsOf(theme), saved = loadMedals(theme), objs = [];
-    const D = L.depth, ink = L.ink, h = 34 + keys.length * L.rowGap + 46, y0 = Math.round((H - 40 - h) / 2), art = this.textures.exists('ui_med-panel');
+    const D = L.depth, h = 46 + keys.length * L.rowGap + 46, y0 = Math.round((H - 40 - h) / 2), art = this.textures.exists('ui_med-panel');
     const keep = (o, dz = 0) => { o.setDepth(D + dz); objs.push(o); return o; };
-    const T = (x, y, s, size, align, color) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 0 }).setOrigin(align, 0.5), 2);
+    const T = (x, y, s, size, align, color) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(align, 0.5), 2);
     keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
     if (art) keep(this.add.nineslice(L.x, y0, 'ui_med-panel', undefined, L.w, h, 6, 6, 6, 6).setOrigin(0, 0), 0);
     else { const g = keep(this.add.graphics()); g.fillStyle(P.dark, 0.96).fillRoundedRect(L.x, y0, L.w, h, 10); g.lineStyle(3, P.pink, 1).strokeRoundedRect(L.x, y0, L.w, h, 10); }
-    const tc = art ? ink : P.cream, names = { cats: 'ALL CATS', allCoins: 'ALL COINS', killAll: 'ALL ENEMIES', noHit: 'NO HIT' };
-    T(W / 2, y0 + 18, node ? node.name : '', 12, 0.5, tc);
+    const tc = 0xffffff, names = { cats: 'ALL CATS', allCoins: 'ALL COINS', killAll: 'ALL ENEMIES', noHit: 'NO HIT' };
+    keep(this.add.text(W / 2, y0 + 22, node ? node.name : '', { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(0xf2b632), stroke: hex(P.shadow), strokeThickness: 4 }).setOrigin(0.5), 2); // the ornate title font
     keys.forEach((k, i) => {
-      const y = y0 + 34 + i * L.rowGap + L.rowGap / 2 - 4, done = saved[k];
-      keep(this.add.image(L.x + 26, y, 'goal_' + k + '_' + (done ? 'earned' : 'open')).setScale(L.iconScale), 2);
+      const y = y0 + 50 + i * L.rowGap + L.rowGap / 2 - 4, done = saved[k];
+      keep(this.add.image(L.x + 26, y, 'goal_' + k + '_' + (done ? 'earned' : 'open')).setScale(goalScale(this, k, L.iconBox)), 2);
       T(L.x + 46, y, names[k], L.textSize, 0, tc);
       keep(this.add.image(L.x + L.w - 24, y, done ? 'star_earned' : 'star_off').setScale(1), 2);
     });
