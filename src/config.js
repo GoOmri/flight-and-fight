@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.103", // bump on every push so the player/Omri can see the build
+  version: "1.9.104", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -261,7 +261,7 @@ export const CONFIG = {
   // Enemy shots: slow red orbs. speed is the default; the wave data may set its own. hitSize = art pixels of the orb core.
   // Colour wash (easy tint): one flat colour over the play field at low strength, so pictures from different packs sit closer together. Per stage: color, alpha (0 = none, 0.2 = strong).
   // depth 33: over the play field and its effects, under the enemy shots (35), coins' pop texts are under it too, and the HUD (50). Try off with ?tint=0.
-  tint: { on: true, depth: 33, forest: { color: 0x7a4fd0, alpha: 0.5, blend: 2 }, swamp: { color: 0x2a9a8a, alpha: 0.12, blend: 0 } }, // blend: 0 = normal paint, 2 = MULTIPLY (darkens and colours like a filter); the forest uses multiply since v1.9.103
+  tint: { on: true, depth: 33, forest: { color: 0x8440e8, alpha: 0.5, blend: 2 }, swamp: { color: 0x2a9a8a, alpha: 0.12, blend: 0 } }, // blend: 0 = normal paint, 2 = MULTIPLY (darkens and colours like a filter); the forest uses multiply since v1.9.103
   // Test helpers of the tune panel (TEST tab). wave = stage starts at this wave (1-10), level = weapon level at the start (-1 = by wave), god = 1: no damage taken. Normal play: 1, -1, 0.
   testing: { wave: 1, level: -1, god: 0 },
   // Difficulty dials (1 = normal). The tune panel (HARD tab) changes them. enemyHp / enemySpeed apply to enemies that spawn after the change; the rest apply at once.

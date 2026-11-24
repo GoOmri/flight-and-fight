@@ -896,3 +896,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-24 v1.9.103: Forest tint with MULTIPLY at 50% (branch v1103-tint-multiply)
 - Omri wanted to try the Forest tint with the MULTIPLY blend mode at 50% opacity (before: normal blend, 22%). Config tint.forest: color 0x7a4fd0, alpha 0.5, blend 2 (new field: 0 = normal, 2 = multiply); the Swamp keeps normal blend 0.12. ?tint=0 still turns it off. Tested in the browser pane: the Forest is darker and more purple-grey. UNVERIFIED on the phone: taste. To go back: alpha 0.22, blend 0.
+
+## 2026-11-24 v1.9.104: Forest tint a little more purple (branch v1104-purple-tint)
+- Omri: a little more purple. With the multiply blend the colour removes light from each colour channel: a colour with less green and more red/blue gives more purple. Forest tint colour 0x7a4fd0 -> 0x8440e8 (less green 0x4f -> 0x40, more blue 0xd0 -> 0xe8); opacity stays 50%. If still not enough: lower the green number more (0x30) or raise alpha. UNVERIFIED on the phone.
