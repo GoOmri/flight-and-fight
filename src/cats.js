@@ -97,6 +97,7 @@ export class Cats {
       c.inside = !s.over && Math.hypot(s.ship.x - c.x, s.ship.y - (cy - 8)) <= CC.ringHitR;
       c.fill = clamp(c.fill + (c.inside ? dt / CC.fillS : -dt * CC.drainMul / CC.fillS), 0, 1);
       c.state = c.inside ? 'hover' : 'wait';
+      c.grow = clamp((c.grow || 0) + (c.inside ? 1 : -1) * dt * CC.ringGrowSpeed, 0, 1); // the ring swells while she hovers and shrinks back when she leaves
       c.meowT -= dt; // the cat calls for help, more often as the ring fills
       if (c.meowT <= 0) { this.meow(c); c.meowT = CC.meowSlowS + (CC.meowFastS - CC.meowSlowS) * c.fill + Math.random() * 0.8; }
       c.stone.setPosition(Math.round(c.x), Math.round(c.y));
@@ -116,7 +117,8 @@ export class Cats {
 
   // The ring is a plain circle around the cat's feet: its BACK half (upper) is drawn behind the cat, its FRONT half (lower) in front of the cat's feet.
   drawRing(c, cy) {
-    const rx = CC.ringRx, ry = CC.ringRy; c.ring.clear(); c.ringBack.clear();
+    const k = c.grow || 0, rx = CC.ringRx + (CC.ringRxBig - CC.ringRx) * k, ry = CC.ringRy + (CC.ringRyBig - CC.ringRy) * k, rw = CC.ringW + (CC.ringWBig - CC.ringW) * k; // bigger and thicker while the witch hovers, so it can be seen around her
+    c.ring.clear(); c.ringBack.clear();
     const stroke = (a0, a1, w, col, alpha) => {
       const n = Math.max(2, Math.ceil((a1 - a0) / 0.12)), runs = [];
       let cur = null, side = null, prev = null;
@@ -132,8 +134,8 @@ export class Cats {
         g.strokePath();
       }
     };
-    stroke(0, Math.PI * 2, CC.ringW, 0x1a0830, 0.45); // the empty ring: one plain dark band (no outline, no lines)
-    if (c.fill > 0.005) stroke(-Math.PI / 2, -Math.PI / 2 + c.fill * Math.PI * 2, CC.ringW, ringColor(this.clock), 1); // the fill: one smooth arc, clockwise from the top
+    stroke(0, Math.PI * 2, rw, 0x1a0830, 0.45); // the empty ring: one plain dark band (no outline, no lines)
+    if (c.fill > 0.005) stroke(-Math.PI / 2, -Math.PI / 2 + c.fill * Math.PI * 2, rw, ringColor(this.clock), 1); // the fill: one smooth arc, clockwise from the top
   }
 
   save(c) {

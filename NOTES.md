@@ -875,3 +875,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri (screenshot): the cat did not look centred in the ring. The cat is now drawn 2 px left and 1 px lower (config cats.catDx -2, catDy 1; also while it jumps and runs).
 - The ring fill now swaps colour like the witch's trail particles (pink, lilac, blue, mint, violet, white), blending from one to the next, 3 colours per second (config cats.ringColors, ringColorSpeed). The old progress colours (brown, pink, green) are gone; the arc length still shows the progress.
 - Tested in the browser pane (zoomed): a lilac ring around the cat, cat centred. UNVERIFIED: the speed of the colour swap (3 per second: lower ringColorSpeed if it flickers too much), the cat's exact centring.
+
+## 2026-11-24 v1.9.98: the ring grows while the witch hovers (branch v1998-ring-grows)
+- Omri: when the player hovers above the cat the ring should get larger so it can be seen under the witch, a bit thicker too. The ring now swells smoothly while she is inside (radius 9 -> 17, thickness 5 -> 7; config cats.ringRxBig / ringRyBig / ringWBig, speed ringGrowSpeed 6 per second) and shrinks back when she leaves. The hit area (ringHitR 24) is unchanged.
+- Tested in the browser pane (witch over the cat: the big ring shows around her). UNVERIFIED: the size and the swell speed on a phone.
