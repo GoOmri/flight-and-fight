@@ -845,3 +845,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - After a rescue two small hearts (9 px) float up out of the cat's head, one after the other, and fade. The star burst is smaller.
 - Enemy aura: now a warm LIGHT glow (amber 0xff9a4a, additive blend, a smooth soft gradient plus the faint flat rings: both effects mixed) instead of the dark maroon rings (config enemies.glow: color, soft, blend, sizeMul). No more shadow look. UNVERIFIED on the phone: strength and colour (stacked bats make a bright streak; lower glow.soft if too bright).
 - Tested in the browser pane here (8 fps): cat on the rock, the ring in front, glow behind bats. UNVERIFIED: the hearts' look (not captured), the cat's size on the phone.
+
+## 2026-11-24 v1.9.92: ring in perspective, cat in front of the rock, enemy glow half size (branch v1992-cat-depth)
+- Omri: the ring was in front of the whole cat; the cat should stand in front of the rock; the enemy glow half as big.
+- Ring: drawn in two halves. The BACK half (upper part of the ellipse) is behind the cat (above the rock), the FRONT half (lower part) is in front of the cat's feet, so it reads as a ring on the ground around the cat. The fill segments are split the same way.
+- The cat stands IN FRONT of its rock: its last pixel row is read from the picture (so the feet are exact) and placed 1.5 px below the rock's bottom edge (config cats.footDrop). This separates the cat from the background.
+- Enemy glow size: sizeMul 1.5 -> 0.75 (config enemies.glow.sizeMul).
+- Tested in the browser pane (8 fps, zoomed): ring halves and the cat in front of the rock look right. UNVERIFIED: the feel on the phone, the 1 to 2 px drop at normal size.

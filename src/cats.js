@@ -33,6 +33,20 @@ export class Cats {
     this.makeArt();
   }
 
+  // The row of the cat's last pixel (0..1 of the 50 px picture): the sprite's origin, so its feet stand exactly at the spot.
+  footOf(id) {
+    this.foot = this.foot || {};
+    if (this.foot[id] !== undefined) return this.foot[id];
+    let f = CC.footY;
+    try {
+      const img = this.s.textures.get('cat' + id + '_sit').getSourceImage(), cv = document.createElement('canvas'); cv.width = 50; cv.height = 50;
+      const cx = cv.getContext('2d'); cx.drawImage(img, 0, 0, 50, 50, 0, 0, 50, 50);
+      const d = cx.getImageData(0, 0, 50, 50).data;
+      for (let y = 49; y >= 0; y--) { let any = false; for (let x = 0; x < 50; x++) if (d[(y * 50 + x) * 4 + 3] > 20) { any = true; break; } if (any) { f = (y + 1) / 50; break; } }
+    } catch (e) { /* keep the default */ }
+    return (this.foot[id] = f);
+  }
+
   makeArt() {
     const s = this.s;
     for (const n of CAT_COLORS) {
@@ -60,11 +74,12 @@ export class Cats {
     const e = s.rockKit ? s.rockKit.rock() : null; // the cat sits on one of the game's own rocks
     const stone = e ? s.add.image(x, y, e.key, e.frame).setScale(CC.stoneScale).setFlipX(Math.random() < 0.5) : s.add.image(x, y, 'cat_stone').setScale(CC.scale);
     stone.setDepth(CC.depth);
-    const top = e ? Math.round(stone.displayHeight * CC.stoneTop) : 4; // how far above the stone's middle the cat's feet are
-    const cat = s.add.sprite(x, y - top, 'cat' + id + '_sit', 0).setScale(CC.scale).setOrigin(0.5, CC.footY).setDepth(CC.depth + 0.1);
-    const ring = s.add.graphics().setDepth(CC.depth + 0.2); // drawn in front of the cat's lower half
+    const top = -Math.round(stone.displayHeight / 2 + CC.footDrop); // the cat stands IN FRONT of the rock: its last pixel row is a little lower than the rock's bottom edge (negative = below the rock's middle)
+    const cat = s.add.sprite(x, y - top, 'cat' + id + '_sit', 0).setScale(CC.scale).setOrigin(0.5, this.footOf(id)).setDepth(CC.depth + 0.1);
+    const ringBack = s.add.graphics().setDepth(CC.depth + 0.05); // the back half of the ring: behind the cat, above the rock
+    const ring = s.add.graphics().setDepth(CC.depth + 0.2); // the front half: in front of the cat's feet
     const fx = s.add.sprite(x, y, 'cat_meowfx', 0).setScale(CC.scale).setDepth(CC.depth + 0.3).setVisible(false);
-    this.list.push({ id, x, y, top, stone, cat, ring, fx, state: 'wait', fill: 0, inside: false, meowT: 1.2, t: 0, bits: [], hearts: [] });
+    this.list.push({ id, x, y, top, stone, cat, ring, ringBack, fx, state: 'wait', fill: 0, inside: false, meowT: 1.2, t: 0, bits: [], hearts: [] });
     this.spawned++;
   }
 
@@ -75,8 +90,8 @@ export class Cats {
       if (c.state === 'leftover') { c.sy += ground; c.stone.setPosition(Math.round(c.x0), Math.round(c.sy)); if (c.sy > H + 20) { c.stone.destroy(); c.state = 'gone'; } continue; } // the empty stone scrolls away
       if (c.state === 'saved') { this.updateSaved(c, dt, ground); continue; }
       c.y += ground; // sits on the ground: moves exactly like it
-      const cy = c.y - c.top - 3; // the ring sits at the cat's feet; the witch counts as inside when her centre is within ringHitR of the cat's body
-      c.inside = !s.over && Math.hypot(s.ship.x - c.x, s.ship.y - (cy - 4)) <= CC.ringHitR;
+      const cy = c.y - c.top - 1; // the ring is centred on the cat's feet; the witch counts as inside when her centre is within ringHitR of the cat's body
+      c.inside = !s.over && Math.hypot(s.ship.x - c.x, s.ship.y - (cy - 8)) <= CC.ringHitR;
       c.fill = clamp(c.fill + (c.inside ? dt / CC.fillS : -dt * CC.drainMul / CC.fillS), 0, 1);
       c.state = c.inside ? 'hover' : 'wait';
       c.meowT -= dt; // the cat calls for help, more often as the ring fills
@@ -96,24 +111,38 @@ export class Cats {
     c.fx.once('animationcomplete', () => c.fx.setVisible(false));
   }
 
-  // The ring is a flat ellipse around the cat's feet (seen from above at an angle), thick, in front of the cat's lower half.
+  // The ring is a flat ellipse around the cat's feet seen in perspective: its BACK half (upper) is drawn behind the cat, its FRONT half (lower) in front of the cat's feet.
   drawRing(c, cy) {
-    const g = c.ring, rx = CC.ringRx, ry = CC.ringRy; g.clear();
-    const arc = (a0, a1) => { g.beginPath(); const n = Math.max(2, Math.ceil((a1 - a0) / 0.15)); for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n, px = c.x + Math.cos(a) * rx, py = cy + Math.sin(a) * ry; if (i) g.lineTo(px, py); else g.moveTo(px, py); } g.strokePath(); };
-    g.lineStyle(CC.ringW + 2, 0x1a0830, 0.6); arc(0, Math.PI * 2); // empty ring: a dark band
+    const rx = CC.ringRx, ry = CC.ringRy; c.ring.clear(); c.ringBack.clear();
+    const stroke = (a0, a1, w, col, alpha) => {
+      const n = Math.max(2, Math.ceil((a1 - a0) / 0.12)), runs = [];
+      let cur = null, side = null, prev = null;
+      for (let i = 0; i <= n; i++) {
+        const a = a0 + (a1 - a0) * i / n, p = [c.x + Math.cos(a) * rx, cy + Math.sin(a) * ry], sd = Math.sin(a) >= 0; // sin >= 0 = the lower, front half
+        if (cur === null || sd !== side) { cur = { front: sd, pts: prev && cur ? [prev] : [] }; runs.push(cur); side = sd; }
+        cur.pts.push(p); prev = p;
+      }
+      for (const r of runs) {
+        const g = r.front ? c.ring : c.ringBack;
+        g.lineStyle(w, col, alpha); g.beginPath();
+        r.pts.forEach((p, i) => (i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])));
+        g.strokePath();
+      }
+    };
+    stroke(0, Math.PI * 2, CC.ringW + 2, 0x1a0830, 0.6); // empty ring: a dark band
     const col = ringColor(c.fill);
     for (let i = 0; i < 8; i++) { // 8 segments, clockwise from the top
       const f = clamp(c.fill * 8 - i, 0, 1);
       if (f <= 0) continue;
       const a0 = -Math.PI / 2 + i * Math.PI / 4;
-      g.lineStyle(CC.ringW, col, 1); arc(a0, a0 + f * Math.PI / 4 - 0.03);
+      stroke(a0, a0 + f * Math.PI / 4 - 0.03, CC.ringW, col, 1);
     }
   }
 
   save(c) {
     const s = this.s;
     c.state = 'saved'; c.t = 0; c.x0 = c.x; c.sy = c.y; // sy = the stone's y (it stays on the ground)
-    c.ring.clear(); c.fx.setVisible(false);
+    c.ring.clear(); c.ringBack.clear(); c.fx.setVisible(false);
     c.cat.anims.stop(); c.cat.play('cat' + c.id + '_run');
     for (let i = 0; i < 9; i++) { // a burst of small gold stars
       const a = (i / 9) * Math.PI * 2, im = s.add.image(c.x, c.y - c.top - 10, 'star_earned').setScale(0.5).setDepth(CC.depth + 0.5);
@@ -147,12 +176,12 @@ export class Cats {
 
   finish(c) {
     c.state = 'leftover';
-    [c.cat, c.ring, c.fx, ...c.hearts.map(h => h.im), ...c.bits.map(b => b.im)].forEach(o => o && o.destroy());
+    [c.cat, c.ring, c.ringBack, c.fx, ...c.hearts.map(h => h.im), ...c.bits.map(b => b.im)].forEach(o => o && o.destroy());
   }
 
   lose(c) {
     c.state = 'gone'; this.lost++;
-    [c.cat, c.stone, c.ring, c.fx].forEach(o => o && o.destroy());
+    [c.cat, c.stone, c.ring, c.ringBack, c.fx].forEach(o => o && o.destroy());
     this.s.onCatLost();
   }
 
