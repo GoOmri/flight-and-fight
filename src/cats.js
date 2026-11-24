@@ -142,19 +142,20 @@ export class Cats {
       const p = this.parts[i]; p.life -= dt;
       if (p.life <= 0) { p.im.destroy(); this.parts.splice(i, 1); continue; }
       if (p.c.state === 'hover' && !s.over) { // she hovers over the cat: each spark first shoots up (fast, braking), then dives into the witch with a very sharp ease-in
-        if (!p.pull) p.big = Math.random() < CC.fastShare; // only some sparks swell when they go fast
+        if (!p.pull) { p.big = Math.random() < CC.fastShare; p.upMul = 0.6 + Math.random() * 0.6; p.im.setBlendMode(1); } // additive: the sparks glow, so they show on the dark witch // only some sparks swell when they go fast
         p.pull = (p.pull || 0) + dt;
         p.im.setDepth(s.ship.depth + 0.2); // pulled sparks are drawn over the witch: you see them flow into her
         const U = CC.suckUpS, u = p.pull;
         p.life = Math.max(p.life, 0.3); // a pulled spark lives until it arrives
         p.im.setRotation(0);
-        if (u < U) { const k = 1 - u / U; p.im.y -= CC.suckUp * k * k * dt; p.im.x += Math.sin(p.ph) * 4 * dt; p.im.setAlpha(1).setScale(1.1); continue; }
+        if (u < U) { const k = 1 - u / U; p.im.y -= CC.suckUp * p.upMul * k * k * dt; p.im.x += Math.sin(p.ph) * 4 * dt; p.im.setAlpha(1).setScale(1.5); continue; }
         const w = u - U, dx = s.ship.x - p.im.x, dy = s.ship.y - p.im.y, d = Math.hypot(dx, dy), spd = 20 + CC.suckSharp * w * w, step = spd * dt;
         if (d <= step + 4) { p.im.destroy(); this.parts.splice(i, 1); continue; }
         p.im.x += dx / d * step; p.im.y += dy / d * step;
-        p.im.setAlpha(1).setScale(Math.min(1.1, 0.4 + d / 50) + (p.big ? CC.fastGrow * Math.min(1, spd / 900) : 0)); // the fast ones grow by a pixel or two
+        p.im.setAlpha(1).setScale(Math.min(1.5, 0.7 + d / 50) + (p.big ? CC.fastGrow * Math.min(1, spd / 900) : 0)); // the fast ones grow by a pixel or two
         continue;
       }
+      if (p.pull) p.im.setBlendMode(0);
       p.pull = 0;
       p.im.setDepth(CC.depth + 0.06);
       p.im.y += (p.vy * (1 + CC.riseFillMul * p.c.fill) * dt) + ground; p.im.x += Math.sin(p.ph + p.life * 5) * 6 * dt; // rises, sways a little and rides with the ground

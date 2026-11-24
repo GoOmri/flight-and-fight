@@ -961,3 +961,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.117: strips removed, back to shoot-up then dive (branch v1117-no-strips)
 - Omri: no strips; go back to the earlier animation. Sparks are plain dots again: shoot up, then dive straight into the witch with the sharp ease-in (the stronger speeds of v1.9.115 stay). Only some sparks (fastShare 0.35) swell by about 1 px (fastGrow 1) as they speed up. Spiral and strips removed; free sparks no longer rotate or stretch.
 - Tested in the browser pane: plain dots stream to the witch. UNVERIFIED on a phone.
+
+## 2026-11-25 v1.9.118: sucked-in sparks easier to see (branch v1118-visible-sparks)
+- Omri could not see the sparks going into the witch. The depth was already above her; the likely cause is that they were small dark-ish dots popping up only about 17 px (inside her 48 px sprite). Now: they pop up 0.6x to 1.2x of 650 px/s braking over 0.22 s (about 30 to 60 px, out of her sprite), are bigger (1.5), and glow (additive blend) while pulled.
+- Syntax checked. The browser pane could not hold the witch over a cat this time (she stayed outside the ring), so UNVERIFIED on screen and on a phone.
