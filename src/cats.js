@@ -117,6 +117,7 @@ export class Cats {
       this.placeGlow(c);
       c.cat.setPosition(Math.round(c.x) + CC.catDx, Math.round(c.y - c.top) + CC.catDy); // the cat sits a little left and lower than the ring's middle (looks centred)
       this.drawRing(c, cy);
+      c.cat.x += c.shx; c.cat.y += c.shy;
       if (c.fill >= 1) { this.save(c); continue; }
       if (c.y > H + 40) this.lose(c);
     }
@@ -177,7 +178,7 @@ export class Cats {
   drawRing(c, cy) {
     const k = c.grow || 0, r = CC.ringRx + (CC.ringRxBig - CC.ringRx) * k, w = CC.ringW + (CC.ringWBig - CC.ringW) * k; // bigger and thicker while the witch hovers, so it can be seen around her
     const r0 = r - w / 2, r1 = r + w / 2;
-    const sh = clamp((c.fill - CC.shakeFrom) / (1 - CC.shakeFrom), 0, 1) * CC.shakePx, ox = (Math.random() - 0.5) * 2 * sh, oy = (Math.random() - 0.5) * 2 * sh; // the ring trembles more and more as it nears the end
+    const sk = clamp((c.fill - CC.shakeFrom) / (1 - CC.shakeFrom), 0, 1), sh = sk * sk * CC.shakePx, ox = (Math.random() - 0.5) * 2 * sh, oy = (Math.random() - 0.5) * 2 * sh; c.shx = ox * CC.catShake; c.shy = oy * CC.catShake; // the ring (and the cat a little) tremble more and more as it nears the end: about to burst
     c.ring.clear(); c.ringBack.clear();
     const piece = (g, a0, a1, col) => { // one filled piece of the ring between two angles
       const n = Math.max(2, Math.ceil((a1 - a0) / 0.1)); g.fillStyle(col, 1); g.beginPath();

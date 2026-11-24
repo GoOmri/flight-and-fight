@@ -947,3 +947,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Ring shake: from 50% fill, up to 3 px (was 1.6 from 60%).
 - Sparks: more (hover 18/s, fill multiplier 4, cap 45), rise faster as the ring fills (riseFillMul), suck-in is faster (suckUpS 0.16, suckSharp 3500). Near the end they stretch into strips: they turn along their flight (up, or toward the witch) and get up to 6 times longer (config streak 5, grows with fill squared).
 - Syntax checked. UNVERIFIED on a phone (is it too much?).
+
+## 2026-11-25 v1.9.115: the ring looks like it is about to burst (branch v1115-about-to-burst)
+- Omri: not powerful enough. Shake up to 7 px (grows with fill squared, from 25% fill) and the cat shakes half as much (catShake). Sparks: 8x rate multiplier, rise speed up to 6.5x, suck-in speed 9000 (very sharp), strips up to 11x long (streak 10), cap 70.
+- Tested in the browser pane with the ring forced to 93%: long coloured strips stream into the witch. The shake was checked by the numbers only (about 5.7 px at 93%). UNVERIFIED on a phone.
