@@ -145,17 +145,17 @@ export class Cats {
         p.im.setDepth(s.ship.depth + 0.2); // pulled sparks are drawn over the witch: you see them flow into her
         const U = CC.suckUpS, u = p.pull;
         p.life = Math.max(p.life, 0.3); // a pulled spark lives until it arrives
-        if (u < U) { const k = 1 - u / U; p.im.y -= CC.suckUp * k * k * dt + 0; p.im.x += Math.sin(p.ph) * 4 * dt; p.im.setAlpha(1).setScale(1.1); continue; }
+        if (u < U) { const k = 1 - u / U; p.im.y -= CC.suckUp * k * k * dt + 0; p.im.x += Math.sin(p.ph) * 4 * dt; p.im.setAlpha(1).setScale(1.1).setRotation(-Math.PI / 2); p.im.scaleX *= 1 + CC.streak * 0.5 * p.c.fill; continue; }
         const w = u - U, dx = s.ship.x - p.im.x, dy = s.ship.y - p.im.y, d = Math.hypot(dx, dy), step = (20 + CC.suckSharp * w * w) * dt;
         if (d <= step + 4) { p.im.destroy(); this.parts.splice(i, 1); continue; }
         p.im.x += dx / d * step; p.im.y += dy / d * step;
-        p.im.setAlpha(1).setScale(Math.min(1.1, 0.4 + d / 50));
+        p.im.setAlpha(1).setScale(Math.min(1.1, 0.4 + d / 50)).setRotation(Math.atan2(dy, dx)); p.im.scaleX *= 1 + CC.streak * (0.3 + p.c.fill) * Math.min(1, step / (dt * 400)); // a strip pointing at the witch, longer the faster it goes
         continue;
       }
       p.pull = 0;
       p.im.setDepth(CC.depth + 0.06);
-      p.im.y += (p.vy * dt) + ground; p.im.x += Math.sin(p.ph + p.life * 5) * 6 * dt; // rises, sways a little and rides with the ground
-      p.im.setAlpha(clamp(p.life / (p.max * 0.5), 0, 1)).setScale(0.45 + 0.6 * clamp(p.life / p.max, 0, 1));
+      p.im.y += (p.vy * (1 + CC.riseFillMul * p.c.fill) * dt) + ground; p.im.x += Math.sin(p.ph + p.life * 5) * 6 * dt; // rises, sways a little and rides with the ground
+      p.im.setAlpha(clamp(p.life / (p.max * 0.5), 0, 1)).setScale(0.45 + 0.6 * clamp(p.life / p.max, 0, 1)).setRotation(-Math.PI / 2); p.im.scaleX *= 1 + CC.streak * p.c.fill * p.c.fill; // faster near the end, and so fast they stretch into strips
     }
   }
 
@@ -201,8 +201,8 @@ export class Cats {
     c.ring.clear(); c.ringBack.clear(); c.fx.setVisible(false);
     c.cat.anims.stop(); c.cat.play('cat' + c.id + '_run');
     for (let i = 0; i < 5; i++) { // a few big gold stars shoot off like fireworks, each to a random place, slow down and fade
-      const a = Math.random() * Math.PI * 2, v = 90 + Math.random() * 90, im = s.add.sprite(c.x, c.y - c.top - 10, 'star_spin').setScale(0.8 + Math.random() * 0.3).setDepth(CC.depth + 0.5); im.play({ key: 'star_spin', startFrame: Math.floor(Math.random() * 24) }); // the spinning power-star, each at its own point of the spin
-      c.bits.push({ im, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 25, life: 1 + Math.random() * 0.4 });
+      const a = Math.random() * Math.PI * 2, v = 90 + Math.random() * 90, im = s.add.sprite(c.x, c.y - c.top - 10, 'star_spin').setScale(0.25).setDepth(CC.depth + 0.5); im.play({ key: 'star_spin', startFrame: Math.floor(Math.random() * 24) }); // the spinning power-star, each at its own point of the spin
+      c.bits.push({ im, s1: 0.8 + Math.random() * 0.3, age: 0, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 25, life: 1 + Math.random() * 0.4 });
     }
     for (let i = 0; i < 2; i++) { // small thank-you hearts float out of the cat's head
       const h = s.add.image(c.x + (i ? 5 : -2), c.y - c.top + CC.headDy, 'goal_noHit_earned').setScale(goalScale(s, 'noHit', 9)).setDepth(CC.depth + 0.5).setAlpha(0);
@@ -215,7 +215,8 @@ export class Cats {
   updateSaved(c, dt, ground) {
     c.t += dt; c.sy += ground;
     const J = CC.jumpS;
-    for (const b of c.bits) { b.life -= dt; b.im.x += b.vx * dt; b.im.y += b.vy * dt + ground; const f = Math.max(0, 1 - 3.2 * dt); b.vx *= f; b.vy = b.vy * f + 30 * dt; b.im.setAlpha(clamp(b.life / 0.5, 0, 1)); } // fireworks: fast at first, slowing down, a little fall
+    for (const b of c.bits) { b.life -= dt; b.age += dt; b.im.setScale(b.s1 * (0.25 + 0.75 * Math.min(1, b.age / 0.35))); // starts small and grows as it flies
+      b.im.x += b.vx * dt; b.im.y += b.vy * dt + ground; const f = Math.max(0, 1 - 3.2 * dt); b.vx *= f; b.vy = b.vy * f + 30 * dt; b.im.setAlpha(clamp(b.life / 0.5, 0, 1)); } // fireworks: fast at first, slowing down, a little fall
     for (const h of c.hearts) { const u = c.t - h.d; if (u < 0) continue; h.im.y -= 14 * dt; h.im.x = h.x0 + Math.sin(u * 6) * 2; h.im.setAlpha(clamp(Math.min(u * 6, 1.2 - u), 0, 1)); }
     let x, y;
     if (c.t < J) { // two happy jumps in place (the cat stays above its stone)

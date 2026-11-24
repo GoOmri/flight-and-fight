@@ -941,3 +941,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri: more and longer-lived sparks as the circle fills, and the circle shakes near the end.
 - src/cats.js: spark rate x (1 + 2.5 * fill), spark life x (1 + 0.8 * fill), the cap on sparks grows up to double. The ring trembles from 60% fill, up to 1.6 px at 100%. Config cats: sparkFillMul, sparkFillLife, shakeFrom, shakePx.
 - Syntax checked. UNVERIFIED on a phone (is the build-up clear, is the shake too much).
+
+## 2026-11-25 v1.9.114: stars start small, stronger shake, faster sparks that stretch into strips (branch v1114-strips-shake)
+- Rescue stars: still 5; each starts small (25%) and grows to full size in 0.35 s while flying.
+- Ring shake: from 50% fill, up to 3 px (was 1.6 from 60%).
+- Sparks: more (hover 18/s, fill multiplier 4, cap 45), rise faster as the ring fills (riseFillMul), suck-in is faster (suckUpS 0.16, suckSharp 3500). Near the end they stretch into strips: they turn along their flight (up, or toward the witch) and get up to 6 times longer (config streak 5, grows with fill squared).
+- Syntax checked. UNVERIFIED on a phone (is it too much?).
