@@ -888,3 +888,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-24 v1.9.101: soft glow behind the cats (branch v1101-cat-glow)
 - Omri: the cats need to stand out from the background more. Each cat now has a smooth round light behind it (warm white-pink, additive, 60 px across, pulsing gently; config cats.glowSize / glowAlpha / glowPulse). It sits behind the cat and its ring, above the rock, follows the cat when it jumps and runs, and goes with it. Tested in the browser pane: a black cat clearly separates from the ground. UNVERIFIED on the phone: size and strength (glowAlpha 0.9). Other ideas not built: a light outline, a bobbing marker above the cat.
+
+## 2026-11-24 v1.9.102: ring drawn as filled pieces (no spokes), visible pink cat glow (branch v1102-ring-fill)
+- Omri's phone screenshot (v1.9.101): the spokes were still there and the glow could not be seen. (The browser pane here showed neither problem: the phone's graphics chip draws thick lines differently.)
+- Spokes: the ring is no longer made of thick lines. It is drawn as filled ring pieces (a band between two radii, split into the back and front halves), so there are no pieces that leave thin see-through gaps between them. Same colours, sizes and behaviour.
+- Glow: white light added on a light ground cannot be seen. It is now a saturated pink (like the ring and the trail particles), normal blend (not additive), 70 px across. Tested in the browser pane at normal size: the cat shows in a clear pink haze. UNVERIFIED on the phone: whether the spokes are really gone (the cause is a guess from the screenshot) and the glow's strength (config cats.glowSize / glowAlpha).

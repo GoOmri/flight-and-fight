@@ -60,7 +60,7 @@ export class Cats {
     if (!s.anims.exists('cat_meowfx')) s.anims.create({ key: 'cat_meowfx', frames: s.anims.generateFrameNumbers('cat_meowfx', { start: 0, end: 2 }), frameRate: 8, repeat: 0 });
     if (!s.textures.exists('cat_glow')) { // a smooth round light, used additively behind every cat so it stands out from the ground
       const cv = s.textures.createCanvas('cat_glow', 64, 64), cx = cv.getContext(), g = cx.createRadialGradient(32, 32, 0, 32, 32, 32);
-      g.addColorStop(0, 'rgba(255,238,250,0.9)'); g.addColorStop(0.4, 'rgba(255,225,245,0.45)'); g.addColorStop(0.75, 'rgba(255,215,240,0.12)'); g.addColorStop(1, 'rgba(255,215,240,0)');
+      g.addColorStop(0, 'rgba(255,110,215,0.8)'); g.addColorStop(0.4, 'rgba(255,110,215,0.45)'); g.addColorStop(0.75, 'rgba(255,110,215,0.14)'); g.addColorStop(1, 'rgba(255,110,215,0)'); // a saturated pink: white added on a light ground was invisible
       cx.fillStyle = g; cx.fillRect(0, 0, 64, 64); cv.refresh(); cv.setFilter(Phaser.Textures.FilterMode.LINEAR);
     }
     if (!s.textures.exists('cat_stone')) { // the spot the cat sits on: a flat grey stone drawn in code (14 x 7 art px)
@@ -83,7 +83,7 @@ export class Cats {
     stone.setDepth(CC.depth);
     const top = -Math.round(stone.displayHeight / 2 + CC.footDrop); // the cat stands IN FRONT of the rock: its last pixel row is a little lower than the rock's bottom edge (negative = below the rock's middle)
     const cat = s.add.sprite(x, y - top, 'cat' + id + '_sit', 0).setScale(CC.scale).setOrigin(0.5, this.footOf(id)).setDepth(CC.depth + 0.1);
-    const glow = s.add.image(x, y, 'cat_glow').setBlendMode(1).setDepth(CC.depth + 0.02); // behind the cat and its ring, above the rock
+    const glow = s.add.image(x, y, 'cat_glow').setDepth(CC.depth + 0.02); // behind the cat and its ring, above the rock (normal blend: it shows on any ground)
     const ringBack = s.add.graphics().setDepth(CC.depth + 0.05); // the back half of the ring: behind the cat, above the rock
     const ring = s.add.graphics().setDepth(CC.depth + 0.2); // the front half: in front of the cat's feet
     const fx = s.add.sprite(x, y, 'cat_meowfx', 0).setScale(CC.scale).setDepth(CC.depth + 0.3).setVisible(false);
@@ -129,26 +129,25 @@ export class Cats {
   }
 
   // The ring is a plain circle around the cat's feet: its BACK half (upper) is drawn behind the cat, its FRONT half (lower) in front of the cat's feet.
+  // It is drawn as filled ring pieces (not thick lines): thick lines left thin see-through gaps (spokes) between their pieces on some phones.
   drawRing(c, cy) {
-    const k = c.grow || 0, rx = CC.ringRx + (CC.ringRxBig - CC.ringRx) * k, ry = CC.ringRy + (CC.ringRyBig - CC.ringRy) * k, rw = CC.ringW + (CC.ringWBig - CC.ringW) * k; // bigger and thicker while the witch hovers, so it can be seen around her
+    const k = c.grow || 0, r = CC.ringRx + (CC.ringRxBig - CC.ringRx) * k, w = CC.ringW + (CC.ringWBig - CC.ringW) * k; // bigger and thicker while the witch hovers, so it can be seen around her
+    const r0 = r - w / 2, r1 = r + w / 2;
     c.ring.clear(); c.ringBack.clear();
-    const stroke = (a0, a1, w, col, alpha) => {
-      const n = Math.max(2, Math.ceil((a1 - a0) / 0.12)), runs = [];
-      let cur = null, side = null, prev = null;
-      for (let i = 0; i <= n; i++) {
-        const a = a0 + (a1 - a0) * i / n, p = [c.x + Math.cos(a) * rx, cy + Math.sin(a) * ry], sd = Math.sin(a) >= 0; // sin >= 0 = the lower, front half
-        if (cur === null || sd !== side) { cur = { front: sd, pts: prev && cur ? [prev] : [] }; runs.push(cur); side = sd; }
-        cur.pts.push(p); prev = p;
-      }
-      for (const r of runs) {
-        const g = r.front ? c.ring : c.ringBack;
-        g.lineStyle(w, col, alpha); g.beginPath();
-        r.pts.forEach((p, i) => (i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])));
-        g.strokePath();
+    const piece = (g, a0, a1, col) => { // one filled piece of the ring between two angles
+      const n = Math.max(2, Math.ceil((a1 - a0) / 0.1)); g.fillStyle(col, 1); g.beginPath();
+      for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n, x = c.x + Math.cos(a) * r1, y = cy + Math.sin(a) * r1; if (i) g.lineTo(x, y); else g.moveTo(x, y); }
+      for (let i = n; i >= 0; i--) { const a = a0 + (a1 - a0) * i / n; g.lineTo(c.x + Math.cos(a) * r0, cy + Math.sin(a) * r0); }
+      g.closePath(); g.fillPath();
+    };
+    const draw = (a0, a1, col) => { // split at the left and right ends: the lower half (sin >= 0) is the front, the upper half the back
+      for (const [lo, hi, g] of [[0, Math.PI, c.ring], [Math.PI, Math.PI * 2, c.ringBack], [Math.PI * 2, Math.PI * 3, c.ring], [-Math.PI, 0, c.ringBack]]) {
+        const s0 = Math.max(a0, lo), s1 = Math.min(a1, hi);
+        if (s1 - s0 > 0.001) piece(g, s0, s1, col);
       }
     };
-    stroke(0, Math.PI * 2, rw, 0x3f3060, 1); // the empty ring: one plain dark band, fully opaque (a see-through band showed dark spokes where the stroke pieces overlap)
-    if (c.fill > 0.005) stroke(-Math.PI / 2, -Math.PI / 2 + c.fill * Math.PI * 2, rw, ringColor(this.clock), 1); // the fill: one smooth arc, clockwise from the top
+    draw(0, Math.PI * 2, 0x3f3060); // the empty ring: one plain dark band
+    if (c.fill > 0.005) draw(-Math.PI / 2, -Math.PI / 2 + c.fill * Math.PI * 2, ringColor(this.clock)); // the fill: clockwise from the top
   }
 
   save(c) {
