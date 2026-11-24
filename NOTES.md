@@ -865,3 +865,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - After a rescue the cat does its two happy jumps, then RUNS along the ground (110 px/s, config cats.runSpeed) to the closest side edge (left if it is on the left half, else right; the picture is flipped to face the way it runs) and leaves the screen. The leap to the top left is gone (hut config removed).
 - Enemy glow: the outer flat ring made a hard circle edge; it is gone (rings are now only at 0.7 and 0.45 of the radius), so the soft gradient fades to nothing at the edge.
 - Tested in the browser pane (stepping the code by hand: the cat runs left, flipped, and leaves; 8 fps machine). UNVERIFIED: the look of the run and the glow edge on a phone.
+
+## 2026-11-24 v1.9.96: enemy glow fully smooth (branch v1996-smooth-glow)
+- Omri: use regular (smooth) glows for objects, not pixel art. The enemy glow had two flat pixel rings and a small picture stretched with hard pixels. Now: no flat rings, a bigger picture (texels 12 -> 32) with a smooth gradient, scaled with LINEAR filtering. Strength soft 0.22 -> 0.32 (the smooth glow is fainter at the same value). Cat ring stays a smooth vector circle (unchanged).
+- Coin / heart / potion shine are still pixel-art rings (not changed; Omri only said "objects": ask if those should be smooth too).
+- Tested in the browser pane: a soft warm glow around the bats with no visible edge. UNVERIFIED on the phone: strength.

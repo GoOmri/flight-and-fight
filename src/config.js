@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.95", // bump on every push so the player/Omri can see the build
+  version: "1.9.96", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -219,7 +219,7 @@ export const CONFIG = {
     haloTint: { weapon: 0x4f9bff, heart: 0xffc9e3 }, haloPx: 2, // outline thickness of a carrier in game px (4 shifted copies of its frame); weapon carriers are BLUE like the potion they carry
     // Soft aura behind every enemy (not bosses: an enemy type with noGlow: true has none): flat rings of one warm dark colour (rust-maroon, so it never reads as a red shot), alpha = strength,
     // sizeMul = how much bigger than the enemy, texels = radius of the glow picture. The carrier outline stays much stronger. on: false switches it off.
-    glow: { on: true, color: 0xff9a4a, alpha: 1, soft: 0.22, blend: 1, /* 1 = additive */ sizeMul: 0.75, texels: 12, depth: -0.5, poolSize: 40, rings: [{ r: 0.7, a: 0.06 }, { r: 0.45, a: 0.08 }] } // v1.9.91: a warm light glow (additive), soft gradient + faint flat rings; soft = strength of the smooth part
+    glow: { on: true, color: 0xff9a4a, alpha: 1, soft: 0.32, blend: 1, /* 1 = additive */ sizeMul: 0.75, texels: 32, depth: -0.5, poolSize: 40, rings: [] } // v1.9.91: a warm light glow (additive), soft gradient + faint flat rings; soft = strength of the smooth part
   },
 
   // Animated pictures for coins, hearts, chests and the death puff (strips cut from the packs, see CREDITS.md). Every entry is optional:

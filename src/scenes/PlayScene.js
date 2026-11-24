@@ -1103,13 +1103,14 @@ export class PlayScene extends Phaser.Scene {
       const n = GL.texels * 2 + 1, cv = this.textures.createCanvas('enemyGlow', n, n), cx = cv.getContext();
       const rgb = [(GL.color >> 16) & 255, (GL.color >> 8) & 255, GL.color & 255].join(',');
       const grad = cx.createRadialGradient(GL.texels, GL.texels, 0, GL.texels, GL.texels, GL.texels); // a smooth soft glow (the lantern style rings are added on top: both effects mixed)
-      grad.addColorStop(0, 'rgba(' + rgb + ',' + GL.soft + ')'); grad.addColorStop(0.5, 'rgba(' + rgb + ',' + GL.soft * 0.4 + ')'); grad.addColorStop(1, 'rgba(' + rgb + ',0)');
+      grad.addColorStop(0, 'rgba(' + rgb + ',' + GL.soft + ')'); grad.addColorStop(0.35, 'rgba(' + rgb + ',' + GL.soft * 0.55 + ')'); grad.addColorStop(0.7, 'rgba(' + rgb + ',' + GL.soft * 0.15 + ')'); grad.addColorStop(1, 'rgba(' + rgb + ',0)');
       cx.fillStyle = grad; cx.fillRect(0, 0, n, n);
       for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
         const d = Math.hypot(x - GL.texels, y - GL.texels), ring = GL.rings.find(r => d <= r.r * GL.texels);
         if (ring) { cx.fillStyle = hex(GL.color); cx.globalAlpha = ring.a; cx.fillRect(x, y, 1, 1); }
       }
       cx.globalAlpha = 1; cv.refresh();
+      cv.setFilter(Phaser.Textures.FilterMode.LINEAR); // a regular smooth glow (not pixel art): the picture is smoothed when it is scaled up
     }
     const fire = { y: '#bfe9ff', o: '#4aa3ff', w: '#ffffff' }; // the muzzle burst matches the blue shot
     pix('muzzleA', ['..y..', '.yoy.', 'yowoy', '.yoy.', '..y..'], fire); // smaller than before: the old 7x7 burst on every shot looked like flashing
