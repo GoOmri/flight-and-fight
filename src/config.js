@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.105", // bump on every push so the player/Omri can see the build
+  version: "1.9.106", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -91,7 +91,7 @@ export const CONFIG = {
   // Cat rescue (src/cats.js). atWave = the (0-based) stage waves at whose start the 3 cats appear; ringR = rescue ring radius (game px), fillS = seconds to fill, drainMul = drain speed (x the fill speed),
   // hitLoss = share of the ring lost when she is hit inside, scale = picture scale (art pixel = 2 game px), footY = where the cat's feet are in its 50 px picture (0..1), ringDy = ring centre above the stone,
   // meow*S = seconds between meows (empty ring / full ring), fxDx/fxDy = where the meow puff sits, jumpS/jumpPx = the two happy jumps, runSpeed = how fast the saved cat runs to the closest side edge. spark* = the colourful sparks rising from the rings (per second idle / hovering, rise speed px/s, life s, most at once).
-  cats: { atWave: [0, 4, 8], ringRx: 9, ringRy: 9, ringW: 5, ringRxBig: 14, ringRyBig: 14, ringWBig: 7, ringGrowSpeed: 6, ringHitR: 24, fillS: 2.0, drainMul: 0.5, hitLoss: 0.25, scale: 1.5, stoneScale: 1.2, footY: 0.62, footDrop: 1.5, depth: 33.6, stoneDepth: 3, meowSlowS: 4, meowFastS: 1.2, fxDx: 10, fxDy: -20, headDy: -22, jumpS: 0.9, jumpPx: 12, runSpeed: 110, glowSize: 70, glowAlpha: 1, glowPulse: 4, sparkRate: 5, sparkRateHover: 16, sparkRise: 26, sparkLife: 1.1, sparkMax: 60, catDx: -2, catDy: 1, ringColors: [0xff7ad9, 0xc89cff, 0x8fb4ff, 0x5fe6d0, 0xb15bd6, 0xffffff], ringColorSpeed: 3 }, // catDx/catDy = the cat's offset from the ring's middle (px); ring fill colours (the trail particle colours) and how many colours per second pass // runSpeed = px/s of the run to the closest edge after a rescue
+  cats: { atWave: [0, 4, 8], ringRx: 9, ringRy: 9, ringW: 5, ringRxBig: 14, ringRyBig: 14, ringWBig: 7, ringGrowSpeed: 6, ringHitR: 24, fillS: 2.0, drainMul: 0.5, hitLoss: 0.25, scale: 1.5, stoneScale: 1.2, footY: 0.62, footDrop: 1.5, depth: 33.6, stoneDepth: 3, meowSlowS: 4, meowFastS: 1.2, fxDx: 10, fxDy: -20, headDy: -22, jumpS: 0.9, jumpPx: 12, runSpeed: 110, glowSize: 70, glowAlpha: 1, glowPulse: 4, sparkRate: 2.5, sparkRateHover: 7, sparkRise: 22, sparkLife: 1.2, sparkMax: 30, catDx: -2, catDy: 1, ringColors: [0xff7ad9, 0xc89cff, 0x8fb4ff, 0x5fe6d0, 0xb15bd6, 0xffffff], ringColorSpeed: 3 }, // catDx/catDy = the cat's offset from the ring's middle (px); ring fill colours (the trail particle colours) and how many colours per second pass // runSpeed = px/s of the run to the closest edge after a rescue
   lightbox: { x: 20, w: 200, rowGap: 30, iconBox: 22, textSize: 10, depth: 110, titleSize: 24 }, // the goals box in the menu (tap a stage): position, width, row spacing, icon size, text size
   pauseBtn: { x: 226, y: 32, size: 20, hit: 36, fill: 0x3b1478, border: 0xf2b632, ink: 0xfff3c4, btnW: 96, btnH: 30, gap: 14, textSize: 10 }, // PAUSE button (top right, under the hearts) and the pause screen buttons
   endMenuBtn: { w: 96, h: 30, bottom: 36, size: 10, color: 0x3b1478, border: 0xff5ac8 }, // MENU button on the end screen (bottom = its middle's distance from the bottom edge)
@@ -101,6 +101,7 @@ export const CONFIG = {
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units
 
   ship: {
+    depth: 33.7, // the witch and her trail, muzzle flash and stars: above the colour tint (33) and the enemies (33.5); heart pickup animation is above her
     startY: z(520),
     dragSensitivity: 1.2, // ship moves this many times the finger movement (1 = 1:1, 1.5 = faster)
     // Drag feel (spring). While the finger MOVES the witch catches up quickly (fastW strength, fastZ damping, no bounce). When the thumb is DOWN and the finger STOPS for idleMs she coasts a little past it (when the thumb is lifted she stops where the swipe put her, no overshoot)
@@ -139,6 +140,7 @@ export const CONFIG = {
 
   // Player shots. Which shots, how fast and how hard come from weaponLevels below.
   bullet: {
+    depth: 33.2, // the witch's shots: above the colour tint (33), below the enemies (33.5)
     speed: z(333), // witch shot speed (was z(620), z(520), z(416))
     refSpeed: z(333), gap: 1, // gap = spacing between shots (1 = normal). The time between volleys is fireRateMs x gap x refSpeed / speed, so a faster or slower shot keeps the same spacing unless you change gap; keep refSpeed equal to the normal speed above
     // The witch's shot: one orange fire bolt straight up ("flight_smooth" of the SovDigital fire pack, north row, shrunk 5x and cut to 6 fire colours). Delete this entry to get the old twin code-drawn shots back (then set pattern TWIN).
@@ -231,7 +233,7 @@ export const CONFIG = {
     // Gold coin, 24 frames = one full spin, loops while it falls. Each coin starts at a random frame.
     coin: { file: 'pickups/coin.png', frameW: 18, frameH: 18, frames: 24, fps: 30, scale: 1.1 },
     // Falling heart (carrier drop): Drop plays once when it appears, then Idle loops while it falls; Collect plays once at the witch when she grabs it.
-    heartPickup: { scale: 1, collectDepth: 12, // collectDepth: drawn over the witch (10)
+    heartPickup: { scale: 1, collectDepth: 33.95, // collectDepth: drawn over the witch (ship.depth)
       idle:    { file: 'pickups/heart-idle.png',    frameW: 26, frameH: 62, frames: 24, fps: 8 },
       shine:   { file: 'pickups/heart-shine.png',   frameW: 26, frameH: 62, frames: 24 }, // the pack's outline_shine layer, drawn over Idle (same frames); remove the key to hide it
       drop:    { file: 'pickups/heart-drop.png',    frameW: 26, frameH: 62, frames: 11, fps: 14 },

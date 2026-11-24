@@ -606,7 +606,7 @@ export class PlayScene extends Phaser.Scene {
         .setOrigin(0.5).setDepth(30).setVisible(false));
     }
     // muzzle flash: two small white pixels at the nose, shown for a few ms on every volley
-    this.muzzle = [0].map(() => this.add.image(0, 0, 'muzzleA').setScale(C.feel.muzzleSize).setAlpha(C.feel.muzzleAlpha).setDepth(11).setVisible(false));
+    this.muzzle = [0].map(() => this.add.image(0, 0, 'muzzleA').setScale(C.feel.muzzleSize).setAlpha(C.feel.muzzleAlpha).setDepth(C.ship.depth + 0.1).setVisible(false));
   }
 
   makeShip() {
@@ -618,11 +618,11 @@ export class PlayScene extends Phaser.Scene {
       if (!A.exists(key)) A.create({ key, frames: defs[key].map(f => ({ key: 'witch', frame: f })), frameRate: fps, repeat: -1 });
     }
     this.witchAnim = 'witch_n';
-    this.ship = this.physics.add.sprite(W / 2, C.ship.startY, 'witch', 1).setScale(SS).setDepth(10);
+    this.ship = this.physics.add.sprite(W / 2, C.ship.startY, 'witch', 1).setScale(SS).setDepth(C.ship.depth); // above the colour tint (33)
     this.ship.play('witch_n');
     const ST = C.sprites.stunned; // stars and sparks circling over her head for a moment after a hit
     this.stunUntil = 0;
-    this.stunFx = ST ? this.add.sprite(0, 0, 'sp_stunned', 0).setScale(ST.scale).setDepth(12).setVisible(false) : null;
+    this.stunFx = ST ? this.add.sprite(0, 0, 'sp_stunned', 0).setScale(ST.scale).setDepth(C.ship.depth + 0.2).setVisible(false) : null;
     const hb = 2 * C.ship.hitRadius / SS; // body size is in art pixels; centred on the sprite (hitbox stays tiny whatever the sprite size)
     this.ship.body.setSize(hb, hb);
     this.target = new Phaser.Math.Vector2(this.ship.x, this.ship.y); // where the finger wants the ship
@@ -940,7 +940,7 @@ export class PlayScene extends Phaser.Scene {
     const speed = Phaser.Math.Clamp(Math.hypot(this.vx, this.vy) / S.bankSpeed, 0, 1);
     this.trailT = Phaser.Math.Linear(F.trailIdleMs, F.trailMoveMs, speed) / 1000;
     this.emit(this.trail, sh.x + Phaser.Math.Between(-F.trailSpreadX, F.trailSpreadX), sh.y + F.trailY, -this.vx * F.trailCarry + Phaser.Math.Between(-F.trailJitter, F.trailJitter), F.trailSpeed - this.vy * F.trailCarry,
-      F.trailLifeMs / 1000, Phaser.Math.FloatBetween(F.trailSize[0], F.trailSize[1]) * SS, F.trailColors[this.trailN++ % F.trailColors.length], 9, true); // colours go round in order, so the stream looks striped and colourful
+      F.trailLifeMs / 1000, Phaser.Math.FloatBetween(F.trailSize[0], F.trailSize[1]) * SS, F.trailColors[this.trailN++ % F.trailColors.length], C.ship.depth - 0.1, true); // colours go round in order, so the stream looks striped and colourful
   }
 
   // Coins close to the witch fly to her (magnet).
@@ -965,6 +965,7 @@ export class PlayScene extends Phaser.Scene {
       const fs = C.bullet.fire;
       const b = this.spawn(this.bullets, fs ? (this.textures.exists('sp_fire_b') ? 'sp_fire_b' : 'sp_fire') : 'pbullet', this.ship.x + sh.dx, this.ship.y - C.ship.shotY, fs ? fs.scale : PX);
       if (!b) continue;
+      b.setDepth(C.bullet.depth); // the witch's shots are above the colour tint too
       if (fs) { b.body.setSize(fs.hitW, fs.hitH); b.play('fire_shot'); } else b.anims.stop();
       const a = sh.deg * DEG;
       b.setRotation(a);

@@ -130,7 +130,7 @@ export class Cats {
       this.emit -= 1;
       const live = this.list.filter(c => c.state === 'wait' || c.state === 'hover');
       if (!live.length || this.parts.length >= CC.sparkMax) break;
-      const c = live[Math.floor(Math.random() * live.length)], k = c.grow || 0, r = CC.ringRx + (CC.ringRxBig - CC.ringRx) * k, a = Math.random() * Math.PI * 2;
+      const c = live[Math.floor(Math.random() * live.length)], k = c.grow || 0, r = CC.ringRx + (CC.ringRxBig - CC.ringRx) * k, a = (this.sparkA = (this.sparkA || 0) + 2.4); // each spark starts 2.4 rad (the golden angle) after the last one: they spread evenly all around the ring
       const im = s.add.image(c.x + Math.cos(a) * r, c.y - c.top - 1 + Math.sin(a) * r, 'cat_spark').setDepth(CC.depth + 0.4).setTint(CC.ringColors[Math.floor(Math.random() * CC.ringColors.length)]);
       this.parts.push({ im, vy: -(CC.sparkRise * (0.7 + Math.random() * 0.6)), life: CC.sparkLife * (0.7 + Math.random() * 0.6), max: 0, ph: Math.random() * 6 });
       this.parts[this.parts.length - 1].max = this.parts[this.parts.length - 1].life;
@@ -139,7 +139,7 @@ export class Cats {
       const p = this.parts[i]; p.life -= dt;
       if (p.life <= 0) { p.im.destroy(); this.parts.splice(i, 1); continue; }
       p.im.y += (p.vy * dt) + ground; p.im.x += Math.sin(p.ph + p.life * 5) * 6 * dt; // rises, sways a little and rides with the ground
-      p.im.setAlpha(clamp(p.life / (p.max * 0.5), 0, 1)).setScale(1 + 1.2 * clamp(p.life / p.max, 0, 1));
+      p.im.setAlpha(clamp(p.life / (p.max * 0.5), 0, 1)).setScale(0.45 + 0.6 * clamp(p.life / p.max, 0, 1));
     }
   }
 
