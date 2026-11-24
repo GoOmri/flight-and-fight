@@ -957,3 +957,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Every pulled spark now has its OWN flight: random pop-up height/speed, a short random hang (anticipation), then a spiral around the witch (random direction, 0.5 to 1.6 turns, random size) that tightens with ease-in (radius 1 - v^2.6, angle v^1.7) and is faster the fuller the ring is (duration shrinks up to 55%). Thin (scaleY 0.5), stretched along the real speed (up to 8x, only when really fast), so lengths vary. Free sparks stretch less (streak 7, half strength) and are thinner.
 - Tested in the browser pane (ring forced to 85%): many thin curved streaks of different lengths and colours spiral into the witch. Cat was far from the witch in that test, so the close-up look is UNVERIFIED, also on a phone.
 - Idea not built: a flash and expanding ring when the ring completes (release).
+
+## 2026-11-25 v1.9.117: strips removed, back to shoot-up then dive (branch v1117-no-strips)
+- Omri: no strips; go back to the earlier animation. Sparks are plain dots again: shoot up, then dive straight into the witch with the sharp ease-in (the stronger speeds of v1.9.115 stay). Only some sparks (fastShare 0.35) swell by about 1 px (fastGrow 1) as they speed up. Spiral and strips removed; free sparks no longer rotate or stretch.
+- Tested in the browser pane: plain dots stream to the witch. UNVERIFIED on a phone.
