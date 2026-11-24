@@ -58,6 +58,11 @@ export class Cats {
       }
     }
     if (!s.anims.exists('cat_meowfx')) s.anims.create({ key: 'cat_meowfx', frames: s.anims.generateFrameNumbers('cat_meowfx', { start: 0, end: 2 }), frameRate: 8, repeat: 0 });
+    if (!s.textures.exists('cat_glow')) { // a smooth round light, used additively behind every cat so it stands out from the ground
+      const cv = s.textures.createCanvas('cat_glow', 64, 64), cx = cv.getContext(), g = cx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      g.addColorStop(0, 'rgba(255,238,250,0.9)'); g.addColorStop(0.4, 'rgba(255,225,245,0.45)'); g.addColorStop(0.75, 'rgba(255,215,240,0.12)'); g.addColorStop(1, 'rgba(255,215,240,0)');
+      cx.fillStyle = g; cx.fillRect(0, 0, 64, 64); cv.refresh(); cv.setFilter(Phaser.Textures.FilterMode.LINEAR);
+    }
     if (!s.textures.exists('cat_stone')) { // the spot the cat sits on: a flat grey stone drawn in code (14 x 7 art px)
       const g = s.make.graphics({ x: 0, y: 0, add: false }), col = { k: 0x2a2540, a: 0x9a9eb5, b: 0x6b6f8a };
       const rows = ['....kkkkkk....', '..kkaaaaaakk..', '.kaaaaaaaaaak.', 'kaaaabbbbaaaak', 'kabbbbbbbbbbak', 'kbbbbbbbbbbbbk', '.kkkkkkkkkkkk.'];
@@ -78,10 +83,11 @@ export class Cats {
     stone.setDepth(CC.depth);
     const top = -Math.round(stone.displayHeight / 2 + CC.footDrop); // the cat stands IN FRONT of the rock: its last pixel row is a little lower than the rock's bottom edge (negative = below the rock's middle)
     const cat = s.add.sprite(x, y - top, 'cat' + id + '_sit', 0).setScale(CC.scale).setOrigin(0.5, this.footOf(id)).setDepth(CC.depth + 0.1);
+    const glow = s.add.image(x, y, 'cat_glow').setBlendMode(1).setDepth(CC.depth + 0.02); // behind the cat and its ring, above the rock
     const ringBack = s.add.graphics().setDepth(CC.depth + 0.05); // the back half of the ring: behind the cat, above the rock
     const ring = s.add.graphics().setDepth(CC.depth + 0.2); // the front half: in front of the cat's feet
     const fx = s.add.sprite(x, y, 'cat_meowfx', 0).setScale(CC.scale).setDepth(CC.depth + 0.3).setVisible(false);
-    this.list.push({ id, x, y, top, stone, cat, ring, ringBack, fx, state: 'wait', fill: 0, inside: false, meowT: 1.2, t: 0, bits: [], hearts: [] });
+    this.list.push({ id, x, y, top, stone, cat, glow, ring, ringBack, fx, state: 'wait', fill: 0, inside: false, meowT: 1.2, t: 0, bits: [], hearts: [] });
     this.spawned++;
   }
 
@@ -101,11 +107,18 @@ export class Cats {
       c.meowT -= dt; // the cat calls for help, more often as the ring fills
       if (c.meowT <= 0) { this.meow(c); c.meowT = CC.meowSlowS + (CC.meowFastS - CC.meowSlowS) * c.fill + Math.random() * 0.8; }
       c.stone.setPosition(Math.round(c.x), Math.round(c.y));
+      this.placeGlow(c);
       c.cat.setPosition(Math.round(c.x) + CC.catDx, Math.round(c.y - c.top) + CC.catDy); // the cat sits a little left and lower than the ring's middle (looks centred)
       this.drawRing(c, cy);
       if (c.fill >= 1) { this.save(c); continue; }
       if (c.y > H + 40) this.lose(c);
     }
+  }
+
+  // The light behind the cat follows its body and pulses gently.
+  placeGlow(c) {
+    const p = 1 + 0.12 * Math.sin(this.clock * CC.glowPulse);
+    c.glow.setPosition(c.cat.x, c.cat.y - 9).setScale(CC.glowSize / 64 * p).setAlpha(CC.glowAlpha * (0.88 + 0.12 * Math.sin(this.clock * CC.glowPulse)));
   }
 
   meow(c) {
@@ -170,17 +183,18 @@ export class Cats {
       if (x < -30 || x > W + 30) { this.finish(c); return; }
     }
     c.cat.setPosition(Math.round(x) + CC.catDx, Math.round(y) + CC.catDy);
+    this.placeGlow(c);
     c.stone.setPosition(Math.round(c.x0), Math.round(c.sy)); // the stone stays on the ground and scrolls away
   }
 
   finish(c) {
     c.state = 'leftover';
-    [c.cat, c.ring, c.ringBack, c.fx, ...c.hearts.map(h => h.im), ...c.bits.map(b => b.im)].forEach(o => o && o.destroy());
+    [c.cat, c.glow, c.ring, c.ringBack, c.fx, ...c.hearts.map(h => h.im), ...c.bits.map(b => b.im)].forEach(o => o && o.destroy());
   }
 
   lose(c) {
     c.state = 'gone'; this.lost++;
-    [c.cat, c.stone, c.ring, c.ringBack, c.fx].forEach(o => o && o.destroy());
+    [c.cat, c.glow, c.stone, c.ring, c.ringBack, c.fx].forEach(o => o && o.destroy());
     this.s.onCatLost();
   }
 

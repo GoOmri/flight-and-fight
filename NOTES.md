@@ -885,3 +885,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-24 v1.9.100: no spokes inside the ring (branch v1100-ring-spokes)
 - Omri's screenshots showed dark spokes inside the ring. Cause: the empty ring band was see-through (opacity 0.45) and drawn as many small stroke pieces; where pieces overlap the colour doubles, which made radial lines. The band is now fully opaque (0x3f3060), so no overlaps show. The colourful fill was already opaque. Tested in the browser pane: a clean ring.
+
+## 2026-11-24 v1.9.101: soft glow behind the cats (branch v1101-cat-glow)
+- Omri: the cats need to stand out from the background more. Each cat now has a smooth round light behind it (warm white-pink, additive, 60 px across, pulsing gently; config cats.glowSize / glowAlpha / glowPulse). It sits behind the cat and its ring, above the rock, follows the cat when it jumps and runs, and goes with it. Tested in the browser pane: a black cat clearly separates from the ground. UNVERIFIED on the phone: size and strength (glowAlpha 0.9). Other ideas not built: a light outline, a bobbing marker above the cat.
