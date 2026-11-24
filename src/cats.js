@@ -141,31 +141,24 @@ export class Cats {
     for (let i = this.parts.length - 1; i >= 0; i--) {
       const p = this.parts[i]; p.life -= dt;
       if (p.life <= 0) { p.im.destroy(); this.parts.splice(i, 1); continue; }
-      if (p.c.state === 'hover' && !s.over) { // she hovers: every spark has its own flight: a quick pop up, a short hang, then a spiral into the witch that speeds up like a drain
-        const F = p.c.fill;
-        if (p.pull === undefined || p.pull === 0) { // set up this spark's own flight once
-          p.pull = 0.0001; p.up = 0.1 + Math.random() * 0.18; p.upV = 120 + Math.random() * 220; p.hang = Math.random() * 0.12; p.dir = Math.random() < 0.5 ? -1 : 1;
-          p.turns = 0.5 + Math.random() * 1.1; p.T = (0.5 + Math.random() * 0.4) * (1 - 0.55 * F); p.sz = 0.6 + Math.random() * 1.1; p.drift = (Math.random() - 0.5) * 30; p.a0 = null;
-        }
-        p.pull += dt; p.life = Math.max(p.life, 0.3);
-        p.im.setDepth(s.ship.depth + 0.2); // drawn over the witch: you see them flow into her
-        const u = p.pull; let px = p.im.x, py = p.im.y;
-        if (u < p.up) { const k = 1 - u / p.up; p.im.y -= p.upV * k * k * dt; p.im.x += p.drift * k * dt; } // pop up, braking
-        else if (u < p.up + p.hang) { p.im.y -= 4 * dt; } // a beat of hanging in the air (anticipation)
-        else {
-          if (p.a0 === null) { const dx = p.im.x - s.ship.x, dy = p.im.y - s.ship.y; p.a0 = Math.atan2(dy, dx); p.r0 = Math.max(10, Math.hypot(dx, dy)); p.w = 0; }
-          p.w += dt; const v = Math.min(1, p.w / p.T), r = p.r0 * (1 - Math.pow(v, 2.6)), a = p.a0 + p.dir * p.turns * Math.PI * 2 * Math.pow(v, 1.7);
-          p.im.x = s.ship.x + Math.cos(a) * r; p.im.y = s.ship.y + Math.sin(a) * r; // a spiral that tightens and speeds up (ease-in)
-          if (v >= 1) { p.im.destroy(); this.parts.splice(i, 1); continue; }
-        }
-        const mx = p.im.x - px, my = p.im.y - py, sp = Math.hypot(mx, my) / Math.max(dt, 0.001), len = 1 + Math.min(CC.streak, sp / 55); // long only when really fast
-        p.im.setAlpha(1).setRotation(sp > 5 ? Math.atan2(my, mx) : -Math.PI / 2).setScale(0.55 * p.sz * len, 0.5 * p.sz); // thin, tapering with speed
+      if (p.c.state === 'hover' && !s.over) { // she hovers over the cat: each spark first shoots up (fast, braking), then dives into the witch with a very sharp ease-in
+        if (!p.pull) p.big = Math.random() < CC.fastShare; // only some sparks swell when they go fast
+        p.pull = (p.pull || 0) + dt;
+        p.im.setDepth(s.ship.depth + 0.2); // pulled sparks are drawn over the witch: you see them flow into her
+        const U = CC.suckUpS, u = p.pull;
+        p.life = Math.max(p.life, 0.3); // a pulled spark lives until it arrives
+        p.im.setRotation(0);
+        if (u < U) { const k = 1 - u / U; p.im.y -= CC.suckUp * k * k * dt; p.im.x += Math.sin(p.ph) * 4 * dt; p.im.setAlpha(1).setScale(1.1); continue; }
+        const w = u - U, dx = s.ship.x - p.im.x, dy = s.ship.y - p.im.y, d = Math.hypot(dx, dy), spd = 20 + CC.suckSharp * w * w, step = spd * dt;
+        if (d <= step + 4) { p.im.destroy(); this.parts.splice(i, 1); continue; }
+        p.im.x += dx / d * step; p.im.y += dy / d * step;
+        p.im.setAlpha(1).setScale(Math.min(1.1, 0.4 + d / 50) + (p.big ? CC.fastGrow * Math.min(1, spd / 900) : 0)); // the fast ones grow by a pixel or two
         continue;
       }
       p.pull = 0;
       p.im.setDepth(CC.depth + 0.06);
       p.im.y += (p.vy * (1 + CC.riseFillMul * p.c.fill) * dt) + ground; p.im.x += Math.sin(p.ph + p.life * 5) * 6 * dt; // rises, sways a little and rides with the ground
-      p.im.setAlpha(clamp(p.life / (p.max * 0.5), 0, 1)).setScale(0.45 + 0.6 * clamp(p.life / p.max, 0, 1)).setRotation(-Math.PI / 2); p.im.scaleX *= 1 + CC.streak * 0.5 * p.c.fill * p.c.fill; p.im.scaleY *= 0.7; // faster near the end, and so fast they stretch into strips
+      p.im.setAlpha(clamp(p.life / (p.max * 0.5), 0, 1)).setScale(0.45 + 0.6 * clamp(p.life / p.max, 0, 1)).setRotation(0); // faster near the end, and so fast they stretch into strips
     }
   }
 
