@@ -965,3 +965,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.118: sucked-in sparks easier to see (branch v1118-visible-sparks)
 - Omri could not see the sparks going into the witch. The depth was already above her; the likely cause is that they were small dark-ish dots popping up only about 17 px (inside her 48 px sprite). Now: they pop up 0.6x to 1.2x of 650 px/s braking over 0.22 s (about 30 to 60 px, out of her sprite), are bigger (1.5), and glow (additive blend) while pulled.
 - Syntax checked. The browser pane could not hold the witch over a cat this time (she stayed outside the ring), so UNVERIFIED on screen and on a phone.
+
+## 2026-11-25 v1.9.119: sparks pop out at every angle (branch v1119-angles)
+- Omri: the sparks only flew straight up. Each pulled spark now pops out at its own random angle (0 to 360 degrees), braking, then dives into the witch. Checked in the browser pane: 38 sparks around the cat with angles from -159 to 174 degrees. Look on a phone UNVERIFIED.
