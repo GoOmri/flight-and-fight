@@ -134,7 +134,7 @@ export class Cats {
         g.strokePath();
       }
     };
-    stroke(0, Math.PI * 2, rw, 0x1a0830, 0.45); // the empty ring: one plain dark band (no outline, no lines)
+    stroke(0, Math.PI * 2, rw, 0x3f3060, 1); // the empty ring: one plain dark band, fully opaque (a see-through band showed dark spokes where the stroke pieces overlap)
     if (c.fill > 0.005) stroke(-Math.PI / 2, -Math.PI / 2 + c.fill * Math.PI * 2, rw, ringColor(this.clock), 1); // the fill: one smooth arc, clockwise from the top
   }
 
