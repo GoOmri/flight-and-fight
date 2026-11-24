@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.83", // bump on every push so the player/Omri can see the build
+  version: "1.9.84", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -88,6 +88,7 @@ export const CONFIG = {
       { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 204, y: 422, originX: 0.5, originY: 1,   scale: 2, depth: 50, bob: 0, bobMs: 1000, par: 6 }
     ]
   },
+  goalCard: { showMs: 3500, rowGap: 34, iconScale: 1.6, textSize: 14 }, // the goal card at the start of a stage (how long, row spacing, icon size, text size)
   pauseBtn: { x: 226, y: 32, size: 20, hit: 36, fill: 0x3b1478, border: 0xf2b632, ink: 0xfff3c4, btnW: 96, btnH: 30, gap: 14, textSize: 10 }, // PAUSE button (top right, under the hearts) and the pause screen buttons
   endMenuBtn: { w: 96, h: 30, bottom: 36, size: 10, color: 0x3b1478, border: 0xff5ac8 }, // MENU button on the end screen (bottom = its middle's distance from the bottom edge)
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
@@ -336,7 +337,7 @@ export const CONFIG = {
   // HUD layout (logical px on the 240-wide screen)
   hud: {
     margin: 4,
-    medalSize: 13, medalGap: 2,
+    medalSize: 16, medalGap: 5, goalScale: 0.9, // goal icons top left: row height, gap, picture scale
     versionSize: 8, versionAlpha: 0.9, versionStroke: 3, versionGap: 2, // version text under the medals (px, 0..1, outline px, gap under medals)
     rowOffset: 22,                  // bars (and wave dots) start this far below the top margin; below the score text even when it pops
     heartStep: z(26), heartY: 6,    // distance between hearts; heart centre below the top margin

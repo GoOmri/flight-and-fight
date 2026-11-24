@@ -1,6 +1,6 @@
 # Flight and Fight: roadmap
 
-Kept short on purpose. Per-version history is in NOTES.md, the look rules are in DESIGN.md (section CURRENT LOOK). Last updated 24 Nov 2026 (v1.9.83).
+Kept short on purpose. Per-version history is in NOTES.md, the look rules are in DESIGN.md (section CURRENT LOOK). Last updated 24 Nov 2026 (v1.9.84).
 
 ## Next up (order agreed with Omri, 24 Nov 2026)
 1. **Stars part 1:** DONE in v1.9.81 (look unverified).
@@ -24,14 +24,13 @@ Kept short on purpose. Per-version history is in NOTES.md, the look rules are in
 - A new font was added (art-packs/fonts/DungeonFont.ttf): ornate, readable only large (24 px and up). Idea: use it for big titles only (SETTINGS, STAGE CLEAR, GAME OVER, stage names); keep PackFont for everything small. Omri decides.
 - Kenney "UI Pack - Pixel Adventure" (CC0) added in art-packs/ui-buttons/kenney-ui-pixel-adventure: an option for the HUD pills.
 
-## Goals and stars: DECIDED with Omri (24 Nov 2026, nothing built yet)
-- **3 stars per stage:** (1) Finish the stage (easy), (2) Collect every coin (medium), (3) No hit (hard). The goals "defeat 70%" and "defeat every enemy" are DROPPED (the old 4 medals go away).
-- Earned once, stay earned. Cat and boss come later as a bonus star that swaps in (the tile stays at 3 or 4 slots).
-- Look: a gold star with a small picture inside (flag or hat = finish, coin = coins, shield-heart = no hit). Grey when not earned, gold when earned. I (Claude) make the icons from existing art, in our palette (swap colours only for recolouring); Omri judges from a screenshot.
-- Where: on each stage tile only (3 slots where the 4 medals are now). NO star total on the path, NO pop-in on the end screen for now.
-- Unlock: EVERY stage needs stars in total: stage 2 needs 2, stage 3 needs 5, stage 4 needs 8, stage 5 needs 11 (about 2 per stage; numbers in config so they can be tuned after Deck tests). A locked tile is greyed out a lot and shows the stars it needs (small star + number, no words). Check: a player must never get stuck (stage 1 gives at most 3 stars, stage 2 needs 2).
-- To check when building: saved medals of old players (keys ff_medals_*): map "no hit" and "all coins" to the new stars; finish = stage already cleared.
-- First build step: replace the 4 medal icons by 3 star slots, then add the unlock rule and the locked-tile look.
+## Goals and stars: DECIDED with Omri (24 Nov 2026). v1.9.81 built stars as the goal icons; v1.9.84 (next) separates GOALS from STARS
+- **3 goals, 1 goal = 1 star:** finish the stage, collect every coin, no hit. Stars are the reward you keep; goals are what you do. Earned once, stay earned. Old goals (70%, kill all) are dropped. Cat and boss come later as a bonus goal.
+- **Before the stage (goal card):** the stage opens with the world still and a card shows the 3 goals (icon + 1 to 2 words: FINISH, ALL COINS, NO HIT). It fades after about 3 s or on a tap, then play starts. (A menu screen before PLAY is a later option.)
+- **During the stage (top left):** 3 small GOAL icons, NOT star shaped, made from pictures already in the game: witch hat = finish (BTL loot pack "witch icon/witch hat.png", licence unconfirmed: ask Omri before pushing the file, add to CREDITS.md), the game coin = all coins, the game heart = no hit. States: WHITE (white silhouette) = still open, FULL COLOUR = done, GREY = failed. NO crosses (Omri dislikes crosses). Omri disliked the 13 px star-shaped icons from v1.9.81 (too small, ugly shapes, star shape): replace them.
+- **End screen (STAGE CLEAR):** 3 rows: goal icon, tick or cross, and a star that flies in for each goal done; NEW under new stars.
+- **Menu tile:** only the 3 STARS (gold earned, grey not). Locked tiles show the stars needed. Unlock: swamp 2, stage 3: 5, stage 4: 8, stage 5: 11 (config path.nodes need).
+- Built in v1.9.81: stars on tile, unlock rule, locked tiles. TO DO: goal icons (non-star), goal card, end screen rows.
 
 ## Enemy projectiles (DELAYED, design kept)
 - Today: one red orb (aimed or straight), speed and delay from config difficulty dials.

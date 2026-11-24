@@ -795,3 +795,11 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-24 v1.9.83: RESTART in the pause menu (branch v1983-pause-restart)
 - The pause screen now has CONTINUE, RESTART and MENU. RESTART starts the same stage again (same as tapping after game over); the run so far is lost and nothing is saved. UNVERIFIED: the three buttons' spacing on the phone.
+
+## 2026-11-24 v1.9.84: goals and stars separated (branch v1984-goals, NOT pushed yet)
+- Goals (what you do) and stars (the reward) now look different. GOAL icons: witch hat = finish (assets/ui/goal-hat.png from the BTL loot pack, recoloured to purples in code), the game's coin = all coins, the game's heart = no hit (cut from the coin and heart sheets at runtime, src/sprites.js makeGoalIcons). States: WHITE = open, FULL COLOUR = done, GREY = failed (no crosses). They sit top left in the game (config hud.goalScale / medalSize / medalGap).
+- GOAL CARD at the start of every stage: world waits, shows GOALS with the 3 icons and names, TAP TO START (also closes by itself after 3.5 s, config goalCard). The pause button does not work while it is up.
+- STAGE CLEAR: 3 rows (icon, name, star): a gold star lands (small bounce) for each goal done, a dim star for the others, NEW next to new stars; COINS / KILLS / HITS lines moved down a little.
+- Stars are now plain gold stars (13 px, no picture) on the menu tiles and the end screen (textures star_earned, star_off).
+- Checked: syntax, tools\check.py all green, menu smoke test. NOT run: the game itself. UNVERIFIED: everything visual (icon size and crispness, hat colours, card layout, end screen rows fitting above the MENU button), and the runtime cutting of the coin and heart frames (if the HUD shows empty or wrong pictures, tell Claude).
+- The hat file's licence is not confirmed: Omri must OK pushing it (see CREDITS.md).

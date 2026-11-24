@@ -1,5 +1,5 @@
 import { CONFIG as C, z, hex, snap4 } from '../config.js';
-import { makeAllTextures, PX } from '../sprites.js';
+import { makeAllTextures, makeGoalIcons, PX } from '../sprites.js';
 import { STAGE1 } from '../waves.js';
 import { WaveRunner, initPath, followPath } from '../waves-runner.js';
 import { Hud, FONT, fpx, drawPlate } from '../hud.js';
@@ -42,6 +42,7 @@ export class PlayScene extends Phaser.Scene {
     const SP = C.enemies.sprites; // animated enemy sheets (assets/enemies); types without an entry keep the code-drawn picture
     for (const t in SP) this.load.spritesheet('en_' + t, 'assets/enemies/' + SP[t].file, { frameWidth: SP[t].frameW, frameHeight: SP[t].frameH });
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
+    if (!this.textures.exists('goal_hat')) this.load.image('goal_hat', 'assets/ui/goal-hat.png?v=' + C.version); // the witch hat of the FINISH goal
     if (!this.textures.exists('ui_med-button')) this.load.image('ui_med-button', 'assets/ui/ui-med-button.png?v=' + C.version); // the menu's button (a stage started from the menu has it already)
     const K = C.sprites; // coin / heart / chest / puff strips (assets/pickups, assets/fx); a thing without an entry keeps its code-drawn picture
     const strip = (key, d) => this.load.spritesheet(key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
@@ -122,6 +123,7 @@ export class PlayScene extends Phaser.Scene {
     this.makeShip();
     const waveTotals = STAGE1.map(w => w.groups.reduce((n, g) => n + g.n, 0));
     this.medals = new Medals(waveTotals.slice(startWave).reduce((a, b) => a + b, 0));
+    makeGoalIcons(this); // goal pictures (after the coin and heart sheets are loaded)
     this.hud = new Hud(this, waveTotals, startWave);
     this.hud.setLevel(this.weaponLevel);
 
@@ -150,9 +152,11 @@ export class PlayScene extends Phaser.Scene {
       () => this.physics.world.resume()) : null;
     this.paused = false; this.pauseUi = null;
     this.makePauseButton();
+    this.goalCard = null; this.showGoalCard();
     this.game.events.on('hidden', this.pauseGame, this); // the phone app goes to the background: pause by itself
     this.events.once('shutdown', () => { this.game.events.off('hidden', this.pauseGame, this); this.anims.resumeAll(); });
     this.input.on('pointerdown', p => {
+      if (this.goalCard) { if (this.time.now > this.goalCard.readyAt) this.hideGoalCard(); return; } // a tap closes the goal card
       if (this.paused) { this.pauseTap(p.x / R, p.y / R); return; } // the pause screen takes every touch
       if (this.tune && this.tune.press(p.x / R, p.y / R)) return; // the panel used this touch
       if (!this.over && this.pauseHit(p.x / R, p.y / R)) { this.pauseGame(); return; }
@@ -822,10 +826,37 @@ export class PlayScene extends Phaser.Scene {
     this.pauseBtnGfx = g;
   }
 
+  // ---------- goal card (shown when a stage starts) ----------
+  showGoalCard() {
+    const G = C.goalCard, P = C.menu.pal, CR = hex(P.cream), ui = [];
+    this.paused = true; this.physics.world.pause(); // the stage waits behind the card
+    ui.push(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.6).setDepth(70));
+    ui.push(this.add.text(W / 2, H / 2 - 90, 'GOALS', { ...FONT, fontSize: fpx(snap4(z(30))) + 'px', color: hex(0xf2b632), stroke: hex(P.shadow), strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(71));
+    const names = { finish: 'FINISH', allCoins: 'ALL COINS', noHit: 'NO HIT' };
+    MEDAL_KEYS.forEach((k, i) => {
+      const y = H / 2 - 40 + i * G.rowGap;
+      const im = this.add.image(W / 2 - 62, y, 'goal_' + k + '_earned').setScale(G.iconScale).setDepth(71);
+      ui.push(im);
+      ui.push(this.add.text(W / 2 - 34, y, names[k], { ...FONT, fontSize: fpx(G.textSize) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0, 0.5).setDepth(71));
+    });
+    const tap = this.add.text(W / 2, H / 2 + 90, 'TAP TO START', { ...FONT, fontSize: fpx(12) + 'px', color: hex(P.pink), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5).setDepth(71);
+    ui.push(tap);
+    this.goalCardTween = this.tweens.add({ targets: tap, alpha: { from: 1, to: 0.3 }, yoyo: true, repeat: -1, duration: 600 });
+    this.goalCard = { objs: ui, readyAt: this.time.now + 350 }; // a tap too early (a finger still down from the menu) does not close it
+    this.goalCardTimer = this.time.delayedCall(G.showMs, () => this.hideGoalCard());
+  }
+
+  hideGoalCard() {
+    if (!this.goalCard) return;
+    this.goalCard.objs.forEach(o => o.destroy()); this.goalCard = null;
+    if (this.goalCardTween) this.goalCardTween.stop(); if (this.goalCardTimer) this.goalCardTimer.remove(false);
+    this.paused = false; this.physics.world.resume();
+  }
+
   pauseHit(x, y) { const B = C.pauseBtn; return Math.abs(x - B.x) <= B.hit / 2 && Math.abs(y - B.y) <= B.hit / 2; }
 
   pauseGame() {
-    if (this.paused || this.over) return;
+    if (this.paused || this.over || this.goalCard) return;
     this.paused = true; this.pauseAt = this.time.now;
     this.physics.world.pause(); this.tweens.pauseAll(); this.anims.pauseAll();
     this.dragId = null; this.stickV.set(0, 0); this.stopping = false; this.stickC.set(W / 2, C.stick.restY);
@@ -1551,16 +1582,23 @@ export class PlayScene extends Phaser.Scene {
     } else {
       t(100, title, 36, col);
       t(138, 'SCORE ' + this.score, 26, CR);
-      MEDAL_KEYS.forEach((k, i) => { // the 3 stars, big; NEW under a medal earned for the first time
-        const x = W / 2 + (i - 1) * 46;
-        fade.push(this.add.image(x, 185, 'medal_' + k + '_' + this.medals.state[k]).setScale(3).setDepth(61));
-        if (isNew && isNew[k]) t(206, 'NEW', 12, hex(P.orange), 2).setX(x);
+      const names = { finish: 'FINISH', allCoins: 'ALL COINS', noHit: 'NO HIT' }, rowTxt = (x, y, str, color) => { // goal rows: goal icon, its name, and a star for every goal done
+        const o = this.add.text(x, y, str, { ...FONT, fontSize: fpx(12) + 'px', color, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0, 0.5).setDepth(61); fade.push(o); return o;
+      };
+      MEDAL_KEYS.forEach((k, i) => {
+        const y = 176 + i * 28, done = this.medals.state[k] === 'earned';
+        fade.push(this.add.image(W / 2 - 84, y, 'goal_' + k + '_' + (done ? 'earned' : 'failed')).setScale(1.3).setDepth(61));
+        rowTxt(W / 2 - 62, y, names[k], done ? CR : '#8a80a8');
+        const star = this.add.image(W / 2 + 62, y, done ? 'star_earned' : 'star_off').setScale(2).setDepth(61);
+        fade.push(star);
+        if (done && ease > 0) this.tweens.add({ targets: star, scale: { from: 3.4, to: 2 }, duration: 260, delay: ease + i * 220, ease: 'Back.easeOut' }); // the star lands
+        if (isNew && isNew[k]) rowTxt(W / 2 + 80, y, 'NEW', hex(P.orange));
       });
       const V = C.coin.value;
-      t(228, 'KILLS ' + this.enemiesKilled + '/' + this.enemiesSpawned, 16, CR);
-      t(243, 'COINS ' + this.coinsCollected * V + '/' + this.coinsSpawned * V, 16, CR);
-      t(258, 'HITS ' + this.hitsTaken, 16, CR);
-      tapY = 300;
+      t(262, 'COINS ' + this.coinsCollected * V + '/' + this.coinsSpawned * V, 16, CR);
+      t(277, 'KILLS ' + this.enemiesKilled + '/' + this.enemiesSpawned, 16, CR);
+      t(292, 'HITS ' + this.hitsTaken, 16, CR);
+      tapY = 320;
     }
     const tap = t(tapY, 'TAP TO PLAY AGAIN', 18, hex(P.pink));
     fade.pop(); // the tap text blinks on its own

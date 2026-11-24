@@ -230,14 +230,14 @@ export class MenuScene extends Phaser.Scene {
     if (b.locked) {
       add(txt(cx, y + 24, nd.name, B.nameSize, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 24);
       if (nd.need) { // the stars still needed: a small star and a number, no words
-        const star = add(this.add.image(cx - 12, y + 45, 'medal_finish_earned').setScale(1.5).setTint(0x9a9a9a), y + 45);
+        const star = add(this.add.image(cx - 12, y + 45, 'star_earned').setScale(1.5).setTint(0x9a9a9a), y + 45);
         add(txt(cx + 10, y + 45, String(nd.need), B.nameSize + 2, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 45);
       }
     } else {
       add(txt(cx, y + 14, nd.name, B.nameSize, shadow, 0.5, ink), y + 14);
       const medals = loadMedals(nd.theme), best = loadBest(nd.theme), n = MEDAL_KEYS.length;
       MEDAL_KEYS.forEach((k, j) => {
-        const im = add(this.add.image(0, y + 35, 'medal_' + k + '_' + (medals[k] ? 'earned' : 'pending')).setScale(B.medalScale), y + 35);
+        const im = add(this.add.image(0, y + 35, 'star_' + (medals[k] ? 'earned' : 'off')).setScale(B.medalScale), y + 35);
         im.x = cx + (j - (n - 1) / 2) * (im.displayWidth + B.medalGap);
       });
       if (best > 0) add(txt(cx, y + h - 13, 'BEST ' + best, B.bestSize, shadow, 0.5, art ? B.bestInk : P.cyan), y + h - 13);

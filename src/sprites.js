@@ -161,43 +161,60 @@ function ringRows(rows, ch, keep) {
   return out;
 }
 
-// HUD medal icons, 10x10 art px, drawn 1:1. Keys match src/medals.js. Each gets 3 textures: _earned, _pending, _failed.
-// STAR icons, 13x13 art px: a gold star (K = brown outline, Q = gold) with a small picture inside (flag = finish, coin = all coins, heart = no hit).
+// STAR icons (the reward, shown in the menu and on the end screen): a plain gold star, 13x13 art px (K = brown outline, Q = gold). Textures star_earned and star_off.
 const STAR = [
   '......K......', '.....KQK.....', '.....KQK.....', 'KKKKKKQKKKKKK', 'KQQQQQQQQQQQK',
   '.KQQQQQQQQQK.', '..KQQQQQQQK..', '..KQQQQQQQK..', '.KQQQQQQQQQK.', '.KQQQQQQQQQK.',
   '.KQQQKKKQQQK.', 'KQQQK...KQQQK', 'KKKK.....KKKK'
 ];
-const withPicture = pic => STAR.map((row, y) => (y >= 4 && y <= 8)
-  ? row.slice(0, 4) + pic[y - 4].replace(/\./g, 'Q') + row.slice(9) : row);
-const MEDAL_ART = {
-  finish: withPicture(['KKK..', 'KKKK.', 'KKK..', 'K....', 'K....']),   // a flag
-  allCoins: withPicture(['.KKK.', 'K...K', 'K.K.K', 'K...K', '.KKK.']), // a coin
-  noHit: withPicture(['.K.K.', 'KKKKK', 'KKKKK', '.KKK.', '..K..'])    // a heart
-};
-function makeMedalIcons(scene) {
+function makeStarIcons(scene) {
   const look = {
     earned: ch => [PAL[ch], 1],
-    pending: ch => (ch === 'k' || ch === 'D' ? [0xdfe8ff, 0.65] : [0xffffff, 0.14]), // dim outline only
-    failed: ch => (ch === 'k' || ch === 'D' ? [0x23232e, 1] : [0x4f5565, 1])        // dark grey + small cross
+    off: ch => (ch === 'K' ? [0xdfe8ff, 0.65] : [0xffffff, 0.14]) // not earned: a dim outline only
   };
-  for (const key of Object.keys(MEDAL_ART)) {
-    const rows = MEDAL_ART[key], w = rows[0].length, h = rows.length;
-    for (const st of Object.keys(look)) {
-      const tex = 'medal_' + key + '_' + st;
-      if (scene.textures.exists(tex)) continue;
-      const g = scene.make.graphics({ x: 0, y: 0, add: false });
-      rows.forEach((row, y) => [...row].forEach((ch, x) => {
-        if (ch === '.') return;
-        const [c, a] = look[st](ch);
-        g.fillStyle(c, a); g.fillRect(x, y, 1, 1);
-      }));
-      if (st === 'failed') { // small cross, bottom right
-        g.fillStyle(0xd9deea, 1);
-        [[-4, -4], [-2, -4], [-3, -3], [-4, -2], [-2, -2]].forEach(([dx, dy]) => g.fillRect(w + dx, h + dy, 1, 1));
+  for (const st of Object.keys(look)) {
+    const tex = 'star_' + st;
+    if (scene.textures.exists(tex)) continue;
+    const g = scene.make.graphics({ x: 0, y: 0, add: false });
+    STAR.forEach((row, y) => [...row].forEach((ch, x) => {
+      if (ch === '.') return;
+      const [c, a] = look[st](ch);
+      g.fillStyle(c, a); g.fillRect(x, y, 1, 1);
+    }));
+    g.generateTexture(tex, 13, 13);
+    g.destroy();
+  }
+}
+
+// GOAL icons (what the player does): the witch hat = finish, the game's coin = all coins, the game's heart = no hit. Textures goal_<key>_<open|earned|failed>:
+// open = white silhouette, earned = full colour, failed = grey (no cross). Cut from pictures the game already loads (coin and heart sheets) and the hat (assets/ui/goal-hat.png),
+// trimmed to the visible pixels. The hat's black is swapped to purples (a colour swap only).
+export function makeGoalIcons(scene) {
+  const src = {
+    finish: { tex: 'goal_hat', hat: true },
+    allCoins: { tex: scene.textures.exists('sp_coin') ? 'sp_coin' : 'coin' },
+    noHit: { tex: scene.textures.exists('sp_heart_idle') ? 'sp_heart_idle' : 'heart' }
+  };
+  for (const key of Object.keys(src)) {
+    if (scene.textures.exists('goal_' + key + '_open') || !scene.textures.exists(src[key].tex)) continue;
+    const t = scene.textures.get(src[key].tex), fr = t.has(0) ? t.get(0) : t.get(), img = t.getSourceImage(); // frame 0 of a sheet (the coin faces front there), or the whole picture
+    const c0 = document.createElement('canvas'); c0.width = fr.cutWidth; c0.height = fr.cutHeight;
+    const x0 = c0.getContext('2d'); x0.drawImage(img, fr.cutX, fr.cutY, fr.cutWidth, fr.cutHeight, 0, 0, fr.cutWidth, fr.cutHeight);
+    const d0 = x0.getImageData(0, 0, c0.width, c0.height).data;
+    let x1 = c0.width, y1 = c0.height, x2 = -1, y2 = -1;
+    for (let y = 0; y < c0.height; y++) for (let x = 0; x < c0.width; x++) if (d0[(y * c0.width + x) * 4 + 3] > 20) { x1 = Math.min(x1, x); y1 = Math.min(y1, y); x2 = Math.max(x2, x); y2 = Math.max(y2, y); }
+    if (x2 < 0) continue;
+    const w = x2 - x1 + 1, h = y2 - y1 + 1, px = x0.getImageData(x1, y1, w, h).data;
+    for (const st of ['open', 'earned', 'failed']) {
+      const cv = scene.textures.createCanvas('goal_' + key + '_' + st, w, h), cx = cv.getContext(), out = cx.createImageData(w, h), o = out.data;
+      for (let i = 0; i < px.length; i += 4) {
+        let r = px[i], g = px[i + 1], b = px[i + 2], a = px[i + 3];
+        if (src[key].hat) { const l = Math.min(1, (r * 0.3 + g * 0.59 + b * 0.11) / 90); r = 0x3b + (0xc8 - 0x3b) * l; g = 0x14 + (0x9c - 0x14) * l; b = 0x78 + (0xff - 0x78) * l; }
+        if (st === 'open') { r = g = b = 255; }
+        else if (st === 'failed') { const v = (r * 0.3 + g * 0.59 + b * 0.11) * 0.55; r = g = b = v; a *= 0.8; }
+        o[i] = r; o[i + 1] = g; o[i + 2] = b; o[i + 3] = a;
       }
-      g.generateTexture(tex, w, h);
-      g.destroy();
+      cx.putImageData(out, 0, 0); cv.refresh();
     }
   }
 }
@@ -221,7 +238,7 @@ export function makeAllTextures(scene) {
     makeTexture(scene, 'ring_' + type + '_weapon', ringRows(rows, 'E', false));
     makeTexture(scene, 'ring_' + type + '_heart', ringRows(rows, 'P', false));
   }
-  makeMedalIcons(scene);
+  makeStarIcons(scene);
   makeTexture(scene, 'cloudFar', ['..www...', '.wwwww..', 'wwwwwwww', '.wwwwww.']);
   makeTexture(scene, 'star', ['w']);
   makeTexture(scene, 'fxRing', ['..wwwww..', '.ww...ww.', 'ww.....ww', 'w.......w', 'w.......w', 'w.......w', 'ww.....ww', '.ww...ww.', '..wwwww..']); // puff ring, tinted + scaled in code

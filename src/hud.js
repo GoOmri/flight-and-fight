@@ -3,6 +3,7 @@
 import { CONFIG as C, z, hex } from './config.js';
 import { PX } from './sprites.js';
 import { MEDAL_KEYS } from './medals.js';
+const GOAL_TEX = { pending: 'open', earned: 'earned', failed: 'failed' }; // goal icon look per state
 
 // ONE font for the whole game: PackFont (the pixel font of the Fantasy UI pack, made from its glyph sheet, see CREDITS.md). Only if the file cannot be loaded at all the old
 // Pixelify Sans + Jersey 10 take over by themselves (main.js checks), so text never disappears.
@@ -40,8 +41,11 @@ export class Hud {
     this.total = waveTotals; this.spawned = waveTotals.map(() => 0); this.alive = waveTotals.map(() => 0); this.escaped = waveTotals.map(() => false);
 
     // LEFT: medals, version under them
-    this.medalImgs = MEDAL_KEYS.map((k, i) =>
-      scene.add.image(H.margin + i * (H.medalSize + H.medalGap), H.margin, 'medal_' + k + '_pending').setOrigin(0, 0).setDepth(depth));
+    let gx = H.margin; // the 3 goal icons in a row (witch hat, coin, heart), each centred in the row
+    this.medalImgs = MEDAL_KEYS.map(k => {
+      const im = scene.add.image(0, H.margin + H.medalSize / 2, 'goal_' + k + '_open').setOrigin(0, 0.5).setScale(H.goalScale).setDepth(depth);
+      im.x = gx; gx += im.displayWidth + H.medalGap; return im;
+    });
     this.medalLook = MEDAL_KEYS.map(() => 'pending');
     this.versionText = scene.add.text(H.margin, H.margin + H.medalSize + H.versionGap, 'v' + C.version, { ...FONT, fontSize: fpx(H.versionSize) + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: H.versionStroke }).setAlpha(H.versionAlpha).setDepth(depth);
 
@@ -97,7 +101,7 @@ export class Hud {
     MEDAL_KEYS.forEach((k, i) => {
       if (this.medalLook[i] === state[k]) return;
       this.medalLook[i] = state[k];
-      this.medalImgs[i].setTexture('medal_' + k + '_' + state[k]);
+      this.medalImgs[i].setTexture('goal_' + k + '_' + GOAL_TEX[state[k]]);
     });
   }
 
