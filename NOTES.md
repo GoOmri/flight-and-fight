@@ -852,3 +852,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - The cat stands IN FRONT of its rock: its last pixel row is read from the picture (so the feet are exact) and placed 1.5 px below the rock's bottom edge (config cats.footDrop). This separates the cat from the background.
 - Enemy glow size: sizeMul 1.5 -> 0.75 (config enemies.glow.sizeMul).
 - Tested in the browser pane (8 fps, zoomed): ring halves and the cat in front of the rock look right. UNVERIFIED: the feel on the phone, the 1 to 2 px drop at normal size.
+
+## 2026-11-24 v1.9.93: round ring without lines (branch v1993-round-ring)
+- Omri: the ring must be a circle, not an oval, and without the lines. Now a plain circle (radius 12, 4 px thick, config cats.ringRx = ringRy): a dark translucent band for the empty ring (no outline) and ONE smooth arc for the fill, clockwise from the top, in the colour step of the fill (no segment gaps). The back half still goes behind the cat, the front half in front of it.
+- Tested in the browser pane (zoomed): clean circle, no segment lines. UNVERIFIED on the phone (a very faint dot may show where the two halves meet).

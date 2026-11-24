@@ -111,7 +111,7 @@ export class Cats {
     c.fx.once('animationcomplete', () => c.fx.setVisible(false));
   }
 
-  // The ring is a flat ellipse around the cat's feet seen in perspective: its BACK half (upper) is drawn behind the cat, its FRONT half (lower) in front of the cat's feet.
+  // The ring is a plain circle around the cat's feet: its BACK half (upper) is drawn behind the cat, its FRONT half (lower) in front of the cat's feet.
   drawRing(c, cy) {
     const rx = CC.ringRx, ry = CC.ringRy; c.ring.clear(); c.ringBack.clear();
     const stroke = (a0, a1, w, col, alpha) => {
@@ -129,14 +129,8 @@ export class Cats {
         g.strokePath();
       }
     };
-    stroke(0, Math.PI * 2, CC.ringW + 2, 0x1a0830, 0.6); // empty ring: a dark band
-    const col = ringColor(c.fill);
-    for (let i = 0; i < 8; i++) { // 8 segments, clockwise from the top
-      const f = clamp(c.fill * 8 - i, 0, 1);
-      if (f <= 0) continue;
-      const a0 = -Math.PI / 2 + i * Math.PI / 4;
-      stroke(a0, a0 + f * Math.PI / 4 - 0.03, CC.ringW, col, 1);
-    }
+    stroke(0, Math.PI * 2, CC.ringW, 0x1a0830, 0.45); // the empty ring: one plain dark band (no outline, no lines)
+    if (c.fill > 0.005) stroke(-Math.PI / 2, -Math.PI / 2 + c.fill * Math.PI * 2, CC.ringW, ringColor(c.fill), 1); // the fill: one smooth arc, clockwise from the top
   }
 
   save(c) {
