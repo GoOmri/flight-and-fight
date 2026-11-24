@@ -831,19 +831,20 @@ export class PlayScene extends Phaser.Scene {
     this.dragId = null; this.stickV.set(0, 0); this.stopping = false; this.stickC.set(W / 2, C.stick.restY);
     const B = C.pauseBtn, P = C.menu.pal, CR = hex(P.cream), ui = [];
     ui.push(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.6).setDepth(70));
-    ui.push(this.add.text(W / 2, H / 2 - 70, 'PAUSED', { ...FONT, fontSize: fpx(snap4(z(36))) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(71));
+    ui.push(this.add.text(W / 2, H / 2 - 80, 'PAUSED', { ...FONT, fontSize: fpx(snap4(z(36))) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(71));
     const btn = (y, label) => {
       if (this.textures.exists('ui_med-button')) ui.push(this.add.nineslice(W / 2 - B.btnW / 2, y - 12, 'ui_med-button', undefined, B.btnW, 25, 10, 10, 0, 0).setOrigin(0, 0).setDepth(71));
       else { const gg = this.add.graphics().setDepth(71); drawPlate(gg, W / 2 - B.btnW / 2, y - B.btnH / 2, B.btnW, B.btnH, { fill: B.fill, border: B.border, down: false }); ui.push(gg); }
       ui.push(this.add.text(W / 2, y, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: 3, align: 'center' }).setOrigin(0.5).setDepth(72));
       return { x: W / 2, y, w: B.btnW, h: B.btnH };
     };
-    this.pauseUi = { objs: ui, cont: btn(H / 2 - 5, 'CONTINUE'), menu: btn(H / 2 - 5 + B.btnH + B.gap, 'MENU') };
+    this.pauseUi = { objs: ui, cont: btn(H / 2 - 25, 'CONTINUE'), restart: btn(H / 2 - 25 + B.btnH + B.gap, 'RESTART'), menu: btn(H / 2 - 25 + 2 * (B.btnH + B.gap), 'MENU') };
   }
 
   pauseTap(x, y) {
     const hit = b => Math.abs(x - b.x) <= b.w / 2 && Math.abs(y - b.y) <= b.h / 2;
     if (hit(this.pauseUi.cont)) this.resumeGame();
+    else if (hit(this.pauseUi.restart)) { this.anims.resumeAll(); this.scene.restart(this.startData); } // start the stage again (the run so far is lost, nothing saved)
     else if (hit(this.pauseUi.menu)) { this.anims.resumeAll(); this.scene.start('Menu'); } // a pause never saves anything: leaving loses the run
   }
 

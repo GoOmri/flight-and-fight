@@ -792,3 +792,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Roadmap: added "Fix soon: enemy aura looks like a dark shadow, not a glow" (Omri, v1.9.80).
 - Checked: syntax of all files, tests (tools\check.py) and the menu smoke test pass. NOT run: the game itself (no way to open it here). UNVERIFIED: button position and look, that nothing keeps moving while paused (e.g. a tween or timer I did not know about), the pause when the app is in the background.
 - Phone check: tap the pause button during play; see PAUSED; CONTINUE resumes exactly where it was; pause again and tap MENU: back at the stage menu; tapping beside the buttons does nothing; the button also works near the hearts without moving the witch.
+
+## 2026-11-24 v1.9.83: RESTART in the pause menu (branch v1983-pause-restart)
+- The pause screen now has CONTINUE, RESTART and MENU. RESTART starts the same stage again (same as tapping after game over); the run so far is lost and nothing is saved. UNVERIFIED: the three buttons' spacing on the phone.
