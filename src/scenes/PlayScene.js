@@ -107,7 +107,7 @@ export class PlayScene extends Phaser.Scene {
     const q = new URLSearchParams(window.location.search);
     this.god = q.get('god') === '1';
     const startWave = Phaser.Math.Clamp(parseInt(q.get('wave'), 10) || C.testing.wave, 1, STAGE1.length) - 1; // ?wave=N, or the tune panel's TEST tab
-    this.debug = this.god || C.testing.god > 0 || startWave > 0 || tuneEnabled(); // debug runs do not touch the saved medals
+    this.startWaveN = startWave; this.tainted = false; // runs that cheat (god mode, a jump to a later wave, a chosen weapon level, changed difficulty rows) are not saved; a plain run with the tune panel only open IS saved
     this.weaponLevel = C.testing.level >= 0 ? Math.min(C.pickup.maxLevel, C.testing.level) : Math.min(C.pickup.maxLevel, startWave); // wave=N starts with weapon level N-1 so later waves can be tried fairly
     this.runner = new WaveRunner(STAGE1, startWave, C.stage.firstWaveDelay);
     this.hooks = { enemy: (cg, i) => this.spawnEnemy(cg, i), crate: cc => this.spawnCrate(cc) };
@@ -565,6 +565,7 @@ export class PlayScene extends Phaser.Scene {
     this.sparks = this.add.group({ defaultKey: 'square', maxSize: C.particles.poolSize });
     this.flashPool = this.add.group({ defaultKey: 'square', maxSize: 30 }); // white hit-flash copies of enemies
     this.halos = this.add.group({ defaultKey: 'square', maxSize: C.pickup.haloPoolSize }); // glowing outlines of carriers
+    this.glows = this.add.group({ defaultKey: 'enemyGlow', maxSize: C.enemies.glow.poolSize }); // a soft dark aura behind every enemy (not bosses)
     this.trail = this.add.group({ defaultKey: 'square', maxSize: C.feel.trailPoolSize }); // broom sparkles (own pool so bursts never starve it)
     this.fxGroups = [this.sparks, this.trail];
     // screen flash: one reused rectangle, below the enemy shots so it never hides them
@@ -933,7 +934,12 @@ export class PlayScene extends Phaser.Scene {
     e.coin = g.type === 'shooter' || (g.coinEvery > 0 && (i + 1) % g.coinEvery === 0); // shooters always drop 1 coin
     e.wave = cg.w;
     e.drop = g.drop && i === g.n - 1 ? g.drop : null; // the last enemy of a marked group is the carrier
-    e.halo = null; e.halos = null;
+    e.halo = null; e.halos = null; e.glow = null;
+    const GL = C.enemies.glow;
+    if (GL.on && !cfg.noGlow) { // soft aura behind the enemy; the carrier outline stays stronger
+      e.glow = this.glows.get(e.x, e.y, 'enemyGlow');
+      if (e.glow) e.glow.setTexture('enemyGlow').setActive(true).setVisible(true).setDepth(GL.depth).setAlpha(GL.alpha).setScale(Math.max(e.displayWidth, e.displayHeight) * GL.sizeMul / (GL.texels * 2));
+    }
     if (e.drop) {
       const key = 'ring_' + g.type + '_' + e.drop;
       if (sp) { // animated enemy: the outline is 4 solid-colour copies of its current frame, pushed up/down/left/right by haloPx. They follow the real shape, so the outline always fits (green = weapon, pink-white = heart)
@@ -1030,6 +1036,15 @@ export class PlayScene extends Phaser.Scene {
       const n = PR.diameter + 2, cv = this.textures.createCanvas('fxRingFine', n, n), ctx = cv.getContext('2d'); ctx.fillStyle = '#ffffff';
       for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { const d = Math.hypot(x + 0.5 - n / 2, y + 0.5 - n / 2); if (Math.abs(d - PR.diameter / 2) <= PR.thick / 2) ctx.fillRect(x, y, 1, 1); }
       cv.refresh();
+    }
+    const GL = C.enemies.glow; // soft aura behind enemies: flat rings (like the lantern glow) of one warm dark colour, made once
+    if (GL.on && !this.textures.exists('enemyGlow')) {
+      const n = GL.texels * 2 + 1, cv = this.textures.createCanvas('enemyGlow', n, n), cx = cv.getContext();
+      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
+        const d = Math.hypot(x - GL.texels, y - GL.texels), ring = GL.rings.find(r => d <= r.r * GL.texels);
+        if (ring) { cx.fillStyle = hex(GL.color); cx.globalAlpha = ring.a; cx.fillRect(x, y, 1, 1); }
+      }
+      cx.globalAlpha = 1; cv.refresh();
     }
     const fire = { y: '#bfe9ff', o: '#4aa3ff', w: '#ffffff' }; // the muzzle burst matches the blue shot
     pix('muzzleA', ['..y..', '.yoy.', 'yowoy', '.yoy.', '..y..'], fire); // smaller than before: the old 7x7 burst on every shot looked like flashing
@@ -1139,6 +1154,7 @@ export class PlayScene extends Phaser.Scene {
 
   removeEnemy(e) {
     if (e.flashSpr) { e.flashSpr.setActive(false).setVisible(false); e.flashSpr = null; }
+    if (e.glow) { e.glow.setActive(false).setVisible(false); e.glow = null; }
     if (e.halo) { e.halo.setActive(false).setVisible(false); e.halo = null; }
     if (e.halos) { e.halos.forEach(h => h.setActive(false).setVisible(false)); e.halos = null; }
     this.hud.waveAlive(e.wave, -1);
@@ -1163,6 +1179,7 @@ export class PlayScene extends Phaser.Scene {
     const pulse = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(time * TAU / C.pickup.haloPulseMs));
     if (e.halos) e.halos.forEach(h => h.setFrame(e.frame.name).setFlipX(e.flipX).setPosition(e.x + h.ox, e.y + h.oy).setAlpha(pulse)); // same frame and flip as the enemy, shifted 4 ways
     if (e.halo) e.halo.setPosition(e.x, e.y).setAlpha(pulse);
+    if (e.glow) e.glow.setPosition(e.x, e.y);
   }
 
   updateEnemies(time, dt) {
@@ -1439,8 +1456,11 @@ export class PlayScene extends Phaser.Scene {
     p.life = C.feel.popTextMs / 1000;
   }
 
+  cheated() { return this.god || C.testing.god > 0 || C.testing.level >= 0 || this.startWaveN > 0 || this.tainted; }
+
   gameOver() {
     this.vx = this.vy = 0; // clouds stop boosting
+    if (!this.cheated()) saveBest(this.score, this.stageTheme); // the high score also counts when the run ends in a game over (it was only saved on STAGE CLEAR before)
     this.endScreen('GAME OVER', hex(C.menu.pal.pink), false);
     this.ship.setVisible(false).setAlpha(1);
   }
@@ -1449,8 +1469,9 @@ export class PlayScene extends Phaser.Scene {
     this.vx = this.vy = 0;
     this.medals.finish(this.enemiesKilled);
     this.syncMedals();
-    const isNew = this.debug ? null : saveMedals(this.medals.state, this.stageTheme); // debug runs are not saved
-    if (!this.debug) saveBest(this.score, this.stageTheme);
+    const cheat = this.cheated();
+    const isNew = cheat ? null : saveMedals(this.medals.state, this.stageTheme); // cheating runs are not saved
+    if (!cheat) saveBest(this.score, this.stageTheme);
     this.endScreen('STAGE CLEAR', hex(C.menu.pal.cyan), true, isNew);
     this.ship.setAlpha(1);
   }

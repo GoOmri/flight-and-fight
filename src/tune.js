@@ -111,6 +111,7 @@ export class Tune {
   set(r, v) {
     v = Math.round(Math.min(r[4], Math.max(r[3], v)) * 1000) / 1000;
     setp(r[1], v);
+    if ((r[1].startsWith('difficulty.') || r[1].startsWith('testing.')) && this.scene) this.scene.tainted = true; // a run with changed difficulty / test rows is not saved
     if (r[6] && this.scene.rebuildRays) this.scene.rebuildRays();
   }
 

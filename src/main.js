@@ -1,5 +1,7 @@
 import { CONFIG, hex } from './config.js';
 import { useClassicFont, packFontOn } from './hud.js';
+import { resetSavedOnce } from './medals.js';
+resetSavedOnce('2026-11-24-score-fix'); // best scores were not saved correctly before v1.9.80: start clean once
 import { MenuScene } from './scenes/MenuScene.js';
 import { PlayScene } from './scenes/PlayScene.js';
 

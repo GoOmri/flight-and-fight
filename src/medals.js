@@ -62,3 +62,14 @@ export function saveBest(score, theme = 'forest') {
   if (score <= loadBest(theme)) return;
   try { window.localStorage.setItem(keyOf(theme) + '_best', String(score)); } catch (e) { /* ignore */ }
 }
+
+// One-time clean start after a fix (the old best scores were saved by a buggy version): the first time this tag is seen on a phone, the saved medals and best scores of every stage are erased.
+export function resetSavedOnce(tag) {
+  try {
+    const flag = 'ff_reset_' + tag;
+    if (window.localStorage.getItem(flag) === '1') return false;
+    for (const k of Object.values(SAVE_KEYS)) { window.localStorage.removeItem(k); window.localStorage.removeItem(k + '_best'); }
+    window.localStorage.setItem(flag, '1');
+    return true;
+  } catch (e) { return false; }
+}

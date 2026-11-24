@@ -411,7 +411,7 @@ export class MenuScene extends Phaser.Scene {
     } });
     if (witch) this.time.addEvent({ delay: B.trail.every, loop: true, callback: () => { // sparks fall behind her broom
       const s = witch.s;
-      this.bit(s.x + B.trail.dx + rnd(-3, 3), s.y + B.trail.dy + rnd(-3, 3), { tint: pick(B.trail.tints), vx: -rnd(8, 18), vy: rnd(4, 14), life: rnd(700, 1100), s0: 1.6, s1: 0.4, a0: 1, add: true, depth: 49 });
+      this.bit(s.x + B.trail.dx + rnd(-4, 4), s.y + B.trail.dy + rnd(-4, 4), { tint: pick(B.trail.tints), vx: -rnd(10, 26), vy: rnd(2, 18), life: rnd(900, 1500), s0: B.trail.size, s1: 0.6, a0: 1, add: B.trail.add, depth: 49 }); // bigger, longer lived and (not additive) clearly visible on the light sky
     } });
     // fireflies: a few dots wander slowly and blink
     const F = B.fireflies;

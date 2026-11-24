@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.79", // bump on every push so the player/Omri can see the build
+  version: "1.9.80", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -46,7 +46,7 @@ export const CONFIG = {
     // start x / y ranges, travel dx / dy, ms) and the sparks on a touch (count, how far, ms). tilt: the sky and the friends shift when the phone is tilted (range = degrees for the full shift, sky = px).
     bits: {
       cauldron: { every: 260, dy: 8, tints: [0xff5ac8, 0x3df2ff, 0xfff3c4] },
-      trail: { every: 70, dx: -38, dy: 26, tints: [0xff5ac8, 0xffffff, 0xc89cff] },
+      trail: { every: 38, dx: -38, dy: 26, size: 2.8, add: false, tints: [0xff5ac8, 0xffffff, 0xf2b632, 0xff8ad8] },
       fireflies: { count: 7, area: [24, 16, 216, 236], color: 0xfff3a0 },
       star: { everyMs: [8000, 14000], x: [130, 250], y: [8, 80], dx: -110, dy: 55, ms: 650 },
       tap: { count: 9, dist: [12, 26], ms: 420, tints: [0xf2b632, 0xff5ac8, 0xfff3c4] }
@@ -65,7 +65,7 @@ export const CONFIG = {
       { theme: 'stage3', name: 'STAGE 3', side: 'L', locked: true },
       { theme: 'stage4', name: 'STAGE 4', side: 'R', locked: true },
       { theme: 'stage5', name: 'STAGE 5', side: 'L', locked: true }] },
-    bubble: { picAlpha: 0.55, picTint: 0xc8b8e8, lockedTint: 0x9a9a9a, ink: 0xfff3c4, bestInk: 0xf2b632, lockedInk: 0x8a80a8, inset: 0x1a0830, nameSize: 10, medalScale: 1.333, medalGap: 3, bestSize: 8 }, // text and medal sizes inside a stage bubble
+    bubble: { picAlpha: 0.85, picTint: 0xece4ff, lockedTint: 0x9a9a9a, ink: 0xfff3c4, bestInk: 0xf2b632, lockedInk: 0x8a80a8, inset: 0x1a0830, nameSize: 10, medalScale: 1.333, medalGap: 3, bestSize: 8 }, // text and medal sizes inside a stage bubble
     lockedFill: 0x241c3a, lockedBorder: 0x6b5a90, lockedText: 0x9a90b8, // a locked stage bubble
     gear: { x: 215, y: 24, hit: 32, scale: 1, art: 12, px: 2, color: 0x38b6f5, shade: 0x1c6fb5 }, // settings gear: the medallion picture at scale (the art / px / colour numbers are only for the code-drawn fallback cog)
     settings: { x: 20, y: 84, w: 200, h: 262, btnW: 60, btnSize: 10, titleSize: 16, ink: 0x3b2410, hintInk: 0x7a5a3a, depth: 100 }, // settings panel (parchment): position, size, button width, text sizes, ink colours
@@ -112,7 +112,7 @@ export const CONFIG = {
     bankSpeed: z(400),   // sideways speed (units/s) that gives the full tilt
     bankEase: 14,        // how fast the tilt comes and goes (higher = snappier)
     spriteScale: 1.5,   // size of one witch art pixel. The witch sheet frame is 24x32 art px, so 1.5 = 36x48 px (about 15% of the screen width). 2 = bigger. Hitbox does not change
-    witch: 2,           // which witch sheet from assets/witch: 1 = orange hair, blue cloak; 2 = blue hat, green cloak. Try with ?witch=1 / ?witch=2
+    witch: 1,           // which witch sheet from assets/witch: 1 = orange hair, blue cloak; 2 = blue hat, green cloak. Try with ?witch=1 / ?witch=2
     sideSpeed: z(110),  // sideways speed (px/s) from which the witch turns to her side-view frames (flying left or right)
     animFps: 8,         // wing-beat... broom-wobble speed of the flight animation
     shotY: 20,          // player shots start this far above the ship centre (at the hat tip)
@@ -210,7 +210,10 @@ export const CONFIG = {
       // Vulture (not used in waves yet). Frames of vulture.png: 0 = folded, 1 = wings up, 2 = wings flat/low, 3 = half. Flap loop: up, half, low, half. (Cleanest guess; check it.)
       vulture: { file: 'vulture.png', frameW: 39, frameH: 39, frames: [1, 3, 2, 3], fps: 8, scale: 0.8, hitW: 22, hitH: 22, faceVelocity: true }
     },
-    haloTint: { weapon: 0x2ee86a, heart: 0xffc9e3 }, haloPx: 2 // outline thickness of a carrier in game px (4 shifted copies of its frame)
+    haloTint: { weapon: 0x4f9bff, heart: 0xffc9e3 }, haloPx: 2, // outline thickness of a carrier in game px (4 shifted copies of its frame); weapon carriers are BLUE like the potion they carry
+    // Soft aura behind every enemy (not bosses: an enemy type with noGlow: true has none): flat rings of one warm dark colour (rust-maroon, so it never reads as a red shot), alpha = strength,
+    // sizeMul = how much bigger than the enemy, texels = radius of the glow picture. The carrier outline stays much stronger. on: false switches it off.
+    glow: { on: true, color: 0x6a2418, alpha: 1, sizeMul: 1.5, texels: 12, depth: -0.5, poolSize: 40, rings: [{ r: 1, a: 0.10 }, { r: 0.75, a: 0.12 }, { r: 0.5, a: 0.14 }] }
   },
 
   // Animated pictures for coins, hearts, chests and the death puff (strips cut from the packs, see CREDITS.md). Every entry is optional:
@@ -372,7 +375,7 @@ CONFIG.background.swamp = {
       { file: 'lantern_1_anim', w: 24, h: 52, glowDx: 1.3, glowDy: -0.6 },
       { file: 'witch_lantern_0_anim', w: 24, h: 41, glowDx: -1.2, glowDy: -7.3 }
     ],
-    glow: { cell: 2, rings: [{ r: 2, color: 0xb8ff90, alpha: 0.6 }, { r: 4, color: 0x4fe070, alpha: 0.36 }, { r: 7, color: 0x2fbf6a, alpha: 0.18 }], flicker: [1, 0.8, 1, 0.65, 0.9, 1, 0.75] },
+    glow: { cell: 2, rings: [{ r: 2, color: 0xb8ff90, alpha: 0.46 }, { r: 4, color: 0x4fe070, alpha: 0.28 }, { r: 7, color: 0x2fbf6a, alpha: 0.14 }], flicker: [1, 0.8, 1, 0.65, 0.9, 1, 0.75] },
     bugs: 3, bugSize: 1.5, bugSpeed: 0.3, bugColor: 0xe6ff8a }, // bugSize in px (a bit smaller than 2), bugSpeed = how fast they circle (was 0.5)
   light: { on: true, depth: -6, // fog: big, very soft, pale grey-green patches (same code as the forest cloud shadows) drifting over the floor
     shadowCount: 5, shadowVariants: 3, shadowSize: 64, shadowCell: 4, shadowGapY: 300, shadowSpeedMul: 1.5, shadowDrift: 5, shadowAlpha: 0.12, shadowColor: 0xb4c2b0,
