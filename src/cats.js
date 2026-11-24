@@ -192,9 +192,9 @@ export class Cats {
     c.state = 'saved'; c.t = 0; c.x0 = c.x; c.sy = c.y; // sy = the stone's y (it stays on the ground)
     c.ring.clear(); c.ringBack.clear(); c.fx.setVisible(false);
     c.cat.anims.stop(); c.cat.play('cat' + c.id + '_run');
-    for (let i = 0; i < 9; i++) { // a burst of small gold stars
-      const a = (i / 9) * Math.PI * 2, im = s.add.image(c.x, c.y - c.top - 10, 'star_earned').setScale(0.5).setDepth(CC.depth + 0.5);
-      c.bits.push({ im, vx: Math.cos(a) * 70, vy: Math.sin(a) * 70 - 20, life: 0.8 });
+    for (let i = 0; i < 5; i++) { // a few big gold stars shoot off like fireworks, each to a random place, slow down and fade
+      const a = Math.random() * Math.PI * 2, v = 90 + Math.random() * 90, im = s.add.image(c.x, c.y - c.top - 10, 'star_earned').setScale(0.9 + Math.random() * 0.3).setDepth(CC.depth + 0.5);
+      c.bits.push({ im, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 25, life: 1 + Math.random() * 0.4 });
     }
     for (let i = 0; i < 2; i++) { // small thank-you hearts float out of the cat's head
       const h = s.add.image(c.x + (i ? 5 : -2), c.y - c.top + CC.headDy, 'goal_noHit_earned').setScale(goalScale(s, 'noHit', 9)).setDepth(CC.depth + 0.5).setAlpha(0);
@@ -207,7 +207,7 @@ export class Cats {
   updateSaved(c, dt, ground) {
     c.t += dt; c.sy += ground;
     const J = CC.jumpS;
-    for (const b of c.bits) { b.life -= dt; b.im.x += b.vx * dt; b.im.y += b.vy * dt; b.vy += 120 * dt; b.im.setAlpha(clamp(b.life / 0.5, 0, 1)); }
+    for (const b of c.bits) { b.life -= dt; b.im.x += b.vx * dt; b.im.y += b.vy * dt + ground; const f = Math.max(0, 1 - 3.2 * dt); b.vx *= f; b.vy = b.vy * f + 30 * dt; b.im.setAlpha(clamp(b.life / 0.5, 0, 1)); b.im.angle += 120 * dt; } // fireworks: fast at first, slowing down, a little fall, spinning
     for (const h of c.hearts) { const u = c.t - h.d; if (u < 0) continue; h.im.y -= 14 * dt; h.im.x = h.x0 + Math.sin(u * 6) * 2; h.im.setAlpha(clamp(Math.min(u * 6, 1.2 - u), 0, 1)); }
     let x, y;
     if (c.t < J) { // two happy jumps in place (the cat stays above its stone)

@@ -619,6 +619,16 @@ export class PlayScene extends Phaser.Scene {
     }
     this.witchAnim = 'witch_n';
     this.ship = this.physics.add.sprite(W / 2, C.ship.startY, 'witch', 1).setScale(SS).setDepth(C.ship.depth); // above the colour tint (33)
+    { // the muzzle flash must never sit above her sprite (a taller hat): find the top row of the art once and keep the flash a few px below it
+      this.muzzleDy = C.ship.muzzleY;
+      try {
+        const fr = this.textures.getFrame('witch', 1), cv = document.createElement('canvas'); cv.width = fr.cutWidth; cv.height = fr.cutHeight;
+        const cx = cv.getContext('2d'); cx.drawImage(fr.source.image, fr.cutX, fr.cutY, fr.cutWidth, fr.cutHeight, 0, 0, fr.cutWidth, fr.cutHeight);
+        const d = cx.getImageData(0, 0, cv.width, cv.height).data; let top = 0;
+        outer: for (; top < cv.height; top++) for (let x = 0; x < cv.width; x++) if (d[(top * cv.width + x) * 4 + 3] > 20) break outer;
+        this.muzzleDy = Math.min(C.ship.muzzleY, (cv.height / 2 - top) * SS - 3);
+      } catch (e) { /* keep the config value */ }
+    }
     this.ship.play('witch_n');
     const ST = C.sprites.stunned; // stars and sparks circling over her head for a moment after a hit
     this.stunUntil = 0;
@@ -973,7 +983,7 @@ export class PlayScene extends Phaser.Scene {
       b.body.setVelocity(Math.sin(a) * sp, -Math.cos(a) * sp);
     }
     const F = C.feel;
-    this.muzzle.forEach((m, i) => m.setPosition(this.ship.x + (this.muzzle.length > 1 ? (i ? F.muzzleSpread : -F.muzzleSpread) : 0), this.ship.y - C.ship.muzzleY).setVisible(true));
+    this.muzzle.forEach((m, i) => m.setPosition(this.ship.x + (this.muzzle.length > 1 ? (i ? F.muzzleSpread : -F.muzzleSpread) : 0), this.ship.y - this.muzzleDy).setVisible(true));
     this.muzzleUntil = time + F.muzzleMs;
     this.recoil = 1;
   }
@@ -1000,7 +1010,7 @@ export class PlayScene extends Phaser.Scene {
     const GL = C.enemies.glow;
     if (GL.on && !cfg.noGlow) { // soft aura behind the enemy; the carrier outline stays stronger
       e.glow = this.glows.get(e.x, e.y, 'enemyGlow');
-      if (e.glow) e.glow.setTexture('enemyGlow').setActive(true).setVisible(true).setBlendMode(GL.blend).setDepth(C.enemies.depth + GL.depth).setAlpha(GL.alpha).setScale(Math.max(e.displayWidth, e.displayHeight) * GL.sizeMul / (GL.texels * 2));
+      if (e.glow) e.glow.setTexture('enemyGlow').setActive(true).setVisible(true).setBlendMode(GL.blend).setDepth(C.enemies.depth + GL.depth).setAlpha(GL.alpha).setScale(Math.max(e.displayWidth, e.displayHeight) * GL.sizeMul / (GL.texels * 2)).setTint(cfg.glowColor != null ? cfg.glowColor : this.enemyGlowColor(e, GL.color));
     }
     if (e.drop) {
       const key = 'ring_' + g.type + '_' + e.drop;
@@ -1085,6 +1095,29 @@ export class PlayScene extends Phaser.Scene {
     }
   }
 
+  // The main colour of an enemy picture (cached per picture): the average of its solid pixels, weighted so strong colours count more than grey, then brightened a little for the glow.
+  enemyGlowColor(e, fallback) {
+    this.glowCache = this.glowCache || {};
+    const fr = e.frame, key = e.texture.key + ':' + fr.name;
+    if (this.glowCache[key] != null) return this.glowCache[key];
+    let col = fallback;
+    try {
+      const cv = document.createElement('canvas'); cv.width = fr.cutWidth; cv.height = fr.cutHeight;
+      const cx = cv.getContext('2d'); cx.drawImage(fr.source.image, fr.cutX, fr.cutY, fr.cutWidth, fr.cutHeight, 0, 0, fr.cutWidth, fr.cutHeight);
+      const d = cx.getImageData(0, 0, cv.width, cv.height).data; let r = 0, g = 0, b = 0, w = 0;
+      for (let k = 0; k < d.length; k += 4) {
+        if (d[k + 3] < 200) continue;
+        const mx = Math.max(d[k], d[k + 1], d[k + 2]), mn = Math.min(d[k], d[k + 1], d[k + 2]), sat = mx ? (mx - mn) / mx : 0, wt = 0.05 + sat * sat * (mx / 255); // bright, saturated pixels decide; dark outlines and grey barely count
+        r += d[k] * wt; g += d[k + 1] * wt; b += d[k + 2] * wt; w += wt;
+      }
+      if (w > 0) {
+        r /= w; g /= w; b /= w; const mx = Math.max(r, g, b) || 1, f = 255 / mx; // stretch to full brightness (keeps the hue)
+        col = (Math.min(255, Math.round(r * f)) << 16) | (Math.min(255, Math.round(g * f)) << 8) | Math.min(255, Math.round(b * f));
+      }
+    } catch (err) { /* keep the fallback */ }
+    return (this.glowCache[key] = col);
+  }
+
   // Small pixel-art pictures made in code (no files): the muzzle flash at the wand and the shine behind a coin.
   makeShineTextures() {
     const pix = (key, rows, pal) => { // rows of characters, '.' = empty
@@ -1102,7 +1135,7 @@ export class PlayScene extends Phaser.Scene {
     const GL = C.enemies.glow; // soft aura behind enemies: flat rings (like the lantern glow) of one warm dark colour, made once
     if (GL.on && !this.textures.exists('enemyGlow')) {
       const n = GL.texels * 2 + 1, cv = this.textures.createCanvas('enemyGlow', n, n), cx = cv.getContext();
-      const rgb = [(GL.color >> 16) & 255, (GL.color >> 8) & 255, GL.color & 255].join(',');
+      const rgb = '255,255,255'; // the glow picture is white: every enemy tints it with its own main colour (enemyGlowColor)
       const grad = cx.createRadialGradient(GL.texels, GL.texels, 0, GL.texels, GL.texels, GL.texels); // a smooth soft glow (the lantern style rings are added on top: both effects mixed)
       grad.addColorStop(0, 'rgba(' + rgb + ',' + GL.soft + ')'); grad.addColorStop(0.35, 'rgba(' + rgb + ',' + GL.soft * 0.55 + ')'); grad.addColorStop(0.7, 'rgba(' + rgb + ',' + GL.soft * 0.15 + ')'); grad.addColorStop(1, 'rgba(' + rgb + ',0)');
       cx.fillStyle = grad; cx.fillRect(0, 0, n, n);

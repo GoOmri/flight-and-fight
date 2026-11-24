@@ -915,3 +915,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri: when the witch hovers over the cat, the sparks should vacuum into her.
 - src/cats.js updateSparks: every spark remembers its cat. While that cat is in the 'hover' state the spark flies to the witch, faster and faster (50 + 420 px/s per second), full brightness, and vanishes when it reaches her. When she leaves, the remaining sparks rise again as before.
 - Syntax checked, tests 389 passed. NOT looked at on a phone (UNVERIFIED): speed and how many sparks reach her.
+
+## 2026-11-25 v1.9.108: firework stars, enemy glow in the enemy's colour, muzzle flash under the hat (branch v1108-fireworks-glow-muzzle)
+- Cat rescue: 5 bigger gold stars (was 9 small) shoot off in random directions like fireworks, slow down, spin, fade.
+- Enemy glow: the glow picture is now white and each enemy tints it with its main colour (PlayScene.enemyGlowColor: average of the solid pixels, strong colours count most, stretched to full brightness, cached per picture). An enemy type can force a colour with glowColor in its config.
+- Muzzle flash: PlayScene finds the top row of the witch art once and keeps the flash 3 px below it (muzzleDy, never more than config ship.muzzleY). With the current witch it is 19.5 px above her centre.
+- Tested in the browser pane: grunt glow is pink-violet, muzzleDy 19.5. NOT looked at on a phone (UNVERIFIED): other enemy glow colours, star size and spread.
