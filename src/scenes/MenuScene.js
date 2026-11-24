@@ -1,7 +1,7 @@
 import { CONFIG as C, hex } from '../config.js';
 import { makeAllTextures } from '../sprites.js';
 import { FONT, fpx, drawPlate } from '../hud.js';
-import { MEDAL_KEYS, loadMedals, loadBest } from '../medals.js';
+import { MEDAL_KEYS, loadMedals, loadBest, totalStars } from '../medals.js';
 import { latestVersion, refreshFiles } from '../update.js';
 import { toggleTune, tuneEnabled } from '../tune.js';
 
@@ -46,7 +46,8 @@ export class MenuScene extends Phaser.Scene {
     let verTaps = 0, verAt = 0; // 5 quick taps on the version text turn the tuning panel on or off (see tune.js)
 
     // ---- the path: a line up the middle, bubbles left and right of it. Stage 1 is at the bottom; with more stages than fit, drag up / down to scroll (applyScroll).
-    const PA = M.path, bw = PA.bubbleW, bh = PA.bubbleH, nodes = PA.nodes;
+    const PA = M.path, bw = PA.bubbleW, bh = PA.bubbleH, stars = totalStars();
+    const nodes = PA.nodes.map(nd => ({ ...nd, locked: !!nd.locked || stars < (nd.need || 0) })); // a stage opens when the stars of all stages together reach its need
     const lastOpen = nodes.reduce((m, nd, i) => (nd.locked ? m : i), 0), farthest = Math.min(nodes.length - 1, lastOpen + PA.lookAhead); // a player can look PA.lookAhead stages beyond the highest open one, no further
     this.scrollMax = Math.max(0, PA.topStop - (PA.bottomCy - farthest * PA.step)); // how far the path can be pulled down (0 = everything fits, no scrolling)
     this.scroll = 0; this.scrollV = 0; this.drag = null;
@@ -222,18 +223,21 @@ export class MenuScene extends Phaser.Scene {
       if (art) {
         img.setTint(b.down ? 0xcccccc : (b.locked ? B.lockedTint : 0xffffff)); img.y = y + sink;
         if (pic) pic.y = y + 6 + sink;
-        if (!b.locked) g.fillStyle(B.inset, 1).fillRoundedRect(x + 8, y + 26 + sink, w - 16, 17, 3); // a dark strip behind the medals so the grey ones can be seen on the tan
+        if (!b.locked) g.fillStyle(B.inset, 1).fillRoundedRect(x + 8, y + 24 + sink, w - 16, 22, 3); // a dark strip behind the medals so the grey ones can be seen on the tan
       }
       b.items.forEach(i => i.o.setY(i.oy + sink));
     };
     if (b.locked) {
       add(txt(cx, y + 24, nd.name, B.nameSize, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 24);
-      add(txt(cx, y + 44, 'SOON', B.nameSize, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 44);
+      if (nd.need) { // the stars still needed: a small star and a number, no words
+        const star = add(this.add.image(cx - 12, y + 45, 'medal_finish_earned').setScale(1.5).setTint(0x9a9a9a), y + 45);
+        add(txt(cx + 10, y + 45, String(nd.need), B.nameSize + 2, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 45);
+      }
     } else {
       add(txt(cx, y + 14, nd.name, B.nameSize, shadow, 0.5, ink), y + 14);
       const medals = loadMedals(nd.theme), best = loadBest(nd.theme), n = MEDAL_KEYS.length;
       MEDAL_KEYS.forEach((k, j) => {
-        const im = add(this.add.image(0, y + 34, 'medal_' + k + '_' + (medals[k] ? 'earned' : 'pending')).setScale(B.medalScale), y + 34);
+        const im = add(this.add.image(0, y + 35, 'medal_' + k + '_' + (medals[k] ? 'earned' : 'pending')).setScale(B.medalScale), y + 35);
         im.x = cx + (j - (n - 1) / 2) * (im.displayWidth + B.medalGap);
       });
       if (best > 0) add(txt(cx, y + h - 13, 'BEST ' + best, B.bestSize, shadow, 0.5, art ? B.bestInk : P.cyan), y + h - 13);

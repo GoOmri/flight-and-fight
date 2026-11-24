@@ -162,15 +162,18 @@ function ringRows(rows, ch, keep) {
 }
 
 // HUD medal icons, 10x10 art px, drawn 1:1. Keys match src/medals.js. Each gets 3 textures: _earned, _pending, _failed.
-const SKULL = [
-  '..kkkkkk..', '.kJJJJJJk.', 'kJJJJJJJJk', 'kJkkJJkkJk', 'kJkkJJkkJk',
-  'kJJJkkJJJk', '.kJJJJJJk.', '..kJkJkJk.', '..kJkJkJk.', '...kkkkk..'
+// STAR icons, 13x13 art px: a gold star (K = brown outline, Q = gold) with a small picture inside (flag = finish, coin = all coins, heart = no hit).
+const STAR = [
+  '......K......', '.....KQK.....', '.....KQK.....', 'KKKKKKQKKKKKK', 'KQQQQQQQQQQQK',
+  '.KQQQQQQQQQK.', '..KQQQQQQQK..', '..KQQQQQQQK..', '.KQQQQQQQQQK.', '.KQQQQQQQQQK.',
+  '.KQQQKKKQQQK.', 'KQQQK...KQQQK', 'KKKK.....KKKK'
 ];
+const withPicture = pic => STAR.map((row, y) => (y >= 4 && y <= 8)
+  ? row.slice(0, 4) + pic[y - 4].replace(/\./g, 'Q') + row.slice(9) : row);
 const MEDAL_ART = {
-  kill70: SKULL.map(r => r.slice(0, 5) + r.slice(5).replace(/J/g, 'j')), // half skull: right half is shaded
-  killAll: SKULL,
-  allCoins: ['...KKKK...', '..KAAQQK..', '.KAAQQQUK.', 'KAAQQQQQUK', 'KAQQQQQQUK', 'KQQQQQQQUK', 'KQQQQQQUUK', '.KQQQUUUK.', '..KUUUUK..', '...KKKK...'],
-  noHit: ['kkkkkkkkkk', 'kbbbbbbbbk', 'kbwwbbwwbk', 'kbwwwwwwbk', 'kbwwwwwwbk', '.kbwwwwbk.', '.kbbwwbbk.', '..kbbbbk..', '...kbbk...', '....kk....']
+  finish: withPicture(['KKK..', 'KKKK.', 'KKK..', 'K....', 'K....']),   // a flag
+  allCoins: withPicture(['.KKK.', 'K...K', 'K.K.K', 'K...K', '.KKK.']), // a coin
+  noHit: withPicture(['.K.K.', 'KKKKK', 'KKKKK', '.KKK.', '..K..'])    // a heart
 };
 function makeMedalIcons(scene) {
   const look = {

@@ -1499,8 +1499,8 @@ export class PlayScene extends Phaser.Scene {
     } else {
       t(100, title, 36, col);
       t(138, 'SCORE ' + this.score, 26, CR);
-      MEDAL_KEYS.forEach((k, i) => { // the 4 medals, big; NEW under a medal earned for the first time
-        const x = W / 2 + (i - 1.5) * 46;
+      MEDAL_KEYS.forEach((k, i) => { // the 3 stars, big; NEW under a medal earned for the first time
+        const x = W / 2 + (i - 1) * 46;
         fade.push(this.add.image(x, 185, 'medal_' + k + '_' + this.medals.state[k]).setScale(3).setDepth(61));
         if (isNew && isNew[k]) t(206, 'NEW', 12, hex(P.orange), 2).setX(x);
       });
