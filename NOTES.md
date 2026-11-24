@@ -925,3 +925,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.109: sparks shoot up, then dive into the witch (branch v1109-spark-suck-anim)
 - Omri could not see the v1.9.107 suck. Now each spark has its own animation: it shoots up about 19 px (fast, braking, 0.22 s), then dives into the witch with a very sharp ease-in (speed 20 + 2200 * t squared). More sparks while she hovers (12 per second). Config cats: suckUpS, suckUp, suckSharp, sparkRateHover.
 - NOT verified: the browser pane could not hold the witch over a cat (the controls move her back), so the new motion was only syntax-checked and read through. UNVERIFIED on screen and on a phone.
+
+## 2026-11-25 v1.9.110: rescue stars use the gallery's spinning power-star (branch v1110-spinning-stars)
+- Omri: use the spinning star from the gallery for the rescue. The 5 firework stars are now the Frakassets power-star idle spin (assets/pickups/star-lit.png, first row = 24 frames of 32x45, 24 fps), each starting at a random frame, scale 0.8 to 1.1. Texture/anim star_spin (src/cats.js).
+- Tested in the browser pane: the stars animate. Size and look on a phone UNVERIFIED.
