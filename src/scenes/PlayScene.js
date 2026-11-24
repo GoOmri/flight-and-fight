@@ -587,7 +587,7 @@ export class PlayScene extends Phaser.Scene {
     this.flashT = 0;
     // colour wash over the whole play field so art from different packs looks like one palette (a flat colour at low strength; shots, coins and the HUD stay above it). ?tint=0 turns it off.
     const TN = C.tint, tq = new URLSearchParams(window.location.search).get('tint');
-    if (TN && TN.on && tq !== '0' && TN[this.stageTheme]) this.add.rectangle(W / 2, H / 2, W, H, TN[this.stageTheme].color, TN[this.stageTheme].alpha).setDepth(TN.depth);
+    if (TN && TN.on && tq !== '0' && TN[this.stageTheme]) this.add.rectangle(W / 2, H / 2, W, H, TN[this.stageTheme].color, TN[this.stageTheme].alpha).setBlendMode(TN[this.stageTheme].blend || 0).setDepth(TN.depth);
     this.rings = this.add.group({ defaultKey: 'fxRing', maxSize: C.feel.ringPoolSize });  // expanding ring puffs
     const K = C.sprites, mkFx = (n, tex) => { // one-shot animation sprites, made once; each hides itself when its animation ends
       const a = [];
