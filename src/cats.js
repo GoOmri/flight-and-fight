@@ -31,6 +31,7 @@ export class Cats {
     this.waves = CC.atWave.filter(w => w >= startWave); // the (0-based) stage waves at whose first enemy a cat appears
     this.total = this.waves.length;
     this.spawned = 0; this.saved = 0; this.lost = 0; this.clock = 0;
+    this.parts = []; this.emit = 0; // colourful sparks rising from the rings
     this.colors = CAT_COLORS.slice().sort(() => Math.random() - 0.5); // 3 random colours per stage
     this.makeArt();
   }
@@ -63,6 +64,9 @@ export class Cats {
       g.addColorStop(0, 'rgba(255,110,215,0.8)'); g.addColorStop(0.4, 'rgba(255,110,215,0.45)'); g.addColorStop(0.75, 'rgba(255,110,215,0.14)'); g.addColorStop(1, 'rgba(255,110,215,0)'); // a saturated pink: white added on a light ground was invisible
       cx.fillStyle = g; cx.fillRect(0, 0, 64, 64); cv.refresh(); cv.setFilter(Phaser.Textures.FilterMode.LINEAR);
     }
+    if (!s.textures.exists('cat_spark')) { // a tiny white square, tinted per spark
+      const g = s.make.graphics({ x: 0, y: 0, add: false }); g.fillStyle(0xffffff, 1); g.fillRect(0, 0, 2, 2); g.generateTexture('cat_spark', 2, 2); g.destroy();
+    }
     if (!s.textures.exists('cat_stone')) { // the spot the cat sits on: a flat grey stone drawn in code (14 x 7 art px)
       const g = s.make.graphics({ x: 0, y: 0, add: false }), col = { k: 0x2a2540, a: 0x9a9eb5, b: 0x6b6f8a };
       const rows = ['....kkkkkk....', '..kkaaaaaakk..', '.kaaaaaaaaaak.', 'kaaaabbbbaaaak', 'kabbbbbbbbbbak', 'kbbbbbbbbbbbbk', '.kkkkkkkkkkkk.'];
@@ -80,7 +84,7 @@ export class Cats {
     const s = this.s, id = this.colors[this.spawned % 6], x = Phaser.Math.Between(CC.ringRx + 20, W - CC.ringRx - 20), y = -30;
     const e = s.rockKit ? s.rockKit.rock() : null; // the cat sits on one of the game's own rocks
     const stone = e ? s.add.image(x, y, e.key, e.frame).setScale(CC.stoneScale).setFlipX(Math.random() < 0.5) : s.add.image(x, y, 'cat_stone').setScale(CC.scale);
-    stone.setDepth(CC.depth);
+    stone.setDepth(CC.stoneDepth); // the rock stays under the colour tint like the background; the cat, ring, glow and sparks are above it (so the tint does not dull them)
     const top = -Math.round(stone.displayHeight / 2 + CC.footDrop); // the cat stands IN FRONT of the rock: its last pixel row is a little lower than the rock's bottom edge (negative = below the rock's middle)
     const cat = s.add.sprite(x, y - top, 'cat' + id + '_sit', 0).setScale(CC.scale).setOrigin(0.5, this.footOf(id)).setDepth(CC.depth + 0.1);
     const glow = s.add.image(x, y, 'cat_glow').setDepth(CC.depth + 0.02); // behind the cat and its ring, above the rock (normal blend: it shows on any ground)
@@ -94,6 +98,7 @@ export class Cats {
   update(dt) {
     this.clock += dt;
     const s = this.s, ground = s.bgF.scroll * s.cloudMul * dt;
+    this.updateSparks(dt, ground);
     for (const c of this.list) {
       if (c.state === 'gone') continue;
       if (c.state === 'leftover') { c.sy += ground; c.stone.setPosition(Math.round(c.x0), Math.round(c.sy)); if (c.sy > H + 20) { c.stone.destroy(); c.state = 'gone'; } continue; } // the empty stone scrolls away
@@ -112,6 +117,29 @@ export class Cats {
       this.drawRing(c, cy);
       if (c.fill >= 1) { this.save(c); continue; }
       if (c.y > H + 40) this.lose(c);
+    }
+  }
+
+  // Colourful sparks (the trail colours) rise from every ring, more of them while the witch hovers.
+  updateSparks(dt, ground) {
+    const s = this.s;
+    let rate = 0;
+    for (const c of this.list) if (c.state === 'wait' || c.state === 'hover') rate += CC.sparkRate + (CC.sparkRateHover - CC.sparkRate) * (c.grow || 0);
+    this.emit += rate * dt;
+    while (this.emit >= 1) {
+      this.emit -= 1;
+      const live = this.list.filter(c => c.state === 'wait' || c.state === 'hover');
+      if (!live.length || this.parts.length >= CC.sparkMax) break;
+      const c = live[Math.floor(Math.random() * live.length)], k = c.grow || 0, r = CC.ringRx + (CC.ringRxBig - CC.ringRx) * k, a = Math.random() * Math.PI * 2;
+      const im = s.add.image(c.x + Math.cos(a) * r, c.y - c.top - 1 + Math.sin(a) * r, 'cat_spark').setDepth(CC.depth + 0.4).setTint(CC.ringColors[Math.floor(Math.random() * CC.ringColors.length)]);
+      this.parts.push({ im, vy: -(CC.sparkRise * (0.7 + Math.random() * 0.6)), life: CC.sparkLife * (0.7 + Math.random() * 0.6), max: 0, ph: Math.random() * 6 });
+      this.parts[this.parts.length - 1].max = this.parts[this.parts.length - 1].life;
+    }
+    for (let i = this.parts.length - 1; i >= 0; i--) {
+      const p = this.parts[i]; p.life -= dt;
+      if (p.life <= 0) { p.im.destroy(); this.parts.splice(i, 1); continue; }
+      p.im.y += (p.vy * dt) + ground; p.im.x += Math.sin(p.ph + p.life * 5) * 6 * dt; // rises, sways a little and rides with the ground
+      p.im.setAlpha(clamp(p.life / (p.max * 0.5), 0, 1)).setScale(1 + 1.2 * clamp(p.life / p.max, 0, 1));
     }
   }
 

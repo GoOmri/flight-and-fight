@@ -983,7 +983,7 @@ export class PlayScene extends Phaser.Scene {
     const sp = C.enemies.sprites[g.type]; // animated sheet or null (code-drawn)
     const e = this.spawn(this.enemies, sp ? 'en_' + g.type : g.type, cg.p.sx, cg.p.sy);
     if (!e) return;
-    e.sp = sp || null; e.lastX = e.x;
+    e.sp = sp || null; e.lastX = e.x; e.setDepth(C.enemies.depth); // above the colour tint
     if (sp) {
       e.setScale(sp.scale).setFlipX(false);
       e.body.setSize(sp.hitW, sp.hitH);
@@ -999,16 +999,16 @@ export class PlayScene extends Phaser.Scene {
     const GL = C.enemies.glow;
     if (GL.on && !cfg.noGlow) { // soft aura behind the enemy; the carrier outline stays stronger
       e.glow = this.glows.get(e.x, e.y, 'enemyGlow');
-      if (e.glow) e.glow.setTexture('enemyGlow').setActive(true).setVisible(true).setBlendMode(GL.blend).setDepth(GL.depth).setAlpha(GL.alpha).setScale(Math.max(e.displayWidth, e.displayHeight) * GL.sizeMul / (GL.texels * 2));
+      if (e.glow) e.glow.setTexture('enemyGlow').setActive(true).setVisible(true).setBlendMode(GL.blend).setDepth(C.enemies.depth + GL.depth).setAlpha(GL.alpha).setScale(Math.max(e.displayWidth, e.displayHeight) * GL.sizeMul / (GL.texels * 2));
     }
     if (e.drop) {
       const key = 'ring_' + g.type + '_' + e.drop;
       if (sp) { // animated enemy: the outline is 4 solid-colour copies of its current frame, pushed up/down/left/right by haloPx. They follow the real shape, so the outline always fits (green = weapon, pink-white = heart)
         const H = C.enemies.haloPx, offs = [[-H, 0], [H, 0], [0, -H], [0, H]];
-        e.halos = offs.map(o => { const h = this.halos.get(e.x, e.y, key); if (!h) return null; h.ox = o[0]; h.oy = o[1]; return h.setTexture('en_' + g.type, e.frame.name).setActive(true).setVisible(true).setScale(sp.scale).setTintFill(C.enemies.haloTint[e.drop]).setDepth(-0.5); }).filter(Boolean);
+        e.halos = offs.map(o => { const h = this.halos.get(e.x, e.y, key); if (!h) return null; h.ox = o[0]; h.oy = o[1]; return h.setTexture('en_' + g.type, e.frame.name).setActive(true).setVisible(true).setScale(sp.scale).setTintFill(C.enemies.haloTint[e.drop]).setDepth(C.enemies.depth - 0.5); }).filter(Boolean);
       } else {
         e.halo = this.halos.get(e.x, e.y, key);
-        if (e.halo) e.halo.setTexture(key).setActive(true).setVisible(true).setScale(PX).clearTint().setDepth(0);
+        if (e.halo) e.halo.setTexture(key).setActive(true).setVisible(true).setScale(PX).clearTint().setDepth(C.enemies.depth);
       }
     }
     this.hud.waveAlive(cg.w, 1);
