@@ -929,3 +929,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.110: rescue stars use the gallery's spinning power-star (branch v1110-spinning-stars)
 - Omri: use the spinning star from the gallery for the rescue. The 5 firework stars are now the Frakassets power-star idle spin (assets/pickups/star-lit.png, first row = 24 frames of 32x45, 24 fps), each starting at a random frame, scale 0.8 to 1.1. Texture/anim star_spin (src/cats.js).
 - Tested in the browser pane: the stars animate. Size and look on a phone UNVERIFIED.
+
+## 2026-11-25 v1.9.111: cat, ring and sparks are drawn under the witch (branch v1111-ring-under-witch)
+- Bug (Omri's screenshot): the front half of the ring (depth 33.8) and the sparks (34.0) were above the witch (33.7). Now everything of a waiting cat sits between 33.61 and 33.66: glow, back ring, cat, front ring, meow puff, sparks. The witch (33.7) covers all of it. Stars and hearts after the rescue stay above her.
+- Syntax checked. NOT looked at on a phone (UNVERIFIED).

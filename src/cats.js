@@ -88,11 +88,11 @@ export class Cats {
     const stone = e ? s.add.image(x, y, e.key, e.frame).setScale(CC.stoneScale).setFlipX(Math.random() < 0.5) : s.add.image(x, y, 'cat_stone').setScale(CC.scale);
     stone.setDepth(CC.stoneDepth); // the rock stays under the colour tint like the background; the cat, ring, glow and sparks are above it (so the tint does not dull them)
     const top = -Math.round(stone.displayHeight / 2 + CC.footDrop); // the cat stands IN FRONT of the rock: its last pixel row is a little lower than the rock's bottom edge (negative = below the rock's middle)
-    const cat = s.add.sprite(x, y - top, 'cat' + id + '_sit', 0).setScale(CC.scale).setOrigin(0.5, this.footOf(id)).setDepth(CC.depth + 0.1);
-    const glow = s.add.image(x, y, 'cat_glow').setDepth(CC.depth + 0.02); // behind the cat and its ring, above the rock (normal blend: it shows on any ground)
-    const ringBack = s.add.graphics().setDepth(CC.depth + 0.05); // the back half of the ring: behind the cat, above the rock
-    const ring = s.add.graphics().setDepth(CC.depth + 0.2); // the front half: in front of the cat's feet
-    const fx = s.add.sprite(x, y, 'cat_meowfx', 0).setScale(CC.scale).setDepth(CC.depth + 0.3).setVisible(false);
+    const cat = s.add.sprite(x, y - top, 'cat' + id + '_sit', 0).setScale(CC.scale).setOrigin(0.5, this.footOf(id)).setDepth(CC.depth + 0.03);
+    const glow = s.add.image(x, y, 'cat_glow').setDepth(CC.depth + 0.01); // behind the cat and its ring, above the rock (normal blend: it shows on any ground)
+    const ringBack = s.add.graphics().setDepth(CC.depth + 0.02); // the back half of the ring: behind the cat, above the rock
+    const ring = s.add.graphics().setDepth(CC.depth + 0.04); // the front half: in front of the cat's feet
+    const fx = s.add.sprite(x, y, 'cat_meowfx', 0).setScale(CC.scale).setDepth(CC.depth + 0.05).setVisible(false);
     this.list.push({ id, x, y, top, stone, cat, glow, ring, ringBack, fx, state: 'wait', fill: 0, inside: false, meowT: 1.2, t: 0, bits: [], hearts: [] });
     this.spawned++;
   }
@@ -133,7 +133,7 @@ export class Cats {
       const live = this.list.filter(c => c.state === 'wait' || c.state === 'hover');
       if (!live.length || this.parts.length >= CC.sparkMax) break;
       const c = live[Math.floor(Math.random() * live.length)], k = c.grow || 0, r = CC.ringRx + (CC.ringRxBig - CC.ringRx) * k, a = (this.sparkA = (this.sparkA || 0) + 2.4); // each spark starts 2.4 rad (the golden angle) after the last one: they spread evenly all around the ring
-      const im = s.add.image(c.x + Math.cos(a) * r, c.y - c.top - 1 + Math.sin(a) * r, 'cat_spark').setDepth(CC.depth + 0.4).setTint(CC.ringColors[Math.floor(Math.random() * CC.ringColors.length)]);
+      const im = s.add.image(c.x + Math.cos(a) * r, c.y - c.top - 1 + Math.sin(a) * r, 'cat_spark').setDepth(CC.depth + 0.06).setTint(CC.ringColors[Math.floor(Math.random() * CC.ringColors.length)]);
       this.parts.push({ c, im, vy: -(CC.sparkRise * (0.7 + Math.random() * 0.6)), life: CC.sparkLife * (0.7 + Math.random() * 0.6), max: 0, ph: Math.random() * 6 });
       this.parts[this.parts.length - 1].max = this.parts[this.parts.length - 1].life;
     }
