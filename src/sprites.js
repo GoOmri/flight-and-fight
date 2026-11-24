@@ -168,6 +168,27 @@ const STAR = [
   '.KQQQKKKQQQK.', 'KQQQK...KQQQK', 'KKKK.....KKKK'
 ];
 function makeStarIcons(scene) {
+  if (scene.textures.exists('star_src') && !scene.textures.exists('star_earned')) { // the gold power-star of the Frakassets pack (frame 0, front facing): star_earned = full colour, star_off = dim grey
+    const img = scene.textures.get('star_src').getSourceImage(), FW = 32, FH = 43;
+    const c0 = document.createElement('canvas'); c0.width = FW; c0.height = FH;
+    const x0 = c0.getContext('2d'); x0.drawImage(img, 0, 0, FW, FH, 0, 0, FW, FH);
+    const d0 = x0.getImageData(0, 0, FW, FH).data;
+    let x1 = FW, y1 = FH, x2 = -1, y2 = -1;
+    for (let y = 0; y < FH; y++) for (let x = 0; x < FW; x++) if (d0[(y * FW + x) * 4 + 3] > 20) { x1 = Math.min(x1, x); y1 = Math.min(y1, y); x2 = Math.max(x2, x); y2 = Math.max(y2, y); }
+    if (x2 >= 0) {
+      const w = x2 - x1 + 1, h = y2 - y1 + 1, px = x0.getImageData(x1, y1, w, h).data;
+      for (const st of ['earned', 'off']) {
+        const cv = scene.textures.createCanvas('star_' + st, w, h), cx = cv.getContext(), out = cx.createImageData(w, h), o = out.data;
+        for (let i = 0; i < px.length; i += 4) {
+          let r = px[i], g = px[i + 1], b = px[i + 2], a = px[i + 3];
+          if (st === 'off') { const v = (r * 0.3 + g * 0.59 + b * 0.11) * 0.5 + 40; r = g = b = v; a *= 0.45; }
+          o[i] = r; o[i + 1] = g; o[i + 2] = b; o[i + 3] = a;
+        }
+        cx.putImageData(out, 0, 0); cv.refresh();
+      }
+      return;
+    }
+  }
   const look = {
     earned: ch => [PAL[ch], 1],
     off: ch => (ch === 'K' ? [0xdfe8ff, 0.65] : [0xffffff, 0.14]) // not earned: a dim outline only

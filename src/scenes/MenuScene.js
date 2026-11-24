@@ -25,6 +25,7 @@ export class MenuScene extends Phaser.Scene {
     this.load.image('menu_logo', 'assets/' + M.logo.file); // only the letters: they rise and float
     for (const k of ['fight', 'amp', 'flight']) this.load.image('menu_logo_' + k, 'assets/menu/logo-' + k + '.png'); // the three parts of the letters: "Fight", "&", "Flight" (together they are menu_logo)
     for (const nd of M.path.nodes) if (!nd.locked) this.load.image('stage_' + nd.theme, 'assets/ui/stage-' + nd.theme + '.png?v=' + C.version); // a small picture of each open stage (shown dimmed inside its tile)
+    this.load.image('star_src', 'assets/pickups/star-lit.png?v=' + C.version); // the gold star of the tiles (made into star_earned / star_off in sprites.js)
     if (M.logo.decor) this.load.image('menu_logo_decor', 'assets/' + M.logo.decor); // the moon, stars and bats of the logo picture: they stay in the background
     for (const k of ['panel-parchment', 'med-panel', 'med-button', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png?v=' + C.version); // ?v= = the phone must load the newest picture after an update (it kept an old copy of a picture with the same file name) // UI pictures: parchment panel and gear (Fantasy UI pack, catau-games), tan panel and button (Medieval UI pack, Doktoresco)
   }
@@ -230,7 +231,7 @@ export class MenuScene extends Phaser.Scene {
     if (b.locked) {
       add(txt(cx, y + 24, nd.name, B.nameSize, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 24);
       if (nd.need) { // the stars still needed: a small star and a number, no words
-        const star = add(this.add.image(cx - 12, y + 45, 'star_earned').setScale(1.5).setTint(0x9a9a9a), y + 45);
+        const star = add(this.add.image(cx - 12, y + 45, 'star_earned').setScale(0.7).setTint(0x9a9a9a), y + 45);
         add(txt(cx + 10, y + 45, String(nd.need), B.nameSize + 2, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 45);
       }
     } else {

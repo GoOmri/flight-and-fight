@@ -42,6 +42,7 @@ export class PlayScene extends Phaser.Scene {
     const SP = C.enemies.sprites; // animated enemy sheets (assets/enemies); types without an entry keep the code-drawn picture
     for (const t in SP) this.load.spritesheet('en_' + t, 'assets/enemies/' + SP[t].file, { frameWidth: SP[t].frameW, frameHeight: SP[t].frameH });
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
+    if (!this.textures.exists('star_src')) this.load.image('star_src', 'assets/pickups/star-lit.png?v=' + C.version); // the gold star (reward)
     if (!this.textures.exists('goal_hat')) this.load.image('goal_hat', 'assets/ui/goal-hat.png?v=' + C.version); // the witch hat of the FINISH goal
     if (!this.textures.exists('ui_med-button')) this.load.image('ui_med-button', 'assets/ui/ui-med-button.png?v=' + C.version); // the menu's button (a stage started from the menu has it already)
     const K = C.sprites; // coin / heart / chest / puff strips (assets/pickups, assets/fx); a thing without an entry keeps its code-drawn picture
@@ -1588,9 +1589,9 @@ export class PlayScene extends Phaser.Scene {
         const y = 176 + i * 28, done = this.medals.state[k] === 'earned';
         fade.push(this.add.image(W / 2 - 84, y, 'goal_' + k + '_' + (done ? 'earned' : 'failed')).setScale(1.3).setDepth(61));
         rowTxt(W / 2 - 62, y, names[k], done ? CR : '#8a80a8');
-        const star = this.add.image(W / 2 + 62, y, done ? 'star_earned' : 'star_off').setScale(2).setDepth(61);
+        const star = this.add.image(W / 2 + 62, y, done ? 'star_earned' : 'star_off').setScale(1.3).setDepth(61);
         fade.push(star);
-        if (done && ease > 0) this.tweens.add({ targets: star, scale: { from: 3.4, to: 2 }, duration: 260, delay: ease + i * 220, ease: 'Back.easeOut' }); // the star lands
+        if (done && ease > 0) this.tweens.add({ targets: star, scale: { from: 2.4, to: 1.3 }, duration: 260, delay: ease + i * 220, ease: 'Back.easeOut' }); // the star lands
         if (isNew && isNew[k]) rowTxt(W / 2 + 80, y, 'NEW', hex(P.orange));
       });
       const V = C.coin.value;

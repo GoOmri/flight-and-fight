@@ -809,3 +809,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - The goal card no longer closes by itself; it waits for a tap (config goalCard.showMs removed).
 - Open (asked Omri): goals in a lightbox in the main menu before PLAY instead of the in-game card; when the witch hat goal should light up.
 - Checked: syntax. UNVERIFIED: heart size and spacing at the top right.
+
+## 2026-11-24 v1.9.86: gallery stars (branch v1986-gallery-stars)
+- Omri: use the stars from the gallery. The stage stars (menu tiles, STAGE CLEAR, locked tile) are now the gold power-star of the Frakassets loot pack (CC BY 4.0, credit already in CREDITS.md), frame 0 (front facing), file assets/pickups/star-lit.png, cut and trimmed at runtime in sprites.js (star_earned = full colour, star_off = dim grey). The old drawn 13 px star stays only as a fallback if the picture does not load.
+- Sizes (about 20 px art): tile stars hud scale config menu.bubble.medalScale 0.9, end screen 1.3, locked tile star 0.7. UNVERIFIED: how they look and fit (tile row, end screen rows).
