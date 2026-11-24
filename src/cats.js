@@ -126,15 +126,15 @@ export class Cats {
   updateSparks(dt, ground) {
     const s = this.s;
     let rate = 0;
-    for (const c of this.list) if (c.state === 'wait' || c.state === 'hover') rate += CC.sparkRate + (CC.sparkRateHover - CC.sparkRate) * (c.grow || 0);
+    for (const c of this.list) if (c.state === 'wait' || c.state === 'hover') rate += (CC.sparkRate + (CC.sparkRateHover - CC.sparkRate) * (c.grow || 0)) * (1 + CC.sparkFillMul * c.fill); // more sparks as the ring fills
     this.emit += rate * dt;
     while (this.emit >= 1) {
       this.emit -= 1;
       const live = this.list.filter(c => c.state === 'wait' || c.state === 'hover');
-      if (!live.length || this.parts.length >= CC.sparkMax) break;
+      if (!live.length || this.parts.length >= CC.sparkMax * (1 + Math.max(...live.map(q => q.fill)))) break;
       const c = live[Math.floor(Math.random() * live.length)], k = c.grow || 0, r = CC.ringRx + (CC.ringRxBig - CC.ringRx) * k, a = (this.sparkA = (this.sparkA || 0) + 2.4); // each spark starts 2.4 rad (the golden angle) after the last one: they spread evenly all around the ring
       const im = s.add.image(c.x + Math.cos(a) * r, c.y - c.top - 1 + Math.sin(a) * r, 'cat_spark').setDepth(CC.depth + 0.06).setTint(CC.ringColors[Math.floor(Math.random() * CC.ringColors.length)]);
-      this.parts.push({ c, im, vy: -(CC.sparkRise * (0.7 + Math.random() * 0.6)), life: CC.sparkLife * (0.7 + Math.random() * 0.6), max: 0, ph: Math.random() * 6 });
+      this.parts.push({ c, im, vy: -(CC.sparkRise * (0.7 + Math.random() * 0.6)), life: CC.sparkLife * (1 + CC.sparkFillLife * c.fill) * (0.7 + Math.random() * 0.6), max: 0, ph: Math.random() * 6 });
       this.parts[this.parts.length - 1].max = this.parts[this.parts.length - 1].life;
     }
     for (let i = this.parts.length - 1; i >= 0; i--) {
@@ -177,11 +177,12 @@ export class Cats {
   drawRing(c, cy) {
     const k = c.grow || 0, r = CC.ringRx + (CC.ringRxBig - CC.ringRx) * k, w = CC.ringW + (CC.ringWBig - CC.ringW) * k; // bigger and thicker while the witch hovers, so it can be seen around her
     const r0 = r - w / 2, r1 = r + w / 2;
+    const sh = clamp((c.fill - CC.shakeFrom) / (1 - CC.shakeFrom), 0, 1) * CC.shakePx, ox = (Math.random() - 0.5) * 2 * sh, oy = (Math.random() - 0.5) * 2 * sh; // the ring trembles more and more as it nears the end
     c.ring.clear(); c.ringBack.clear();
     const piece = (g, a0, a1, col) => { // one filled piece of the ring between two angles
       const n = Math.max(2, Math.ceil((a1 - a0) / 0.1)); g.fillStyle(col, 1); g.beginPath();
-      for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n, x = c.x + Math.cos(a) * r1, y = cy + Math.sin(a) * r1; if (i) g.lineTo(x, y); else g.moveTo(x, y); }
-      for (let i = n; i >= 0; i--) { const a = a0 + (a1 - a0) * i / n; g.lineTo(c.x + Math.cos(a) * r0, cy + Math.sin(a) * r0); }
+      for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n, x = c.x + ox + Math.cos(a) * r1, y = cy + oy + Math.sin(a) * r1; if (i) g.lineTo(x, y); else g.moveTo(x, y); }
+      for (let i = n; i >= 0; i--) { const a = a0 + (a1 - a0) * i / n; g.lineTo(c.x + ox + Math.cos(a) * r0, cy + oy + Math.sin(a) * r0); }
       g.closePath(); g.fillPath();
     };
     const draw = (a0, a1, col) => { // split at the left and right ends: the lower half (sin >= 0) is the front, the upper half the back

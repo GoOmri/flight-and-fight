@@ -936,3 +936,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-25 v1.9.112: sucked-in sparks are drawn over the witch (branch v1112-sparks-over-witch)
 - Omri: the sparks that fly into the witch must be above her (a "juicing up" look). While a spark is pulled it gets depth ship.depth + 0.2; when it is free again it goes back under her. Syntax checked, UNVERIFIED on a phone.
+
+## 2026-11-25 v1.9.113: the ring builds up as it fills (branch v1113-ring-builds-up)
+- Omri: more and longer-lived sparks as the circle fills, and the circle shakes near the end.
+- src/cats.js: spark rate x (1 + 2.5 * fill), spark life x (1 + 0.8 * fill), the cap on sparks grows up to double. The ring trembles from 60% fill, up to 1.6 px at 100%. Config cats: sparkFillMul, sparkFillLife, shakeFrom, shakePx.
+- Syntax checked. UNVERIFIED on a phone (is the build-up clear, is the shake too much).
