@@ -152,19 +152,19 @@ export class Cats {
 
   updateSaved(c, dt, ground) {
     c.t += dt; c.sy += ground;
-    const J = CC.jumpS, T = CC.leapS;
+    const J = CC.jumpS;
     for (const b of c.bits) { b.life -= dt; b.im.x += b.vx * dt; b.im.y += b.vy * dt; b.vy += 120 * dt; b.im.setAlpha(clamp(b.life / 0.5, 0, 1)); }
     for (const h of c.hearts) { const u = c.t - h.d; if (u < 0) continue; h.im.y -= 14 * dt; h.im.x = h.x0 + Math.sin(u * 6) * 2; h.im.setAlpha(clamp(Math.min(u * 6, 1.2 - u), 0, 1)); }
-    let x, y, sc = CC.scale;
+    let x, y;
     if (c.t < J) { // two happy jumps in place (the cat stays above its stone)
       x = c.x0; y = c.sy - c.top - Math.abs(Math.sin(Math.PI * 2 * c.t / J)) * CC.jumpPx;
-    } else { // a leap in an arc to the top left (the hut)
-      const u = clamp((c.t - J) / T, 0, 1), e = u * u * (3 - 2 * u), y0 = c.sy - c.top;
-      x = c.x0 + (CC.hut.x - c.x0) * e; y = y0 + (CC.hut.y - y0) * e - Math.sin(Math.PI * e) * CC.arcPx; sc = CC.scale * (1 - 0.6 * e);
-      c.cat.setFlipX(CC.hut.x < c.x0);
-      if (u >= 1) { this.finish(c); return; }
+    } else { // then it runs along the ground to the closest side edge and out of the screen
+      const dir = c.x0 < W / 2 ? -1 : 1, run = (c.t - J) * CC.runSpeed;
+      x = c.x0 + dir * run; y = c.sy - c.top;
+      c.cat.setFlipX(dir < 0); // the pictures face right
+      if (x < -30 || x > W + 30) { this.finish(c); return; }
     }
-    c.cat.setPosition(Math.round(x), Math.round(y)).setScale(sc);
+    c.cat.setPosition(Math.round(x), Math.round(y));
     c.stone.setPosition(Math.round(c.x0), Math.round(c.sy)); // the stone stays on the ground and scrolls away
   }
 

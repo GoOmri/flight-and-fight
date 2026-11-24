@@ -859,3 +859,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-24 v1.9.94: first cat at the start of the level (branch v1994-cat-at-start)
 - Omri could not wait half a level to test the cats: config cats.atWave [2, 5, 8] -> [0, 4, 8]: the first cat appears with the first enemies (about 2 s into the stage), the others at waves 5 and 9. A late start (tune ?wave= jump) keeps the cats from that wave on. Tested in the browser pane: the cat sits on its rock at the start. Change atWave back later if the first wave is too busy with a cat.
+
+## 2026-11-24 v1.9.95: smaller thicker ring, cats run to the closest edge, enemy glow fades at its edge (branch v1995-run-away)
+- Ring: radius 12 -> 9, thickness 4 -> 5 (config cats.ringRx / ringRy / ringW).
+- After a rescue the cat does its two happy jumps, then RUNS along the ground (110 px/s, config cats.runSpeed) to the closest side edge (left if it is on the left half, else right; the picture is flipped to face the way it runs) and leaves the screen. The leap to the top left is gone (hut config removed).
+- Enemy glow: the outer flat ring made a hard circle edge; it is gone (rings are now only at 0.7 and 0.45 of the radius), so the soft gradient fades to nothing at the edge.
+- Tested in the browser pane (stepping the code by hand: the cat runs left, flipped, and leaves; 8 fps machine). UNVERIFIED: the look of the run and the glow edge on a phone.

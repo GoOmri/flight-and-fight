@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.94", // bump on every push so the player/Omri can see the build
+  version: "1.9.95", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -90,8 +90,8 @@ export const CONFIG = {
   },
   // Cat rescue (src/cats.js). atWave = the (0-based) stage waves at whose start the 3 cats appear; ringR = rescue ring radius (game px), fillS = seconds to fill, drainMul = drain speed (x the fill speed),
   // hitLoss = share of the ring lost when she is hit inside, scale = picture scale (art pixel = 2 game px), footY = where the cat's feet are in its 50 px picture (0..1), ringDy = ring centre above the stone,
-  // meow*S = seconds between meows (empty ring / full ring), fxDx/fxDy = where the meow puff sits, jumpS/jumpPx = the two happy jumps, leapS/arcPx = the leap to the hut, hut = where the saved cat flies to.
-  cats: { atWave: [0, 4, 8], ringRx: 12, ringRy: 12, ringW: 4, ringHitR: 24, fillS: 2.0, drainMul: 0.5, hitLoss: 0.25, scale: 1.5, stoneScale: 1.2, footY: 0.62, footDrop: 1.5, depth: 3, meowSlowS: 4, meowFastS: 1.2, fxDx: 10, fxDy: -20, headDy: -22, jumpS: 0.9, jumpPx: 12, leapS: 0.8, arcPx: 50, hut: { x: 14, y: 34 } },
+  // meow*S = seconds between meows (empty ring / full ring), fxDx/fxDy = where the meow puff sits, jumpS/jumpPx = the two happy jumps, runSpeed = how fast the saved cat runs to the closest side edge.
+  cats: { atWave: [0, 4, 8], ringRx: 9, ringRy: 9, ringW: 5, ringHitR: 24, fillS: 2.0, drainMul: 0.5, hitLoss: 0.25, scale: 1.5, stoneScale: 1.2, footY: 0.62, footDrop: 1.5, depth: 3, meowSlowS: 4, meowFastS: 1.2, fxDx: 10, fxDy: -20, headDy: -22, jumpS: 0.9, jumpPx: 12, runSpeed: 110 }, // runSpeed = px/s of the run to the closest edge after a rescue
   lightbox: { x: 20, w: 200, rowGap: 30, iconBox: 22, textSize: 10, depth: 110, titleSize: 24 }, // the goals box in the menu (tap a stage): position, width, row spacing, icon size, text size
   pauseBtn: { x: 226, y: 32, size: 20, hit: 36, fill: 0x3b1478, border: 0xf2b632, ink: 0xfff3c4, btnW: 96, btnH: 30, gap: 14, textSize: 10 }, // PAUSE button (top right, under the hearts) and the pause screen buttons
   endMenuBtn: { w: 96, h: 30, bottom: 36, size: 10, color: 0x3b1478, border: 0xff5ac8 }, // MENU button on the end screen (bottom = its middle's distance from the bottom edge)
@@ -219,7 +219,7 @@ export const CONFIG = {
     haloTint: { weapon: 0x4f9bff, heart: 0xffc9e3 }, haloPx: 2, // outline thickness of a carrier in game px (4 shifted copies of its frame); weapon carriers are BLUE like the potion they carry
     // Soft aura behind every enemy (not bosses: an enemy type with noGlow: true has none): flat rings of one warm dark colour (rust-maroon, so it never reads as a red shot), alpha = strength,
     // sizeMul = how much bigger than the enemy, texels = radius of the glow picture. The carrier outline stays much stronger. on: false switches it off.
-    glow: { on: true, color: 0xff9a4a, alpha: 1, soft: 0.22, blend: 1, /* 1 = additive */ sizeMul: 0.75, texels: 12, depth: -0.5, poolSize: 40, rings: [{ r: 1, a: 0.06 }, { r: 0.75, a: 0.08 }, { r: 0.5, a: 0.10 }] } // v1.9.91: a warm light glow (additive), soft gradient + faint flat rings; soft = strength of the smooth part
+    glow: { on: true, color: 0xff9a4a, alpha: 1, soft: 0.22, blend: 1, /* 1 = additive */ sizeMul: 0.75, texels: 12, depth: -0.5, poolSize: 40, rings: [{ r: 0.7, a: 0.06 }, { r: 0.45, a: 0.08 }] } // v1.9.91: a warm light glow (additive), soft gradient + faint flat rings; soft = strength of the smooth part
   },
 
   // Animated pictures for coins, hearts, chests and the death puff (strips cut from the packs, see CREDITS.md). Every entry is optional:
