@@ -2,7 +2,7 @@
 // No Phaser in here. States: 'pending' (not decided yet), 'earned', 'failed'.
 // The STARS of a stage (the file keeps its old name). Each goal gives one star. Order = HUD order. 'cats' is for stages that have cats (none yet).
 export const MEDAL_KEYS = ['cats', 'allCoins', 'killAll', 'noHit'];
-const GOALS = { forest: ['allCoins', 'killAll', 'noHit'], swamp: ['allCoins', 'killAll', 'noHit'] }; // which goals a stage has (add 'cats' here when its cats exist)
+const GOALS = { forest: ['cats', 'allCoins', 'killAll', 'noHit'], swamp: ['cats', 'allCoins', 'killAll', 'noHit'] }; // which goals a stage has (cats: 3 per stage since v1.9.90)
 export const goalsOf = theme => GOALS[theme] || GOALS.forest;
 // Save key per stage. The forest keeps the old key so earlier saved medals are not lost.
 const SAVE_KEYS = { forest: 'ff_medals_stage1', swamp: 'ff_medals_swamp' };
@@ -25,8 +25,9 @@ export class Medals {
   catLost() { this.fail('cats'); }        // (for the cats later)
 
   // End of the stage (STAGE CLEAR): everything still pending is decided.
-  finish(kills) {
+  finish(kills, catsOk = true) {
     const s = this.state;
+    if (s.cats === 'pending') s.cats = catsOk ? 'earned' : 'failed';
     if (s.killAll === 'pending') s.killAll = kills >= this.total ? 'earned' : 'failed';
     for (const k of Object.keys(s)) if (s[k] === 'pending') s[k] = 'earned';
   }

@@ -208,7 +208,7 @@ function makeStarIcons(scene) {
 }
 
 // GOAL icons (what the player does): the menu cat = all cats, the game's coin = all coins, a skull (BTL pack) = defeat every enemy, the game's heart = no hit. Textures goal_<key>_<open|earned|failed>:
-// open = white silhouette, earned = full colour, failed = grey (no cross). Cut from pictures the game already loads (coin and heart sheets) and the hat (assets/ui/goal-hat.png),
+// open = near white (keeps the details), earned = full colour, failed = grey (no cross). Cut from pictures the game already loads (coin and heart sheets) and the hat (assets/ui/goal-hat.png),
 // trimmed to the visible pixels. The black cat's colours are swapped to purples (a colour swap only).
 // goalScale(scene, key, box) = the scale that fits a goal icon into a box x box px square (so coin, skull and heart look equally big).
 export const goalScale = (scene, key, box) => { const k = 'goal_' + key + '_open', f = scene.textures.exists(k) ? scene.textures.get(k).get() : null; return f && typeof f.width === 'number' && f.width > 0 ? box / Math.max(f.width, f.height) : 1; };
@@ -250,7 +250,7 @@ export function makeGoalIcons(scene) {
       for (let i = 0; i < px.length; i += 4) {
         let r = px[i], g = px[i + 1], b = px[i + 2], a = px[i + 3];
         if (src[key].recolor) { const l = Math.min(1, (r * 0.3 + g * 0.59 + b * 0.11) / 90); r = 0x3b + (0xc8 - 0x3b) * l; g = 0x14 + (0x9c - 0x14) * l; b = 0x78 + (0xff - 0x78) * l; }
-        if (st === 'open') { r = g = b = 255; }
+        if (st === 'open') { const v = 175 + 80 * ((r * 0.3 + g * 0.59 + b * 0.11) / 255); r = g = b = v; } // open = light grey-white that keeps the picture's details (a flat white blob hid them)
         else if (st === 'failed') { const v = (r * 0.3 + g * 0.59 + b * 0.11) * 0.55; r = g = b = v; a *= 0.8; }
         o[i] = r; o[i + 1] = g; o[i + 2] = b; o[i + 3] = a;
       }

@@ -2,6 +2,7 @@ import { CONFIG as C, z, hex, snap4 } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale, PX } from '../sprites.js';
 import { STAGE1 } from '../waves.js';
 import { WaveRunner, initPath, followPath } from '../waves-runner.js';
+import { Cats, loadCatArt } from '../cats.js';
 import { Hud, FONT, FONT_TITLE, titleCase, fpx, drawPlate } from '../hud.js';
 import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
@@ -42,6 +43,7 @@ export class PlayScene extends Phaser.Scene {
     const SP = C.enemies.sprites; // animated enemy sheets (assets/enemies); types without an entry keep the code-drawn picture
     for (const t in SP) this.load.spritesheet('en_' + t, 'assets/enemies/' + SP[t].file, { frameWidth: SP[t].frameW, frameHeight: SP[t].frameH });
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
+    loadCatArt(this, C.version); // the cats (assets/cats)
     loadGoalArt(this, C.version); // goal icons and the star (the menu loads them too)
     if (!this.textures.exists('ui_med-button')) this.load.image('ui_med-button', 'assets/ui/ui-med-button.png?v=' + C.version); // the menu's button (a stage started from the menu has it already)
     const K = C.sprites; // coin / heart / chest / puff strips (assets/pickups, assets/fx); a thing without an entry keeps its code-drawn picture
@@ -111,7 +113,8 @@ export class PlayScene extends Phaser.Scene {
     this.startWaveN = startWave; this.tainted = false; // runs that cheat (god mode, a jump to a later wave, a chosen weapon level, changed difficulty rows) are not saved; a plain run with the tune panel only open IS saved
     this.weaponLevel = C.testing.level >= 0 ? Math.min(C.pickup.maxLevel, C.testing.level) : Math.min(C.pickup.maxLevel, startWave); // wave=N starts with weapon level N-1 so later waves can be tried fairly
     this.runner = new WaveRunner(STAGE1, startWave, C.stage.firstWaveDelay);
-    this.hooks = { enemy: (cg, i) => this.spawnEnemy(cg, i), crate: cc => this.spawnCrate(cc) };
+    this.hooks = { enemy: (cg, i) => { if (this.cats) this.cats.onWave(cg.w); this.spawnEnemy(cg, i); }, // a cat appears when the first enemy of its wave spawns
+       crate: cc => this.spawnCrate(cc) };
     this.enemyCount = 0;  // enemies alive now
     this.clearAt = 0;     // time when STAGE CLEAR shows (0 = not yet)
     // Counters for the medals later (shown only on the result screen for now)
@@ -122,11 +125,12 @@ export class PlayScene extends Phaser.Scene {
     this.makePools();
     this.makeShip();
     const waveTotals = STAGE1.map(w => w.groups.reduce((n, g) => n + g.n, 0));
-    this.goalKeys = goalsOf(this.stageTheme); // the goals (stars) of this stage
+    this.goalKeys = goalsOf(this.stageTheme).filter(k => k !== 'cats' || C.cats.atWave.some(w => w > startWave)); // the goals (stars) of this stage (a run that starts late, by the tune jump, has no cats)
     this.medals = new Medals(waveTotals.slice(startWave).reduce((a, b) => a + b, 0), this.goalKeys);
     makeGoalIcons(this); // goal pictures (after the coin and heart sheets are loaded)
     this.hud = new Hud(this, waveTotals, startWave);
     this.hud.setLevel(this.weaponLevel);
+    this.cats = new Cats(this, startWave); // 3 cats to rescue (src/cats.js)
 
     // Input: relative drag. The ship moves by the same amount as the finger (or held mouse) moves.
     // Touching somewhere else does not move the ship. Only one pointer steers; others are ignored.
@@ -888,11 +892,12 @@ export class PlayScene extends Phaser.Scene {
     this.updateShipFeel(dt);
     this.autoFire(time);
     this.runner.update(dt, this.enemyCount, this.hooks);
+    this.cats.update(dt);
     this.updateEnemies(time, dt);
     this.updateCrates(time, dt);
     this.updateCoins(dt);
     this.cullOffscreen(time);
-    if (!this.clearAt && this.runner.finished && this.enemyCount === 0 && this.crates.countActive(true) === 0 && this.coins.countActive(true) === 0 && this.weaponUps.countActive(true) === 0 && this.heartUps.countActive(true) === 0) this.clearAt = time + C.stage.endDelayMs;
+    if (!this.clearAt && this.runner.finished && this.cats.idle() && this.enemyCount === 0 && this.crates.countActive(true) === 0 && this.coins.countActive(true) === 0 && this.weaponUps.countActive(true) === 0 && this.heartUps.countActive(true) === 0) this.clearAt = time + C.stage.endDelayMs;
     if (this.clearAt && time >= this.clearAt) { this.stageClear(); return; }
     this.updateFx(dt);
 
@@ -1407,9 +1412,14 @@ export class PlayScene extends Phaser.Scene {
   }
 
   // returns true only if a heart was really lost
+  // a cat was saved / lost (called by src/cats.js)
+  onCatSaved(n, total) { if (n >= total && this.medals.state.cats === 'pending') this.medals.state.cats = 'earned'; this.syncMedals(); }
+  onCatLost() { this.medals.catLost(); this.syncMedals(); }
+
   hurtPlayer() {
     if (this.over || this.time.now < this.invulnUntil) return false;
     this.hitsTaken++;
+    this.cats.hurt(); // a hit while hovering over a cat costs its ring a part
     this.medals.playerHit(); this.syncMedals();
     if (!this.god && !(C.testing.god > 0)) { this.hearts--; this.hud.setHearts(this.hearts); }
     this.invulnUntil = this.time.now + C.ship.invulnMs;
@@ -1522,7 +1532,7 @@ export class PlayScene extends Phaser.Scene {
 
   stageClear() {
     this.vx = this.vy = 0;
-    this.medals.finish(this.enemiesKilled);
+    this.medals.finish(this.enemiesKilled, this.cats.allSaved());
     this.syncMedals();
     const cheat = this.cheated();
     const isNew = cheat ? null : saveMedals(this.medals.state, this.stageTheme); // cheating runs are not saved

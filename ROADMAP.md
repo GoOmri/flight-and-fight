@@ -1,11 +1,11 @@
 # Flight and Fight: roadmap
 
-Kept short on purpose. Per-version history is in NOTES.md, the look rules are in DESIGN.md (section CURRENT LOOK). Last updated 24 Nov 2026 (v1.9.89).
+Kept short on purpose. Per-version history is in NOTES.md, the look rules are in DESIGN.md (section CURRENT LOOK). Last updated 24 Nov 2026 (v1.9.90).
 
 ## Next up (order agreed with Omri, 24 Nov 2026)
 1. **Stars part 1:** DONE in v1.9.81 (look unverified).
 2. **Stars part 2:** DONE in v1.9.81 (unlock 2, 5, 8, 11).
-3. **Cats:** rescue cats, plus a cat star (spec in DESIGN.md section 5, "Cat rescue"). A big mechanic, so right after stars.
+3. **Cats: version 1 DONE in v1.9.90 (both stages, 3 cats, rescue, star). Check on the phone; later: cats living in the hut, swamp spots.**
 4. **DungeonFont for big titles:** DONE in v1.9.88 (look unverified).
 5. **Boss:** one per stage. Art candidates in art-packs/characters-and-enemies: wizard-summoner-unknown, floating-skull (zip), mud-enemy-unknown. Bosses get NO enemy glow (noGlow: true).
 6. **Power-up bar at the top:** blue pixel-art pills (weapon level, 10 levels), src/hud.js.
@@ -14,6 +14,14 @@ Kept short on purpose. Per-version history is in NOTES.md, the look rules are in
 
 ## Fix soon
 - **Enemy aura looks like a dark SHADOW, not a glow** (Omri, 24 Nov, v1.9.80). The aura is a rust-maroon ring set (config enemies.glow). Change it to a real soft glow (lighter, warm, maybe additive) or remove it. Keep bosses without it.
+
+## Cats: DECIDED with Omri (24 Nov 2026, nothing built yet)
+- Spec: DESIGN.md section 5 "Cat rescue". Rescue = HOVER IN A RING until it fills (about 2 s, drains slowly when she leaves, a hit inside takes 25% off the ring). No new button.
+- 3 cats in EVERY stage (Forest and Swamp). Star "ALL CATS" = save all 3 (add 'cats' to GOALS in src/medals.js; the tile row, the goals box and the end screen need room for 4 stars). A cat that scrolls off the bottom is lost for the run (medals.catLost()).
+- A hit is a hit: the no-hit star is not changed by cats. Max about 6 enemies alive while a cat is in the hover zone.
+- CAT ART (decided): Pet Cats Pack (art-packs/characters-and-enemies/pet-cats, CC0, 6 colours Cat-1..Cat-6: Siamese, black, ginger, grey tabby, fluffy white, sphynx; 50x50 frames, the cat is about 16 px wide, faces right, flip for left). Same strips for every colour: Idle 10 frames, Meow 4 (+ Meow-VFX 48x16 = 3 frames), Laying 8, Stretching 13, Itch 2, Licking 5+5, Run 8 (leaps), Sitting / Sleeping1 / Sleeping2 1 frame each. No walk cycle. Each stage uses 3 random colours out of the 6.
+- CAT STATES (decided): WAITING = Sitting (worried) with a Meow + puff every few seconds, faster as the ring fills (one variant only). RESCUE = two happy jumps with the Run frames, sparkles and a small heart, then a leap in an arc to the top left and gone. Stretching is not used.
+- To decide when building: where the cats sit (the forest has big rocks, config bigRockCount; the swamp needs a spot), the ring look (DESIGN.md "Ring look"), the cat goal icon top left (turns to colour per cat) and what the saved cats do (live in the hut later).
 
 ## Smaller open items
 - Sound (none yet) and vibration (short buzz on hit and pickup).

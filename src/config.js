@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.89", // bump on every push so the player/Omri can see the build
+  version: "1.9.90", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -65,7 +65,7 @@ export const CONFIG = {
       { theme: 'stage3', name: 'STAGE 3', side: 'L', locked: true, need: 5 },
       { theme: 'stage4', name: 'STAGE 4', side: 'R', locked: true, need: 8 },
       { theme: 'stage5', name: 'STAGE 5', side: 'L', locked: true, need: 11 }] },
-    bubble: { picAlpha: 0.85, picTint: 0xece4ff, lockedTint: 0x9a9a9a, ink: 0xfff3c4, bestInk: 0xf2b632, lockedInk: 0x8a80a8, inset: 0x1a0830, nameSize: 10, medalScale: 0.9, medalGap: 8, bestSize: 8 }, // text and medal sizes inside a stage bubble
+    bubble: { picAlpha: 0.85, picTint: 0xece4ff, lockedTint: 0x9a9a9a, ink: 0xfff3c4, bestInk: 0xf2b632, lockedInk: 0x8a80a8, inset: 0x1a0830, nameSize: 10, medalScale: 0.9, medalGap: 3, bestSize: 8 }, // text and medal sizes inside a stage bubble
     lockedFill: 0x241c3a, lockedBorder: 0x6b5a90, lockedText: 0x9a90b8, // a locked stage bubble
     gear: { x: 215, y: 24, hit: 32, scale: 1, art: 12, px: 2, color: 0x38b6f5, shade: 0x1c6fb5 }, // settings gear: the medallion picture at scale (the art / px / colour numbers are only for the code-drawn fallback cog)
     settings: { x: 20, y: 84, w: 200, h: 262, btnW: 60, btnSize: 10, titleSize: 16, ink: 0x3b2410, hintInk: 0x7a5a3a, depth: 100 }, // settings panel (parchment): position, size, button width, text sizes, ink colours
@@ -88,6 +88,10 @@ export const CONFIG = {
       { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 204, y: 422, originX: 0.5, originY: 1,   scale: 2, depth: 50, bob: 0, bobMs: 1000, par: 6 }
     ]
   },
+  // Cat rescue (src/cats.js). atWave = the (0-based) stage waves at whose start the 3 cats appear; ringR = rescue ring radius (game px), fillS = seconds to fill, drainMul = drain speed (x the fill speed),
+  // hitLoss = share of the ring lost when she is hit inside, scale = picture scale (art pixel = 2 game px), footY = where the cat's feet are in its 50 px picture (0..1), ringDy = ring centre above the stone,
+  // meow*S = seconds between meows (empty ring / full ring), fxDx/fxDy = where the meow puff sits, jumpS/jumpPx = the two happy jumps, leapS/arcPx = the leap to the hut, hut = where the saved cat flies to.
+  cats: { atWave: [2, 5, 8], ringR: 30, fillS: 2.0, drainMul: 0.5, hitLoss: 0.25, scale: 2, footY: 0.62, ringDy: 14, depth: 3, meowSlowS: 4, meowFastS: 1.2, fxDx: 16, fxDy: -34, jumpS: 0.9, jumpPx: 16, leapS: 0.8, arcPx: 50, hut: { x: 14, y: 34 } },
   lightbox: { x: 20, w: 200, rowGap: 30, iconBox: 22, textSize: 10, depth: 110, titleSize: 24 }, // the goals box in the menu (tap a stage): position, width, row spacing, icon size, text size
   pauseBtn: { x: 226, y: 32, size: 20, hit: 36, fill: 0x3b1478, border: 0xf2b632, ink: 0xfff3c4, btnW: 96, btnH: 30, gap: 14, textSize: 10 }, // PAUSE button (top right, under the hearts) and the pause screen buttons
   endMenuBtn: { w: 96, h: 30, bottom: 36, size: 10, color: 0x3b1478, border: 0xff5ac8 }, // MENU button on the end screen (bottom = its middle's distance from the bottom edge)
