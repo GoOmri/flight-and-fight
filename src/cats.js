@@ -16,6 +16,7 @@ export function loadCatArt(scene, v) {
       L.spritesheet('cat' + n + '_run', 'assets/cats/cat-' + n + '-run.png?v=' + v, { frameWidth: 50, frameHeight: 50 });
     }
   }
+  if (!T.exists('star_spin')) L.spritesheet('star_spin', 'assets/pickups/star-lit.png?v=' + v, { frameWidth: 32, frameHeight: 45 }); // the gallery's spinning power-star: first row = 24 idle frames
   if (!T.exists('cat_meowfx')) L.spritesheet('cat_meowfx', 'assets/cats/meow-vfx.png?v=' + v, { frameWidth: 16, frameHeight: 16 });
 }
 
@@ -58,6 +59,7 @@ export class Cats {
         s.anims.create({ key: 'cat' + n + '_run', frames: s.anims.generateFrameNumbers('cat' + n + '_run', { start: 0, end: 7 }), frameRate: 16, repeat: -1 });
       }
     }
+    if (!s.anims.exists('star_spin')) s.anims.create({ key: 'star_spin', frames: s.anims.generateFrameNumbers('star_spin', { start: 0, end: 23 }), frameRate: 24, repeat: -1 });
     if (!s.anims.exists('cat_meowfx')) s.anims.create({ key: 'cat_meowfx', frames: s.anims.generateFrameNumbers('cat_meowfx', { start: 0, end: 2 }), frameRate: 8, repeat: 0 });
     if (!s.textures.exists('cat_glow')) { // a smooth round light, used additively behind every cat so it stands out from the ground
       const cv = s.textures.createCanvas('cat_glow', 64, 64), cx = cv.getContext(), g = cx.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -196,7 +198,7 @@ export class Cats {
     c.ring.clear(); c.ringBack.clear(); c.fx.setVisible(false);
     c.cat.anims.stop(); c.cat.play('cat' + c.id + '_run');
     for (let i = 0; i < 5; i++) { // a few big gold stars shoot off like fireworks, each to a random place, slow down and fade
-      const a = Math.random() * Math.PI * 2, v = 90 + Math.random() * 90, im = s.add.image(c.x, c.y - c.top - 10, 'star_earned').setScale(0.9 + Math.random() * 0.3).setDepth(CC.depth + 0.5);
+      const a = Math.random() * Math.PI * 2, v = 90 + Math.random() * 90, im = s.add.sprite(c.x, c.y - c.top - 10, 'star_spin').setScale(0.8 + Math.random() * 0.3).setDepth(CC.depth + 0.5); im.play({ key: 'star_spin', startFrame: Math.floor(Math.random() * 24) }); // the spinning power-star, each at its own point of the spin
       c.bits.push({ im, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 25, life: 1 + Math.random() * 0.4 });
     }
     for (let i = 0; i < 2; i++) { // small thank-you hearts float out of the cat's head
@@ -210,7 +212,7 @@ export class Cats {
   updateSaved(c, dt, ground) {
     c.t += dt; c.sy += ground;
     const J = CC.jumpS;
-    for (const b of c.bits) { b.life -= dt; b.im.x += b.vx * dt; b.im.y += b.vy * dt + ground; const f = Math.max(0, 1 - 3.2 * dt); b.vx *= f; b.vy = b.vy * f + 30 * dt; b.im.setAlpha(clamp(b.life / 0.5, 0, 1)); b.im.angle += 120 * dt; } // fireworks: fast at first, slowing down, a little fall, spinning
+    for (const b of c.bits) { b.life -= dt; b.im.x += b.vx * dt; b.im.y += b.vy * dt + ground; const f = Math.max(0, 1 - 3.2 * dt); b.vx *= f; b.vy = b.vy * f + 30 * dt; b.im.setAlpha(clamp(b.life / 0.5, 0, 1)); } // fireworks: fast at first, slowing down, a little fall
     for (const h of c.hearts) { const u = c.t - h.d; if (u < 0) continue; h.im.y -= 14 * dt; h.im.x = h.x0 + Math.sin(u * 6) * 2; h.im.setAlpha(clamp(Math.min(u * 6, 1.2 - u), 0, 1)); }
     let x, y;
     if (c.t < J) { // two happy jumps in place (the cat stays above its stone)
