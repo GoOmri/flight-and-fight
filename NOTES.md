@@ -910,3 +910,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Depths (above the tint 33): config ship.depth 33.7 (the witch, her muzzle flash +0.1, stun stars +0.2, her broom trail -0.1), bullet.depth 33.2 (her shots), enemies 33.5, cats 33.6, heart pickup animation 33.95, pickups 34, enemy shots 35. Set ship.depth back to 10 (and the others to 0..) to put things under the tint again.
 - Sparks: scale 1..2.2 -> 0.45..1.05 (about 1 to 2 game px), rate 5 -> 2.5 per second idle and 16 -> 7 while she hovers, most at once 60 -> 30, rise a little slower; each new spark starts 2.4 rad (golden angle) after the last on the ring, so they spread evenly around it instead of clumping.
 - Tested in the browser pane: the witch, bats and her shots are bright above the tint; a few small sparks around the rings. UNVERIFIED on the phone: sparks subtle enough but visible, and the witch's colours against the purple ground.
+
+## 2026-11-25 v1.9.107: ring sparks get sucked into the witch (branch v1107-sparks-suck)
+- Omri: when the witch hovers over the cat, the sparks should vacuum into her.
+- src/cats.js updateSparks: every spark remembers its cat. While that cat is in the 'hover' state the spark flies to the witch, faster and faster (50 + 420 px/s per second), full brightness, and vanishes when it reaches her. When she leaves, the remaining sparks rise again as before.
+- Syntax checked, tests 389 passed. NOT looked at on a phone (UNVERIFIED): speed and how many sparks reach her.
