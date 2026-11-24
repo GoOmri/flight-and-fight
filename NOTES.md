@@ -968,3 +968,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-25 v1.9.119: sparks pop out at every angle (branch v1119-angles)
 - Omri: the sparks only flew straight up. Each pulled spark now pops out at its own random angle (0 to 360 degrees), braking, then dives into the witch. Checked in the browser pane: 38 sparks around the cat with angles from -159 to 174 degrees. Look on a phone UNVERIFIED.
+
+## 2026-11-25 v1.9.120: sparks are born all around the witch and sucked in (branch v1120-sparks-from-all-sides)
+- Omri's screenshot showed sparks only flying up. In my own test with the witch really over the cat (mouse control, ctl=mouse, scroll stopped) the v1.9.119 sparks already went in all directions, so his phone may have had an OLD cached build (check the version number at the top left). But the pop-out and the dive were short (the witch sits on the ring), so it still did not read as a vacuum.
+- Now while she hovers 70% of the new sparks (farShare) are born 32 to 74 px away from the witch at a random angle, tremble outward a little, then dive in with the sharp ease-in. Tested: 11 sparks around her at relative positions all over (-65..49, -56..55).
+- How to test hovering in the browser pane: ?ctl=mouse, start Play, stop scroll (scene.bgF.scroll = 0), hover the mouse over the cat (game px x 1.4 + offset).
