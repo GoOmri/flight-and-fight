@@ -837,3 +837,11 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Goal icons: "open" is now near white but keeps the picture's details (a flat white blob hid the coin, skull and heart).
 - TESTED in the real game (browser pane works again): cat spawns and sits on its stone, the ring fills and changes colour, SAVED plays and the cat arrives at the top left, no console errors, tile and box show 4 stars. The machine ran at 8 fps, so timing and feel are UNVERIFIED. UNVERIFIED: the meow puff position (cats.fxDx / fxDy), how often cats are in a calm moment (a cat can appear while enemies are near), the hut position, the look of the ring on a phone.
 - Phone check: play the Forest: after wave 3 a cat sits on a stone; fly over it (the ring fills); it jumps and leaps to the top left; losing a cat turns the cat icon grey; the 4th star shows on the tile.
+
+## 2026-11-24 v1.9.91: cat tweaks and a real glow behind enemies (branch v1991-cat-tweaks)
+- Omri's screenshot: the cat stood on my grey drawn stone, was too big, the ring was huge, the thank-you heart was big, and the enemy aura looked like a shadow.
+- The cat now sits on one of the game's own small rocks (kit.rock(), the same pictures as the background; the stone drawn in code stays only as a fallback). Cat scale 2 -> 1.5.
+- The ring is now a thick flat ellipse (rx 14, ry 6, 4 px thick) around the cat's feet, drawn in FRONT of its lower half. The witch counts as inside within 24 px of the cat's body (config cats.ringHitR), so it is not harder to fill than before.
+- After a rescue two small hearts (9 px) float up out of the cat's head, one after the other, and fade. The star burst is smaller.
+- Enemy aura: now a warm LIGHT glow (amber 0xff9a4a, additive blend, a smooth soft gradient plus the faint flat rings: both effects mixed) instead of the dark maroon rings (config enemies.glow: color, soft, blend, sizeMul). No more shadow look. UNVERIFIED on the phone: strength and colour (stacked bats make a bright streak; lower glow.soft if too bright).
+- Tested in the browser pane here (8 fps): cat on the rock, the ring in front, glow behind bats. UNVERIFIED: the hearts' look (not captured), the cat's size on the phone.

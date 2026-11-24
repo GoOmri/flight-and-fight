@@ -281,6 +281,7 @@ export class PlayScene extends Phaser.Scene {
       s.setTexture(e.key, e.frame); s.treeName = e.sway || null; s.animN = e.n || 0;
       if (s.swayPh === undefined) s.swayPh = Math.random() * 8;
     };
+    this.rockKit = kit; // the cats sit on the same rocks as the background
     this.makeBackgroundLayers(F, kit, use, sized, range, pick);
   }
 
@@ -998,7 +999,7 @@ export class PlayScene extends Phaser.Scene {
     const GL = C.enemies.glow;
     if (GL.on && !cfg.noGlow) { // soft aura behind the enemy; the carrier outline stays stronger
       e.glow = this.glows.get(e.x, e.y, 'enemyGlow');
-      if (e.glow) e.glow.setTexture('enemyGlow').setActive(true).setVisible(true).setDepth(GL.depth).setAlpha(GL.alpha).setScale(Math.max(e.displayWidth, e.displayHeight) * GL.sizeMul / (GL.texels * 2));
+      if (e.glow) e.glow.setTexture('enemyGlow').setActive(true).setVisible(true).setBlendMode(GL.blend).setDepth(GL.depth).setAlpha(GL.alpha).setScale(Math.max(e.displayWidth, e.displayHeight) * GL.sizeMul / (GL.texels * 2));
     }
     if (e.drop) {
       const key = 'ring_' + g.type + '_' + e.drop;
@@ -1100,6 +1101,10 @@ export class PlayScene extends Phaser.Scene {
     const GL = C.enemies.glow; // soft aura behind enemies: flat rings (like the lantern glow) of one warm dark colour, made once
     if (GL.on && !this.textures.exists('enemyGlow')) {
       const n = GL.texels * 2 + 1, cv = this.textures.createCanvas('enemyGlow', n, n), cx = cv.getContext();
+      const rgb = [(GL.color >> 16) & 255, (GL.color >> 8) & 255, GL.color & 255].join(',');
+      const grad = cx.createRadialGradient(GL.texels, GL.texels, 0, GL.texels, GL.texels, GL.texels); // a smooth soft glow (the lantern style rings are added on top: both effects mixed)
+      grad.addColorStop(0, 'rgba(' + rgb + ',' + GL.soft + ')'); grad.addColorStop(0.5, 'rgba(' + rgb + ',' + GL.soft * 0.4 + ')'); grad.addColorStop(1, 'rgba(' + rgb + ',0)');
+      cx.fillStyle = grad; cx.fillRect(0, 0, n, n);
       for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
         const d = Math.hypot(x - GL.texels, y - GL.texels), ring = GL.rings.find(r => d <= r.r * GL.texels);
         if (ring) { cx.fillStyle = hex(GL.color); cx.globalAlpha = ring.a; cx.fillRect(x, y, 1, 1); }
