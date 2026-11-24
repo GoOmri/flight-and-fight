@@ -138,12 +138,15 @@ export class Cats {
     for (let i = this.parts.length - 1; i >= 0; i--) {
       const p = this.parts[i]; p.life -= dt;
       if (p.life <= 0) { p.im.destroy(); this.parts.splice(i, 1); continue; }
-      if (p.c.state === 'hover' && !s.over) { // she hovers over the cat: the sparks get sucked into the witch, faster and faster
+      if (p.c.state === 'hover' && !s.over) { // she hovers over the cat: each spark first shoots up (fast, braking), then dives into the witch with a very sharp ease-in
         p.pull = (p.pull || 0) + dt;
-        const dx = s.ship.x - p.im.x, dy = s.ship.y - p.im.y, d = Math.hypot(dx, dy), step = (50 + 420 * p.pull) * dt;
-        if (d <= step + 3) { p.im.destroy(); this.parts.splice(i, 1); continue; }
+        const U = CC.suckUpS, u = p.pull;
+        p.life = Math.max(p.life, 0.3); // a pulled spark lives until it arrives
+        if (u < U) { const k = 1 - u / U; p.im.y -= CC.suckUp * k * k * dt + 0; p.im.x += Math.sin(p.ph) * 4 * dt; p.im.setAlpha(1).setScale(1.1); continue; }
+        const w = u - U, dx = s.ship.x - p.im.x, dy = s.ship.y - p.im.y, d = Math.hypot(dx, dy), step = (20 + CC.suckSharp * w * w) * dt;
+        if (d <= step + 4) { p.im.destroy(); this.parts.splice(i, 1); continue; }
         p.im.x += dx / d * step; p.im.y += dy / d * step;
-        p.im.setAlpha(1).setScale(Math.min(1.05, 0.35 + d / 60));
+        p.im.setAlpha(1).setScale(Math.min(1.1, 0.4 + d / 50));
         continue;
       }
       p.pull = 0;

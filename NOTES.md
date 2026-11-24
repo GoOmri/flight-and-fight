@@ -921,3 +921,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Enemy glow: the glow picture is now white and each enemy tints it with its main colour (PlayScene.enemyGlowColor: average of the solid pixels, strong colours count most, stretched to full brightness, cached per picture). An enemy type can force a colour with glowColor in its config.
 - Muzzle flash: PlayScene finds the top row of the witch art once and keeps the flash 3 px below it (muzzleDy, never more than config ship.muzzleY). With the current witch it is 19.5 px above her centre.
 - Tested in the browser pane: grunt glow is pink-violet, muzzleDy 19.5. NOT looked at on a phone (UNVERIFIED): other enemy glow colours, star size and spread.
+
+## 2026-11-25 v1.9.109: sparks shoot up, then dive into the witch (branch v1109-spark-suck-anim)
+- Omri could not see the v1.9.107 suck. Now each spark has its own animation: it shoots up about 19 px (fast, braking, 0.22 s), then dives into the witch with a very sharp ease-in (speed 20 + 2200 * t squared). More sparks while she hovers (12 per second). Config cats: suckUpS, suckUp, suckSharp, sparkRateHover.
+- NOT verified: the browser pane could not hold the witch over a cat (the controls move her back), so the new motion was only syntax-checked and read through. UNVERIFIED on screen and on a phone.
