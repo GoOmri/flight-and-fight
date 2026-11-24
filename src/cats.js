@@ -20,7 +20,9 @@ export function loadCatArt(scene, v) {
 }
 
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
-const ringColor = f => (f < 0.25 ? 0x8a5560 : f < 0.5 ? 0xff7ac8 : f < 0.75 ? 0xa8ff9d : 0x3dff7a); // dull red-brown, pink, light green, bright green (no gold, no bright red)
+// The fill colour swaps through the same colours as the witch's trail particles (pink, lilac, blue, mint, violet, white), blending smoothly from one to the next.
+const mix = (a, b, t) => { const ch = s => Math.round(((a >> s) & 255) * (1 - t) + ((b >> s) & 255) * t); return (ch(16) << 16) | (ch(8) << 8) | ch(0); };
+const ringColor = clock => { const P = CC.ringColors, x = clock * CC.ringColorSpeed, i = Math.floor(x) % P.length; return mix(P[i], P[(i + 1) % P.length], x - Math.floor(x)); };
 
 export class Cats {
   constructor(scene, startWave) {
@@ -28,7 +30,7 @@ export class Cats {
     this.list = [];
     this.waves = CC.atWave.filter(w => w >= startWave); // the (0-based) stage waves at whose first enemy a cat appears
     this.total = this.waves.length;
-    this.spawned = 0; this.saved = 0; this.lost = 0;
+    this.spawned = 0; this.saved = 0; this.lost = 0; this.clock = 0;
     this.colors = CAT_COLORS.slice().sort(() => Math.random() - 0.5); // 3 random colours per stage
     this.makeArt();
   }
@@ -84,6 +86,7 @@ export class Cats {
   }
 
   update(dt) {
+    this.clock += dt;
     const s = this.s, ground = s.bgF.scroll * s.cloudMul * dt;
     for (const c of this.list) {
       if (c.state === 'gone') continue;
@@ -97,7 +100,7 @@ export class Cats {
       c.meowT -= dt; // the cat calls for help, more often as the ring fills
       if (c.meowT <= 0) { this.meow(c); c.meowT = CC.meowSlowS + (CC.meowFastS - CC.meowSlowS) * c.fill + Math.random() * 0.8; }
       c.stone.setPosition(Math.round(c.x), Math.round(c.y));
-      c.cat.setPosition(Math.round(c.x), Math.round(c.y - c.top));
+      c.cat.setPosition(Math.round(c.x) + CC.catDx, Math.round(c.y - c.top) + CC.catDy); // the cat sits a little left and lower than the ring's middle (looks centred)
       this.drawRing(c, cy);
       if (c.fill >= 1) { this.save(c); continue; }
       if (c.y > H + 40) this.lose(c);
@@ -130,7 +133,7 @@ export class Cats {
       }
     };
     stroke(0, Math.PI * 2, CC.ringW, 0x1a0830, 0.45); // the empty ring: one plain dark band (no outline, no lines)
-    if (c.fill > 0.005) stroke(-Math.PI / 2, -Math.PI / 2 + c.fill * Math.PI * 2, CC.ringW, ringColor(c.fill), 1); // the fill: one smooth arc, clockwise from the top
+    if (c.fill > 0.005) stroke(-Math.PI / 2, -Math.PI / 2 + c.fill * Math.PI * 2, CC.ringW, ringColor(this.clock), 1); // the fill: one smooth arc, clockwise from the top
   }
 
   save(c) {
@@ -164,7 +167,7 @@ export class Cats {
       c.cat.setFlipX(dir < 0); // the pictures face right
       if (x < -30 || x > W + 30) { this.finish(c); return; }
     }
-    c.cat.setPosition(Math.round(x), Math.round(y));
+    c.cat.setPosition(Math.round(x) + CC.catDx, Math.round(y) + CC.catDy);
     c.stone.setPosition(Math.round(c.x0), Math.round(c.sy)); // the stone stays on the ground and scrolls away
   }
 

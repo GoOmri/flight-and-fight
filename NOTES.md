@@ -870,3 +870,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri: use regular (smooth) glows for objects, not pixel art. The enemy glow had two flat pixel rings and a small picture stretched with hard pixels. Now: no flat rings, a bigger picture (texels 12 -> 32) with a smooth gradient, scaled with LINEAR filtering. Strength soft 0.22 -> 0.32 (the smooth glow is fainter at the same value). Cat ring stays a smooth vector circle (unchanged).
 - Coin / heart / potion shine are still pixel-art rings (not changed; Omri only said "objects": ask if those should be smooth too).
 - Tested in the browser pane: a soft warm glow around the bats with no visible edge. UNVERIFIED on the phone: strength.
+
+## 2026-11-24 v1.9.97: cat centred in the ring, colourful ring (branch v1997-ring-colours)
+- Omri (screenshot): the cat did not look centred in the ring. The cat is now drawn 2 px left and 1 px lower (config cats.catDx -2, catDy 1; also while it jumps and runs).
+- The ring fill now swaps colour like the witch's trail particles (pink, lilac, blue, mint, violet, white), blending from one to the next, 3 colours per second (config cats.ringColors, ringColorSpeed). The old progress colours (brown, pink, green) are gone; the arc length still shows the progress.
+- Tested in the browser pane (zoomed): a lilac ring around the cat, cat centred. UNVERIFIED: the speed of the colour swap (3 per second: lower ringColorSpeed if it flickers too much), the cat's exact centring.
