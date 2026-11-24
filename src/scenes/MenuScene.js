@@ -1,6 +1,6 @@
 import { CONFIG as C, hex } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale } from '../sprites.js';
-import { FONT, FONT_TITLE, fpx, drawPlate } from '../hud.js';
+import { FONT, FONT_TITLE, titleCase, fpx, drawPlate } from '../hud.js';
 import { goalsOf, loadMedals, loadBest, totalStars, isCleared } from '../medals.js';
 import { latestVersion, refreshFiles } from '../update.js';
 import { toggleTune, tuneEnabled } from '../tune.js';
@@ -319,7 +319,7 @@ export class MenuScene extends Phaser.Scene {
     const veil = keep(this.add.graphics()); veil.fillStyle(0x000000, 0.55).fillRect(0, 0, W, H); veil.setDepth(S.depth - 1);
     if (art) keep(this.add.nineslice(S.x, S.y, 'ui_panel-parchment', undefined, S.w, S.h, 24, 24, 24, 24).setOrigin(0, 0));
     else { const back = keep(this.add.graphics()); back.fillStyle(P.dark, 0.96).fillRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius); back.lineStyle(M.plateBorderW, P.pink, 1).strokeRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius); }
-    keep(this.add.text(S.x + S.w / 2, S.y + 36, 'SETTINGS', { ...FONT_TITLE, fontSize: '24px', color: hex(art ? ink : P.cream), stroke: hex(P.shadow), strokeThickness: 0 }).setOrigin(0.5)); // the ornate title font
+    keep(this.add.text(S.x + S.w / 2, S.y + 36, 'Settings', { ...FONT_TITLE, fontSize: '24px', color: hex(art ? ink : P.cream), stroke: hex(P.shadow), strokeThickness: 0 }).setOrigin(0.5)); // the ornate title font
     this.panelButtons = [];
     const mkBtn = (x, y, w, label, action) => { // a copper button: 9-slice picture (normal / pressed) with dark text
       const h = 25, bt = { btn: true, x: x - 4, y: y - 3, w: w + 8, h: h + 6, down: false, action, shown: false }; // the touch area is a little bigger than the picture
@@ -371,7 +371,7 @@ export class MenuScene extends Phaser.Scene {
     if (art) keep(this.add.nineslice(L.x, y0, 'ui_med-panel', undefined, L.w, h, 6, 6, 6, 6).setOrigin(0, 0), 0);
     else { const g = keep(this.add.graphics()); g.fillStyle(P.dark, 0.96).fillRoundedRect(L.x, y0, L.w, h, 10); g.lineStyle(3, P.pink, 1).strokeRoundedRect(L.x, y0, L.w, h, 10); }
     const tc = 0xffffff, names = { cats: 'ALL CATS', allCoins: 'ALL COINS', killAll: 'ALL ENEMIES', noHit: 'NO HIT' };
-    keep(this.add.text(W / 2, y0 + 22, node ? node.name : '', { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(0xf2b632), stroke: hex(P.shadow), strokeThickness: 4 }).setOrigin(0.5), 2); // the ornate title font
+    keep(this.add.text(W / 2, y0 + 22, titleCase(node ? node.name : ''), { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(0xf2b632), stroke: hex(P.shadow), strokeThickness: 4 }).setOrigin(0.5), 2); // the ornate title font
     keys.forEach((k, i) => {
       const y = y0 + 50 + i * L.rowGap + L.rowGap / 2 - 4, done = saved[k];
       keep(this.add.image(L.x + 26, y, 'goal_' + k + '_' + (done ? 'earned' : 'open')).setScale(goalScale(this, k, L.iconBox)), 2);

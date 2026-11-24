@@ -13,6 +13,7 @@ export const FONT = { fontFamily: '"PackFont", "GameFont", monospace', fontStyle
 export const packFontOn = () => packOn;
 // The ornate title font (big titles only, 24 px and up: STAGE CLEAR, GAME OVER, PAUSED, SETTINGS, the goals box). Plain px sizes (not fpx).
 export const FONT_TITLE = { fontFamily: '"DungeonFont", "PackFont", monospace', fontStyle: 'normal', resolution: C.game.render };
+export const titleCase = s => s.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase()); // FOREST -> Forest, STAGE CLEAR -> Stage Clear (the title font reads best with small letters)
 export const useClassicFont = () => { packOn = false; Object.assign(FONT, CLASSIC); };
 // A text size in game px for the pixel font. PackFont has 11 art pixels per em, so a size S draws every art pixel S * 3 / 11 canvas px wide (render x3):
 // only sizes with a WHOLE number of canvas px per art pixel stay sharp. fpx() picks p = whole canvas px per art pixel from the size the code asked for

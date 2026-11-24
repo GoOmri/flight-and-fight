@@ -826,3 +826,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri's screenshot of the goals box: coin and heart were big, the skull tiny, text dark. Now every goal icon is fitted into the same square (sprites.js goalScale; the tiny skull is first enlarged by whole pixels): box 22 px in the goals box (config lightbox.iconBox), 16 px top left in the game (hud.goalBox, the life hearts use the same size), 20 px on the end screen. The text in the goals box is white with a dark outline.
 - DungeonFont (promised earlier, only now built): FONT_TITLE in hud.js, loaded in index.html and main.js. Used for STAGE CLEAR, GAME OVER, PAUSED, SETTINGS and the stage name in the goals box (24 px and up; everything else stays PackFont). Licence unknown (CREDITS.md).
 - Checked: syntax, tools\check.py, menu + goals box smoke test. NOT run: the game. UNVERIFIED: how DungeonFont reads at these sizes (SETTINGS at 24 may be too wide or tight), icon sizes, the box height.
+
+## 2026-11-24 v1.9.89: title font in small letters (branch v1989-title-case)
+- Omri: text in the new font should only have a capital at the start (Forest, not FOREST). All DungeonFont titles now go through titleCase (hud.js): Forest, Settings, Paused, Stage Clear, Game Over (each word starts with a capital). PackFont text stays in capitals. UNVERIFIED: the look.

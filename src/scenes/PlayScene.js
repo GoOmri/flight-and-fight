@@ -2,7 +2,7 @@ import { CONFIG as C, z, hex, snap4 } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale, PX } from '../sprites.js';
 import { STAGE1 } from '../waves.js';
 import { WaveRunner, initPath, followPath } from '../waves-runner.js';
-import { Hud, FONT, FONT_TITLE, fpx, drawPlate } from '../hud.js';
+import { Hud, FONT, FONT_TITLE, titleCase, fpx, drawPlate } from '../hud.js';
 import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
 import { Tune, tuneEnabled } from '../tune.js';
@@ -834,7 +834,7 @@ export class PlayScene extends Phaser.Scene {
     this.dragId = null; this.stickV.set(0, 0); this.stopping = false; this.stickC.set(W / 2, C.stick.restY);
     const B = C.pauseBtn, P = C.menu.pal, CR = hex(P.cream), ui = [];
     ui.push(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.6).setDepth(70));
-    ui.push(this.add.text(W / 2, H / 2 - 80, 'PAUSED', { ...FONT_TITLE, fontSize: '36px', color: CR, stroke: hex(P.shadow), strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(71));
+    ui.push(this.add.text(W / 2, H / 2 - 80, 'Paused', { ...FONT_TITLE, fontSize: '36px', color: CR, stroke: hex(P.shadow), strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(71));
     const btn = (y, label) => {
       if (this.textures.exists('ui_med-button')) ui.push(this.add.nineslice(W / 2 - B.btnW / 2, y - 12, 'ui_med-button', undefined, B.btnW, 25, 10, 10, 0, 0).setOrigin(0, 0).setDepth(71));
       else { const gg = this.add.graphics().setDepth(71); drawPlate(gg, W / 2 - B.btnW / 2, y - B.btnH / 2, B.btnW, B.btnH, { fill: B.fill, border: B.border, down: false }); ui.push(gg); }
@@ -1544,7 +1544,7 @@ export class PlayScene extends Phaser.Scene {
     const veil = this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.55).setDepth(60);
     const P = C.menu.pal, CR = hex(P.cream);
     const t = (y, s, size, c, stroke = z(5), title = false) => {
-      const o = this.add.text(W / 2, y, s, title ? { ...FONT_TITLE, fontSize: size + 'px', color: c, stroke: hex(P.shadow), strokeThickness: stroke, align: 'center' } : { ...FONT, fontSize: fpx(snap4(z(size))) + 'px', color: c, stroke: hex(P.shadow), strokeThickness: stroke, align: 'center' }).setOrigin(0.5).setDepth(61);
+      const o = this.add.text(W / 2, y, title ? titleCase(s) : s, title ? { ...FONT_TITLE, fontSize: size + 'px', color: c, stroke: hex(P.shadow), strokeThickness: stroke, align: 'center' } : { ...FONT, fontSize: fpx(snap4(z(size))) + 'px', color: c, stroke: hex(P.shadow), strokeThickness: stroke, align: 'center' }).setOrigin(0.5).setDepth(61);
       fade.push(o); return o;
     };
     let tapY = H / 2 + z(60);
