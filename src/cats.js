@@ -132,12 +132,21 @@ export class Cats {
       if (!live.length || this.parts.length >= CC.sparkMax) break;
       const c = live[Math.floor(Math.random() * live.length)], k = c.grow || 0, r = CC.ringRx + (CC.ringRxBig - CC.ringRx) * k, a = (this.sparkA = (this.sparkA || 0) + 2.4); // each spark starts 2.4 rad (the golden angle) after the last one: they spread evenly all around the ring
       const im = s.add.image(c.x + Math.cos(a) * r, c.y - c.top - 1 + Math.sin(a) * r, 'cat_spark').setDepth(CC.depth + 0.4).setTint(CC.ringColors[Math.floor(Math.random() * CC.ringColors.length)]);
-      this.parts.push({ im, vy: -(CC.sparkRise * (0.7 + Math.random() * 0.6)), life: CC.sparkLife * (0.7 + Math.random() * 0.6), max: 0, ph: Math.random() * 6 });
+      this.parts.push({ c, im, vy: -(CC.sparkRise * (0.7 + Math.random() * 0.6)), life: CC.sparkLife * (0.7 + Math.random() * 0.6), max: 0, ph: Math.random() * 6 });
       this.parts[this.parts.length - 1].max = this.parts[this.parts.length - 1].life;
     }
     for (let i = this.parts.length - 1; i >= 0; i--) {
       const p = this.parts[i]; p.life -= dt;
       if (p.life <= 0) { p.im.destroy(); this.parts.splice(i, 1); continue; }
+      if (p.c.state === 'hover' && !s.over) { // she hovers over the cat: the sparks get sucked into the witch, faster and faster
+        p.pull = (p.pull || 0) + dt;
+        const dx = s.ship.x - p.im.x, dy = s.ship.y - p.im.y, d = Math.hypot(dx, dy), step = (50 + 420 * p.pull) * dt;
+        if (d <= step + 3) { p.im.destroy(); this.parts.splice(i, 1); continue; }
+        p.im.x += dx / d * step; p.im.y += dy / d * step;
+        p.im.setAlpha(1).setScale(Math.min(1.05, 0.35 + d / 60));
+        continue;
+      }
+      p.pull = 0;
       p.im.y += (p.vy * dt) + ground; p.im.x += Math.sin(p.ph + p.life * 5) * 6 * dt; // rises, sways a little and rides with the ground
       p.im.setAlpha(clamp(p.life / (p.max * 0.5), 0, 1)).setScale(0.45 + 0.6 * clamp(p.life / p.max, 0, 1));
     }
