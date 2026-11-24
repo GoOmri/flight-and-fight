@@ -125,7 +125,7 @@ export class PlayScene extends Phaser.Scene {
     this.makePools();
     this.makeShip();
     const waveTotals = STAGE1.map(w => w.groups.reduce((n, g) => n + g.n, 0));
-    this.goalKeys = goalsOf(this.stageTheme).filter(k => k !== 'cats' || C.cats.atWave.some(w => w > startWave)); // the goals (stars) of this stage (a run that starts late, by the tune jump, has no cats)
+    this.goalKeys = goalsOf(this.stageTheme).filter(k => k !== 'cats' || C.cats.atWave.some(w => w >= startWave)); // the goals (stars) of this stage (a run that starts late, by the tune jump, has no cats)
     this.medals = new Medals(waveTotals.slice(startWave).reduce((a, b) => a + b, 0), this.goalKeys);
     makeGoalIcons(this); // goal pictures (after the coin and heart sheets are loaded)
     this.hud = new Hud(this, waveTotals, startWave);

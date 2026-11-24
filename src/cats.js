@@ -26,7 +26,7 @@ export class Cats {
   constructor(scene, startWave) {
     this.s = scene;
     this.list = [];
-    this.waves = CC.atWave.filter(w => w > startWave); // the (0-based) stage waves at whose first enemy a cat appears
+    this.waves = CC.atWave.filter(w => w >= startWave); // the (0-based) stage waves at whose first enemy a cat appears
     this.total = this.waves.length;
     this.spawned = 0; this.saved = 0; this.lost = 0;
     this.colors = CAT_COLORS.slice().sort(() => Math.random() - 0.5); // 3 random colours per stage

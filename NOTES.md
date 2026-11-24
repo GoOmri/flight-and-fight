@@ -856,3 +856,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-24 v1.9.93: round ring without lines (branch v1993-round-ring)
 - Omri: the ring must be a circle, not an oval, and without the lines. Now a plain circle (radius 12, 4 px thick, config cats.ringRx = ringRy): a dark translucent band for the empty ring (no outline) and ONE smooth arc for the fill, clockwise from the top, in the colour step of the fill (no segment gaps). The back half still goes behind the cat, the front half in front of it.
 - Tested in the browser pane (zoomed): clean circle, no segment lines. UNVERIFIED on the phone (a very faint dot may show where the two halves meet).
+
+## 2026-11-24 v1.9.94: first cat at the start of the level (branch v1994-cat-at-start)
+- Omri could not wait half a level to test the cats: config cats.atWave [2, 5, 8] -> [0, 4, 8]: the first cat appears with the first enemies (about 2 s into the stage), the others at waves 5 and 9. A late start (tune ?wave= jump) keeps the cats from that wave on. Tested in the browser pane: the cat sits on its rock at the start. Change atWave back later if the first wave is too busy with a cat.
