@@ -933,3 +933,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.111: cat, ring and sparks are drawn under the witch (branch v1111-ring-under-witch)
 - Bug (Omri's screenshot): the front half of the ring (depth 33.8) and the sparks (34.0) were above the witch (33.7). Now everything of a waiting cat sits between 33.61 and 33.66: glow, back ring, cat, front ring, meow puff, sparks. The witch (33.7) covers all of it. Stars and hearts after the rescue stay above her.
 - Syntax checked. NOT looked at on a phone (UNVERIFIED).
+
+## 2026-11-25 v1.9.112: sucked-in sparks are drawn over the witch (branch v1112-sparks-over-witch)
+- Omri: the sparks that fly into the witch must be above her (a "juicing up" look). While a spark is pulled it gets depth ship.depth + 0.2; when it is free again it goes back under her. Syntax checked, UNVERIFIED on a phone.
