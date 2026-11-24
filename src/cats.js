@@ -142,13 +142,14 @@ export class Cats {
       const p = this.parts[i]; p.life -= dt;
       if (p.life <= 0) { p.im.destroy(); this.parts.splice(i, 1); continue; }
       if (p.c.state === 'hover' && !s.over) { // she hovers over the cat: each spark first shoots up (fast, braking), then dives into the witch with a very sharp ease-in
-        if (!p.pull) { p.big = Math.random() < CC.fastShare; p.upMul = 0.6 + Math.random() * 0.6; p.im.setBlendMode(1); } // additive: the sparks glow, so they show on the dark witch // only some sparks swell when they go fast
+        if (!p.pull) { p.big = Math.random() < CC.fastShare; p.upMul = 0.6 + Math.random() * 0.6; p.la = Math.random() * Math.PI * 2; // every spark pops out at its own angle (any direction)
+           p.im.setBlendMode(1); } // additive: the sparks glow, so they show on the dark witch // only some sparks swell when they go fast
         p.pull = (p.pull || 0) + dt;
         p.im.setDepth(s.ship.depth + 0.2); // pulled sparks are drawn over the witch: you see them flow into her
         const U = CC.suckUpS, u = p.pull;
         p.life = Math.max(p.life, 0.3); // a pulled spark lives until it arrives
         p.im.setRotation(0);
-        if (u < U) { const k = 1 - u / U; p.im.y -= CC.suckUp * p.upMul * k * k * dt; p.im.x += Math.sin(p.ph) * 4 * dt; p.im.setAlpha(1).setScale(1.5); continue; }
+        if (u < U) { const k = 1 - u / U; const v = CC.suckUp * p.upMul * k * k * dt; p.im.x += Math.cos(p.la) * v; p.im.y += Math.sin(p.la) * v; p.im.setAlpha(1).setScale(1.5); continue; }
         const w = u - U, dx = s.ship.x - p.im.x, dy = s.ship.y - p.im.y, d = Math.hypot(dx, dy), spd = 20 + CC.suckSharp * w * w, step = spd * dt;
         if (d <= step + 4) { p.im.destroy(); this.parts.splice(i, 1); continue; }
         p.im.x += dx / d * step; p.im.y += dy / d * step;
