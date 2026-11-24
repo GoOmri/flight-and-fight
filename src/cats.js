@@ -142,6 +142,7 @@ export class Cats {
       if (p.life <= 0) { p.im.destroy(); this.parts.splice(i, 1); continue; }
       if (p.c.state === 'hover' && !s.over) { // she hovers over the cat: each spark first shoots up (fast, braking), then dives into the witch with a very sharp ease-in
         p.pull = (p.pull || 0) + dt;
+        p.im.setDepth(s.ship.depth + 0.2); // pulled sparks are drawn over the witch: you see them flow into her
         const U = CC.suckUpS, u = p.pull;
         p.life = Math.max(p.life, 0.3); // a pulled spark lives until it arrives
         if (u < U) { const k = 1 - u / U; p.im.y -= CC.suckUp * k * k * dt + 0; p.im.x += Math.sin(p.ph) * 4 * dt; p.im.setAlpha(1).setScale(1.1); continue; }
@@ -152,6 +153,7 @@ export class Cats {
         continue;
       }
       p.pull = 0;
+      p.im.setDepth(CC.depth + 0.06);
       p.im.y += (p.vy * dt) + ground; p.im.x += Math.sin(p.ph + p.life * 5) * 6 * dt; // rises, sways a little and rides with the ground
       p.im.setAlpha(clamp(p.life / (p.max * 0.5), 0, 1)).setScale(0.45 + 0.6 * clamp(p.life / p.max, 0, 1));
     }
