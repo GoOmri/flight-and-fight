@@ -803,3 +803,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Stars are now plain gold stars (13 px, no picture) on the menu tiles and the end screen (textures star_earned, star_off).
 - Checked: syntax, tools\check.py all green, menu smoke test. NOT run: the game itself. UNVERIFIED: everything visual (icon size and crispness, hat colours, card layout, end screen rows fitting above the MENU button), and the runtime cutting of the coin and heart frames (if the HUD shows empty or wrong pictures, tell Claude).
 - The hat file's licence is not confirmed: Omri must OK pushing it (see CREDITS.md).
+
+## 2026-11-24 v1.9.85: still life hearts, same size as the goal icons; goal card stays until tapped (branch v1985-hearts-goals)
+- Omri: the life hearts must not be animated and must face front, and be the same size as the goals. The HUD hearts are now the same picture as the no-hit goal icon (the front-facing heart cut from the heart sheet), same scale (hud.goalScale); a lost heart is a dark flat shape. The animated hearts remain only as a fallback if the picture cannot be made.
+- The goal card no longer closes by itself; it waits for a tap (config goalCard.showMs removed).
+- Open (asked Omri): goals in a lightbox in the main menu before PLAY instead of the in-game card; when the witch hat goal should light up.
+- Checked: syntax. UNVERIFIED: heart size and spacing at the top right.

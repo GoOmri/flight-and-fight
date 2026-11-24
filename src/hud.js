@@ -59,10 +59,11 @@ export class Hud {
 
     // RIGHT: hearts, wave pips under them
     this.heartIcons = [];
-    this.hs = C.sprites.heartPickup && C.sprites.heartHud ? C.sprites.heartHud : null; // animated hearts (the beating Idle loop) or the old code-drawn ones
+    this.still = scene.textures.exists('goal_noHit_earned'); // life hearts are the SAME still picture as the no-hit goal icon: front facing, not animated, same size
+    this.hs = !this.still && C.sprites.heartPickup && C.sprites.heartHud ? C.sprites.heartHud : null; // (fallback) animated hearts or the old code-drawn ones
     for (let i = 0; i < C.ship.hearts; i++) {
       const x = W - H.margin - i * H.heartStep, y = H.margin + H.heartY;
-      const ic = this.hs ? scene.add.sprite(x, y, 'sp_heart_idle', 0).setScale(this.hs.scale) : scene.add.image(x, y, 'heart').setScale(PX / C.game.zoom);
+      const ic = this.still ? scene.add.image(x, y, 'goal_noHit_earned').setScale(H.goalScale) : this.hs ? scene.add.sprite(x, y, 'sp_heart_idle', 0).setScale(this.hs.scale) : scene.add.image(x, y, 'heart').setScale(PX / C.game.zoom);
       ic.setOrigin(1, 0.5).setDepth(depth);
       if (this.hs) { ic.play('heart_idle'); ic.anims.setCurrentFrame(ic.anims.currentAnim.frames[(i * this.hs.desync) % C.sprites.heartPickup.idle.frames]); } // each heart beats a little out of step
       ic.full = true;
@@ -84,6 +85,12 @@ export class Hud {
     const max = C.ship.hearts;
     this.heartIcons.forEach((ic, i) => {
       const full = max - 1 - i < n, key = full ? 'heart' : 'heartEmpty';
+      if (this.still) { // still heart: a lost one is a dark flat shape
+        if (ic.full === full) return;
+        ic.full = full;
+        if (full) ic.clearTint().setAlpha(1); else ic.setTintFill(C.sprites.heartHud.emptyTint).setAlpha(C.sprites.heartHud.emptyAlpha);
+        return;
+      }
       if (this.hs) { // animated heart: full = beating loop, empty = first frame as a dark flat shape
         if (ic.full === full) return;
         ic.full = full;

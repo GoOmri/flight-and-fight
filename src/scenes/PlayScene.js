@@ -843,13 +843,12 @@ export class PlayScene extends Phaser.Scene {
     ui.push(tap);
     this.goalCardTween = this.tweens.add({ targets: tap, alpha: { from: 1, to: 0.3 }, yoyo: true, repeat: -1, duration: 600 });
     this.goalCard = { objs: ui, readyAt: this.time.now + 350 }; // a tap too early (a finger still down from the menu) does not close it
-    this.goalCardTimer = this.time.delayedCall(G.showMs, () => this.hideGoalCard());
   }
 
   hideGoalCard() {
     if (!this.goalCard) return;
     this.goalCard.objs.forEach(o => o.destroy()); this.goalCard = null;
-    if (this.goalCardTween) this.goalCardTween.stop(); if (this.goalCardTimer) this.goalCardTimer.remove(false);
+    if (this.goalCardTween) this.goalCardTween.stop();
     this.paused = false; this.physics.world.resume();
   }
 
