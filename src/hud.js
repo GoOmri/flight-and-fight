@@ -2,7 +2,6 @@
 // Everything is created once. Graphics are only redrawn when something changed.
 import { CONFIG as C, z, hex } from './config.js';
 import { PX } from './sprites.js';
-import { MEDAL_KEYS } from './medals.js';
 const GOAL_TEX = { pending: 'open', earned: 'earned', failed: 'failed' }; // goal icon look per state
 
 // ONE font for the whole game: PackFont (the pixel font of the Fantasy UI pack, made from its glyph sheet, see CREDITS.md). Only if the file cannot be loaded at all the old
@@ -42,11 +41,12 @@ export class Hud {
 
     // LEFT: medals, version under them
     let gx = H.margin; // the 3 goal icons in a row (witch hat, coin, heart), each centred in the row
-    this.medalImgs = MEDAL_KEYS.map(k => {
+    this.goalKeys = scene.goalKeys;
+    this.medalImgs = this.goalKeys.map(k => {
       const im = scene.add.image(0, H.margin + H.medalSize / 2, 'goal_' + k + '_open').setOrigin(0, 0.5).setScale(H.goalScale).setDepth(depth);
       im.x = gx; gx += im.displayWidth + H.medalGap; return im;
     });
-    this.medalLook = MEDAL_KEYS.map(() => 'pending');
+    this.medalLook = this.goalKeys.map(() => 'pending');
     this.versionText = scene.add.text(H.margin, H.margin + H.medalSize + H.versionGap, 'v' + C.version, { ...FONT, fontSize: fpx(H.versionSize) + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: H.versionStroke }).setAlpha(H.versionAlpha).setDepth(depth);
 
     // CENTRE: score, weapon bars under it
@@ -105,7 +105,7 @@ export class Hud {
 
   // state = { kill70: 'pending'|'earned'|'failed', ... }
   setMedals(state) {
-    MEDAL_KEYS.forEach((k, i) => {
+    this.goalKeys.forEach((k, i) => {
       if (this.medalLook[i] === state[k]) return;
       this.medalLook[i] = state[k];
       this.medalImgs[i].setTexture('goal_' + k + '_' + GOAL_TEX[state[k]]);

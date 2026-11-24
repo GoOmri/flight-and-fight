@@ -1,7 +1,7 @@
 import { CONFIG as C, hex } from '../config.js';
-import { makeAllTextures } from '../sprites.js';
+import { makeAllTextures, makeGoalIcons, loadGoalArt } from '../sprites.js';
 import { FONT, fpx, drawPlate } from '../hud.js';
-import { MEDAL_KEYS, loadMedals, loadBest, totalStars } from '../medals.js';
+import { goalsOf, loadMedals, loadBest, totalStars, isCleared } from '../medals.js';
 import { latestVersion, refreshFiles } from '../update.js';
 import { toggleTune, tuneEnabled } from '../tune.js';
 
@@ -25,7 +25,7 @@ export class MenuScene extends Phaser.Scene {
     this.load.image('menu_logo', 'assets/' + M.logo.file); // only the letters: they rise and float
     for (const k of ['fight', 'amp', 'flight']) this.load.image('menu_logo_' + k, 'assets/menu/logo-' + k + '.png'); // the three parts of the letters: "Fight", "&", "Flight" (together they are menu_logo)
     for (const nd of M.path.nodes) if (!nd.locked) this.load.image('stage_' + nd.theme, 'assets/ui/stage-' + nd.theme + '.png?v=' + C.version); // a small picture of each open stage (shown dimmed inside its tile)
-    this.load.image('star_src', 'assets/pickups/star-lit.png?v=' + C.version); // the gold star of the tiles (made into star_earned / star_off in sprites.js)
+    loadGoalArt(this, C.version); // the gold star and the goal icons (made into textures in sprites.js; the game uses the same ones)
     if (M.logo.decor) this.load.image('menu_logo_decor', 'assets/' + M.logo.decor); // the moon, stars and bats of the logo picture: they stay in the background
     for (const k of ['panel-parchment', 'med-panel', 'med-button', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png?v=' + C.version); // ?v= = the phone must load the newest picture after an update (it kept an old copy of a picture with the same file name) // UI pictures: parchment panel and gear (Fantasy UI pack, catau-games), tan panel and button (Medieval UI pack, Doktoresco)
   }
@@ -35,7 +35,8 @@ export class MenuScene extends Phaser.Scene {
     if (DEBUG_PARAMS.some(k => q.has(k))) { this.scene.start('Play'); return; }
     try { const s = localStorage.getItem(CTL_KEY); if (s === 'drag' || s === 'stick') C.ship.controls = s; } catch (e) { /* no saved choice */ }
     this.fxLow = false; try { this.fxLow = localStorage.getItem(FX_KEY) === 'low'; } catch (e) { /* full effects */ } // settings: EFFECTS LOW keeps the menu calm (no sparks, bubbles, fireflies, shooting stars, tilt)
-    makeAllTextures(this); // medal pictures (made once, skipped when they exist)
+    makeAllTextures(this); // star pictures (made once, skipped when they exist)
+    makeGoalIcons(this);   // goal pictures (the lightbox shows them)
     this.cameras.main.setZoom(R).centerOn(W / 2, H / 2).setBackgroundColor(M.bgColor);
     this.addArt();
     this.makeBits(); this.startEffects(); this.setupTilt(); // little pictures for the sparks, then cauldron bubbles, witch trail, fireflies, shooting stars, and the tilt parallax
@@ -48,7 +49,7 @@ export class MenuScene extends Phaser.Scene {
 
     // ---- the path: a line up the middle, bubbles left and right of it. Stage 1 is at the bottom; with more stages than fit, drag up / down to scroll (applyScroll).
     const PA = M.path, bw = PA.bubbleW, bh = PA.bubbleH, stars = totalStars();
-    const nodes = PA.nodes.map(nd => ({ ...nd, locked: !!nd.locked || stars < (nd.need || 0) })); // a stage opens when the stars of all stages together reach its need
+    const nodes = PA.nodes.map((nd, i) => ({ ...nd, locked: !!nd.locked || stars < (nd.need || 0), named: i === 0 || isCleared(PA.nodes[i - 1].theme) })); // a stage shows its name once the stage before it was finished (before that: ???) // a stage opens when the stars of all stages together reach its need
     const lastOpen = nodes.reduce((m, nd, i) => (nd.locked ? m : i), 0), farthest = Math.min(nodes.length - 1, lastOpen + PA.lookAhead); // a player can look PA.lookAhead stages beyond the highest open one, no further
     this.scrollMax = Math.max(0, PA.topStop - (PA.bottomCy - farthest * PA.step)); // how far the path can be pulled down (0 = everything fits, no scrolling)
     this.scroll = 0; this.scrollV = 0; this.drag = null;
@@ -117,6 +118,7 @@ export class MenuScene extends Phaser.Scene {
     this.modal = false;
     this.buttons = [...this.bubbles.filter(b => !b.locked), btn, gear];
     this.makeSettings();
+    this.settingsButtons = this.panelButtons;
 
     // Input: remember which button was pressed; release on the same button uses it. Handlers are removed on shutdown.
     const hit = p => (this.modal ? this.panelButtons : this.buttons).find(c => { const px = p.x / R, py = p.y / R; return px >= c.x && px <= c.x + c.w && py >= c.y && py <= c.y + c.h && (c.st === undefined || (c.alpha > 0.35 && py < PA.viewBottom)); }); // a stage bubble can only be hit while it is visible enough and above the fade
@@ -157,7 +159,7 @@ export class MenuScene extends Phaser.Scene {
       setPressed(null);
       if (!same) return;
       if (c.btn && !this.modal) this.bounce(c); // a little pop on UPDATE and the gear
-      if (c.action) c.action(); else if (c.st) this.scene.start('Play', { theme: c.st.theme });
+      if (c.action) c.action(); else if (c.st) this.openGoals(c.st.theme); // a stage tile opens the goals box, PLAY starts the stage
     };
     this.input.on('pointerdown', onDown);
     this.input.on('pointermove', onMove);
@@ -229,21 +231,21 @@ export class MenuScene extends Phaser.Scene {
       b.items.forEach(i => i.o.setY(i.oy + sink));
     };
     if (b.locked) {
-      add(txt(cx, y + 24, nd.name, B.nameSize, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 24);
+      add(txt(cx, y + 24, nd.named ? nd.name : '???', B.nameSize, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 24);
       if (nd.need) { // the stars still needed: a small star and a number, no words
         const star = add(this.add.image(cx - 12, y + 45, 'star_earned').setScale(0.7).setTint(0x9a9a9a), y + 45);
         add(txt(cx + 10, y + 45, String(nd.need), B.nameSize + 2, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 45);
       }
     } else {
       add(txt(cx, y + 14, nd.name, B.nameSize, shadow, 0.5, ink), y + 14);
-      const medals = loadMedals(nd.theme), best = loadBest(nd.theme), n = MEDAL_KEYS.length;
-      MEDAL_KEYS.forEach((k, j) => {
+      const medals = loadMedals(nd.theme), best = loadBest(nd.theme), keys = goalsOf(nd.theme), n = keys.length;
+      keys.forEach((k, j) => {
         const im = add(this.add.image(0, y + 35, 'star_' + (medals[k] ? 'earned' : 'off')).setScale(B.medalScale), y + 35);
         im.x = cx + (j - (n - 1) / 2) * (im.displayWidth + B.medalGap);
       });
       if (best > 0) add(txt(cx, y + h - 13, 'BEST ' + best, B.bestSize, shadow, 0.5, art ? B.bestInk : P.cyan), y + h - 13);
     }
-    b.complete = !b.locked && MEDAL_KEYS.every(k => loadMedals(nd.theme)[k]);
+    b.complete = !b.locked && goalsOf(nd.theme).every(k => loadMedals(nd.theme)[k]);
     b.halo = art && !b.locked ? this.add.graphics().setVisible(false) : null; // gold edge, shown only on the next stage to play
     if (b.halo) b.halo.lineStyle(3, M.path.lineColor, 1).strokeRoundedRect(x - 2, y - 2, w + 4, h + 4, 5);
     b.cont = this.add.container(0, 0, [img, pic, b.halo, g, ...b.items.map(i => i.o)].filter(Boolean)); // order: panel, stage picture, halo, strip, texts and medals
@@ -358,8 +360,40 @@ export class MenuScene extends Phaser.Scene {
     this.panelObjs = objs;
   }
 
+  // The goals box (lightbox): tap a stage, see its goals with the stars you already have, then PLAY (or BACK).
+  openGoals(theme) {
+    if (this.modal) return;
+    const L = C.lightbox, node = M.path.nodes.find(n => n.theme === theme), keys = goalsOf(theme), saved = loadMedals(theme), objs = [];
+    const D = L.depth, ink = L.ink, h = 34 + keys.length * L.rowGap + 46, y0 = Math.round((H - 40 - h) / 2), art = this.textures.exists('ui_med-panel');
+    const keep = (o, dz = 0) => { o.setDepth(D + dz); objs.push(o); return o; };
+    const T = (x, y, s, size, align, color) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 0 }).setOrigin(align, 0.5), 2);
+    keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
+    if (art) keep(this.add.nineslice(L.x, y0, 'ui_med-panel', undefined, L.w, h, 6, 6, 6, 6).setOrigin(0, 0), 0);
+    else { const g = keep(this.add.graphics()); g.fillStyle(P.dark, 0.96).fillRoundedRect(L.x, y0, L.w, h, 10); g.lineStyle(3, P.pink, 1).strokeRoundedRect(L.x, y0, L.w, h, 10); }
+    const tc = art ? ink : P.cream, names = { cats: 'ALL CATS', allCoins: 'ALL COINS', killAll: 'ALL ENEMIES', noHit: 'NO HIT' };
+    T(W / 2, y0 + 18, node ? node.name : '', 12, 0.5, tc);
+    keys.forEach((k, i) => {
+      const y = y0 + 34 + i * L.rowGap + L.rowGap / 2 - 4, done = saved[k];
+      keep(this.add.image(L.x + 26, y, 'goal_' + k + '_' + (done ? 'earned' : 'open')).setScale(L.iconScale), 2);
+      T(L.x + 46, y, names[k], L.textSize, 0, tc);
+      keep(this.add.image(L.x + L.w - 24, y, done ? 'star_earned' : 'star_off').setScale(1), 2);
+    });
+    const bw = 80, by = y0 + h - 38, mk = (x, label, action) => { // two buttons: the same picture as the other buttons
+      const bt = { btn: true, x: x - 4, y: by - 3, w: bw + 8, h: 31, down: false, action, shown: true };
+      bt.img = art2 ? keep(this.add.nineslice(x, by, 'ui_med-button', undefined, bw, 25, 10, 10, 0, 0).setOrigin(0, 0), 1) : null;
+      bt.g = keep(this.add.graphics(), 1);
+      bt.label = T(x + bw / 2, by + 12, label, 10, 0.5, P.cream); bt.label.setStroke(hex(P.shadow), 3);
+      bt.draw = () => { if (bt.img) bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(by + (bt.down ? 1 : 0)); bt.label.setY(by + 12 + (bt.down ? 1 : 0)); };
+      return bt;
+    }, art2 = this.textures.exists('ui_med-button');
+    const close = () => { objs.forEach(o => o.destroy()); this.goalsObjs = null; this.modal = false; this.panelButtons = this.settingsButtons; };
+    const back = mk(L.x + 14, 'BACK', close), play = mk(L.x + L.w - 14 - bw, 'PLAY', () => { close(); this.scene.start('Play', { theme }); });
+    this.goalsObjs = objs; this.modal = true; this.panelButtons = [play, back];
+  }
+
   openSettings(on) {
     this.modal = on;
+    this.panelButtons = this.settingsButtons;
     this.panelObjs.forEach(o => o.setVisible(on));
     this.panelButtons.forEach(b => { b.shown = on; b.label.setVisible(on); b.draw(); });
   }

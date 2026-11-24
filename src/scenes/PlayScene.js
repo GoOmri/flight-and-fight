@@ -1,12 +1,12 @@
 import { CONFIG as C, z, hex, snap4 } from '../config.js';
-import { makeAllTextures, makeGoalIcons, PX } from '../sprites.js';
+import { makeAllTextures, makeGoalIcons, loadGoalArt, PX } from '../sprites.js';
 import { STAGE1 } from '../waves.js';
 import { WaveRunner, initPath, followPath } from '../waves-runner.js';
 import { Hud, FONT, fpx, drawPlate } from '../hud.js';
 import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
 import { Tune, tuneEnabled } from '../tune.js';
-import { Medals, MEDAL_KEYS, saveMedals, saveBest } from '../medals.js';
+import { Medals, goalsOf, saveMedals, saveBest } from '../medals.js';
 
 // Which background is shown: ?bg=forest | swamp | sky in the web address, else config.background.mode.
 // The menu passes data.theme ('forest' | 'swamp'); ?bg still wins, with no data config.background.mode is used.
@@ -42,11 +42,10 @@ export class PlayScene extends Phaser.Scene {
     const SP = C.enemies.sprites; // animated enemy sheets (assets/enemies); types without an entry keep the code-drawn picture
     for (const t in SP) this.load.spritesheet('en_' + t, 'assets/enemies/' + SP[t].file, { frameWidth: SP[t].frameW, frameHeight: SP[t].frameH });
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
-    if (!this.textures.exists('star_src')) this.load.image('star_src', 'assets/pickups/star-lit.png?v=' + C.version); // the gold star (reward)
-    if (!this.textures.exists('goal_hat')) this.load.image('goal_hat', 'assets/ui/goal-hat.png?v=' + C.version); // the witch hat of the FINISH goal
+    loadGoalArt(this, C.version); // goal icons and the star (the menu loads them too)
     if (!this.textures.exists('ui_med-button')) this.load.image('ui_med-button', 'assets/ui/ui-med-button.png?v=' + C.version); // the menu's button (a stage started from the menu has it already)
     const K = C.sprites; // coin / heart / chest / puff strips (assets/pickups, assets/fx); a thing without an entry keeps its code-drawn picture
-    const strip = (key, d) => this.load.spritesheet(key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
+    const strip = (key, d) => this.textures.exists(key) || this.load.spritesheet(key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
     if (K.coin) strip('sp_coin', K.coin);
     if (K.heartPickup) for (const n of ['idle', 'drop', 'collect', 'shine']) if (K.heartPickup[n]) strip('sp_heart_' + n, K.heartPickup[n]);
     if (K.crate) { strip('sp_crate_idle', K.crate.idle); strip('sp_crate_break', K.crate.break); }
@@ -123,7 +122,8 @@ export class PlayScene extends Phaser.Scene {
     this.makePools();
     this.makeShip();
     const waveTotals = STAGE1.map(w => w.groups.reduce((n, g) => n + g.n, 0));
-    this.medals = new Medals(waveTotals.slice(startWave).reduce((a, b) => a + b, 0));
+    this.goalKeys = goalsOf(this.stageTheme); // the goals (stars) of this stage
+    this.medals = new Medals(waveTotals.slice(startWave).reduce((a, b) => a + b, 0), this.goalKeys);
     makeGoalIcons(this); // goal pictures (after the coin and heart sheets are loaded)
     this.hud = new Hud(this, waveTotals, startWave);
     this.hud.setLevel(this.weaponLevel);
@@ -153,11 +153,9 @@ export class PlayScene extends Phaser.Scene {
       () => this.physics.world.resume()) : null;
     this.paused = false; this.pauseUi = null;
     this.makePauseButton();
-    this.goalCard = null; this.showGoalCard();
     this.game.events.on('hidden', this.pauseGame, this); // the phone app goes to the background: pause by itself
     this.events.once('shutdown', () => { this.game.events.off('hidden', this.pauseGame, this); this.anims.resumeAll(); });
     this.input.on('pointerdown', p => {
-      if (this.goalCard) { if (this.time.now > this.goalCard.readyAt) this.hideGoalCard(); return; } // a tap closes the goal card
       if (this.paused) { this.pauseTap(p.x / R, p.y / R); return; } // the pause screen takes every touch
       if (this.tune && this.tune.press(p.x / R, p.y / R)) return; // the panel used this touch
       if (!this.over && this.pauseHit(p.x / R, p.y / R)) { this.pauseGame(); return; }
@@ -827,36 +825,10 @@ export class PlayScene extends Phaser.Scene {
     this.pauseBtnGfx = g;
   }
 
-  // ---------- goal card (shown when a stage starts) ----------
-  showGoalCard() {
-    const G = C.goalCard, P = C.menu.pal, CR = hex(P.cream), ui = [];
-    this.paused = true; this.physics.world.pause(); // the stage waits behind the card
-    ui.push(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.6).setDepth(70));
-    ui.push(this.add.text(W / 2, H / 2 - 90, 'GOALS', { ...FONT, fontSize: fpx(snap4(z(30))) + 'px', color: hex(0xf2b632), stroke: hex(P.shadow), strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(71));
-    const names = { finish: 'FINISH', allCoins: 'ALL COINS', noHit: 'NO HIT' };
-    MEDAL_KEYS.forEach((k, i) => {
-      const y = H / 2 - 40 + i * G.rowGap;
-      const im = this.add.image(W / 2 - 62, y, 'goal_' + k + '_earned').setScale(G.iconScale).setDepth(71);
-      ui.push(im);
-      ui.push(this.add.text(W / 2 - 34, y, names[k], { ...FONT, fontSize: fpx(G.textSize) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0, 0.5).setDepth(71));
-    });
-    const tap = this.add.text(W / 2, H / 2 + 90, 'TAP TO START', { ...FONT, fontSize: fpx(12) + 'px', color: hex(P.pink), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5).setDepth(71);
-    ui.push(tap);
-    this.goalCardTween = this.tweens.add({ targets: tap, alpha: { from: 1, to: 0.3 }, yoyo: true, repeat: -1, duration: 600 });
-    this.goalCard = { objs: ui, readyAt: this.time.now + 350 }; // a tap too early (a finger still down from the menu) does not close it
-  }
-
-  hideGoalCard() {
-    if (!this.goalCard) return;
-    this.goalCard.objs.forEach(o => o.destroy()); this.goalCard = null;
-    if (this.goalCardTween) this.goalCardTween.stop();
-    this.paused = false; this.physics.world.resume();
-  }
-
   pauseHit(x, y) { const B = C.pauseBtn; return Math.abs(x - B.x) <= B.hit / 2 && Math.abs(y - B.y) <= B.hit / 2; }
 
   pauseGame() {
-    if (this.paused || this.over || this.goalCard) return;
+    if (this.paused || this.over) return;
     this.paused = true; this.pauseAt = this.time.now;
     this.physics.world.pause(); this.tweens.pauseAll(); this.anims.pauseAll();
     this.dragId = null; this.stickV.set(0, 0); this.stopping = false; this.stickC.set(W / 2, C.stick.restY);
@@ -1582,11 +1554,12 @@ export class PlayScene extends Phaser.Scene {
     } else {
       t(100, title, 36, col);
       t(138, 'SCORE ' + this.score, 26, CR);
-      const names = { finish: 'FINISH', allCoins: 'ALL COINS', noHit: 'NO HIT' }, rowTxt = (x, y, str, color) => { // goal rows: goal icon, its name, and a star for every goal done
+      const names = { cats: 'ALL CATS', allCoins: 'ALL COINS', killAll: 'ALL ENEMIES', noHit: 'NO HIT' }, rowTxt = (x, y, str, color) => { // goal rows: goal icon, its name, and a star for every goal done
         const o = this.add.text(x, y, str, { ...FONT, fontSize: fpx(12) + 'px', color, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0, 0.5).setDepth(61); fade.push(o); return o;
       };
-      MEDAL_KEYS.forEach((k, i) => {
-        const y = 176 + i * 28, done = this.medals.state[k] === 'earned';
+      const gap = this.goalKeys.length > 3 ? 24 : 28;
+      this.goalKeys.forEach((k, i) => {
+        const y = 176 + i * gap, done = this.medals.state[k] === 'earned';
         fade.push(this.add.image(W / 2 - 84, y, 'goal_' + k + '_' + (done ? 'earned' : 'failed')).setScale(1.3).setDepth(61));
         rowTxt(W / 2 - 62, y, names[k], done ? CR : '#8a80a8');
         const star = this.add.image(W / 2 + 62, y, done ? 'star_earned' : 'star_off').setScale(1.3).setDepth(61);
@@ -1594,11 +1567,11 @@ export class PlayScene extends Phaser.Scene {
         if (done && ease > 0) this.tweens.add({ targets: star, scale: { from: 2.4, to: 1.3 }, duration: 260, delay: ease + i * 220, ease: 'Back.easeOut' }); // the star lands
         if (isNew && isNew[k]) rowTxt(W / 2 + 80, y, 'NEW', hex(P.orange));
       });
-      const V = C.coin.value;
-      t(262, 'COINS ' + this.coinsCollected * V + '/' + this.coinsSpawned * V, 16, CR);
-      t(277, 'KILLS ' + this.enemiesKilled + '/' + this.enemiesSpawned, 16, CR);
-      t(292, 'HITS ' + this.hitsTaken, 16, CR);
-      tapY = 320;
+      const V = C.coin.value, sy = 176 + this.goalKeys.length * gap + 4;
+      t(sy, 'COINS ' + this.coinsCollected * V + '/' + this.coinsSpawned * V, 16, CR);
+      t(sy + 15, 'KILLS ' + this.enemiesKilled + '/' + this.enemiesSpawned, 16, CR);
+      t(sy + 30, 'HITS ' + this.hitsTaken, 16, CR);
+      tapY = sy + 62;
     }
     const tap = t(tapY, 'TAP TO PLAY AGAIN', 18, hex(P.pink));
     fade.pop(); // the tap text blinks on its own

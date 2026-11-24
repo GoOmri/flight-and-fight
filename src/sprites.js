@@ -207,12 +207,23 @@ function makeStarIcons(scene) {
   }
 }
 
-// GOAL icons (what the player does): the witch hat = finish, the game's coin = all coins, the game's heart = no hit. Textures goal_<key>_<open|earned|failed>:
+// GOAL icons (what the player does): the menu cat = all cats, the game's coin = all coins, a skull (BTL pack) = defeat every enemy, the game's heart = no hit. Textures goal_<key>_<open|earned|failed>:
 // open = white silhouette, earned = full colour, failed = grey (no cross). Cut from pictures the game already loads (coin and heart sheets) and the hat (assets/ui/goal-hat.png),
-// trimmed to the visible pixels. The hat's black is swapped to purples (a colour swap only).
+// trimmed to the visible pixels. The black cat's colours are swapped to purples (a colour swap only).
+// Both scenes load the pictures with loadGoalArt (textures are shared, so the menu and the game use the same icons).
+export function loadGoalArt(scene, v) {
+  const L = scene.load, T = scene.textures, S = CONFIG.sprites;
+  if (!T.exists('star_src')) L.image('star_src', 'assets/pickups/star-lit.png?v=' + v);
+  if (!T.exists('goal_skull')) L.image('goal_skull', 'assets/ui/goal-skull.png?v=' + v);
+  if (!T.exists('goal_cat_src')) L.spritesheet('goal_cat_src', 'assets/menu/cat.png?v=' + v, { frameWidth: 21, frameHeight: 25 });
+  if (S.coin && !T.exists('sp_coin')) L.spritesheet('sp_coin', 'assets/' + S.coin.file, { frameWidth: S.coin.frameW, frameHeight: S.coin.frameH });
+  const h = S.heartPickup && S.heartPickup.idle;
+  if (h && !T.exists('sp_heart_idle')) L.spritesheet('sp_heart_idle', 'assets/' + h.file, { frameWidth: h.frameW, frameHeight: h.frameH });
+}
 export function makeGoalIcons(scene) {
   const src = {
-    finish: { tex: 'goal_hat', hat: true },
+    cats: { tex: 'goal_cat_src', recolor: true },
+    killAll: { tex: 'goal_skull' },
     allCoins: { tex: scene.textures.exists('sp_coin') ? 'sp_coin' : 'coin' },
     noHit: { tex: scene.textures.exists('sp_heart_idle') ? 'sp_heart_idle' : 'heart' }
   };
@@ -230,7 +241,7 @@ export function makeGoalIcons(scene) {
       const cv = scene.textures.createCanvas('goal_' + key + '_' + st, w, h), cx = cv.getContext(), out = cx.createImageData(w, h), o = out.data;
       for (let i = 0; i < px.length; i += 4) {
         let r = px[i], g = px[i + 1], b = px[i + 2], a = px[i + 3];
-        if (src[key].hat) { const l = Math.min(1, (r * 0.3 + g * 0.59 + b * 0.11) / 90); r = 0x3b + (0xc8 - 0x3b) * l; g = 0x14 + (0x9c - 0x14) * l; b = 0x78 + (0xff - 0x78) * l; }
+        if (src[key].recolor) { const l = Math.min(1, (r * 0.3 + g * 0.59 + b * 0.11) / 90); r = 0x3b + (0xc8 - 0x3b) * l; g = 0x14 + (0x9c - 0x14) * l; b = 0x78 + (0xff - 0x78) * l; }
         if (st === 'open') { r = g = b = 255; }
         else if (st === 'failed') { const v = (r * 0.3 + g * 0.59 + b * 0.11) * 0.55; r = g = b = v; a *= 0.8; }
         o[i] = r; o[i + 1] = g; o[i + 2] = b; o[i + 3] = a;
