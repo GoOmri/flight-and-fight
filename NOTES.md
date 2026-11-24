@@ -879,3 +879,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-24 v1.9.98: the ring grows while the witch hovers (branch v1998-ring-grows)
 - Omri: when the player hovers above the cat the ring should get larger so it can be seen under the witch, a bit thicker too. The ring now swells smoothly while she is inside (radius 9 -> 17, thickness 5 -> 7; config cats.ringRxBig / ringRyBig / ringWBig, speed ringGrowSpeed 6 per second) and shrinks back when she leaves. The hit area (ringHitR 24) is unchanged.
 - Tested in the browser pane (witch over the cat: the big ring shows around her). UNVERIFIED: the size and the swell speed on a phone.
+
+## 2026-11-24 v1.9.99: big ring a little smaller (branch v1999-ring-smaller)
+- Omri: good width, a little smaller. The swollen ring radius 17 -> 14 (config cats.ringRxBig / ringRyBig); thickness unchanged (7). UNVERIFIED on the phone.
