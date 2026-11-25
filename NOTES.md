@@ -1082,3 +1082,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.146: ring sounds play in succession (branch v1146-ring-stages)
 - Omri's order: cauldron bubbling (first third of the ring), underwater bubbles (second third), teleport (last third). Before: one of the three at random. ringSound(fill) in src/sound.js.
 - Checked in the browser pane (switches at one third and two thirds, stops on leaving). UNVERIFIED: how it sounds.
+
+## 2026-11-25 v1.9.147: Omri's new button picture (branch v1147-new-button)
+- assets/ui/ui-med-button.png replaced with Omri's 80x25 art (source copy: art-packs/ui-buttons/omri/my-button.png). Used by every wide button (settings, goals box, pause, end screen, UPDATE).
+- Checked in the browser pane in the settings panel. UNVERIFIED on phone.
