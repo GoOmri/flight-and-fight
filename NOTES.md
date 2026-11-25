@@ -1033,3 +1033,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Wired: shoot, enemy hit/die, coin, heart, potion + level up, witch hit, cat ring loop (one of 3 at random), cat rescued (2 together), game over, stage clear, taps, menu and forest music. Pause and background tab are silent. SOUND ON/OFF in settings (saved).
 - No sound yet: chest, cat meow, swamp music, end-screen music.
 - Checked in the browser pane: files load, no script errors, switch shows. UNVERIFIED: everything you hear (volumes, how often shoot repeats, loops).
+
+## 2026-11-25 v1.9.135: softer sounds, pitch variety, music preload, settings stay open (branch v1135-sound-soft)
+- EFFECTS button: the settings panel now opens again after the menu rebuilds (it closed before).
+- Sound (src/sound.js): low-pass filter on all effects, 6 ms fade-in, compressor on the effects, lower volumes; shot cut to 0.16 s and max one per 130 ms; random pitch on shot, hit, enemy pop, coin.
+- Music is fetched at game start (was fetched when the stage began, so the forest music was late). If it is still late, the track itself may have a quiet intro.
+- Chest (box) hit and break have no sound yet: new slot 'chest is hit' in the local sound picker.
+- UNVERIFIED: everything you hear.
