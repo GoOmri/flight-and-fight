@@ -216,7 +216,7 @@ export class Cats {
     const s = this.s;
     c.state = 'saved'; c.t = 0; c.x0 = c.x; c.sy = c.y; // sy = the stone's y (it stays on the ground)
     c.ring.clear(); c.ringBack.clear(); c.fx.setVisible(false);
-    c.cat.anims.stop(); c.cat.play('cat' + c.id + '_run');
+    c.cat.anims.stop(); c.cat.setTexture('cat' + c.id + '_run', 3); c.running = false; // while it jumps in place it holds one leaping pose; the run cycle starts only when it really starts to run
     c.dir = c.x < W / 2 ? -1 : 1; c.cat.setFlipX(c.dir < 0); // face the way it will run from the very first jump (the pictures face right)
     for (let i = 0; i < 7; i++) { // 3 small hearts and 4 tiny sparkles shoot off like fireworks (no stars: a gold star means a goal), slow down and fade
       const heart = i < 3, a = Math.random() * Math.PI * 2, v = (heart ? 70 : 90) + Math.random() * 70, x = c.x, y = c.y - c.top - 10;
@@ -242,10 +242,11 @@ export class Cats {
       x = c.x0; y = c.sy - c.top - Math.abs(Math.sin(Math.PI * 2 * c.t / J)) * CC.jumpPx;
     } else { // then it runs along the ground to the closest side edge and out of the screen
       const dir = c.dir, run = (c.t - J) * CC.runSpeed;
+      if (!c.running) { c.running = true; c.cat.play('cat' + c.id + '_run'); }
       x = c.x0 + dir * run; y = c.sy - c.top;
       if (x < -30 || x > W + 30) { this.finish(c); return; }
     }
-    const ro = this.runOff && this.runOff[c.id], fr = c.cat.anims.currentFrame;
+    const ro = this.runOff && this.runOff[c.id], fr = c.running ? c.cat.anims.currentFrame : null;
     if (ro && fr) x -= (ro[parseInt(fr.textureFrame, 10)] || 0) * c.cat.scaleX * (c.dir < 0 ? -1 : 1); // cancel the picture's own forward lean so the run is one smooth slide
     c.cat.setPosition(Math.round(x) + CC.catDx, Math.round(y) + CC.catDy);
     this.placeGlow(c);
