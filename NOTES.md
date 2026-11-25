@@ -1027,3 +1027,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.133: hearts cannot be picked up at full health (branch v1133-full-hearts)
 - With all 3 hearts, a falling heart passes through the witch and keeps falling; it can be caught after a hit. The old +50 score for a heart at full health no longer happens (config pickup.heartScoreIfFull is now unused).
 - Checked in the browser pane (stays at full, collected at 2 hearts). UNVERIFIED on phone.
+
+## 2026-11-25 v1.9.134: sound effects and music (branch v1134-sound)
+- New src/sound.js (own Web Audio module; names, files, volumes at the top). assets/sfx (16 files, 456 KB), assets/music (menu, forest, 15 MB, streamed). Omri's picks; credits in CREDITS.md.
+- Wired: shoot, enemy hit/die, coin, heart, potion + level up, witch hit, cat ring loop (one of 3 at random), cat rescued (2 together), game over, stage clear, taps, menu and forest music. Pause and background tab are silent. SOUND ON/OFF in settings (saved).
+- No sound yet: chest, cat meow, swamp music, end-screen music.
+- Checked in the browser pane: files load, no script errors, switch shows. UNVERIFIED: everything you hear (volumes, how often shoot repeats, loops).

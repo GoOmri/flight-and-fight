@@ -1,3 +1,4 @@
+import { sfx, music, ringSound, pauseSound, soundOn, toggleSound } from '../sound.js';
 import { CONFIG as C, hex } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale } from '../sprites.js';
 import { FONT, FONT_TITLE, titleCase, fpx, drawPlate } from '../hud.js';
@@ -34,6 +35,7 @@ export class MenuScene extends Phaser.Scene {
     const q = new URLSearchParams(window.location.search);
     if (DEBUG_PARAMS.some(k => q.has(k))) { this.scene.start('Play'); return; }
     try { const s = localStorage.getItem(CTL_KEY); if (s === 'drag' || s === 'stick') C.ship.controls = s; } catch (e) { /* no saved choice */ }
+    ringSound(false); pauseSound(false); music('menu');
     this.fxLow = false; try { this.fxLow = localStorage.getItem(FX_KEY) === 'low'; } catch (e) { /* full effects */ } // settings: EFFECTS LOW keeps the menu calm (no sparks, bubbles, fireflies, shooting stars, tilt)
     makeAllTextures(this); // star pictures (made once, skipped when they exist)
     makeGoalIcons(this);   // goal pictures (the lightbox shows them)
@@ -159,7 +161,7 @@ export class MenuScene extends Phaser.Scene {
       setPressed(null);
       if (!same) return;
       if (c.btn && !this.modal) this.bounce(c); // a little pop on UPDATE and the gear
-      if (c.action) c.action(); else if (c.st) this.openGoals(c.st.theme); // a stage tile opens the goals box, PLAY starts the stage
+      sfx('tap'); if (c.action) c.action(); else if (c.st) this.openGoals(c.st.theme); // a stage tile opens the goals box, PLAY starts the stage
     };
     this.input.on('pointerdown', onDown);
     this.input.on('pointermove', onMove);
@@ -310,7 +312,7 @@ export class MenuScene extends Phaser.Scene {
     }
   }
 
-  // The settings panel (closed at first): CONTROLS (drag / stick, saved), TUNE PANEL (on / off), SOUND (not in the game yet), CLOSE.
+  // The settings panel (closed at first): CONTROLS (drag / stick, saved), TUNE PANEL (on / off), EFFECTS, SOUND (on / off, saved), CLOSE.
   makeSettings() {
     const S = M.settings, objs = [], ink = S.ink;
     const keep = o => { o.setDepth(S.depth).setVisible(false); objs.push(o); return o; };
@@ -353,8 +355,8 @@ export class MenuScene extends Phaser.Scene {
     T(left, S.y + 156, 'EFFECTS', S.btnSize, 0, lc);
     mkBtn(right - bwid - 20, S.y + 144, bwid + 20, this.fxLow ? 'LOW' : 'FULL', () => { try { localStorage.setItem(FX_KEY, this.fxLow ? 'full' : 'low'); } catch (e) { /* not saved */ } this.scene.restart(); });
     // SOUND
-    T(left, S.y + 186, 'SOUND', S.btnSize, 0, hc);
-    T(right - bwid / 2, S.y + 186, 'SOON', S.btnSize, 0.5, hc);
+    T(left, S.y + 186, 'SOUND', S.btnSize, 0, lc);
+    const snd = mkBtn(right - bwid, S.y + 174, bwid, soundOn() ? 'ON' : 'OFF', () => { snd.label.setText(toggleSound() ? 'ON' : 'OFF'); });
     // CLOSE
     mkBtn(S.x + (S.w - 90) / 2, S.y + S.h - 56, 90, 'CLOSE', () => this.openSettings(false));
     this.panelObjs = objs;

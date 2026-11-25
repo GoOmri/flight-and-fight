@@ -1,6 +1,7 @@
 // Cat rescue (v1.9.90): a worried cat sits on a stone that scrolls down with the ground. The witch hovers over it: a ring around it fills (about 2 s),
 // drains slowly when she leaves, and loses a bit when she is hit inside. Full = the cat jumps happily and leaps to the top left. A cat that scrolls off the bottom is lost.
 // Pictures: the CC0 "Pet Cats Pack" (assets/cats): Sitting (waiting), Meow (+ puff), Run (the happy jumps). Same strips for all 6 colours.
+import { sfx, ringSound } from './sound.js';
 import { CONFIG as C } from './config.js';
 import { goalScale } from './sprites.js';
 
@@ -131,6 +132,7 @@ export class Cats {
       if (c.fill >= 1) { this.save(c); continue; }
       if (c.y > H + 40) this.lose(c);
     }
+    ringSound(!s.over && this.list.some(c => c.state === 'hover'));
   }
 
   // Colourful sparks (the trail colours) rise from every ring, more of them while the witch hovers.
@@ -214,6 +216,7 @@ export class Cats {
 
   save(c) {
     const s = this.s;
+    sfx('rescue');
     c.state = 'saved'; c.t = 0; c.x0 = c.x; c.sy = c.y; // sy = the stone's y (it stays on the ground)
     c.ring.clear(); c.ringBack.clear(); c.fx.setVisible(false);
     c.cat.anims.stop(); c.cat.setTexture('cat' + c.id + '_run', 0); c.running = false; // while it jumps in place it holds the most upright, reared-up picture (run frame 0; the pack has no real hind-legs picture); the run cycle starts only when it really starts to run
