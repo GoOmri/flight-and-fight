@@ -1023,3 +1023,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.132: cats and their rocks keep scrolling on the game over screen (branch v1132-cats-scroll-gameover)
 - The game over branch of update() skipped cats.update, so the cats and their stones froze while the ground kept scrolling. It now calls cats.update; a cat that scrolls off on that screen is not counted as lost.
 - Checked in the browser pane (cat and stone moved about 25 px in 0.6 s after game over). UNVERIFIED on phone.
+
+## 2026-11-25 v1.9.133: hearts cannot be picked up at full health (branch v1133-full-hearts)
+- With all 3 hearts, a falling heart passes through the witch and keeps falling; it can be caught after a hit. The old +50 score for a heart at full health no longer happens (config pickup.heartScoreIfFull is now unused).
+- Checked in the browser pane (stays at full, collected at 2 hearts). UNVERIFIED on phone.
