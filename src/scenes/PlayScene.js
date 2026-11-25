@@ -1,4 +1,4 @@
-import { sfx, music, ringSound, pauseSound } from '../sound.js';
+import { sfx, music, ringSound, pauseSound, soundOn, toggleSound, musicOn, toggleMusic } from '../sound.js';
 import { CONFIG as C, z, hex, snap4 } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale, PX } from '../sprites.js';
 import { STAGE1 } from '../waves.js';
@@ -205,8 +205,8 @@ export class PlayScene extends Phaser.Scene {
       this.kill(c); sfx('coin'); this.coinsCollected++; this.addScore(C.coin.value);
       this.pop(c.x, c.y, '+' + C.coin.value);
       this.burst(c.x, c.y, C.feel.coinSparkCount, COIN_TINTS, C.feel.coinSparkSpeedMul, 3); // coin pop
-    });
-    this.physics.add.overlap(this.ship, this.weaponUps, (s, p) => { this.kill(p); this.weaponUp(); });
+    }, (s, c) => this.pulledIn(c));
+    this.physics.add.overlap(this.ship, this.weaponUps, (s, p) => { this.kill(p); this.weaponUp(); }, (s, p) => this.pulledIn(p));
     this.physics.add.overlap(this.ship, this.heartUps, (s, p) => { this.kill(p); this.heartUp(p.x, p.y); }, () => this.hearts < C.ship.hearts); // with all hearts full the heart is not picked up: it keeps falling and can be caught after a hit
     // (crates are in no ship overlap: the ship flies through them)
   }
@@ -850,31 +850,46 @@ export class PlayScene extends Phaser.Scene {
     pauseSound(true); sfx('tap');
     this.physics.world.pause(); this.tweens.pauseAll(); this.anims.pauseAll();
     this.dragId = null; this.stickV.set(0, 0); this.stopping = false; this.stickC.set(W / 2, C.stick.restY);
-    const B = C.pauseBtn, P = C.menu.pal, CR = hex(P.cream), ui = [];
+    const P = C.menu.pal, ui = [];
     ui.push(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.6).setDepth(70));
-    ui.push(this.add.text(W / 2, H / 2 - 80, 'Paused', { ...FONT_TITLE, fontSize: '36px', color: CR, stroke: hex(P.shadow), strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(71));
-    const btn = (y, label) => {
+    ui.push(this.add.text(W / 2, H / 2 - 80, 'Paused', { ...FONT_TITLE, fontSize: '36px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(71));
+    this.pauseUi = { objs: ui, btnObjs: [], list: [] };
+    this.pauseButtons('main');
+  }
+
+  // the buttons of the pause screen: the main page, or the options page (sound, music)
+  pauseButtons(page) {
+    const B = C.pauseBtn, P = C.menu.pal, CR = hex(P.cream), ui = this.pauseUi.btnObjs;
+    ui.forEach(o => o.destroy()); ui.length = 0;
+    const rows = page === 'main' ? [['cont', 'CONTINUE'], ['options', 'OPTIONS'], ['restart', 'RESTART'], ['menu', 'MENU']]
+      : [['sound', 'SOUND: ' + (soundOn() ? 'ON' : 'OFF')], ['music', 'MUSIC: ' + (musicOn() ? 'ON' : 'OFF')], ['back', 'BACK']];
+    this.pauseUi.list = rows.map(([id, label], i) => {
+      const y = H / 2 - 25 + i * (B.btnH + B.gap);
       if (this.textures.exists('ui_med-button')) ui.push(this.add.nineslice(W / 2 - B.btnW / 2, y - 12, 'ui_med-button', undefined, B.btnW, 25, 10, 10, 0, 0).setOrigin(0, 0).setDepth(71));
       else { const gg = this.add.graphics().setDepth(71); drawPlate(gg, W / 2 - B.btnW / 2, y - B.btnH / 2, B.btnW, B.btnH, { fill: B.fill, border: B.border, down: false }); ui.push(gg); }
       ui.push(this.add.text(W / 2, y, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: 3, align: 'center' }).setOrigin(0.5).setDepth(72));
-      return { x: W / 2, y, w: B.btnW, h: B.btnH };
-    };
-    this.pauseUi = { objs: ui, cont: btn(H / 2 - 25, 'CONTINUE'), restart: btn(H / 2 - 25 + B.btnH + B.gap, 'RESTART'), menu: btn(H / 2 - 25 + 2 * (B.btnH + B.gap), 'MENU') };
+      return { id, x: W / 2, y, w: B.btnW, h: B.btnH };
+    });
   }
 
   pauseTap(x, y) {
-    const hit = b => Math.abs(x - b.x) <= b.w / 2 && Math.abs(y - b.y) <= b.h / 2;
-    if (hit(this.pauseUi.cont) || hit(this.pauseUi.restart) || hit(this.pauseUi.menu)) sfx('tap');
-    if (hit(this.pauseUi.cont)) this.resumeGame();
-    else if (hit(this.pauseUi.restart)) { this.anims.resumeAll(); this.scene.restart(this.startData); } // start the stage again (the run so far is lost, nothing saved)
-    else if (hit(this.pauseUi.menu)) { this.anims.resumeAll(); this.scene.start('Menu'); } // a pause never saves anything: leaving loses the run
+    const b = this.pauseUi.list.find(b => Math.abs(x - b.x) <= b.w / 2 && Math.abs(y - b.y) <= b.h / 2);
+    if (!b) return;
+    sfx('tap');
+    if (b.id === 'cont') this.resumeGame();
+    else if (b.id === 'options') this.pauseButtons('options');
+    else if (b.id === 'back') this.pauseButtons('main');
+    else if (b.id === 'sound') { toggleSound(); this.pauseButtons('options'); }
+    else if (b.id === 'music') { toggleMusic(); this.pauseButtons('options'); }
+    else if (b.id === 'restart') { this.anims.resumeAll(); this.scene.restart(this.startData); } // start the stage again (the run so far is lost, nothing saved)
+    else if (b.id === 'menu') { this.anims.resumeAll(); this.scene.start('Menu'); } // a pause never saves anything: leaving loses the run
   }
 
   resumeGame() {
     if (!this.paused) return;
     const d = this.time.now - this.pauseAt; // time deadlines move by the time spent paused
     this.invulnUntil += d; this.stunUntil += d; this.shipFlashUntil += d;
-    this.pauseUi.objs.forEach(o => o.destroy()); this.pauseUi = null;
+    [...this.pauseUi.objs, ...this.pauseUi.btnObjs].forEach(o => o.destroy()); this.pauseUi = null;
     this.physics.world.resume(); this.tweens.resumeAll(); this.anims.resumeAll();
     this.paused = false;
     pauseSound(false);
@@ -964,13 +979,18 @@ export class PlayScene extends Phaser.Scene {
     const F = C.feel, R = F.magnetRadius;
     if (R <= 0) return;
     const sh = this.ship;
-    this.coins.children.iterate(c => {
+    for (const grp of [this.coins, this.weaponUps]) grp.children.iterate(c => { // coins and weapon potions
       if (!c || !c.active) return;
       const dx = sh.x - c.x, dy = sh.y - c.y, d = Math.hypot(dx, dy);
-      if (!c.mag && d < R) { c.mag = true; c.body.setDragX(0); }
-      if (c.mag && d > 0.5) c.body.setVelocity(dx / d * F.magnetSpeed, dy / d * F.magnetSpeed);
+      if (!c.mag && d < R) { c.mag = true; c.s0 = c.scaleX; c.body.setDragX(0); }
+      if (!c.mag) return;
+      if (d > 0.5) c.body.setVelocity(dx / d * F.magnetSpeed, dy / d * F.magnetSpeed);
+      c.setScale(c.s0 * Phaser.Math.Clamp(0.3 + 0.7 * d / R, 0.3, 1)); // it shrinks as it is sucked into her
     });
   }
+
+  // a magnet-pulled pickup is only taken once it has reached the middle of the witch
+  pulledIn(o) { return !o.mag || Math.hypot(this.ship.x - o.x, this.ship.y - o.y) <= C.feel.magnetTakeDist; }
 
   // Fire one volley of the current weapon level (see weaponLevels in config.js).
   autoFire(time) {
@@ -1213,7 +1233,7 @@ export class PlayScene extends Phaser.Scene {
     const shSp = C.sprites.heartPickup && C.sprites.heartPickup.shine ? (this.heartShineSp = this.heartShineSp || []) : null; // the pack's own shine layer: glints crossing the heart, same frame as the heart's Idle loop
     let ns = 0;
     const PB = C.sprites.potionShine; // the potion bobs like the heart
-    if (PB && PB.bobAmp) this.weaponUps.children.iterate(p => { if (p && p.active && p.baseV) p.body.setVelocityY(p.baseV + PB.bobAmp * Math.sin(time / 1000 * PB.bobSpeed + p.bobPh)); });
+    if (PB && PB.bobAmp) this.weaponUps.children.iterate(p => { if (p && p.active && p.baseV && !p.mag) p.body.setVelocityY(p.baseV + PB.bobAmp * Math.sin(time / 1000 * PB.bobSpeed + p.bobPh)); });
     this.heartUps.children.iterate(p => {
       if (!p || !p.active) return;
       if (p.baseV) p.body.setVelocityY(p.baseV + HS.bobAmp * Math.sin(time / 1000 * HS.bobSpeed + p.bobPh));
@@ -1373,6 +1393,7 @@ export class PlayScene extends Phaser.Scene {
     const p = this.spawn(group, gem ? (this.textures.exists('sp_gem_g') ? 'sp_gem_g' : 'sp_gem') : sp ? 'sp_heart_drop' : key, Phaser.Math.Clamp(x, m, W - m), y, sp ? sp.scale : PX);
     if (!p) return;
     p.setDepth(C.pickup.depth); // above the colour wash
+    p.mag = false;
     if (gem && gem.angle) p.setAngle(gem.angle); // the weapon potion is tilted to the right
     const hb = 2 * C.coin.pickupRadius / (sp ? sp.scale : PX);
     p.body.setSize(hb, hb);
