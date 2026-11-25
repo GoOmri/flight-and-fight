@@ -989,3 +989,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.124: rescue burst = hearts and sparkles, no stars (branch v1124-rescue-hearts)
 - Stars mean goals, so the rescue burst now throws 3 small hearts and 4 tiny sparkles (same fireworks motion, shorter life). The star_spin art is still loaded but unused.
 - UNVERIFIED: the look on a phone.
+
+## 2026-11-25 v1.9.125: UPDATE now refreshes cats.js (branch v1125-update-refresh-cats)
+- Cause of 'new version number but old game for a few minutes': src/cats.js was missing from FILES in src/update.js, so UPDATE refreshed config.js (the number) but left the old cats.js saved. Added it. Rule: every new src file goes into FILES.
+- Note: the update that brings v1.9.125 still uses the old list; it works from the update after that.
+- UNVERIFIED on phone.
