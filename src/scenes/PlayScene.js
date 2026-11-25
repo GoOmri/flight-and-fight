@@ -1,3 +1,4 @@
+import { popIn } from '../popin.js';
 import { buttonKey, BTN_INK } from '../buttons.js';
 import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
 import { drawVolBar, volFrom, volHit, VOL_W } from '../volbar.js';
@@ -858,7 +859,8 @@ export class PlayScene extends Phaser.Scene {
     const P = C.menu.pal, ui = [];
     ui.push(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.6).setDepth(70));
     ui.push(this.add.text(W / 2, H / 2 - 80, 'Paused', { ...FONT_TITLE, fontSize: '36px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(71));
-    this.pauseUi = { objs: ui, btnObjs: [], list: [] };
+    const box = this.add.container(0, 0, ui.slice(1)).setDepth(71); // everything but the dark veil
+    this.pauseUi = { objs: ui, btnObjs: [], list: [], box };
     this.pauseButtons('main');
   }
 
@@ -882,6 +884,8 @@ export class PlayScene extends Phaser.Scene {
       ui.push(this.add.text(W / 2, y, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: art ? BTN_INK : CR, stroke: hex(P.shadow), strokeThickness: art ? 0 : 3, align: 'center' }).setOrigin(0.5).setDepth(72));
       return { id, x: W / 2, y, w: B.btnW, h: B.btnH };
     });
+    this.pauseUi.box.add(ui);
+    popIn(this, this.pauseUi.box, W / 2, H / 2);
   }
 
   // a drag of the volume slider that was taken hold of (pause screen)
@@ -909,7 +913,7 @@ export class PlayScene extends Phaser.Scene {
     if (!this.paused) return;
     const d = this.time.now - this.pauseAt; // time deadlines move by the time spent paused
     this.invulnUntil += d; this.stunUntil += d; this.shipFlashUntil += d;
-    [...this.pauseUi.objs, ...this.pauseUi.btnObjs].forEach(o => o.destroy()); this.pauseUi = null;
+    [...this.pauseUi.objs, ...this.pauseUi.btnObjs, this.pauseUi.box].forEach(o => o.destroy()); this.pauseUi = null;
     this.physics.world.resume(); this.tweens.resumeAll(); this.anims.resumeAll();
     this.paused = false;
     pauseSound(false);
@@ -1696,9 +1700,9 @@ export class PlayScene extends Phaser.Scene {
       });
       const V = C.coin.value, sy = 176 + this.goalKeys.length * gap + 4;
       t(sy, 'COINS ' + this.coinsCollected * V + '/' + this.coinsSpawned * V, 16, CR);
-      t(sy + 15, 'KILLS ' + this.enemiesKilled + '/' + this.enemiesSpawned, 16, CR);
-      t(sy + 30, 'HITS ' + this.hitsTaken, 16, CR);
-      tapY = sy + 62;
+      t(sy + 17, 'KILLS ' + this.enemiesKilled + '/' + this.enemiesSpawned, 16, CR);
+      t(sy + 34, 'HITS ' + this.hitsTaken, 16, CR);
+      tapY = sy + 66;
     }
     const tap = t(tapY, 'TAP TO PLAY AGAIN', 18, hex(P.pink));
     fade.pop(); // the tap text blinks on its own
@@ -1715,5 +1719,6 @@ export class PlayScene extends Phaser.Scene {
       this.tweens.add({ targets: fade, alpha: 1, duration: ease, delay: ease / 3, ease: 'Quad.easeOut' });
     }
     this.tweens.add({ targets: tap, alpha: { from: 1, to: 0.3 }, yoyo: true, repeat: -1, duration: 600, delay: ease });
+    popIn(this, this.add.container(0, 0, [...fade, tap]).setDepth(61), W / 2, H / 2, ease + 240); // it pops in while it fades in
   }
 }

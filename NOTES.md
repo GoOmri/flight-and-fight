@@ -1123,3 +1123,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - After the last wave, when nothing is left (enemies, cats, boxes, pickups) and 1.5 s passed: controls and shooting stop, enemy shots are removed, she cannot be hit, dips a little and speeds off the top; then STAGE CLEAR. Numbers: config stage.flyOffDip / flyOffAccel / flyOffGone.
 - Checked in the browser pane by forcing the end of a stage. UNVERIFIED on phone: how it feels at the end of a real stage.
 - Boss at the end of stage 1: Omri is not sure it is needed (open question).
+
+## 2026-11-25 v1.9.156: monogram everywhere; all menus pop in (branch v1156-font-popin)
+- The whole game now uses monogram (same sizes in pixels per art pixel as before); PackFont only as a fallback; the old Pixelify fallback switch removed. Big titles keep DungeonFont.
+- Pop-in on pause (both pages), game over and stage clear, besides settings and the stage box. New src/popin.js (runs on scene update, because pause stops tweens). Stage clear stat lines spaced a bit more.
+- Checked in the browser pane: menu, stage box, HUD, pause, stage clear, game over. UNVERIFIED on phone: readability of the thin font at small sizes (version number, buttons).
