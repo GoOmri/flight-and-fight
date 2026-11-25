@@ -1,4 +1,4 @@
-import { buttonKey } from '../buttons.js';
+import { buttonKey, BTN_INK } from '../buttons.js';
 import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
 import { drawVolBar, volFrom, volHit, VOL_W } from '../volbar.js';
 import { CONFIG as C, z, hex, snap4 } from '../config.js';
@@ -49,6 +49,7 @@ export class PlayScene extends Phaser.Scene {
     loadCatArt(this, C.version); // the cats (assets/cats)
     loadGoalArt(this, C.version); // goal icons and the star (the menu loads them too)
     if (!this.textures.exists('ui_med-button')) this.load.image('ui_med-button', 'assets/ui/ui-med-button.png?v=' + C.version); // the menu's button (a stage started from the menu has it already)
+    if (!this.textures.exists('ui_med-button2')) this.load.image('ui_med-button2', 'assets/ui/ui-med-button2.png?v=' + C.version);
     const K = C.sprites; // coin / heart / chest / puff strips (assets/pickups, assets/fx); a thing without an entry keeps its code-drawn picture
     const strip = (key, d) => this.textures.exists(key) || this.load.spritesheet(key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
     if (K.coin) strip('sp_coin', K.coin);
@@ -876,7 +877,8 @@ export class PlayScene extends Phaser.Scene {
       }
       if (this.textures.exists('ui_med-button')) ui.push(this.add.nineslice(W / 2 - B.btnW / 2, y - 12, buttonKey(this), undefined, B.btnW, 25, 10, 10, 0, 0).setOrigin(0, 0).setDepth(71));
       else { const gg = this.add.graphics().setDepth(71); drawPlate(gg, W / 2 - B.btnW / 2, y - B.btnH / 2, B.btnW, B.btnH, { fill: B.fill, border: B.border, down: false }); ui.push(gg); }
-      ui.push(this.add.text(W / 2, y, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: 3, align: 'center' }).setOrigin(0.5).setDepth(72));
+      const art = this.textures.exists('ui_med-button');
+      ui.push(this.add.text(W / 2, y, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: art ? BTN_INK : CR, stroke: hex(P.shadow), strokeThickness: art ? 0 : 3, align: 'center' }).setOrigin(0.5).setDepth(72));
       return { id, x: W / 2, y, w: B.btnW, h: B.btnH };
     });
   }
@@ -1682,7 +1684,7 @@ export class PlayScene extends Phaser.Scene {
     if (this.textures.exists('ui_med-button')) btnPic = this.add.nineslice(W / 2 - M.w / 2, my - 12, buttonKey(this), undefined, M.w, 25, 10, 10, 0, 0).setOrigin(0, 0).setDepth(61);
     else { btnPic = this.add.graphics().setDepth(61); drawPlate(btnPic, W / 2 - M.w / 2, my - M.h / 2, M.w, M.h, { fill: M.color, border: M.border, down: false }); }
     fade.push(btnPic);
-    t(my, 'MENU', M.size, CR, 3);
+    t(my, 'MENU', M.size, btnPic ? BTN_INK : CR, btnPic ? 0 : 3);
     if (ease > 0) {
       veil.setAlpha(0); fade.forEach(o => o.setAlpha(0)); tap.setAlpha(0);
       this.tweens.add({ targets: veil, alpha: 0.55, duration: ease });
