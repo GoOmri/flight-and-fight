@@ -1,4 +1,5 @@
-import { sfx, music, ringSound, pauseSound, soundOn, toggleSound, musicOn, toggleMusic } from '../sound.js';
+import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
+import { drawVolBar, volAt, VOL_W } from '../volbar.js';
 import { CONFIG as C, z, hex, snap4 } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale, PX } from '../sprites.js';
 import { STAGE1 } from '../waves.js';
@@ -181,6 +182,7 @@ export class PlayScene extends Phaser.Scene {
       if (this.stickMode) this.stickC.copy(this.finger); // the ring appears under the thumb
     });
     this.input.on('pointermove', p => {
+      if (this.paused) { if (p.isDown && this.pauseUi) this.pauseVolume(p.x / R, p.y / R); return; } // drag along a volume bar
       if (this.mouseMode) { this.mouseSeen = true; return; }
       if (p.id !== this.dragId || !p.isDown || this.over) return;
       this.finger.set(p.x / R, p.y / R);
@@ -862,9 +864,15 @@ export class PlayScene extends Phaser.Scene {
     const B = C.pauseBtn, P = C.menu.pal, CR = hex(P.cream), ui = this.pauseUi.btnObjs;
     ui.forEach(o => o.destroy()); ui.length = 0;
     const rows = page === 'main' ? [['cont', 'CONTINUE'], ['options', 'OPTIONS'], ['restart', 'RESTART'], ['menu', 'MENU']]
-      : [['sound', 'SOUND: ' + (soundOn() ? 'ON' : 'OFF')], ['music', 'MUSIC: ' + (musicOn() ? 'ON' : 'OFF')], ['back', 'BACK']];
+      : [['sound', 'SOUND'], ['music', 'MUSIC'], ['back', 'BACK']];
     this.pauseUi.list = rows.map(([id, label], i) => {
       const y = H / 2 - 25 + i * (B.btnH + B.gap);
+      if (id === 'sound' || id === 'music') { // a label with a volume bar under it
+        const bx = Math.round(W / 2 - VOL_W / 2), by = y + 6, g = this.add.graphics().setDepth(72);
+        drawVolBar(g, bx, by, volume(id));
+        ui.push(g, this.add.text(W / 2, y - 9, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5).setDepth(72));
+        return { id, bar: true, bx, by, g };
+      }
       if (this.textures.exists('ui_med-button')) ui.push(this.add.nineslice(W / 2 - B.btnW / 2, y - 12, 'ui_med-button', undefined, B.btnW, 25, 10, 10, 0, 0).setOrigin(0, 0).setDepth(71));
       else { const gg = this.add.graphics().setDepth(71); drawPlate(gg, W / 2 - B.btnW / 2, y - B.btnH / 2, B.btnW, B.btnH, { fill: B.fill, border: B.border, down: false }); ui.push(gg); }
       ui.push(this.add.text(W / 2, y, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: 3, align: 'center' }).setOrigin(0.5).setDepth(72));
@@ -872,15 +880,23 @@ export class PlayScene extends Phaser.Scene {
     });
   }
 
+  // a touch or drag on a volume bar of the pause screen
+  pauseVolume(x, y) {
+    for (const b of this.pauseUi.list) {
+      if (!b.bar) continue;
+      const v = volAt(x, y, b.bx, b.by);
+      if (v !== null && setVolume(b.id, v)) { drawVolBar(b.g, b.bx, b.by, v); if (b.id === 'sound') sfx('coin'); }
+    }
+  }
+
   pauseTap(x, y) {
-    const b = this.pauseUi.list.find(b => Math.abs(x - b.x) <= b.w / 2 && Math.abs(y - b.y) <= b.h / 2);
+    this.pauseVolume(x, y);
+    const b = this.pauseUi.list.find(b => !b.bar && Math.abs(x - b.x) <= b.w / 2 && Math.abs(y - b.y) <= b.h / 2);
     if (!b) return;
     sfx('tap');
     if (b.id === 'cont') this.resumeGame();
     else if (b.id === 'options') this.pauseButtons('options');
     else if (b.id === 'back') this.pauseButtons('main');
-    else if (b.id === 'sound') { toggleSound(); this.pauseButtons('options'); }
-    else if (b.id === 'music') { toggleMusic(); this.pauseButtons('options'); }
     else if (b.id === 'restart') { this.anims.resumeAll(); this.scene.restart(this.startData); } // start the stage again (the run so far is lost, nothing saved)
     else if (b.id === 'menu') { this.anims.resumeAll(); this.scene.start('Menu'); } // a pause never saves anything: leaving loses the run
   }

@@ -1,4 +1,5 @@
-import { sfx, music, ringSound, pauseSound, soundOn, toggleSound, musicOn, toggleMusic } from '../sound.js';
+import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
+import { drawVolBar, volAt, VOL_W } from '../volbar.js';
 import { CONFIG as C, hex } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale } from '../sprites.js';
 import { FONT, FONT_TITLE, titleCase, fpx, drawPlate } from '../hud.js';
@@ -127,7 +128,15 @@ export class MenuScene extends Phaser.Scene {
     const hit = p => (this.modal ? this.panelButtons : this.buttons).find(c => { const px = p.x / R, py = p.y / R; return px >= c.x && px <= c.x + c.w && py >= c.y && py <= c.y + c.h && (c.st === undefined || (c.alpha > 0.35 && py < PA.viewBottom)); }); // a stage bubble can only be hit while it is visible enough and above the fade
     this.pressed = null;
     const setPressed = c => { if (this.pressed) { this.pressed.down = false; this.pressed.draw(); } this.pressed = c; if (c) { c.down = true; c.draw(); } };
+    const volTouch = p => { // the volume bars of the open settings panel
+      if (!this.modal || this.goalsObjs) return;
+      for (const b of this.volBars) {
+        const v = volAt(p.x / R, p.y / R, b.x, b.y);
+        if (v !== null && setVolume(b.key, v)) { drawVolBar(b.g, b.x, b.y, v); if (b.key === 'sound') sfx('coin'); }
+      }
+    };
     const onDown = p => {
+      volTouch(p);
       if (!this.modal && Math.abs(p.x / R - W / 2) < 40 && Math.abs(p.y / R - (H - M.versionBottom)) < 12) {
         verTaps = this.time.now - verAt < 800 ? verTaps + 1 : 1; verAt = this.time.now;
         if (verTaps >= 5) { verTaps = 0; verTxt.setText(toggleTune() ? 'TUNE ON' : 'TUNE OFF'); this.time.delayedCall(1500, () => verTxt.active && verTxt.setText('v' + C.version)); }
@@ -138,6 +147,7 @@ export class MenuScene extends Phaser.Scene {
       if (!this.modal && this.scrollMax > 0 && p.y / R < PA.viewBottom) this.drag = { y0: p.y / R, s0: this.scroll, moved: false, last: p.y / R, lastT: this.time.now }; // maybe the start of a scroll
     };
     const onMove = p => {
+      if (p.isDown) volTouch(p);
       const d = this.drag;
       if (d) {
         const py = p.y / R, dy = py - d.y0;
@@ -313,7 +323,7 @@ export class MenuScene extends Phaser.Scene {
     }
   }
 
-  // The settings panel (closed at first): CONTROLS (drag / stick, saved), TUNE PANEL (on / off), EFFECTS, SOUND and MUSIC (on / off, saved), CLOSE.
+  // The settings panel (closed at first): CONTROLS (drag / stick, saved), TUNE PANEL (on / off), EFFECTS, SOUND and MUSIC volume (saved), CLOSE.
   makeSettings() {
     const S = M.settings, objs = [], ink = S.ink;
     const keep = o => { o.setDepth(S.depth).setVisible(false); objs.push(o); return o; };
@@ -355,12 +365,13 @@ export class MenuScene extends Phaser.Scene {
     // EFFECTS (the menu starts again with the new setting)
     T(left, S.y + 156, 'EFFECTS', S.btnSize, 0, lc);
     mkBtn(right - bwid - 20, S.y + 144, bwid + 20, this.fxLow ? 'LOW' : 'FULL', () => { try { localStorage.setItem(FX_KEY, this.fxLow ? 'full' : 'low'); } catch (e) { /* not saved */ } this.scene.restart({ settings: true }); }); // the menu is rebuilt, then the settings open again
-    // SOUND
-    T(left, S.y + 186, 'SOUND', S.btnSize, 0, lc);
-    const snd = mkBtn(right - bwid, S.y + 174, bwid, soundOn() ? 'ON' : 'OFF', () => { snd.label.setText(toggleSound() ? 'ON' : 'OFF'); });
-    // MUSIC (off: the effects stay, so your own music or video can play alone)
-    T(left, S.y + 216, 'MUSIC', S.btnSize, 0, lc);
-    const mus = mkBtn(right - bwid, S.y + 204, bwid, musicOn() ? 'ON' : 'OFF', () => { mus.label.setText(toggleMusic() ? 'ON' : 'OFF'); });
+    // SOUND and MUSIC volume bars (music at 0: your own music or video can play alone)
+    this.volBars = [['sound', 'SOUND', S.y + 186], ['music', 'MUSIC', S.y + 216]].map(([key, label, y]) => {
+      T(left, y, label, S.btnSize, 0, lc);
+      const bar = { key, x: right - VOL_W, y, g: keep(this.add.graphics()) };
+      drawVolBar(bar.g, bar.x, bar.y, volume(key));
+      return bar;
+    });
     // CLOSE
     mkBtn(S.x + (S.w - 90) / 2, S.y + S.h - 56, 90, 'CLOSE', () => this.openSettings(false));
     this.panelObjs = objs;
