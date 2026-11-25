@@ -1,4 +1,4 @@
-import { sfx, music, ringSound, pauseSound, soundOn, toggleSound } from '../sound.js';
+import { sfx, music, ringSound, pauseSound, soundOn, toggleSound, musicOn, toggleMusic } from '../sound.js';
 import { CONFIG as C, hex } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale } from '../sprites.js';
 import { FONT, FONT_TITLE, titleCase, fpx, drawPlate } from '../hud.js';
@@ -313,7 +313,7 @@ export class MenuScene extends Phaser.Scene {
     }
   }
 
-  // The settings panel (closed at first): CONTROLS (drag / stick, saved), TUNE PANEL (on / off), EFFECTS, SOUND (on / off, saved), CLOSE.
+  // The settings panel (closed at first): CONTROLS (drag / stick, saved), TUNE PANEL (on / off), EFFECTS, SOUND and MUSIC (on / off, saved), CLOSE.
   makeSettings() {
     const S = M.settings, objs = [], ink = S.ink;
     const keep = o => { o.setDepth(S.depth).setVisible(false); objs.push(o); return o; };
@@ -358,6 +358,9 @@ export class MenuScene extends Phaser.Scene {
     // SOUND
     T(left, S.y + 186, 'SOUND', S.btnSize, 0, lc);
     const snd = mkBtn(right - bwid, S.y + 174, bwid, soundOn() ? 'ON' : 'OFF', () => { snd.label.setText(toggleSound() ? 'ON' : 'OFF'); });
+    // MUSIC (off: the effects stay, so your own music or video can play alone)
+    T(left, S.y + 216, 'MUSIC', S.btnSize, 0, lc);
+    const mus = mkBtn(right - bwid, S.y + 204, bwid, musicOn() ? 'ON' : 'OFF', () => { mus.label.setText(toggleMusic() ? 'ON' : 'OFF'); });
     // CLOSE
     mkBtn(S.x + (S.w - 90) / 2, S.y + S.h - 56, 90, 'CLOSE', () => this.openSettings(false));
     this.panelObjs = objs;
