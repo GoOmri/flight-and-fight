@@ -3,10 +3,10 @@ import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.j
 import { drawVolBar, volFrom, volHit, VOL_W } from '../volbar.js';
 import { CONFIG as C, hex } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale } from '../sprites.js';
-import { FONT, FONT_TITLE, titleCase, fpx, drawPlate } from '../hud.js';
+import { FONT, FONT_TITLE, FONT_MONO, titleCase, fpx, drawPlate } from '../hud.js';
 import { goalsOf, loadMedals, loadBest, totalStars, isCleared } from '../medals.js';
 import { latestVersion, refreshFiles } from '../update.js';
-import { toggleTune, tuneEnabled } from '../tune.js';
+import { toggleTune } from '../tune.js';
 
 const W = C.game.width, H = C.game.height, R = C.game.render;
 const M = C.menu;
@@ -31,6 +31,7 @@ export class MenuScene extends Phaser.Scene {
     loadGoalArt(this, C.version); // the gold star and the goal icons (made into textures in sprites.js; the game uses the same ones)
     if (M.logo.decor) this.load.image('menu_logo_decor', 'assets/' + M.logo.decor); // the moon, stars and bats of the logo picture: they stay in the background
     for (const k of ['panel-parchment', 'med-panel', 'med-button', 'med-button2', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png?v=' + C.version); // ?v= = the phone must load the newest picture after an update (it kept an old copy of a picture with the same file name) // UI pictures: parchment panel and gear (Fantasy UI pack, catau-games), tan panel and button (Medieval UI pack, Doktoresco)
+    this.load.image('ui_flat1', 'assets/ui/regular-scroll-button.png?v=' + C.version); this.load.image('ui_flat2', 'assets/ui/regular-scroll-button-02.png?v=' + C.version); // the flat parchment buttons of the settings
   }
 
   create() {
@@ -325,57 +326,67 @@ export class MenuScene extends Phaser.Scene {
     }
   }
 
-  // The settings panel (closed at first): CONTROLS (drag / stick, saved), TUNE PANEL (on / off), EFFECTS, SOUND and MUSIC volume (saved), CLOSE.
+  // The parchment picture as a bigger panel: its 24 px ragged edges and its middle are REPEATED, never stretched (stretching smeared its specks into dashes)
+  parchment(w, h) {
+    const key = 'ui_parchment_' + w + 'x' + h, B = 24, N = 96, M2 = N - 2 * B;
+    if (this.textures.exists(key)) return key;
+    const img = this.textures.get('ui_panel-parchment').getSourceImage(), cv = this.textures.createCanvas(key, w, h), c = cv.getContext();
+    const tile = (sx, sy, sw, sh, dx, dy, dw, dh) => {
+      for (let y = 0; y < dh; y += sh) for (let x = 0; x < dw; x += sw) { const cw = Math.min(sw, dw - x), ch = Math.min(sh, dh - y); c.drawImage(img, sx, sy, cw, ch, dx + x, dy + y, cw, ch); }
+    };
+    tile(B, B, M2, M2, B, B, w - 2 * B, h - 2 * B);
+    tile(B, 0, M2, B, B, 0, w - 2 * B, B); tile(B, N - B, M2, B, B, h - B, w - 2 * B, B);
+    tile(0, B, B, M2, 0, B, B, h - 2 * B); tile(N - B, B, B, M2, w - B, B, B, h - 2 * B);
+    for (const [sx, sy, dx, dy] of [[0, 0, 0, 0], [N - B, 0, w - B, 0], [0, N - B, 0, h - B], [N - B, N - B, w - B, h - B]]) c.drawImage(img, sx, sy, B, B, dx, dy, B, B);
+    cv.refresh();
+    return key;
+  }
+
+  // The settings panel (closed at first), everything centred: CONTROLS (drag / stick) and EFFECTS (full / low) as two buttons side by side,
+  // SOUND and MUSIC volume sliders (music at 0: your own music or video can play alone), CLOSE. All saved. (Tune panel: 5 taps on the version number.)
   makeSettings() {
-    const S = M.settings, objs = [], ink = S.ink;
-    const keep = o => { o.setDepth(S.depth).setVisible(false); objs.push(o); return o; };
-    const art = this.textures.exists('ui_panel-parchment'), T = (x, y, s, size, align = 0.5, color = ink, stroke = 0) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: stroke }).setOrigin(align, 0.5));
-    // a dark veil over the menu, then the parchment (9-slice: the 24 px ragged border stays, the middle stretches); without the picture a drawn dark plate
-    const veil = keep(this.add.graphics()); veil.fillStyle(0x000000, 0.55).fillRect(0, 0, W, H); veil.setDepth(S.depth - 1);
-    if (art) keep(this.add.nineslice(S.x, S.y, 'ui_panel-parchment', undefined, S.w, S.h, 24, 24, 24, 24).setOrigin(0, 0));
-    else { const back = keep(this.add.graphics()); back.fillStyle(P.dark, 0.96).fillRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius); back.lineStyle(M.plateBorderW, P.pink, 1).strokeRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius); }
-    keep(this.add.text(S.x + S.w / 2, S.y + 36, 'Settings', { ...FONT_TITLE, fontSize: '24px', color: hex(art ? ink : P.cream), stroke: hex(P.shadow), strokeThickness: 0 }).setOrigin(0.5)); // the ornate title font
+    const S = M.settings, objs = [], mid = S.x + S.w / 2, ink = hex(S.ink);
+    const keep = (o, dz = 0) => { o.setDepth(S.depth + dz).setVisible(false); objs.push(o); return o; };
+    const T = (x, y, s) => keep(this.add.text(x, y, s, { ...FONT_MONO, color: ink }).setOrigin(0.5), 2);
+    const veil = keep(this.add.graphics(), -1); veil.fillStyle(0x000000, 0.55).fillRect(0, 0, W, H);
+    if (this.textures.exists('ui_panel-parchment')) keep(this.add.image(S.x, S.y, this.parchment(S.w, S.h)).setOrigin(0, 0));
+    else { const back = keep(this.add.graphics()); back.fillStyle(0xe8d4a8, 1).fillRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius); }
+    keep(this.add.text(mid, S.y + 30, 'Settings', { ...FONT_TITLE, fontSize: '24px', color: ink }).setOrigin(0.5), 2); // the ornate title font
     this.panelButtons = [];
-    const mkBtn = (x, y, w, label, action) => { // a copper button: 9-slice picture (normal / pressed) with dark text
-      const h = 26, bt = { btn: true, x: x - 4, y: y - 3, w: w + 8, h: h + 6, down: false, action, shown: false }; // the touch area is a little bigger than the picture
-      bt.img = art ? keep(this.add.nineslice(x, y, buttonKey(this), undefined, w, h, 10, 10, 0, 0).setOrigin(0, 0)) : null;
-      bt.g = keep(this.add.graphics());
-      bt.label = T(x + w / 2, y + h / 2, label, S.btnSize, 0.5, art ? 0x5a3416 : P.cream, art ? 0 : 3);
+    // Omri's flat parchment buttons (80 x 26, 10 px ends). isOn = null: a plain button; else a choice, faded when it is not the chosen one
+    const mkBtn = (x, y, w, key, label, action, isOn = null) => {
+      const h = 26, bt = { btn: true, x: x - 2, y: y - 4, w: w + 4, h: h + 8, down: false, action, shown: false };
+      bt.img = keep(this.add.nineslice(x, y, key, undefined, w, h, 10, 10, 0, 0).setOrigin(0, 0), 1);
+      bt.label = T(x + w / 2, y + 12, label);
       bt.draw = () => {
-        bt.g.clear();
-        if (art) { bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(y + (bt.down ? 1 : 0)); bt.label.setY(y + h / 2 + (bt.down ? 1 : 0)); return; }
-        if (!bt.shown) return;
-        const sink = drawPlate(bt.g, x, y, w, h, { fill: P.purple, border: P.pink, down: bt.down, radius: 6 });
-        bt.label.setY(y + (h - M.plateDrop) / 2 + sink + 1);
+        const on = !isOn || isOn(), sink = bt.down ? 1 : 0;
+        bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setAlpha(on ? 1 : 0.45).setY(y + sink);
+        bt.label.setAlpha(on ? 1 : 0.5).setY(y + 12 + sink);
       };
       this.panelButtons.push(bt);
       return bt;
     };
-    const left = S.x + 30, right = S.x + S.w - 30, bwid = S.btnW, lc = art ? ink : P.cream, hc = art ? S.hintInk : P.cyan;
-    // CONTROLS
-    T(left, S.y + 67, 'CONTROLS', S.btnSize, 0, lc);
-    const ctl = mkBtn(right - bwid, S.y + 55, bwid, C.ship.controls === 'stick' ? 'STICK' : 'DRAG', () => {
-      const v = C.ship.controls === 'stick' ? 'drag' : 'stick';
+    const pair = (y, options, current, choose) => { // two buttons side by side
+      const w = 62, gap = 6, list = options.map(([value, label], i) => mkBtn(mid - w - gap / 2 + i * (w + gap), y, w, i ? 'ui_flat2' : 'ui_flat1', label, () => { choose(value); list.forEach(b => b.draw()); }, () => current() === value));
+    };
+    T(mid, S.y + 56, 'CONTROLS');
+    pair(S.y + 66, [['drag', 'DRAG'], ['stick', 'STICK']], () => (C.ship.controls === 'stick' ? 'stick' : 'drag'), v => {
       C.ship.controls = v;
       try { localStorage.setItem(CTL_KEY, v); } catch (e) { /* not saved */ }
-      ctl.label.setText(v === 'stick' ? 'STICK' : 'DRAG'); hint.setText(v === 'stick' ? 'RING STICK UNDER YOUR THUMB' : 'SWIPE ANYWHERE TO MOVE');
     });
-    const hint = T(left, S.y + 92, C.ship.controls === 'stick' ? 'RING STICK UNDER YOUR THUMB' : 'SWIPE ANYWHERE TO MOVE', 8, 0, hc);
-    // TUNE PANEL
-    T(left, S.y + 126, 'TUNE PANEL', S.btnSize, 0, lc);
-    const tn = mkBtn(right - bwid, S.y + 114, bwid, tuneEnabled() ? 'ON' : 'OFF', () => { tn.label.setText(toggleTune() ? 'ON' : 'OFF'); });
-    // EFFECTS (the menu starts again with the new setting)
-    T(left, S.y + 156, 'EFFECTS', S.btnSize, 0, lc);
-    mkBtn(right - bwid - 20, S.y + 144, bwid + 20, this.fxLow ? 'LOW' : 'FULL', () => { try { localStorage.setItem(FX_KEY, this.fxLow ? 'full' : 'low'); } catch (e) { /* not saved */ } this.scene.restart({ settings: true }); }); // the menu is rebuilt, then the settings open again
-    // SOUND and MUSIC volume bars (music at 0: your own music or video can play alone)
-    this.volBars = [['sound', 'SOUND', S.y + 186], ['music', 'MUSIC', S.y + 216]].map(([key, label, y]) => {
-      T(left, y, label, S.btnSize, 0, lc);
-      const bar = { key, x: right - VOL_W, y, g: keep(this.add.graphics()) };
+    T(mid, S.y + 104, 'EFFECTS');
+    pair(S.y + 114, [['full', 'FULL'], ['low', 'LOW']], () => (this.fxLow ? 'low' : 'full'), v => {
+      if (v === (this.fxLow ? 'low' : 'full')) return;
+      try { localStorage.setItem(FX_KEY, v); } catch (e) { /* not saved */ }
+      this.scene.restart({ settings: true }); // the menu is rebuilt with the new setting, then the settings open again
+    });
+    this.volBars = [['sound', 'SOUND', S.y + 154], ['music', 'MUSIC', S.y + 193]].map(([key, label, y]) => {
+      T(mid, y, label);
+      const bar = { key, x: Math.round(mid - VOL_W / 2), y: y + 16, g: keep(this.add.graphics(), 1) };
       drawVolBar(bar.g, bar.x, bar.y, volume(key));
       return bar;
     });
-    // CLOSE
-    mkBtn(S.x + (S.w - 90) / 2, S.y + S.h - 56, 90, 'CLOSE', () => this.openSettings(false));
+    mkBtn(mid - 45, S.y + 238, 90, 'ui_flat1', 'CLOSE', () => this.openSettings(false));
     this.panelObjs = objs;
   }
 

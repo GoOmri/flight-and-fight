@@ -1098,3 +1098,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.150: buttons 26 px with Omri's drop shadow (branch v1150-button-26)
 - Omri added a shadow to both scroll pictures (80x26, saved straight into assets/ui). All button pictures now drawn 26 tall (were 25). Backup copies in art-packs/ui-buttons/omri updated.
 - Checked in the browser pane (settings). UNVERIFIED on phone.
+
+## 2026-11-25 v1.9.151: new settings screen (branch v1151-settings-redesign)
+- Everything centred like the agreed mockup: monogram font (CC0) in ALL CAPS, Omri's flat parchment buttons as DRAG/STICK and FULL/LOW pairs (chosen one solid, other faded), 110 px volume sliders without outline, CLOSE. Parchment edges and middle repeated, not stretched (same picture file, pixels unchanged).
+- Removed from settings: TUNE PANEL button (5 taps on the version number still toggles it) and the controls hint line.
+- Rolled scroll buttons (Omri's latest) stay elsewhere. The pause screen sliders got the same new look.
+- Checked in the browser pane: choices, saving, close. UNVERIFIED on phone: text size and sharpness.
