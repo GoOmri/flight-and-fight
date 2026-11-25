@@ -24,6 +24,20 @@
 </style>
 </head>
 <body>
+<script>
+// Android takes back graphics memory from a game in the background. Pictures the game draws itself (all text, some effects and icons)
+// then came back blank. willReadFrequently keeps these drawing canvases in normal memory. Only when the game itself runs on WebGL
+// (with the older canvas drawing the main picture must stay fast).
+(function () {
+  try {
+    if (/[?&]render=canvas/.test(location.search) || !document.createElement('canvas').getContext('webgl')) return;
+    var get = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, opts) {
+      return type === '2d' ? get.call(this, type, Object.assign({}, opts, { willReadFrequently: true })) : get.apply(this, arguments);
+    };
+  } catch (e) { /* as before */ }
+})();
+</script>
 <script src="lib/phaser.min.js"></script>
 <script type="module" src="src/main.js"></script>
 </body>
