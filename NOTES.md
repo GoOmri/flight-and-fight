@@ -1045,3 +1045,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Music now plays through Web Audio, not an <audio> player, so Android should not treat the game as a media player (a YouTube overlay should keep playing). Both tracks are unpacked at start at 22 kHz (memory cost, size not measured).
 - Settings: MUSIC ON/OFF (saved), separate from SOUND. Panel a bit taller.
 - Checked in the browser pane: music starts, stops, pauses and switches. UNVERIFIED on phone: mixing with YouTube, memory, sound quality.
+
+## 2026-11-25 v1.9.137: potion magnet, shrink into the witch, pause options (branch v1137-potion-pause)
+- Weapon potions are pulled by the magnet like coins. Coins and potions now shrink on the way in and are taken at her middle (feel.magnetTakeDist 8).
+- Pause screen: CONTINUE, OPTIONS, RESTART, MENU. OPTIONS has SOUND, MUSIC, BACK.
+- Checked in the browser pane (potion shrinks and levels up; options page shows). UNVERIFIED on phone.
