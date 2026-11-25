@@ -1054,3 +1054,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.138: volume bars instead of SOUND and MUSIC buttons (branch v1138-volume-bars)
 - New src/volbar.js: a 10-pill bar, tap or drag, 0..10. In the menu settings and the pause OPTIONS page, one for SOUND and one for MUSIC. 7 = the mix as before, 10 = louder, 0 = silent; saved; an old OFF choice becomes 0.
 - Checked in the browser pane (drag and tap change the level and it is saved). UNVERIFIED on phone: touch size, how the steps sound.
+
+## 2026-11-25 v1.9.139: volume slider as a growing wedge with a handle (branch v1139-volume-wedge)
+- Replaces the pills (Omri disliked them): a long triangle that gets taller to the right, blue up to a rectangular handle; drag or tap, half steps 0..10. Settings and pause OPTIONS. The finger can wander up or down while dragging.
+- Checked in the browser pane. UNVERIFIED on phone.
