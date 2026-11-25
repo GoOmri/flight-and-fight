@@ -1,4 +1,4 @@
-// The wide buttons are Omri's two scroll pictures (assets/ui/ui-med-button.png and ui-med-button2.png, 80 x 25), each also mirrored
+// The wide buttons are Omri's two scroll pictures (assets/ui/ui-med-button.png and ui-med-button2.png, 80 x 26), each also mirrored
 // left-right: 4 looks, handed out one after another so buttons next to each other differ. Never flipped upside down: the scrolls face up.
 const BASE = 'ui_med-button', SECOND = 'ui_med-button2';
 export const BTN_INK = '#5a3416', BTN_HOT = '#c0331c'; // dark brown text on the light scroll; red when a newer version waits
