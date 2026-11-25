@@ -216,7 +216,7 @@ export class Cats {
     const s = this.s;
     c.state = 'saved'; c.t = 0; c.x0 = c.x; c.sy = c.y; // sy = the stone's y (it stays on the ground)
     c.ring.clear(); c.ringBack.clear(); c.fx.setVisible(false);
-    c.cat.anims.stop(); c.cat.setTexture('cat' + c.id + '_run', 3); c.running = false; // while it jumps in place it holds one leaping pose; the run cycle starts only when it really starts to run
+    c.cat.anims.stop(); c.cat.setTexture('cat' + c.id + '_run', 0); c.running = false; // while it jumps in place it holds the most upright, reared-up picture (run frame 0; the pack has no real hind-legs picture); the run cycle starts only when it really starts to run
     c.dir = c.x < W / 2 ? -1 : 1; c.cat.setFlipX(c.dir < 0); // face the way it will run from the very first jump (the pictures face right)
     for (let i = 0; i < 7; i++) { // 3 small hearts and 4 tiny sparkles shoot off like fireworks (no stars: a gold star means a goal), slow down and fade
       const heart = i < 3, a = Math.random() * Math.PI * 2, v = (heart ? 70 : 90) + Math.random() * 70, x = c.x, y = c.y - c.top - 10;

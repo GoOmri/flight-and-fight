@@ -1008,3 +1008,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.128: cat no longer runs on the spot (branch v1128-cat-run-start)
 - The run cycle played during the two in-place jumps, so the cat ran without moving. Now it holds one leaping pose (run frame 3) while jumping and the run cycle starts only when it starts to move.
 - UNVERIFIED on phone.
+
+## 2026-11-25 v1.9.129: cat's celebration jumps use the reared-up picture (branch v1129-cat-jump-pose)
+- The pet-cats pack has no standing-on-hind-legs picture (Idle, Meow, Sitting, Laying, Stretching = play bow, Itch, Licking, Sleeping, Run). Run frame 0 is the most upright (tallest body), so the two jumps hold it. UNVERIFIED how it looks; if poor, options: the Sitting picture, or the Meow picture.
