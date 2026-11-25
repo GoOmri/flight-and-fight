@@ -151,11 +151,11 @@ export class Cats {
         const U = CC.suckUpS, u = p.pull;
         p.life = Math.max(p.life, 0.3); // a pulled spark lives until it arrives
         p.im.setRotation(0);
-        if (u < U) { const k = 1 - u / U; const v = CC.suckUp * p.upMul * k * k * dt; p.im.x += Math.cos(p.la) * v; p.im.y += Math.sin(p.la) * v; p.im.setAlpha(1).setScale(1.5); continue; }
+        if (u < U) { const k = 1 - u / U; const v = CC.suckUp * p.upMul * k * k * dt; p.im.x += Math.cos(p.la) * v; p.im.y += Math.sin(p.la) * v; p.im.setAlpha(0.75).setScale(1); continue; }
         const w = u - U, dx = s.ship.x - p.im.x, dy = s.ship.y - p.im.y, d = Math.hypot(dx, dy), spd = 20 + CC.suckSharp * w * w, step = spd * dt;
         if (d <= step + 4) { p.im.destroy(); this.parts.splice(i, 1); continue; }
         p.im.x += dx / d * step; p.im.y += dy / d * step;
-        p.im.setAlpha(1).setScale(Math.min(1.5, 0.7 + d / 50) + (p.big ? CC.fastGrow * Math.min(1, spd / 900) : 0)); // the fast ones grow by a pixel or two
+        p.im.setAlpha(0.75).setScale(Math.min(1, 0.6 + d / 80) + (p.big ? CC.fastGrow * Math.min(1, spd / 900) : 0)); // the fast ones grow by a pixel or two
         continue;
       }
       if (p.pull) p.im.setBlendMode(0);
