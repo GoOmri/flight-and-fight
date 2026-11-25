@@ -234,8 +234,9 @@ export class MenuScene extends Phaser.Scene {
     const art = this.textures.exists('ui_panel-parchment'); // the purple parchment (same as the settings); a locked stage is the same, darker; without the picture the old drawn plate
     const g = this.add.graphics();
     const b = { st: { theme: nd.theme }, locked: !!nd.locked, x, y, w, h, g, down: false, items: [] };
-    const img = art ? this.add.image(x, y, this.parchment(w, h)).setOrigin(0, 0) : null;
-    const pic = art && !b.locked && this.textures.exists('stage_' + nd.theme) ? this.add.image(x + 6, y + 6, 'stage_' + nd.theme).setOrigin(0, 0).setAlpha(M.bubble.picAlpha).setTint(M.bubble.picTint) : null; // the stage picture fills the inside of the tile, dimmed so the text stays readable
+    // an open stage: its picture sits inside the ragged edge (tilePicture)
+    const pictured = art && !b.locked && this.textures.exists('stage_' + nd.theme);
+    const img = art ? this.add.image(x, y, pictured ? this.tilePicture(nd.theme, w, h) : this.parchment(w, h)).setOrigin(0, 0) : null;
     const add = (o, oy) => { b.items.push({ o, oy }); return o; }; // texts and medals sink with the plate when pressed
     const B = M.bubble, cx = x + w / 2, ink = art ? B.ink : P.cream, shadow = 3;
     b.draw = () => {
@@ -243,7 +244,6 @@ export class MenuScene extends Phaser.Scene {
       const sink = art ? (b.down ? 1 : 0) : drawPlate(g, x, y, w, h, { fill: b.locked ? M.lockedFill : P.purple, border: b.locked ? M.lockedBorder : P.pink, down: b.down, radius: M.cardRadius });
       if (art) {
         img.setTint(b.down ? 0xcccccc : (b.locked ? B.lockedTint : 0xffffff)); img.y = y + sink;
-        if (pic) pic.y = y + 6 + sink;
         if (!b.locked) g.fillStyle(B.inset, 1).fillRoundedRect(x + 8, y + 24 + sink, w - 16, 22, 3); // a dark strip behind the medals so the grey ones can be seen on the tan
       }
       b.items.forEach(i => i.o.setY(i.oy + sink));
@@ -266,7 +266,7 @@ export class MenuScene extends Phaser.Scene {
     b.complete = !b.locked && goalsOf(nd.theme).every(k => loadMedals(nd.theme)[k]);
     b.halo = art && !b.locked ? this.add.graphics().setVisible(false) : null; // gold edge, shown only on the next stage to play
     if (b.halo) b.halo.lineStyle(3, M.path.lineColor, 1).strokeRoundedRect(x - 2, y - 2, w + 4, h + 4, 5);
-    b.cont = this.add.container(0, 0, [img, pic, b.halo, g, ...b.items.map(i => i.o)].filter(Boolean)); // order: panel, stage picture, halo, strip, texts and medals
+    b.cont = this.add.container(0, 0, [img, b.halo, g, ...b.items.map(i => i.o)].filter(Boolean)); // order: panel, stage picture, halo, strip, texts and medals
     b.draw();
     return b;
   }
@@ -356,6 +356,37 @@ export class MenuScene extends Phaser.Scene {
     for (let i = 0; i < d.length; i += 4) {
       const to = SWAP[(d[i] << 16) | (d[i + 1] << 8) | d[i + 2]];
       if (d[i + 3] && to !== undefined) { d[i] = to >> 16; d[i + 1] = (to >> 8) & 255; d[i + 2] = to & 255; }
+    }
+    c.putImageData(px, 0, 0);
+    cv.refresh();
+    return key;
+  }
+
+  // A stage tile with its picture inside the parchment's own ragged edge: the picture is painted only on the panel's inner pixels
+  // (found by flooding from the middle over the three inner purples), so the torn rim stays on top all around it.
+  tilePicture(theme, w, h) {
+    const key = 'ui_tile_' + theme + '_' + w + 'x' + h;
+    if (this.textures.exists(key)) return key;
+    const base = this.textures.get(this.parchment(w, h)).getSourceImage(), cv = this.textures.createCanvas(key, w, h), c = cv.getContext();
+    c.drawImage(base, 0, 0);
+    const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h;
+    const t = tmp.getContext('2d'), pic = this.textures.get('stage_' + theme).getSourceImage();
+    t.imageSmoothingEnabled = false; t.globalAlpha = M.bubble.picAlpha;
+    t.drawImage(pic, 4, 4, w - 8, h - 8);
+    const px = c.getImageData(0, 0, w, h), d = px.data, p = t.getImageData(0, 0, w, h).data;
+    const INNER = new Set([0x3a1a72, 0x452180, 0x52288f]), tint = M.bubble.picTint, k = [(tint >> 16) / 255, ((tint >> 8) & 255) / 255, (tint & 255) / 255];
+    const seen = new Uint8Array(w * h), todo = [(h >> 1) * w + (w >> 1)];
+    while (todo.length) {
+      const n = todo.pop(), i = n * 4;
+      if (seen[n] || !INNER.has((d[i] << 16) | (d[i + 1] << 8) | d[i + 2])) continue;
+      seen[n] = 1;
+      const a = p[i + 3] / 255;
+      for (let j = 0; j < 3; j++) d[i + j] = Math.round(p[i + j] * k[j] * a + d[i + j] * (1 - a));
+      const x = n % w;
+      if (x > 0) todo.push(n - 1);
+      if (x < w - 1) todo.push(n + 1);
+      if (n >= w) todo.push(n - w);
+      if (n < w * (h - 1)) todo.push(n + w);
     }
     c.putImageData(px, 0, 0);
     cv.refresh();
