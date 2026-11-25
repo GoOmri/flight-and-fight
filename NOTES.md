@@ -973,3 +973,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri's screenshot showed sparks only flying up. In my own test with the witch really over the cat (mouse control, ctl=mouse, scroll stopped) the v1.9.119 sparks already went in all directions, so his phone may have had an OLD cached build (check the version number at the top left). But the pop-out and the dive were short (the witch sits on the ring), so it still did not read as a vacuum.
 - Now while she hovers 70% of the new sparks (farShare) are born 32 to 74 px away from the witch at a random angle, tremble outward a little, then dive in with the sharp ease-in. Tested: 11 sparks around her at relative positions all over (-65..49, -56..55).
 - How to test hovering in the browser pane: ?ctl=mouse, start Play, stop scroll (scene.bgF.scroll = 0), hover the mouse over the cat (game px x 1.4 + offset).
+
+## 2026-11-25 v1.9.121: smaller far-spark radius; ?tintblend= test switch (branch v1121-radius-overlay-test)
+- Far sparks are born 16 to 42 px from the witch (was 32 to 74).
+- New test parameter ?tintblend=N changes the forest tint's blend mode (2 multiply = the game's setting, 3 screen, 4 overlay). Overlay is drawn ONLY in CANVAS mode (add ?render=canvas); WebGL (phones, most browsers) has no overlay blend in Phaser and falls back to normal paint. Seen in the browser pane: overlay gives a lighter, blue-lilac wash. The game itself is unchanged (multiply).
