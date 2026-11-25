@@ -1,20 +1,22 @@
 // Sound effects and music. A small module on the browser's own audio (no Phaser), shared by both scenes.
 // Effects (assets/sfx) and music (assets/music) are decoded once and played through Web Audio. Phones only allow sound after the first tap: the first tap wakes everything. The volume bars are in the settings and on the pause screen.
 // Which sounds and how loud are all here. gap = shortest time in ms between two plays of the same effect (shots repeat very fast).
-// rate = pitch (1 = as recorded, 0.8 = lower), v = volume, gap = shortest ms between plays, pv = random pitch change (0.08 = up to 8% higher or lower), lp = cut the sharp highs above this many Hz (default LP), len = fade out after this many seconds
+// f = file(s), played together, or one at random with any: true. rate = pitch (1 = as recorded, 0.8 = lower), v = volume, gap = shortest ms between plays, pv = random pitch change (0.08 = up to 8% higher or lower), lp = cut the sharp highs above this many Hz (default LP), len = fade out after this many seconds
 const SFX = {
-  shoot: { f: ['shoot'], v: 0.08, gap: 130, pv: 0.08, lp: 2200, len: 0.16 },
+  shoot: { f: ['shoot2'], v: 0.08, gap: 130, pv: 0.08, lp: 2200, len: 0.16 },
   enemyHit: { f: ['enemy-hit'], v: 0.18, gap: 70, pv: 0.1, lp: 3500 },
-  enemyDie: { f: ['enemy-die'], v: 0.34, gap: 60, pv: 0.12, lp: 4500 },
-  coin: { f: ['coin'], v: 0.2, gap: 50, pv: 0.04, rate: 0.8 },
+  enemyDie: { f: ['enemy-die', 'enemy-die2'], any: true, v: 0.34, gap: 60, pv: 0.12, lp: 4500 },
+  coin: { f: ['coin2'], v: 0.2, gap: 50, pv: 0.04 },
   heart: { f: ['heart'], v: 0.45 },
   potion: { f: ['potion'], v: 0.4 },
   levelUp: { f: ['level-up'], v: 0.4 },
   hurt: { f: ['hurt'], v: 0.38, lp: 3500 },
-  rescue: { f: ['rescue-a', 'rescue-b'], v: 0.45 }, // both together
+  rescue: { f: ['rescue-b'], v: 0.45 },
+  meow: { f: ['meow-1', 'meow-2'], any: true, v: 0.16, gap: 900, pv: 0.07 }, // a waiting cat: quiet
+  boxOpen: { f: ['box-open'], v: 0.4, pv: 0.05 },
   gameOver: { f: ['game-over'], v: 0.5 },
   stageClear: { f: ['stage-clear'], v: 0.5 },
-  tap: { f: ['tap'], v: 0.3 }
+  tap: { f: ['tap2'], v: 0.3 }
 };
 const LP = 6000, ATTACK = 0.006; // every effect: softer highs and a very short fade-in (no click)
 const RING = { f: ['ring-b', 'ring-c', 'ring-a'], v: 0.3 }; // while a cat's ring fills, in this order, one third of the ring each: cauldron bubbling, underwater bubbles, teleport
@@ -89,7 +91,7 @@ export function sfx(name, delayMs = 0) {
   const now = performance.now();
   if (s.gap && now - (last[name] || 0) < s.gap) return;
   last[name] = now;
-  for (const f of s.f) play(f, s.v, false, s);
+  for (const f of s.any ? [s.f[Math.floor(Math.random() * s.f.length)]] : s.f) play(f, s.v, false, s);
 }
 
 // fill = how full the ring is (0..1) while she hovers over a cat, or null = silent

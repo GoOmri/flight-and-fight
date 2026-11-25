@@ -123,7 +123,7 @@ export class Cats {
       c.state = c.inside ? 'hover' : 'wait';
       c.grow = clamp((c.grow || 0) + (c.inside ? 1 : -1) * dt * CC.ringGrowSpeed, 0, 1); // the ring swells while she hovers and shrinks back when she leaves
       c.meowT -= dt; // the cat calls for help, more often as the ring fills
-      if (c.meowT <= 0) { this.meow(c); c.meowT = CC.meowSlowS + (CC.meowFastS - CC.meowSlowS) * c.fill + Math.random() * 0.8; }
+      if (c.meowT <= 0) { this.meow(c); if (c.y > 0 && c.y < H) sfx('meow'); c.meowT = CC.meowSlowS + (CC.meowFastS - CC.meowSlowS) * c.fill + Math.random() * 0.8; }
       c.stone.setPosition(Math.round(c.x), Math.round(c.y));
       this.placeGlow(c);
       c.cat.setPosition(Math.round(c.x) + CC.catDx, Math.round(c.y - c.top) + CC.catDy); // the cat sits a little left and lower than the ring's middle (looks centred)
