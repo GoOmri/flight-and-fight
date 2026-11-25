@@ -205,7 +205,7 @@ export class PlayScene extends Phaser.Scene {
       this.burst(c.x, c.y, C.feel.coinSparkCount, COIN_TINTS, C.feel.coinSparkSpeedMul, 3); // coin pop
     });
     this.physics.add.overlap(this.ship, this.weaponUps, (s, p) => { this.kill(p); this.weaponUp(); });
-    this.physics.add.overlap(this.ship, this.heartUps, (s, p) => { this.kill(p); this.heartUp(p.x, p.y); });
+    this.physics.add.overlap(this.ship, this.heartUps, (s, p) => { this.kill(p); this.heartUp(p.x, p.y); }, () => this.hearts < C.ship.hearts); // with all hearts full the heart is not picked up: it keeps falling and can be caught after a hit
     // (crates are in no ship overlap: the ship flies through them)
   }
 
