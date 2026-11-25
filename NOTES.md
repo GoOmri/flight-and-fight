@@ -985,3 +985,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.123: calmer sparks (branch v1123-calmer-sparks)
 - About half as many sparks (sparkRateHover 18 to 9, sparkFillMul 8 to 4, sparkMax 70 to 40). Pulled sparks smaller (scale 1.5 to 1) and softer (alpha 0.75).
 - UNVERIFIED on phone: whether it now feels calm enough.
+
+## 2026-11-25 v1.9.124: rescue burst = hearts and sparkles, no stars (branch v1124-rescue-hearts)
+- Stars mean goals, so the rescue burst now throws 3 small hearts and 4 tiny sparkles (same fireworks motion, shorter life). The star_spin art is still loaded but unused.
+- UNVERIFIED: the look on a phone.
