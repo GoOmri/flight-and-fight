@@ -1,6 +1,5 @@
 // Sound effects and music. A small module on the browser's own audio (no Phaser), shared by both scenes.
-// Effects (assets/sfx) are decoded once and played through Web Audio. Music (assets/music) is streamed by <audio> so the big files
-// never delay the start. Phones only allow sound after the first tap: the first tap wakes everything. SOUND ON/OFF is in the settings.
+// Effects (assets/sfx) and music (assets/music) are decoded once and played through Web Audio. Phones only allow sound after the first tap: the first tap wakes everything. SOUND ON/OFF is in the settings.
 // Which sounds and how loud are all here. gap = shortest time in ms between two plays of the same effect (shots repeat very fast).
 // v = volume, gap = shortest ms between plays, pv = random pitch change (0.08 = up to 8% higher or lower), lp = cut the sharp highs above this many Hz (default LP), len = fade out after this many seconds
 const SFX = {
@@ -23,13 +22,21 @@ const MUSIC = { menu: 0.35, forest: 0.3 }; // name = assets/music/<name>.ogg, va
 const KEY = 'ff_sound';
 
 const WEB = typeof window !== 'undefined';
-let on = true;
+let on = true, musicIsOn = true;
+try { musicIsOn = localStorage.getItem('ff_music') !== 'off'; } catch (e) { /* music on */ }
 try { on = localStorage.getItem(KEY) !== 'off'; } catch (e) { /* sound on */ }
-let ctx = null, out = null, ringNode = null, paused = false;
+let ctx = null, out = null, node = null, ringNode = null, paused = false;
 let want = null; // the music that should be playing now (a name of MUSIC, or null)
-const buffers = {}, last = {}, tracks = {};
+const buffers = {}, last = {}, tracks = {}, at = {};
 
 export const soundOn = () => on;
+export const musicOn = () => musicIsOn;
+export function toggleMusic() {
+  musicIsOn = !musicIsOn;
+  try { localStorage.setItem('ff_music', musicIsOn ? 'on' : 'off'); } catch (e) { /* not saved */ }
+  syncMusic();
+  return musicIsOn;
+}
 export function toggleSound() {
   on = !on;
   try { localStorage.setItem(KEY, on ? 'on' : 'off'); } catch (e) { /* not saved */ }
@@ -46,7 +53,7 @@ export function initSound() {
   out = ctx.createDynamicsCompressor(); // when many effects pile up this squeezes the loud peaks down
   out.threshold.value = -18; out.knee.value = 12; out.ratio.value = 6; out.attack.value = 0.004; out.release.value = 0.18;
   out.connect(ctx.destination);
-  for (const n of Object.keys(MUSIC)) track(n); // fetch the music right away so it starts without a wait
+  for (const n of Object.keys(MUSIC)) loadTrack(n); // fetch and unpack the music right away so it starts without a wait
   const names = new Set([...Object.values(SFX).flatMap(s => s.f), ...RING.f]);
   for (const n of names) {
     fetch('assets/sfx/' + n + '.ogg').then(r => (r.ok ? r.arrayBuffer() : null)).then(a => a && ctx.decodeAudioData(a, b => { buffers[n] = b; }, () => {})).catch(() => {});
@@ -55,7 +62,7 @@ export function initSound() {
   window.addEventListener('pointerdown', wake, true);
   window.addEventListener('keydown', wake, true);
   document.addEventListener('visibilitychange', () => { // the app goes to the background: silence
-    if (document.hidden) { ctx.suspend(); for (const t of Object.values(tracks)) t.pause(); } else wake();
+    if (document.hidden) ctx.suspend(); else wake();
   });
 }
 
@@ -91,22 +98,37 @@ export function ringSound(active) {
   }
 }
 
-function track(n) {
-  if (!tracks[n]) { const t = tracks[n] = new Audio(); t.preload = 'auto'; t.loop = true; t.volume = MUSIC[n]; t.src = 'assets/music/' + n + '.ogg'; }
-  return tracks[n];
+// Music goes through Web Audio too (not through an <audio> player): Android then does not treat the game as a "media player",
+// so a video or music app can keep playing at the same time. A track is unpacked once, at 22 kHz to save memory.
+function loadTrack(n) {
+  const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const dec = OC ? new OC(2, 1, 22050) : ctx;
+  fetch('assets/music/' + n + '.ogg').then(r => (r.ok ? r.arrayBuffer() : null))
+    .then(a => a && dec.decodeAudioData(a, b => { tracks[n] = b; syncMusic(); }, () => {})).catch(() => {});
+}
+
+function stopTrack() {
+  if (!node) return;
+  const n = node; node = null;
+  at[n.name] = (ctx.currentTime - n.start) % n.src.buffer.duration; // remember where it was (pause)
+  n.src.stop();
 }
 
 function syncMusic() {
-  if (!WEB) return;
-  for (const [n, t] of Object.entries(tracks)) if (n !== want) t.pause();
-  if (!want || !on || paused || document.hidden) { if (want && tracks[want]) tracks[want].pause(); return; }
-  const t = track(want);
-  if (t.paused) { const p = t.play(); if (p && p.catch) p.catch(() => {}); } // refused before the first tap: the tap tries again
+  if (!ctx) return;
+  const play = want && on && musicIsOn && !paused && tracks[want] ? want : null;
+  if (node && node.name === play) return;
+  stopTrack();
+  if (!play) return;
+  const src = ctx.createBufferSource(), gain = ctx.createGain(), from = at[play] || 0;
+  src.buffer = tracks[play]; src.loop = true; gain.gain.value = MUSIC[play];
+  src.connect(gain); gain.connect(ctx.destination); src.start(0, from);
+  node = { src, name: play, start: ctx.currentTime - from };
 }
 
 export function music(name) {
   const next = MUSIC[name] !== undefined ? name : null;
-  if (next !== want && next && tracks[next]) tracks[next].currentTime = 0;
+  if (next !== want && next) at[next] = 0; // a new scene's music starts from the beginning
   want = next;
   syncMusic();
 }

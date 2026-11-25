@@ -1040,3 +1040,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Music is fetched at game start (was fetched when the stage began, so the forest music was late). If it is still late, the track itself may have a quiet intro.
 - Chest (box) hit and break have no sound yet: new slot 'chest is hit' in the local sound picker.
 - UNVERIFIED: everything you hear.
+
+## 2026-11-25 v1.9.136: music can mix with other apps; MUSIC switch (branch v1136-music-mix)
+- Music now plays through Web Audio, not an <audio> player, so Android should not treat the game as a media player (a YouTube overlay should keep playing). Both tracks are unpacked at start at 22 kHz (memory cost, size not measured).
+- Settings: MUSIC ON/OFF (saved), separate from SOUND. Panel a bit taller.
+- Checked in the browser pane: music starts, stops, pauses and switches. UNVERIFIED on phone: mixing with YouTube, memory, sound quality.
