@@ -132,7 +132,8 @@ export class Cats {
       if (c.fill >= 1) { this.save(c); continue; }
       if (c.y > H + 40) this.lose(c);
     }
-    ringSound(!s.over && this.list.some(c => c.state === 'hover'));
+    const hov = s.over ? [] : this.list.filter(c => c.state === 'hover');
+    ringSound(hov.length ? Math.max(...hov.map(c => c.fill)) : null);
   }
 
   // Colourful sparks (the trail colours) rise from every ring, more of them while the witch hovers.
