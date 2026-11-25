@@ -1,5 +1,5 @@
 import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
-import { drawVolBar, volAt, VOL_W } from '../volbar.js';
+import { drawVolBar, volFrom, volHit, VOL_W } from '../volbar.js';
 import { CONFIG as C, z, hex, snap4 } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale, PX } from '../sprites.js';
 import { STAGE1 } from '../waves.js';
@@ -182,7 +182,7 @@ export class PlayScene extends Phaser.Scene {
       if (this.stickMode) this.stickC.copy(this.finger); // the ring appears under the thumb
     });
     this.input.on('pointermove', p => {
-      if (this.paused) { if (p.isDown && this.pauseUi) this.pauseVolume(p.x / R, p.y / R); return; } // drag along a volume bar
+      if (this.paused) { if (p.isDown && this.pauseUi) this.pauseVolume(p.x / R); return; } // drag a volume slider
       if (this.mouseMode) { this.mouseSeen = true; return; }
       if (p.id !== this.dragId || !p.isDown || this.over) return;
       this.finger.set(p.x / R, p.y / R);
@@ -880,17 +880,17 @@ export class PlayScene extends Phaser.Scene {
     });
   }
 
-  // a touch or drag on a volume bar of the pause screen
-  pauseVolume(x, y) {
-    for (const b of this.pauseUi.list) {
-      if (!b.bar) continue;
-      const v = volAt(x, y, b.bx, b.by);
-      if (v !== null && setVolume(b.id, v)) { drawVolBar(b.g, b.bx, b.by, v); if (b.id === 'sound') sfx('coin'); }
-    }
+  // a drag of the volume slider that was taken hold of (pause screen)
+  pauseVolume(x) {
+    const b = this.pauseUi.held;
+    if (!b) return;
+    const v = volFrom(x, b.bx);
+    if (setVolume(b.id, v)) { drawVolBar(b.g, b.bx, b.by, v); if (b.id === 'sound') sfx('coin'); }
   }
 
   pauseTap(x, y) {
-    this.pauseVolume(x, y);
+    this.pauseUi.held = this.pauseUi.list.find(b => b.bar && volHit(x, y, b.bx, b.by)) || null;
+    this.pauseVolume(x);
     const b = this.pauseUi.list.find(b => !b.bar && Math.abs(x - b.x) <= b.w / 2 && Math.abs(y - b.y) <= b.h / 2);
     if (!b) return;
     sfx('tap');
