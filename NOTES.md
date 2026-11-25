@@ -1090,3 +1090,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.148: button looks vary (branch v1148-button-variants)
 - New src/buttons.js: 4 looks of the button picture (as drawn, mirrored, face flipped, both; the shadow stays at the bottom), handed out one after another to each button. Note: face is rows 0..20 and the drop shadow rows 21..24 (4 px).
 - Checked in the browser pane (settings). UNVERIFIED on phone; pause screen not looked at.
+
+## 2026-11-25 v1.9.149: scroll buttons (branch v1149-scroll-buttons)
+- Omri's two 80x25 scroll pictures replace the purple button: assets/ui/ui-med-button.png and ui-med-button2.png (sources in art-packs/ui-buttons/omri). 4 looks = each picture and its mirror; never flipped upside down. Button text is dark brown without outline; NEW VERSION is red.
+- Checked in the browser pane (settings, pause). UNVERIFIED on phone; goals box and end screen not looked at.

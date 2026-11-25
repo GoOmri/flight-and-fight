@@ -1,4 +1,4 @@
-import { buttonKey } from '../buttons.js';
+import { buttonKey, BTN_INK, BTN_HOT } from '../buttons.js';
 import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
 import { drawVolBar, volFrom, volHit, VOL_W } from '../volbar.js';
 import { CONFIG as C, hex } from '../config.js';
@@ -30,7 +30,7 @@ export class MenuScene extends Phaser.Scene {
     for (const nd of M.path.nodes) if (!nd.locked) this.load.image('stage_' + nd.theme, 'assets/ui/stage-' + nd.theme + '.png?v=' + C.version); // a small picture of each open stage (shown dimmed inside its tile)
     loadGoalArt(this, C.version); // the gold star and the goal icons (made into textures in sprites.js; the game uses the same ones)
     if (M.logo.decor) this.load.image('menu_logo_decor', 'assets/' + M.logo.decor); // the moon, stars and bats of the logo picture: they stay in the background
-    for (const k of ['panel-parchment', 'med-panel', 'med-button', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png?v=' + C.version); // ?v= = the phone must load the newest picture after an update (it kept an old copy of a picture with the same file name) // UI pictures: parchment panel and gear (Fantasy UI pack, catau-games), tan panel and button (Medieval UI pack, Doktoresco)
+    for (const k of ['panel-parchment', 'med-panel', 'med-button', 'med-button2', 'gear']) this.load.image('ui_' + k, 'assets/ui/ui-' + k + '.png?v=' + C.version); // ?v= = the phone must load the newest picture after an update (it kept an old copy of a picture with the same file name) // UI pictures: parchment panel and gear (Fantasy UI pack, catau-games), tan panel and button (Medieval UI pack, Doktoresco)
   }
 
   create() {
@@ -92,7 +92,7 @@ export class MenuScene extends Phaser.Scene {
       btn.g.clear();
       if (art) { // normal, pressed, or hover (a newer version is waiting); dark brown text
         btn.img.setTint(btn.down ? 0xbbbbbb : 0xffffff).setY(by + (btn.down ? 1 : 0)); // pressed: darker and 1 px lower
-        btn.label.setColor(btn.hot ? hex(M.updateHotColor) : hex(UB.textColor)).setStroke(hex(P.shadow), 3); // a newer version waiting: orange text
+        btn.label.setColor(btn.hot ? BTN_HOT : BTN_INK).setStroke(BTN_INK, 0); // a newer version waiting: red text
         btn.label.setY(by + ubh / 2 + (btn.down ? 1 : 0));
         return;
       }
@@ -340,7 +340,7 @@ export class MenuScene extends Phaser.Scene {
       const h = 25, bt = { btn: true, x: x - 4, y: y - 3, w: w + 8, h: h + 6, down: false, action, shown: false }; // the touch area is a little bigger than the picture
       bt.img = art ? keep(this.add.nineslice(x, y, buttonKey(this), undefined, w, h, 10, 10, 0, 0).setOrigin(0, 0)) : null;
       bt.g = keep(this.add.graphics());
-      bt.label = T(x + w / 2, y + h / 2, label, S.btnSize, 0.5, P.cream, 3);
+      bt.label = T(x + w / 2, y + h / 2, label, S.btnSize, 0.5, art ? 0x5a3416 : P.cream, art ? 0 : 3);
       bt.draw = () => {
         bt.g.clear();
         if (art) { bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(y + (bt.down ? 1 : 0)); bt.label.setY(y + h / 2 + (bt.down ? 1 : 0)); return; }
@@ -401,7 +401,7 @@ export class MenuScene extends Phaser.Scene {
       const bt = { btn: true, x: x - 4, y: by - 3, w: bw + 8, h: 31, down: false, action, shown: true };
       bt.img = art2 ? keep(this.add.nineslice(x, by, buttonKey(this), undefined, bw, 25, 10, 10, 0, 0).setOrigin(0, 0), 1) : null;
       bt.g = keep(this.add.graphics(), 1);
-      bt.label = T(x + bw / 2, by + 12, label, 10, 0.5, P.cream); bt.label.setStroke(hex(P.shadow), 3);
+      bt.label = T(x + bw / 2, by + 12, label, 10, 0.5, P.cream); if (art2) bt.label.setColor(BTN_INK).setStroke(BTN_INK, 0); else bt.label.setStroke(hex(P.shadow), 3);
       bt.draw = () => { if (bt.img) bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(by + (bt.down ? 1 : 0)); bt.label.setY(by + 12 + (bt.down ? 1 : 0)); };
       return bt;
     }, art2 = this.textures.exists('ui_med-button');
