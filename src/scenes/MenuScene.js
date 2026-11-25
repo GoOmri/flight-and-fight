@@ -238,7 +238,7 @@ export class MenuScene extends Phaser.Scene {
     const pictured = art && !b.locked && this.textures.exists('stage_' + nd.theme);
     const img = art ? this.add.image(x, y, pictured ? this.tilePicture(nd.theme, w, h) : this.parchment(w, h)).setOrigin(0, 0) : null;
     const add = (o, oy) => { b.items.push({ o, oy }); return o; }; // texts and medals sink with the plate when pressed
-    const B = M.bubble, cx = x + w / 2, ink = art ? B.ink : P.cream, shadow = 3;
+    const B = M.bubble, cx = x + w / 2, ink = art ? B.ink : P.cream, shadow = 0; // no outline: the thin font stays thin
     b.draw = () => {
       g.clear();
       const sink = art ? (b.down ? 1 : 0) : drawPlate(g, x, y, w, h, { fill: b.locked ? M.lockedFill : P.purple, border: b.locked ? M.lockedBorder : P.pink, down: b.down, radius: M.cardRadius });
