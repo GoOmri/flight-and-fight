@@ -1141,3 +1141,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - The stage picture is now painted only on the parchment's inner pixels, so it has the same torn edge as the tile (MenuScene.tilePicture).
 - Checked in the browser pane. UNVERIFIED on phone.
 - Stage names are monogram with a 3 px dark outline, which makes them look heavier than in the settings.
+
+## 2026-11-25 v1.9.160: no outline on stage tile text (branch v1160-tile-text)
+- Stage names, locked '???', star count and BEST score have no dark outline now. Checked in the browser pane. UNVERIFIED: readability over the pictures on a phone.
