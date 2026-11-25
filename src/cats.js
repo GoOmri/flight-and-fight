@@ -135,7 +135,7 @@ export class Cats {
       if (!live.length || this.parts.length >= CC.sparkMax * (1 + Math.max(...live.map(q => q.fill)))) break;
       const c = live[Math.floor(Math.random() * live.length)], k = c.grow || 0, r = CC.ringRx + (CC.ringRxBig - CC.ringRx) * k, a = (this.sparkA = (this.sparkA || 0) + 2.4); // each spark starts 2.4 rad (the golden angle) after the last one: they spread evenly all around the ring
       let sx = c.x + Math.cos(a) * r, sy = c.y - c.top - 1 + Math.sin(a) * r, far = false;
-      if (c.state === 'hover' && Math.random() < CC.farShare) { const R = 16 + Math.random() * 26, A = Math.random() * Math.PI * 2; sx = s.ship.x + Math.cos(A) * R; sy = s.ship.y + Math.sin(A) * R; far = A; } // while she hovers many sparks are born far out around her, from every direction, and get sucked in
+      if (c.state === 'hover' && Math.random() < CC.farShare) { const R = 8 + Math.random() * 16, A = Math.random() * Math.PI * 2; sx = s.ship.x + Math.cos(A) * R; sy = s.ship.y + Math.sin(A) * R; far = A; } // while she hovers many sparks are born far out around her, from every direction, and get sucked in
       const im = s.add.image(sx, sy, 'cat_spark').setDepth(CC.depth + 0.06).setTint(CC.ringColors[Math.floor(Math.random() * CC.ringColors.length)]);
       this.parts.push({ far, c, im, vy: -(CC.sparkRise * (0.7 + Math.random() * 0.6)), life: CC.sparkLife * (1 + CC.sparkFillLife * c.fill) * (0.7 + Math.random() * 0.6), max: 0, ph: Math.random() * 6 });
       this.parts[this.parts.length - 1].max = this.parts[this.parts.length - 1].life;
