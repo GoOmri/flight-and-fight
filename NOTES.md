@@ -1104,3 +1104,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Removed from settings: TUNE PANEL button (5 taps on the version number still toggles it) and the controls hint line.
 - Rolled scroll buttons (Omri's latest) stay elsewhere. The pause screen sliders got the same new look.
 - Checked in the browser pane: choices, saving, close. UNVERIFIED on phone: text size and sharpness.
+
+## 2026-11-25 v1.9.152: UPDATE button widens to fit its text (branch v1152-update-fits)
+- UPDATE is 80 px (pause OPTIONS is 96). It now grows when the text needs it: NEW VERSION gives 90 px. Pause buttons unchanged.
+- Checked in the browser pane. UNVERIFIED on phone.
