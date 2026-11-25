@@ -1086,3 +1086,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.147: Omri's new button picture (branch v1147-new-button)
 - assets/ui/ui-med-button.png replaced with Omri's 80x25 art (source copy: art-packs/ui-buttons/omri/my-button.png). Used by every wide button (settings, goals box, pause, end screen, UPDATE).
 - Checked in the browser pane in the settings panel. UNVERIFIED on phone.
+
+## 2026-11-25 v1.9.148: button looks vary (branch v1148-button-variants)
+- New src/buttons.js: 4 looks of the button picture (as drawn, mirrored, face flipped, both; the shadow stays at the bottom), handed out one after another to each button. Note: face is rows 0..20 and the drop shadow rows 21..24 (4 px).
+- Checked in the browser pane (settings). UNVERIFIED on phone; pause screen not looked at.
