@@ -12,6 +12,8 @@ const CLASSIC = { fontFamily: '"GameFont", monospace', fontStyle: 'bold', resolu
 export const FONT = { fontFamily: '"PackFont", "GameFont", monospace', fontStyle: 'normal', resolution: C.game.render }; // text drawn at canvas resolution = sharp
 export const packFontOn = () => packOn;
 // The ornate title font (big titles only, 24 px and up: STAGE CLEAR, GAME OVER, PAUSED, SETTINGS, the goals box). Plain px sizes (not fpx).
+// the thin pixel font (monogram): sharp at 16 px. Settings screen.
+export const FONT_MONO = { fontFamily: '"Monogram", "PackFont", monospace', fontSize: '16px', resolution: C.game.render };
 export const FONT_TITLE = { fontFamily: '"DungeonFont", "PackFont", monospace', fontStyle: 'normal', resolution: C.game.render };
 export const titleCase = s => s.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase()); // FOREST -> Forest, STAGE CLEAR -> Stage Clear (the title font reads best with small letters)
 export const useClassicFont = () => { packOn = false; Object.assign(FONT, CLASSIC); };
