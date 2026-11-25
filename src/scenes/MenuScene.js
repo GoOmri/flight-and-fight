@@ -1,3 +1,4 @@
+import { buttonKey } from '../buttons.js';
 import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
 import { drawVolBar, volFrom, volHit, VOL_W } from '../volbar.js';
 import { CONFIG as C, hex } from '../config.js';
@@ -85,7 +86,7 @@ export class MenuScene extends Phaser.Scene {
     const art = this.textures.exists('ui_med-button'), UB = M.updateBtn; // the tan button of the Medieval UI pack (9-slice: the round ends stay, the middle stretches); without the picture the old drawn plate is used
     const ubw = art ? UB.w : M.updateW, ubh = art ? 25 : M.updateH, bx = (W - ubw) / 2, by = M.updateTop;
     const btn = { btn: true, x: bx - 8, y: by - 4, w: ubw + 16, h: ubh + 8, g: this.add.graphics(), down: false, hot: false, busy: false }; // x / y / w / h = the touch area, bigger than the picture (a thumb needs about 44 phone px)
-    btn.img = art ? this.add.nineslice(bx, by, 'ui_med-button', undefined, ubw, 25, 10, 10, 0, 0).setOrigin(0, 0) : null;
+    btn.img = art ? this.add.nineslice(bx, by, buttonKey(this), undefined, ubw, 25, 10, 10, 0, 0).setOrigin(0, 0) : null;
     btn.label = this.add.text(W / 2, by + ubh / 2, 'UPDATE', { ...FONT, fontSize: fpx(M.updateSize) + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5);
     btn.draw = () => {
       btn.g.clear();
@@ -337,7 +338,7 @@ export class MenuScene extends Phaser.Scene {
     this.panelButtons = [];
     const mkBtn = (x, y, w, label, action) => { // a copper button: 9-slice picture (normal / pressed) with dark text
       const h = 25, bt = { btn: true, x: x - 4, y: y - 3, w: w + 8, h: h + 6, down: false, action, shown: false }; // the touch area is a little bigger than the picture
-      bt.img = art ? keep(this.add.nineslice(x, y, 'ui_med-button', undefined, w, h, 10, 10, 0, 0).setOrigin(0, 0)) : null;
+      bt.img = art ? keep(this.add.nineslice(x, y, buttonKey(this), undefined, w, h, 10, 10, 0, 0).setOrigin(0, 0)) : null;
       bt.g = keep(this.add.graphics());
       bt.label = T(x + w / 2, y + h / 2, label, S.btnSize, 0.5, P.cream, 3);
       bt.draw = () => {
@@ -398,7 +399,7 @@ export class MenuScene extends Phaser.Scene {
     });
     const bw = 80, by = y0 + h - 38, mk = (x, label, action) => { // two buttons: the same picture as the other buttons
       const bt = { btn: true, x: x - 4, y: by - 3, w: bw + 8, h: 31, down: false, action, shown: true };
-      bt.img = art2 ? keep(this.add.nineslice(x, by, 'ui_med-button', undefined, bw, 25, 10, 10, 0, 0).setOrigin(0, 0), 1) : null;
+      bt.img = art2 ? keep(this.add.nineslice(x, by, buttonKey(this), undefined, bw, 25, 10, 10, 0, 0).setOrigin(0, 0), 1) : null;
       bt.g = keep(this.add.graphics(), 1);
       bt.label = T(x + bw / 2, by + 12, label, 10, 0.5, P.cream); bt.label.setStroke(hex(P.shadow), 3);
       bt.draw = () => { if (bt.img) bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(by + (bt.down ? 1 : 0)); bt.label.setY(by + 12 + (bt.down ? 1 : 0)); };

@@ -1,3 +1,4 @@
+import { buttonKey } from '../buttons.js';
 import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
 import { drawVolBar, volFrom, volHit, VOL_W } from '../volbar.js';
 import { CONFIG as C, z, hex, snap4 } from '../config.js';
@@ -873,7 +874,7 @@ export class PlayScene extends Phaser.Scene {
         ui.push(g, this.add.text(W / 2, y - 9, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5).setDepth(72));
         return { id, bar: true, bx, by, g };
       }
-      if (this.textures.exists('ui_med-button')) ui.push(this.add.nineslice(W / 2 - B.btnW / 2, y - 12, 'ui_med-button', undefined, B.btnW, 25, 10, 10, 0, 0).setOrigin(0, 0).setDepth(71));
+      if (this.textures.exists('ui_med-button')) ui.push(this.add.nineslice(W / 2 - B.btnW / 2, y - 12, buttonKey(this), undefined, B.btnW, 25, 10, 10, 0, 0).setOrigin(0, 0).setDepth(71));
       else { const gg = this.add.graphics().setDepth(71); drawPlate(gg, W / 2 - B.btnW / 2, y - B.btnH / 2, B.btnW, B.btnH, { fill: B.fill, border: B.border, down: false }); ui.push(gg); }
       ui.push(this.add.text(W / 2, y, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: 3, align: 'center' }).setOrigin(0.5).setDepth(72));
       return { id, x: W / 2, y, w: B.btnW, h: B.btnH };
@@ -1678,7 +1679,7 @@ export class PlayScene extends Phaser.Scene {
     const M = C.endMenuBtn, my = H - M.bottom; // MENU button: back to the stage menu
     this.menuBtn = { x: W / 2, y: my, w: M.w, h: M.h };
     let btnPic; // the same button picture as the menu (9-slice: round ends stay, the middle stretches); without it the old drawn plate
-    if (this.textures.exists('ui_med-button')) btnPic = this.add.nineslice(W / 2 - M.w / 2, my - 12, 'ui_med-button', undefined, M.w, 25, 10, 10, 0, 0).setOrigin(0, 0).setDepth(61);
+    if (this.textures.exists('ui_med-button')) btnPic = this.add.nineslice(W / 2 - M.w / 2, my - 12, buttonKey(this), undefined, M.w, 25, 10, 10, 0, 0).setOrigin(0, 0).setDepth(61);
     else { btnPic = this.add.graphics().setDepth(61); drawPlate(btnPic, W / 2 - M.w / 2, my - M.h / 2, M.w, M.h, { fill: M.color, border: M.border, down: false }); }
     fade.push(btnPic);
     t(my, 'MENU', M.size, CR, 3);
