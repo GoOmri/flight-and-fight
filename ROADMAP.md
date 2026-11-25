@@ -1,6 +1,6 @@
 # Flight and Fight: roadmap
 
-Kept short on purpose. Per-version history is in NOTES.md, the look rules are in DESIGN.md (section CURRENT LOOK). Last updated 24 Nov 2026 (v1.9.155).
+Kept short on purpose. Per-version history is in NOTES.md, the look rules are in DESIGN.md (section CURRENT LOOK). Last updated 24 Nov 2026 (v1.9.156).
 
 ## Next up (order agreed with Omri, 24 Nov 2026)
 1. **Stars part 1:** DONE in v1.9.81 (look unverified).
@@ -10,7 +10,7 @@ Kept short on purpose. Per-version history is in NOTES.md, the look rules are in
 5. **Boss:** one per stage. Art candidates in art-packs/characters-and-enemies: wizard-summoner-unknown, floating-skull (zip), mud-enemy-unknown. Bosses get NO enemy glow (noGlow: true).
 6. **Power-up bar at the top:** DONE in v1.9.130 (blue pills drawn in code, src/hud.js; look unverified on phone).
 7. **Sound:** built in v1.9.134 (unheard, check on the phone). Still open: vibration, effects switch for the game, pause and game-over leftovers, sounds for chest and cat meow, swamp and end-screen music.
-8. **New enemy shots: DELAYED** (Omri: the shots in stages 1 and 2 are good now). The design is kept below. Swamp enemy patterns go with it.
+8. **New enemy shots: DELAYED** (Omri, 25 Nov: they are for enemies we have not added yet) (Omri: the shots in stages 1 and 2 are good now). The design is kept below. Swamp enemy patterns go with it.
 
 ## Cats: DECIDED with Omri (24 Nov 2026, nothing built yet)
 - Spec: DESIGN.md section 5 "Cat rescue". Rescue = HOVER IN A RING until it fills (about 2 s, drains slowly when she leaves, a hit inside takes 25% off the ring). No new button.

@@ -5,22 +5,17 @@ import { goalScale } from './sprites.js';
 import { PX } from './sprites.js';
 const GOAL_TEX = { pending: 'open', earned: 'earned', failed: 'failed' }; // goal icon look per state
 
-// ONE font for the whole game: PackFont (the pixel font of the Fantasy UI pack, made from its glyph sheet, see CREDITS.md). Only if the file cannot be loaded at all the old
-// Pixelify Sans + Jersey 10 take over by themselves (main.js checks), so text never disappears.
-let packOn = true;
-const CLASSIC = { fontFamily: '"GameFont", monospace', fontStyle: 'bold', resolution: C.game.render };
-export const FONT = { fontFamily: '"PackFont", "GameFont", monospace', fontStyle: 'normal', resolution: C.game.render }; // text drawn at canvas resolution = sharp
-export const packFontOn = () => packOn;
+// ONE font for the whole game: monogram (thin pixel font by datagoblin, CC0). PackFont (the older pixel font) steps in only if its file cannot load.
+export const FONT = { fontFamily: '"Monogram", "PackFont", monospace', fontStyle: 'normal', resolution: C.game.render }; // text drawn at canvas resolution = sharp
 // The ornate title font (big titles only, 24 px and up: STAGE CLEAR, GAME OVER, PAUSED, SETTINGS, the goals box). Plain px sizes (not fpx).
 // the thin pixel font (monogram): sharp at 16 px. Settings screen.
 export const FONT_MONO = { fontFamily: '"Monogram", "PackFont", monospace', fontSize: '16px', resolution: C.game.render };
 export const FONT_TITLE = { fontFamily: '"DungeonFont", "PackFont", monospace', fontStyle: 'normal', resolution: C.game.render };
 export const titleCase = s => s.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase()); // FOREST -> Forest, STAGE CLEAR -> Stage Clear (the title font reads best with small letters)
-export const useClassicFont = () => { packOn = false; Object.assign(FONT, CLASSIC); };
-// A text size in game px for the pixel font. PackFont has 11 art pixels per em, so a size S draws every art pixel S * 3 / 11 canvas px wide (render x3):
-// only sizes with a WHOLE number of canvas px per art pixel stay sharp. fpx() picks p = whole canvas px per art pixel from the size the code asked for
-// (p = size * C.fontScale, at least 3) and returns S = 11 * p / 3: asked 8 -> p 3 (S 11), 10 -> 4 (14.7), 12 -> 5 (18.3), 16 -> 6 (22), 20 -> 8, 24 -> 9 (33). Classic fonts keep the size they were given.
-export const fpx = size => (!packOn ? size : +(11 * Math.max(3, Math.round(size * C.fontScale)) / 3).toFixed(3));
+// A text size in game px for the pixel font. monogram has 16 art pixels per em, so only sizes with a WHOLE number of canvas px per art pixel
+// (render x3) stay sharp. fpx() picks p = canvas px per art pixel from the size the code asked for (p = size * C.fontScale, at least 3) and
+// returns 16 * p / 3: asked 8 or 10 -> p 3 or 4 (16 or 21.3 px), 12 -> 5, 16 -> 6 (32), and so on.
+export const fpx = size => +(16 * Math.max(3, Math.round(size * C.fontScale)) / 3).toFixed(3);
 const W = C.game.width;
 
 // Chunky button plate (flat, no glow): dark bottom edge, plate with a border on top. down = pressed: plate sinks, bottom edge shrinks, fill lighter.

@@ -1,5 +1,4 @@
 import { CONFIG, hex } from './config.js';
-import { useClassicFont, packFontOn } from './hud.js';
 import { resetSavedOnce } from './medals.js';
 import { initSound } from './sound.js';
 initSound();
@@ -18,7 +17,6 @@ const fontReady = Promise.race([
   new Promise(r => setTimeout(r, 2000))
 ]);
 fontReady.then(() => {
-  if (packFontOn() && !document.fonts.check('16px "PackFont"', 'A')) useClassicFont(); // the new font did not load: the old one it is
   window.__game = new Phaser.Game({
   type: new URLSearchParams(window.location.search).get('render') === 'canvas' ? Phaser.CANVAS : Phaser.AUTO, // ?render=canvas forces the older drawing mode (to test browsers without WebGL)
   width: CONFIG.game.width * CONFIG.game.render,
