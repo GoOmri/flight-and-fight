@@ -1019,3 +1019,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.131: horizontal, larger pills; score without the word (branch v1131-wide-pills)
 - Pills are now horizontal and bigger: 8 x 5 px with 1 px gap (was 4 x 7 vertical), light stripe along the top. 10 pills are 89 px wide, centred; the wave pips start at about x 168, so they fit side by side (unverified with pips visible on a phone).
 - The HUD shows only the number for the score (no 'SCORE'). The game-over screen still says SCORE.
+
+## 2026-11-25 v1.9.132: cats and their rocks keep scrolling on the game over screen (branch v1132-cats-scroll-gameover)
+- The game over branch of update() skipped cats.update, so the cats and their stones froze while the ground kept scrolling. It now calls cats.update; a cat that scrolls off on that screen is not counted as lost.
+- Checked in the browser pane (cat and stone moved about 25 px in 0.6 s after game over). UNVERIFIED on phone.

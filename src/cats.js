@@ -259,8 +259,10 @@ export class Cats {
   }
 
   lose(c) {
-    c.state = 'gone'; this.lost++;
+    c.state = 'gone';
     [c.cat, c.glow, c.stone, c.ring, c.ringBack, c.fx].forEach(o => o && o.destroy());
+    if (this.s.over) return; // scrolled off on the game over screen: not counted
+    this.lost++;
     this.s.onCatLost();
   }
 
