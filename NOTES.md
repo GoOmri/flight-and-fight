@@ -981,3 +981,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.122: tighter spark radius, less ring shake (branch v1122-tighter-sparks-less-shake)
 - Far sparks are born 8 to 24 px from the witch (was 16 to 42). Ring shake halved (shakePx 7 to 3.5, catShake 0.5 to 0.3).
 - UNVERIFIED on phone: how the tighter cloud and calmer shake feel.
+
+## 2026-11-25 v1.9.123: calmer sparks (branch v1123-calmer-sparks)
+- About half as many sparks (sparkRateHover 18 to 9, sparkFillMul 8 to 4, sparkMax 70 to 40). Pulled sparks smaller (scale 1.5 to 1) and softer (alpha 0.75).
+- UNVERIFIED on phone: whether it now feels calm enough.
