@@ -977,3 +977,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.121: smaller far-spark radius; ?tintblend= test switch (branch v1121-radius-overlay-test)
 - Far sparks are born 16 to 42 px from the witch (was 32 to 74).
 - New test parameter ?tintblend=N changes the forest tint's blend mode (2 multiply = the game's setting, 3 screen, 4 overlay). Overlay is drawn ONLY in CANVAS mode (add ?render=canvas); WebGL (phones, most browsers) has no overlay blend in Phaser and falls back to normal paint. Seen in the browser pane: overlay gives a lighter, blue-lilac wash. The game itself is unchanged (multiply).
+
+## 2026-11-25 v1.9.122: tighter spark radius, less ring shake (branch v1122-tighter-sparks-less-shake)
+- Far sparks are born 8 to 24 px from the witch (was 16 to 42). Ring shake halved (shakePx 7 to 3.5, catShake 0.5 to 0.3).
+- UNVERIFIED on phone: how the tighter cloud and calmer shake feel.
