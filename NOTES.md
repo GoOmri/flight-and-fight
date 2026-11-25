@@ -1116,5 +1116,5 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.154: new sound picks and cat meows (branch v1154-sound-picks)
 - New: coin (now at its own pitch, quiet), menu tap, shot (bubble pop), box breaking open, two quiet cat meows at random while a cat on screen calls. Enemy pop: one of two at random. Cat rescued: only the wink-ting.
 - Still silent: box being hit, swamp music, end screen music.
-- Meow files: source and licence not known (Omri added them).
+- Meow files: added by Omri, who confirmed they are free to use (source not recorded).
 - UNVERIFIED: everything heard.
