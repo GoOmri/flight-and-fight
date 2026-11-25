@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.154", // bump on every push so the player/Omri can see the build
+  version: "1.9.155", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -292,7 +292,8 @@ export const CONFIG = {
 
   stage: {
     firstWaveDelay: 1.5, // seconds before the first wave starts
-    endDelayMs: 1500     // after the last enemy is gone, wait this long (coins can still be caught), then show STAGE CLEAR
+    endDelayMs: 1500,    // after the last enemy is gone and nothing is left to pick up, wait this long, then she flies off and STAGE CLEAR shows
+    flyOffDip: 45, flyOffAccel: 430, flyOffGone: 30 // the fly-off: first dip speed (px/s, down), how fast she speeds up (px/s per s), how far above the screen counts as gone
   },
 
   particles: { poolSize: 140, perExplosion: 8, speed: z(140), lifeMs: 450 },

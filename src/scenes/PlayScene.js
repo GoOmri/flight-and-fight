@@ -121,6 +121,7 @@ export class PlayScene extends Phaser.Scene {
     this.hooks = { enemy: (cg, i) => { if (this.cats) this.cats.onWave(cg.w); this.spawnEnemy(cg, i); }, // a cat appears when the first enemy of its wave spawns
        crate: cc => this.spawnCrate(cc) };
     this.enemyCount = 0;  // enemies alive now
+    this.leaving = false; // true while she flies off the top at the end of the stage
     this.clearAt = 0;     // time when STAGE CLEAR shows (0 = not yet)
     // Counters for the medals later (shown only on the result screen for now)
     this.enemiesSpawned = 0; this.enemiesKilled = 0; this.coinsSpawned = 0; this.coinsCollected = 0; this.hitsTaken = 0;
@@ -939,6 +940,7 @@ export class PlayScene extends Phaser.Scene {
       this.updateFx(dt); return;
     }
 
+    if (this.leaving) { this.flyOff(time, dt); return; }
     this.moveShip(dt);
     this.updateShipFeel(dt);
     this.autoFire(time);
@@ -949,7 +951,7 @@ export class PlayScene extends Phaser.Scene {
     this.updateCoins(dt);
     this.cullOffscreen(time);
     if (!this.clearAt && this.runner.finished && this.cats.idle() && this.enemyCount === 0 && this.crates.countActive(true) === 0 && this.coins.countActive(true) === 0 && this.weaponUps.countActive(true) === 0 && this.heartUps.countActive(true) === 0) this.clearAt = time + C.stage.endDelayMs;
-    if (this.clearAt && time >= this.clearAt) { this.stageClear(); return; }
+    if (this.clearAt && time >= this.clearAt) this.startFlyOff();
     this.updateFx(dt);
 
     // invulnerability blink
@@ -958,6 +960,27 @@ export class PlayScene extends Phaser.Scene {
     } else this.ship.setAlpha(1);
     if (time < this.shipFlashUntil) this.ship.setTintFill(0xb8ffd0); else this.ship.clearTint(); // level-up flash
     if (this.muzzle[0].visible) { if (time >= this.muzzleUntil) this.muzzle.forEach(m => m.setVisible(false)); else this.muzzle[0].setTexture(this.muzzleUntil - time > C.feel.muzzleMs / 2 ? 'muzzleA' : 'muzzleB'); } // big burst, then a small one
+  }
+
+  // End of the stage (last wave done, nothing left to pick up): the player lets go, she stops shooting, dips a little and shoots off the top.
+  startFlyOff() {
+    this.leaving = true;
+    this.leaveV = C.stage.flyOffDip; // px/s, positive = down: the small wind-up
+    this.dragId = null; if (this.stickC) this.stickC.set(W / 2, C.stick.restY);
+    this.vx = this.vy = 0; this.recoil = 0;
+    this.muzzle.forEach(m => m.setVisible(false));
+    this.enemyBullets.children.iterate(b => { if (b && b.active) this.kill(b); }); // nothing can hit her now
+    this.ship.setAlpha(1).clearTint().setFrame(1).setAngle(0).setScale(C.ship.spriteScale);
+  }
+
+  flyOff(time, dt) {
+    this.leaveV -= C.stage.flyOffAccel * dt;
+    this.ship.y += this.leaveV * dt;
+    this.vy = Math.min(0, this.leaveV); // the clouds rush by and the broom trail thickens as she speeds up
+    this.updateShipFeel(dt);
+    this.cats.update(dt);
+    this.updateFx(dt);
+    if (this.ship.y < -C.stage.flyOffGone) this.stageClear();
   }
 
   scrollBackground(dt) {
@@ -1508,7 +1531,7 @@ export class PlayScene extends Phaser.Scene {
   onCatLost() { this.medals.catLost(); this.syncMedals(); }
 
   hurtPlayer() {
-    if (this.over || this.time.now < this.invulnUntil) return false;
+    if (this.over || this.leaving || this.time.now < this.invulnUntil) return false;
     this.hitsTaken++;
     sfx('hurt');
     this.cats.hurt(); // a hit while hovering over a cat costs its ring a part
