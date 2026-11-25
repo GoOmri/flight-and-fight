@@ -1000,3 +1000,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - The run pictures lean forward and snap back (body centre swings about 7 px per cycle) on top of our steady slide = a stagger. makeArt measures the swing per frame (runOff) and updateSaved cancels it, so only the smooth slide moves the cat.
 - Ring shake softer again (shakePx 3.5 to 2.5, catShake 0.3 to 0.2).
 - UNVERIFIED on phone: how the run looks (the browser pane was throttled, so I could only check the numbers).
+
+## 2026-11-25 v1.9.127: broom trail drawn over the cat ring (branch v1127-trail-over-ring)
+- The broom trail sat at depth 33.6, the same as the cat parts, so the ring front (33.64) covered it. Trail is now at ship depth minus 0.02 (33.68): above the ring and cat sparks, still under the witch (33.7).
+- UNVERIFIED on phone.
