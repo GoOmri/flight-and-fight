@@ -1,3 +1,4 @@
+import { sfx, music, ringSound, pauseSound } from '../sound.js';
 import { CONFIG as C, z, hex, snap4 } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale, PX } from '../sprites.js';
 import { STAGE1 } from '../waves.js';
@@ -70,6 +71,7 @@ export class PlayScene extends Phaser.Scene {
 
   create() {
     makeAllTextures(this);
+    ringSound(false); pauseSound(false); music(this.bg === 'forest' ? 'forest' : null); // only the forest has its own music so far
     if (C.sprites.poof) { // death smoke in the main colour of each enemy (and the chest): a tinted copy of the poof sheet per type, made once (no tint at draw time, so it also works in CANVAS mode)
       const smoke = { ...Object.fromEntries(Object.keys(C.enemies.sprites).map(t => [t, C.enemies.sprites[t].smokeColor !== undefined ? C.enemies.sprites[t].smokeColor : this.mainColour('en_' + t)])), crate: DEATH_TINTS.crate[0] };
       for (const t in smoke) {
@@ -200,7 +202,7 @@ export class PlayScene extends Phaser.Scene {
     this.physics.add.overlap(this.ship, this.enemyBullets, (s, b) => { this.kill(b); this.hurtPlayer(); });
     this.physics.add.overlap(this.ship, this.enemies, (s, e) => { if (e.onScreen && this.hurtPlayer() && C.ship.ramKillsEnemy) this.crashEnemy(e); });
     this.physics.add.overlap(this.ship, this.coins, (s, c) => {
-      this.kill(c); this.coinsCollected++; this.addScore(C.coin.value);
+      this.kill(c); sfx('coin'); this.coinsCollected++; this.addScore(C.coin.value);
       this.pop(c.x, c.y, '+' + C.coin.value);
       this.burst(c.x, c.y, C.feel.coinSparkCount, COIN_TINTS, C.feel.coinSparkSpeedMul, 3); // coin pop
     });
@@ -845,6 +847,7 @@ export class PlayScene extends Phaser.Scene {
   pauseGame() {
     if (this.paused || this.over) return;
     this.paused = true; this.pauseAt = this.time.now;
+    pauseSound(true); sfx('tap');
     this.physics.world.pause(); this.tweens.pauseAll(); this.anims.pauseAll();
     this.dragId = null; this.stickV.set(0, 0); this.stopping = false; this.stickC.set(W / 2, C.stick.restY);
     const B = C.pauseBtn, P = C.menu.pal, CR = hex(P.cream), ui = [];
@@ -861,6 +864,7 @@ export class PlayScene extends Phaser.Scene {
 
   pauseTap(x, y) {
     const hit = b => Math.abs(x - b.x) <= b.w / 2 && Math.abs(y - b.y) <= b.h / 2;
+    if (hit(this.pauseUi.cont) || hit(this.pauseUi.restart) || hit(this.pauseUi.menu)) sfx('tap');
     if (hit(this.pauseUi.cont)) this.resumeGame();
     else if (hit(this.pauseUi.restart)) { this.anims.resumeAll(); this.scene.restart(this.startData); } // start the stage again (the run so far is lost, nothing saved)
     else if (hit(this.pauseUi.menu)) { this.anims.resumeAll(); this.scene.start('Menu'); } // a pause never saves anything: leaving loses the run
@@ -873,6 +877,7 @@ export class PlayScene extends Phaser.Scene {
     this.pauseUi.objs.forEach(o => o.destroy()); this.pauseUi = null;
     this.physics.world.resume(); this.tweens.resumeAll(); this.anims.resumeAll();
     this.paused = false;
+    pauseSound(false);
   }
 
   addScore(n) { this.score += n; this.hud.setScore(this.score, true); }
@@ -986,6 +991,7 @@ export class PlayScene extends Phaser.Scene {
     const F = C.feel;
     this.muzzle.forEach((m, i) => m.setPosition(this.ship.x + (this.muzzle.length > 1 ? (i ? F.muzzleSpread : -F.muzzleSpread) : 0), this.ship.y - this.muzzleDy).setVisible(true));
     this.muzzleUntil = time + F.muzzleMs;
+    sfx('shoot');
     this.recoil = 1;
   }
 
@@ -1377,7 +1383,8 @@ export class PlayScene extends Phaser.Scene {
   }
 
   weaponUp() {
-    if (this.weaponLevel < C.pickup.maxLevel) this.weaponLevel++;
+    sfx('potion');
+    if (this.weaponLevel < C.pickup.maxLevel) { this.weaponLevel++; sfx('levelUp', 180); }
     this.hud.setLevel(this.weaponLevel);
     this.shipFlashUntil = this.time.now + C.feel.levelFlashMs;
     this.burst(this.ship.x, this.ship.y, C.feel.levelSparkCount, GREEN_TINTS, 1, 3);
@@ -1386,6 +1393,7 @@ export class PlayScene extends Phaser.Scene {
   }
 
   heartUp(px, py) {
+    sfx('heart');
     const sp = C.sprites.heartPickup;
     if (this.hearts < C.ship.hearts) { this.hearts++; this.hud.setHearts(this.hearts); } else { this.addScore(C.pickup.heartScoreIfFull); this.pop(this.ship.x, this.ship.y - C.feel.popTextOffsetY, '+' + C.pickup.heartScoreIfFull); }
     if (sp) this.playFx(this.fxPool, 'sp_heart_collect', 'heart_collect', px, py, sp.scale, sp.collectDepth, null); // the heart jumps and bursts where it was grabbed (replaces the pink ring)
@@ -1417,6 +1425,7 @@ export class PlayScene extends Phaser.Scene {
   damageEnemy(e, dmg, flash) {
     if (!e.active) return;
     e.hp -= dmg;
+    sfx(e.hp > 0 ? 'enemyHit' : 'enemyDie');
     if (e.hp > 0) { if (flash) { e.flashUntil = this.time.now + C.enemies.hitFlashMs; if (e.sp) this.syncFlash(e); else e.setTintFill(0xffffff); } if (C.feel.hitKickPx > 0) e.kick = 1; return; } // white at once, not only on the next update
     const big = e.kind === 'shooter';
     this.explode(e.x, e.y, big, DEATH_TINTS[e.kind], true, e.kind);
@@ -1460,6 +1469,7 @@ export class PlayScene extends Phaser.Scene {
   hurtPlayer() {
     if (this.over || this.time.now < this.invulnUntil) return false;
     this.hitsTaken++;
+    sfx('hurt');
     this.cats.hurt(); // a hit while hovering over a cat costs its ring a part
     this.medals.playerHit(); this.syncMedals();
     if (!this.god && !(C.testing.god > 0)) { this.hearts--; this.hud.setHearts(this.hearts); }
@@ -1565,6 +1575,7 @@ export class PlayScene extends Phaser.Scene {
   cheated() { return this.god || C.testing.god > 0 || C.testing.level >= 0 || this.startWaveN > 0 || this.tainted; }
 
   gameOver() {
+    music(null); ringSound(false); sfx('gameOver', 350); // after the hit sound
     this.vx = this.vy = 0; // clouds stop boosting
     if (!this.cheated()) saveBest(this.score, this.stageTheme); // the high score also counts when the run ends in a game over (it was only saved on STAGE CLEAR before)
     this.endScreen('GAME OVER', hex(C.menu.pal.pink), false);
@@ -1572,6 +1583,7 @@ export class PlayScene extends Phaser.Scene {
   }
 
   stageClear() {
+    music(null); ringSound(false); sfx('stageClear');
     this.vx = this.vy = 0;
     this.medals.finish(this.enemiesKilled, this.cats.allSaved());
     this.syncMedals();

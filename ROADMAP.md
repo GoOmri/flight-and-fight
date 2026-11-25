@@ -1,6 +1,6 @@
 # Flight and Fight: roadmap
 
-Kept short on purpose. Per-version history is in NOTES.md, the look rules are in DESIGN.md (section CURRENT LOOK). Last updated 24 Nov 2026 (v1.9.133).
+Kept short on purpose. Per-version history is in NOTES.md, the look rules are in DESIGN.md (section CURRENT LOOK). Last updated 24 Nov 2026 (v1.9.134).
 
 ## Next up (order agreed with Omri, 24 Nov 2026)
 1. **Stars part 1:** DONE in v1.9.81 (look unverified).
@@ -9,7 +9,7 @@ Kept short on purpose. Per-version history is in NOTES.md, the look rules are in
 4. **DungeonFont for big titles:** DONE in v1.9.88 (look unverified).
 5. **Boss:** one per stage. Art candidates in art-packs/characters-and-enemies: wizard-summoner-unknown, floating-skull (zip), mud-enemy-unknown. Bosses get NO enemy glow (noGlow: true).
 6. **Power-up bar at the top:** DONE in v1.9.130 (blue pills drawn in code, src/hud.js; look unverified on phone).
-7. **Sound** and vibration, effects switch for the game, pause and game-over leftovers.
+7. **Sound:** built in v1.9.134 (unheard, check on the phone). Still open: vibration, effects switch for the game, pause and game-over leftovers, sounds for chest and cat meow, swamp and end-screen music.
 8. **New enemy shots: DELAYED** (Omri: the shots in stages 1 and 2 are good now). The design is kept below. Swamp enemy patterns go with it.
 
 ## Cats: DECIDED with Omri (24 Nov 2026, nothing built yet)
