@@ -121,6 +121,7 @@ export class MenuScene extends Phaser.Scene {
     this.buttons = [...this.bubbles.filter(b => !b.locked), btn, gear];
     this.makeSettings();
     this.settingsButtons = this.panelButtons;
+    if (this.scene.settings.data && this.scene.settings.data.settings) { this.scene.settings.data = {}; this.openSettings(true); }
 
     // Input: remember which button was pressed; release on the same button uses it. Handlers are removed on shutdown.
     const hit = p => (this.modal ? this.panelButtons : this.buttons).find(c => { const px = p.x / R, py = p.y / R; return px >= c.x && px <= c.x + c.w && py >= c.y && py <= c.y + c.h && (c.st === undefined || (c.alpha > 0.35 && py < PA.viewBottom)); }); // a stage bubble can only be hit while it is visible enough and above the fade
@@ -353,7 +354,7 @@ export class MenuScene extends Phaser.Scene {
     const tn = mkBtn(right - bwid, S.y + 114, bwid, tuneEnabled() ? 'ON' : 'OFF', () => { tn.label.setText(toggleTune() ? 'ON' : 'OFF'); });
     // EFFECTS (the menu starts again with the new setting)
     T(left, S.y + 156, 'EFFECTS', S.btnSize, 0, lc);
-    mkBtn(right - bwid - 20, S.y + 144, bwid + 20, this.fxLow ? 'LOW' : 'FULL', () => { try { localStorage.setItem(FX_KEY, this.fxLow ? 'full' : 'low'); } catch (e) { /* not saved */ } this.scene.restart(); });
+    mkBtn(right - bwid - 20, S.y + 144, bwid + 20, this.fxLow ? 'LOW' : 'FULL', () => { try { localStorage.setItem(FX_KEY, this.fxLow ? 'full' : 'low'); } catch (e) { /* not saved */ } this.scene.restart({ settings: true }); }); // the menu is rebuilt, then the settings open again
     // SOUND
     T(left, S.y + 186, 'SOUND', S.btnSize, 0, lc);
     const snd = mkBtn(right - bwid, S.y + 174, bwid, soundOn() ? 'ON' : 'OFF', () => { snd.label.setText(toggleSound() ? 'ON' : 'OFF'); });
