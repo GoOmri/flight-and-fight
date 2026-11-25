@@ -59,6 +59,16 @@ export class Cats {
         s.anims.create({ key: 'cat' + n + '_run', frames: s.anims.generateFrameNumbers('cat' + n + '_run', { start: 0, end: 7 }), frameRate: 16, repeat: -1 });
       }
     }
+    this.runOff = this.runOff || {}; // per colour: how far the cat's body centre sits from its average centre in each run frame (the pictures lean forward and snap back: we cancel that, and only the smooth slide moves the cat)
+    for (const n of CAT_COLORS) {
+      if (this.runOff[n]) continue;
+      try {
+        const img = s.textures.get('cat' + n + '_run').getSourceImage(), cv = document.createElement('canvas'); cv.width = img.width; cv.height = img.height;
+        const cx = cv.getContext('2d'); cx.drawImage(img, 0, 0); const cs = [];
+        for (let i = 0; i < img.width / 50; i++) { const d = cx.getImageData(i * 50, 0, 50, 50).data; let a = 99, b = -1; for (let q = 0; q < 2500; q++) if (d[q * 4 + 3] > 0) { const px = q % 50; if (px < a) a = px; if (px > b) b = px; } cs.push(b < 0 ? 25 : (a + b) / 2); }
+        const m = cs.reduce((u, v) => u + v, 0) / cs.length; this.runOff[n] = cs.map(v => v - m);
+      } catch (e) { this.runOff[n] = null; }
+    }
     if (!s.anims.exists('star_spin')) s.anims.create({ key: 'star_spin', frames: s.anims.generateFrameNumbers('star_spin', { start: 0, end: 23 }), frameRate: 24, repeat: -1 });
     if (!s.anims.exists('cat_meowfx')) s.anims.create({ key: 'cat_meowfx', frames: s.anims.generateFrameNumbers('cat_meowfx', { start: 0, end: 2 }), frameRate: 8, repeat: 0 });
     if (!s.textures.exists('cat_glow')) { // a smooth round light, used additively behind every cat so it stands out from the ground
@@ -207,6 +217,7 @@ export class Cats {
     c.state = 'saved'; c.t = 0; c.x0 = c.x; c.sy = c.y; // sy = the stone's y (it stays on the ground)
     c.ring.clear(); c.ringBack.clear(); c.fx.setVisible(false);
     c.cat.anims.stop(); c.cat.play('cat' + c.id + '_run');
+    c.dir = c.x < W / 2 ? -1 : 1; c.cat.setFlipX(c.dir < 0); // face the way it will run from the very first jump (the pictures face right)
     for (let i = 0; i < 7; i++) { // 3 small hearts and 4 tiny sparkles shoot off like fireworks (no stars: a gold star means a goal), slow down and fade
       const heart = i < 3, a = Math.random() * Math.PI * 2, v = (heart ? 70 : 90) + Math.random() * 70, x = c.x, y = c.y - c.top - 10;
       const im = (heart ? s.add.image(x, y, 'goal_noHit_earned') : s.add.image(x, y, 'cat_spark').setTint([0xffd0e8, 0xffffff, 0xffe9a8][i % 3])).setDepth(CC.depth + 0.5);
@@ -230,11 +241,12 @@ export class Cats {
     if (c.t < J) { // two happy jumps in place (the cat stays above its stone)
       x = c.x0; y = c.sy - c.top - Math.abs(Math.sin(Math.PI * 2 * c.t / J)) * CC.jumpPx;
     } else { // then it runs along the ground to the closest side edge and out of the screen
-      const dir = c.x0 < W / 2 ? -1 : 1, run = (c.t - J) * CC.runSpeed;
+      const dir = c.dir, run = (c.t - J) * CC.runSpeed;
       x = c.x0 + dir * run; y = c.sy - c.top;
-      c.cat.setFlipX(dir < 0); // the pictures face right
       if (x < -30 || x > W + 30) { this.finish(c); return; }
     }
+    const ro = this.runOff && this.runOff[c.id], fr = c.cat.anims.currentFrame;
+    if (ro && fr) x -= (ro[parseInt(fr.textureFrame, 10)] || 0) * c.cat.scaleX * (c.dir < 0 ? -1 : 1); // cancel the picture's own forward lean so the run is one smooth slide
     c.cat.setPosition(Math.round(x) + CC.catDx, Math.round(y) + CC.catDy);
     this.placeGlow(c);
     c.stone.setPosition(Math.round(c.x0), Math.round(c.sy)); // the stone stays on the ground and scrolls away
