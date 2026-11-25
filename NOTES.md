@@ -1132,3 +1132,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.157: purple settings panel (branch v1157-purple-parchment)
 - The parchment's 8 colours are swapped for purples when the panel is built (no pixel moves, picture file unchanged; map SWAP in MenuScene.parchment). Labels cream, title gold, button words stay dark. Sliders: light up to the handle, purple after it (pause screen too).
 - Only the settings panel uses the parchment; the stage box and pause were already dark/purple. Checked in the browser pane. UNVERIFIED on phone.
+
+## 2026-11-25 v1.9.158: stage tiles on the purple parchment (branch v1158-purple-tiles)
+- The stage tiles (open and locked) use the recoloured parchment instead of the plain purple panel. The goals box still uses the old panel. Stage names already use monogram.
+- Checked in the browser pane. UNVERIFIED on phone.

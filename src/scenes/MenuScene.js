@@ -231,10 +231,10 @@ export class MenuScene extends Phaser.Scene {
 
   // One stage bubble: a plate with a colour tab, the name, the earned medals and the best score. A locked stage is faded and says SOON.
   makeBubble(nd, x, y, w, h, txt) {
-    const key = 'ui_med-panel', art = this.textures.exists(key); // the tan panel of the Medieval UI pack, 9-slice (6 px border); a locked stage is the same panel, darker; without the picture the old drawn plate
+    const art = this.textures.exists('ui_panel-parchment'); // the purple parchment (same as the settings); a locked stage is the same, darker; without the picture the old drawn plate
     const g = this.add.graphics();
     const b = { st: { theme: nd.theme }, locked: !!nd.locked, x, y, w, h, g, down: false, items: [] };
-    const img = art ? this.add.nineslice(x, y, key, undefined, w, h, 6, 6, 6, 6).setOrigin(0, 0) : null;
+    const img = art ? this.add.image(x, y, this.parchment(w, h)).setOrigin(0, 0) : null;
     const pic = art && !b.locked && this.textures.exists('stage_' + nd.theme) ? this.add.image(x + 6, y + 6, 'stage_' + nd.theme).setOrigin(0, 0).setAlpha(M.bubble.picAlpha).setTint(M.bubble.picTint) : null; // the stage picture fills the inside of the tile, dimmed so the text stays readable
     const add = (o, oy) => { b.items.push({ o, oy }); return o; }; // texts and medals sink with the plate when pressed
     const B = M.bubble, cx = x + w / 2, ink = art ? B.ink : P.cream, shadow = 3;
