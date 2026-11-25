@@ -1072,3 +1072,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri: after leaving and coming back, text and things disappear. NOT reproduced here. Likely: Android drops graphics memory of background apps and canvases the game draws itself are not redrawn.
 - index.html: when the game runs on WebGL, all 2D canvases are made with willReadFrequently (kept in normal memory). sound.js: music kept mono (half the memory).
 - Checked in the browser pane: WebGL, text canvas has the flag, menu draws normally. UNVERIFIED: whether it cures the phone. If not: redraw the screen on return.
+
+## 2026-11-25 v1.9.144: lower coin pitch (branch v1144-coin-lower)
+- Coin plays at rate 0.8 (src/sound.js SFX.coin.rate). UNVERIFIED: unheard.
