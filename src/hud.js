@@ -33,6 +33,7 @@ export function drawPlate(g, x, y, w, h, o) {
   return sink;
 }
 const DARK = 0x1b1b2b, GREEN = 0x2ee86a;
+const PILL = { fill: 0x2f7bff, light: 0xa6d4ff, shade: 0x1c47b8, out: 0x0d1a3d }; // the weapon-level pills: blue, a light stripe on the left, a darker bottom, a navy outline
 const PIP_COMING = 0, PIP_ON = 1, PIP_OFF = 2, PIP_DONE = 3, PIP_DIRTY = 4; // pip look codes (DIRTY = done, but an enemy escaped)
 
 export class Hud {
@@ -125,9 +126,13 @@ export class Hud {
     g.clear();
     for (let i = 0; i < n; i++) {
       const x = x0 + i * (H.barW + H.barGap), y = this.rowY;
-      if (i < level) { g.fillStyle(GREEN, 1); g.fillRect(x, y, H.barW, H.barH); }
-      else { g.fillStyle(0x000000, 0.3); g.fillRect(x, y, H.barW, H.barH); }
-      g.lineStyle(1, DARK, 1); g.strokeRect(x + 0.5, y + 0.5, H.barW - 1, H.barH - 1);
+      const w = H.barW, h = H.barH, on = i < level;
+      g.fillStyle(on ? PILL.out : DARK, on ? 1 : 0.55); g.fillRect(x + 1, y, w - 2, h); g.fillRect(x, y + 1, w, h - 2); // rounded outline (the 4 corner pixels are left out)
+      if (on) { // filled pill: base colour, light stripe on the left, darker bottom pixel row
+        g.fillStyle(PILL.fill, 1); g.fillRect(x + 1, y + 1, w - 2, h - 2);
+        g.fillStyle(PILL.shade, 1); g.fillRect(x + 1, y + h - 2, w - 2, 1);
+        g.fillStyle(PILL.light, 1); g.fillRect(x + 1, y + 1, 1, h - 3);
+      } else { g.fillStyle(0x000000, 0.35); g.fillRect(x + 1, y + 1, w - 2, h - 2); } // empty pill: a dark hollow
     }
   }
 

@@ -1011,3 +1011,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-25 v1.9.129: cat's celebration jumps use the reared-up picture (branch v1129-cat-jump-pose)
 - The pet-cats pack has no standing-on-hind-legs picture (Idle, Meow, Sitting, Laying, Stretching = play bow, Itch, Licking, Sleeping, Run). Run frame 0 is the most upright (tallest body), so the two jumps hold it. UNVERIFIED how it looks; if poor, options: the Sitting picture, or the Meow picture.
+
+## 2026-11-25 v1.9.130: blue power-up pills (branch v1130-blue-pills)
+- The weapon-level bars (0..10) are now blue pixel pills drawn in code (rounded corners, light stripe, darker bottom, navy outline); empty ones are dark hollows. Same size and place as the old green bars (config hud.barW/barH/barGap). Colours in PILL at the top of src/hud.js.
+- Checked in the browser pane at level 6. UNVERIFIED: size and look on a phone. Not built: a pulse when the level goes up, a gold full state at level 10.
