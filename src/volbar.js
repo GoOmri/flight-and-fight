@@ -6,9 +6,9 @@ const LOW = 2, TALL = 14, HW = 6; // wedge height at the left / right end, handl
 export function drawVolBar(g, x, y, level) {
   g.clear();
   const base = Math.round(y + TALL / 2), at = Math.round(VOL_W * level / 10);
-  for (let i = 0; i < VOL_W; i++) { const h = Math.round(LOW + (TALL - LOW) * i / VOL_W); g.fillStyle(i < at ? 0xa87c50 : 0xd4bb90, 1).fillRect(x + i, base - h, 1, h); } // light brown up to the handle, no outline
+  for (let i = 0; i < VOL_W; i++) { const h = Math.round(LOW + (TALL - LOW) * i / VOL_W); g.fillStyle(i < at ? 0xf2d9a6 : 0x7b43b8, 1).fillRect(x + i, base - h, 1, h); } // light parchment up to the handle, purple after it, no outline
   const hx = x + at - HW / 2, hy = base - TALL; // the handle is exactly as tall as the tall end of the wedge
-  g.fillStyle(0x3b2410, 1).fillRect(hx + 1, hy, HW - 2, TALL).fillRect(hx, hy + 1, HW, TALL - 2); // dark edge with 1 px round corners
+  g.fillStyle(0x120622, 1).fillRect(hx + 1, hy, HW - 2, TALL).fillRect(hx, hy + 1, HW, TALL - 2); // dark edge with 1 px round corners
   g.fillStyle(0xf7ead0, 1).fillRect(hx + 1, hy + 1, HW - 2, TALL - 2);
 }
 
