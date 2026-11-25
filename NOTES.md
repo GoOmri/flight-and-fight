@@ -1108,3 +1108,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.152: UPDATE button widens to fit its text (branch v1152-update-fits)
 - UPDATE is 80 px (pause OPTIONS is 96). It now grows when the text needs it: NEW VERSION gives 90 px. Pause buttons unchanged.
 - Checked in the browser pane. UNVERIFIED on phone.
+
+## 2026-11-25 v1.9.153: settings and stage box pop in (branch v1153-menu-pop)
+- Both boxes grow from 70% to full size with a small bounce (240 ms), the dark veil fades in. No pop when settings reopen after EFFECTS. Pause menu not changed.
+- Checked in the browser pane: both end at full size. UNVERIFIED: how the motion feels (the pane runs slowly).
