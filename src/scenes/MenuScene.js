@@ -126,7 +126,7 @@ export class MenuScene extends Phaser.Scene {
     this.buttons = [...this.bubbles.filter(b => !b.locked), btn, gear];
     this.makeSettings();
     this.settingsButtons = this.panelButtons;
-    if (this.scene.settings.data && this.scene.settings.data.settings) { this.scene.settings.data = {}; this.openSettings(true); }
+    if (this.scene.settings.data && this.scene.settings.data.settings) { this.scene.settings.data = {}; this.openSettings(true, false); } // reopened after EFFECTS changed: no pop
 
     // Input: remember which button was pressed; release on the same button uses it. Handlers are removed on shutdown.
     const hit = p => (this.modal ? this.panelButtons : this.buttons).find(c => { const px = p.x / R, py = p.y / R; return px >= c.x && px <= c.x + c.w && py >= c.y && py <= c.y + c.h && (c.st === undefined || (c.alpha > 0.35 && py < PA.viewBottom)); }); // a stage bubble can only be hit while it is visible enough and above the fade
@@ -328,6 +328,16 @@ export class MenuScene extends Phaser.Scene {
     }
   }
 
+  // A box that has just opened grows from 70% to full size with a small bounce, around (cx, cy). Its objects sit in one container
+  // (kept at their normal places), so only the container is scaled; the dark veil behind it just fades in.
+  popIn(box, veil, cx, cy) {
+    if (this.popTween) this.popTween.remove();
+    const set = k => { if (box.active) box.setScale(k).setPosition(cx * (1 - k), cy * (1 - k)); };
+    set(0.7); veil.setAlpha(0);
+    this.tweens.add({ targets: veil, alpha: 1, duration: 150 });
+    this.popTween = this.tweens.addCounter({ from: 0.7, to: 1, duration: 240, ease: 'Back.easeOut', onUpdate: t => set(t.getValue()), onComplete: () => set(1) });
+  }
+
   // The parchment picture as a bigger panel: its 24 px ragged edges and its middle are REPEATED, never stretched (stretching smeared its specks into dashes)
   parchment(w, h) {
     const key = 'ui_parchment_' + w + 'x' + h, B = 24, N = 96, M2 = N - 2 * B;
@@ -389,6 +399,7 @@ export class MenuScene extends Phaser.Scene {
       return bar;
     });
     mkBtn(mid - 45, S.y + 238, 90, 'ui_flat1', 'CLOSE', () => this.openSettings(false));
+    this.panelVeil = veil; this.panelBox = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(S.depth);
     this.panelObjs = objs;
   }
 
@@ -399,7 +410,7 @@ export class MenuScene extends Phaser.Scene {
     const D = L.depth, h = 46 + keys.length * L.rowGap + 46, y0 = Math.round((H - 40 - h) / 2), art = this.textures.exists('ui_med-panel');
     const keep = (o, dz = 0) => { o.setDepth(D + dz); objs.push(o); return o; };
     const T = (x, y, s, size, align, color) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(align, 0.5), 2);
-    keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
+    const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
     if (art) keep(this.add.nineslice(L.x, y0, 'ui_med-panel', undefined, L.w, h, 6, 6, 6, 6).setOrigin(0, 0), 0);
     else { const g = keep(this.add.graphics()); g.fillStyle(P.dark, 0.96).fillRoundedRect(L.x, y0, L.w, h, 10); g.lineStyle(3, P.pink, 1).strokeRoundedRect(L.x, y0, L.w, h, 10); }
     const tc = 0xffffff, names = { cats: 'ALL CATS', allCoins: 'ALL COINS', killAll: 'ALL ENEMIES', noHit: 'NO HIT' };
@@ -418,12 +429,17 @@ export class MenuScene extends Phaser.Scene {
       bt.draw = () => { if (bt.img) bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(by + (bt.down ? 1 : 0)); bt.label.setY(by + 12 + (bt.down ? 1 : 0)); };
       return bt;
     }, art2 = this.textures.exists('ui_med-button');
-    const close = () => { objs.forEach(o => o.destroy()); this.goalsObjs = null; this.modal = false; this.panelButtons = this.settingsButtons; };
+    let box = null;
+    const close = () => { if (this.popTween) this.popTween.remove(); objs.forEach(o => o.destroy()); box.destroy(); this.goalsObjs = null; this.modal = false; this.panelButtons = this.settingsButtons; };
     const back = mk(L.x + 14, 'BACK', close), play = mk(L.x + L.w - 14 - bw, 'PLAY', () => { close(); this.scene.start('Play', { theme }); });
+    box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(D);
+    this.popIn(box, veil, W / 2, y0 + h / 2);
     this.goalsObjs = objs; this.modal = true; this.panelButtons = [play, back];
   }
 
-  openSettings(on) {
+  openSettings(on, pop = true) {
+    if (on && pop) this.popIn(this.panelBox, this.panelVeil, M.settings.x + M.settings.w / 2, M.settings.y + M.settings.h / 2);
+    else { if (this.popTween) this.popTween.remove(); this.panelBox.setScale(1).setPosition(0, 0); this.panelVeil.setAlpha(1); }
     this.modal = on;
     this.panelButtons = this.settingsButtons;
     this.panelObjs.forEach(o => o.setVisible(on));
