@@ -1075,3 +1075,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-25 v1.9.144: lower coin pitch (branch v1144-coin-lower)
 - Coin plays at rate 0.8 (src/sound.js SFX.coin.rate). UNVERIFIED: unheard.
+
+## 2026-11-25 v1.9.145: quieter coin (branch v1145-coin-quieter)
+- Coin volume 0.28 to 0.2. UNVERIFIED: unheard.

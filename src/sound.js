@@ -6,7 +6,7 @@ const SFX = {
   shoot: { f: ['shoot'], v: 0.08, gap: 130, pv: 0.08, lp: 2200, len: 0.16 },
   enemyHit: { f: ['enemy-hit'], v: 0.18, gap: 70, pv: 0.1, lp: 3500 },
   enemyDie: { f: ['enemy-die'], v: 0.34, gap: 60, pv: 0.12, lp: 4500 },
-  coin: { f: ['coin'], v: 0.28, gap: 50, pv: 0.04, rate: 0.8 },
+  coin: { f: ['coin'], v: 0.2, gap: 50, pv: 0.04, rate: 0.8 },
   heart: { f: ['heart'], v: 0.45 },
   potion: { f: ['potion'], v: 0.4 },
   levelUp: { f: ['level-up'], v: 0.4 },
