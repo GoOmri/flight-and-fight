@@ -994,3 +994,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Cause of 'new version number but old game for a few minutes': src/cats.js was missing from FILES in src/update.js, so UPDATE refreshed config.js (the number) but left the old cats.js saved. Added it. Rule: every new src file goes into FILES.
 - Note: the update that brings v1.9.125 still uses the old list; it works from the update after that.
 - UNVERIFIED on phone.
+
+## 2026-11-25 v1.9.126: smoother cat run, softer shake (branch v1126-cat-run-smooth)
+- Cats now face their run direction from the first jump (before: they jumped facing right, then flipped when running left).
+- The run pictures lean forward and snap back (body centre swings about 7 px per cycle) on top of our steady slide = a stagger. makeArt measures the swing per frame (runOff) and updateSaved cancels it, so only the smooth slide moves the cat.
+- Ring shake softer again (shakePx 3.5 to 2.5, catShake 0.3 to 0.2).
+- UNVERIFIED on phone: how the run looks (the browser pane was throttled, so I could only check the numbers).
