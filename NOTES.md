@@ -1004,3 +1004,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.127: broom trail drawn over the cat ring (branch v1127-trail-over-ring)
 - The broom trail sat at depth 33.6, the same as the cat parts, so the ring front (33.64) covered it. Trail is now at ship depth minus 0.02 (33.68): above the ring and cat sparks, still under the witch (33.7).
 - UNVERIFIED on phone.
+
+## 2026-11-25 v1.9.128: cat no longer runs on the spot (branch v1128-cat-run-start)
+- The run cycle played during the two in-place jumps, so the cat ran without moving. Now it holds one leaping pose (run frame 3) while jumping and the run cycle starts only when it starts to move.
+- UNVERIFIED on phone.
