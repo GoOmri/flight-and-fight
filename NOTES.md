@@ -1136,3 +1136,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.158: stage tiles on the purple parchment (branch v1158-purple-tiles)
 - The stage tiles (open and locked) use the recoloured parchment instead of the plain purple panel. The goals box still uses the old panel. Stage names already use monogram.
 - Checked in the browser pane. UNVERIFIED on phone.
+
+## 2026-11-25 v1.9.159: stage picture inside the ragged edge (branch v1159-tile-edge)
+- The stage picture is now painted only on the parchment's inner pixels, so it has the same torn edge as the tile (MenuScene.tilePicture).
+- Checked in the browser pane. UNVERIFIED on phone.
+- Stage names are monogram with a 3 px dark outline, which makes them look heavier than in the settings.
