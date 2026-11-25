@@ -1128,3 +1128,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - The whole game now uses monogram (same sizes in pixels per art pixel as before); PackFont only as a fallback; the old Pixelify fallback switch removed. Big titles keep DungeonFont.
 - Pop-in on pause (both pages), game over and stage clear, besides settings and the stage box. New src/popin.js (runs on scene update, because pause stops tweens). Stage clear stat lines spaced a bit more.
 - Checked in the browser pane: menu, stage box, HUD, pause, stage clear, game over. UNVERIFIED on phone: readability of the thin font at small sizes (version number, buttons).
+
+## 2026-11-25 v1.9.157: purple settings panel (branch v1157-purple-parchment)
+- The parchment's 8 colours are swapped for purples when the panel is built (no pixel moves, picture file unchanged; map SWAP in MenuScene.parchment). Labels cream, title gold, button words stay dark. Sliders: light up to the handle, purple after it (pause screen too).
+- Only the settings panel uses the parchment; the stage box and pause were already dark/purple. Checked in the browser pane. UNVERIFIED on phone.

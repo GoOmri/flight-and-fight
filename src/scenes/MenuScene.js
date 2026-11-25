@@ -338,7 +338,7 @@ export class MenuScene extends Phaser.Scene {
     this.popTween = this.tweens.addCounter({ from: 0.7, to: 1, duration: 240, ease: 'Back.easeOut', onUpdate: t => set(t.getValue()), onComplete: () => set(1) });
   }
 
-  // The parchment picture as a bigger panel: its 24 px ragged edges and its middle are REPEATED, never stretched (stretching smeared its specks into dashes)
+  // The parchment picture as a bigger PURPLE panel: its 24 px ragged edges and its middle are REPEATED, never stretched (stretching smeared its specks into dashes)
   parchment(w, h) {
     const key = 'ui_parchment_' + w + 'x' + h, B = 24, N = 96, M2 = N - 2 * B;
     if (this.textures.exists(key)) return key;
@@ -350,6 +350,14 @@ export class MenuScene extends Phaser.Scene {
     tile(B, 0, M2, B, B, 0, w - 2 * B, B); tile(B, N - B, M2, B, B, h - B, w - 2 * B, B);
     tile(0, B, B, M2, 0, B, B, h - 2 * B); tile(N - B, B, B, M2, w - B, B, B, h - 2 * B);
     for (const [sx, sy, dx, dy] of [[0, 0, 0, 0], [N - B, 0, w - B, 0], [0, N - B, 0, h - B], [N - B, N - B, w - B, h - B]]) c.drawImage(img, sx, sy, B, B, dx, dy, B, B);
+    // colour swap only (no pixel moves): each of the picture's 8 colours becomes one of our purples, light stays light and dark stays dark
+    const SWAP = { 0xead4aa: 0x3a1a72, 0xe8b796: 0x452180, 0xe4a672: 0x52288f, 0xc28569: 0x7b43b8, 0xb86f50: 0x6630a0, 0x733e39: 0x2c1058, 0x3e2731: 0x1e0a40, 0x181425: 0x120622 };
+    const px = c.getImageData(0, 0, w, h), d = px.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const to = SWAP[(d[i] << 16) | (d[i + 1] << 8) | d[i + 2]];
+      if (d[i + 3] && to !== undefined) { d[i] = to >> 16; d[i + 1] = (to >> 8) & 255; d[i + 2] = to & 255; }
+    }
+    c.putImageData(px, 0, 0);
     cv.refresh();
     return key;
   }
@@ -359,17 +367,18 @@ export class MenuScene extends Phaser.Scene {
   makeSettings() {
     const S = M.settings, objs = [], mid = S.x + S.w / 2, ink = hex(S.ink);
     const keep = (o, dz = 0) => { o.setDepth(S.depth + dz).setVisible(false); objs.push(o); return o; };
-    const T = (x, y, s) => keep(this.add.text(x, y, s, { ...FONT_MONO, color: ink }).setOrigin(0.5), 2);
+    const cream = hex(P.cream); // light text on the purple panel; the words on the light buttons stay dark (ink)
+    const T = (x, y, s, color = cream) => keep(this.add.text(x, y, s, { ...FONT_MONO, color }).setOrigin(0.5), 2);
     const veil = keep(this.add.graphics(), -1); veil.fillStyle(0x000000, 0.55).fillRect(0, 0, W, H);
     if (this.textures.exists('ui_panel-parchment')) keep(this.add.image(S.x, S.y, this.parchment(S.w, S.h)).setOrigin(0, 0));
-    else { const back = keep(this.add.graphics()); back.fillStyle(0xe8d4a8, 1).fillRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius); }
-    keep(this.add.text(mid, S.y + 30, 'Settings', { ...FONT_TITLE, fontSize: '24px', color: ink }).setOrigin(0.5), 2); // the ornate title font
+    else { const back = keep(this.add.graphics()); back.fillStyle(0x3a1a72, 1).fillRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius); }
+    keep(this.add.text(mid, S.y + 30, 'Settings', { ...FONT_TITLE, fontSize: '24px', color: hex(0xf2b632) }).setOrigin(0.5), 2); // the ornate title font
     this.panelButtons = [];
     // Omri's flat parchment buttons (80 x 26, 10 px ends). isOn = null: a plain button; else a choice, faded when it is not the chosen one
     const mkBtn = (x, y, w, key, label, action, isOn = null) => {
       const h = 26, bt = { btn: true, x: x - 2, y: y - 4, w: w + 4, h: h + 8, down: false, action, shown: false };
       bt.img = keep(this.add.nineslice(x, y, key, undefined, w, h, 10, 10, 0, 0).setOrigin(0, 0), 1);
-      bt.label = T(x + w / 2, y + 12, label);
+      bt.label = T(x + w / 2, y + 12, label, ink);
       bt.draw = () => {
         const on = !isOn || isOn(), sink = bt.down ? 1 : 0;
         bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setAlpha(on ? 1 : 0.45).setY(y + sink);
