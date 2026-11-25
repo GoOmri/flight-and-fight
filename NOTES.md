@@ -1061,3 +1061,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-25 v1.9.140: slider handle (branch v1140-volume-handle)
 - Handle is exactly as tall as the tall end of the wedge, with 1 px round corners. UNVERIFIED on phone.
+
+## 2026-11-25 v1.9.141: slider in light parchment brown (branch v1141-volume-brown)
+- Fill 0xc49a6c, empty 0xe6d3ae, outline 0x8a6a44, handle 0xf7ead0 (src/volbar.js). Same slider on the pause screen. UNVERIFIED on phone.
