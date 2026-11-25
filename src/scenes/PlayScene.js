@@ -1487,6 +1487,7 @@ export class PlayScene extends Phaser.Scene {
     this.kill(b);
     c.hp -= b.dmg;
     if (c.hp > 0) { c.flashUntil = this.time.now + C.enemies.hitFlashMs; if (C.feel.hitKickPx > 0) c.kick = 1; return; }
+    sfx('boxOpen');
     this.explode(c.x, c.y, true, DEATH_TINTS.crate, true, 'crate');
     const cs = C.sprites.crate;
     if (cs) this.playFx(this.fxPool, 'sp_crate_break', 'crate_break', c.x, c.y, cs.scale, cs.breakDepth, cs.tint); // chest bursts at the same moment as the coins
