@@ -91,7 +91,9 @@ export class MenuScene extends Phaser.Scene {
     btn.label = this.add.text(W / 2, by + ubh / 2, 'UPDATE', { ...FONT, fontSize: fpx(M.updateSize) + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5);
     btn.draw = () => {
       btn.g.clear();
-      if (art) { // normal, pressed, or hover (a newer version is waiting); dark brown text
+      if (art) {
+        const w = Math.max(ubw, 2 * Math.ceil((btn.label.width + 28) / 2)), x = (W - w) / 2; // the button widens when its text needs it (the scroll ends take about 14 px each side)
+        btn.img.setSize(w, 26).setX(x); btn.x = x - 8; btn.w = w + 16; // normal, pressed, or hover (a newer version is waiting); dark brown text
         btn.img.setTint(btn.down ? 0xbbbbbb : 0xffffff).setY(by + (btn.down ? 1 : 0)); // pressed: darker and 1 px lower
         btn.label.setColor(btn.hot ? BTN_HOT : BTN_INK).setStroke(BTN_INK, 0); // a newer version waiting: red text
         btn.label.setY(by + ubh / 2 + (btn.down ? 1 : 0));
@@ -104,9 +106,9 @@ export class MenuScene extends Phaser.Scene {
     btn.draw();
     btn.action = async () => {
       if (btn.busy) return;
-      btn.busy = true; btn.label.setText('UPDATING...');
+      btn.busy = true; btn.label.setText('UPDATING...'); btn.draw();
       try { await refreshFiles(); window.location.reload(); }
-      catch (e) { btn.label.setText('NO INTERNET'); this.time.delayedCall(2200, () => { btn.busy = false; btn.label.setText(btn.hot ? 'NEW VERSION' : 'UPDATE'); }); }
+      catch (e) { btn.label.setText('NO INTERNET'); btn.draw(); this.time.delayedCall(2200, () => { btn.busy = false; btn.label.setText(btn.hot ? 'NEW VERSION' : 'UPDATE'); btn.draw(); }); }
     };
     latestVersion().then(v => {
       if (!v || v === C.version || !btn.label.active) return; // same version, offline, or the menu was already left
