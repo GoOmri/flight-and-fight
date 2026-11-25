@@ -1015,3 +1015,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-25 v1.9.130: blue power-up pills (branch v1130-blue-pills)
 - The weapon-level bars (0..10) are now blue pixel pills drawn in code (rounded corners, light stripe, darker bottom, navy outline); empty ones are dark hollows. Same size and place as the old green bars (config hud.barW/barH/barGap). Colours in PILL at the top of src/hud.js.
 - Checked in the browser pane at level 6. UNVERIFIED: size and look on a phone. Not built: a pulse when the level goes up, a gold full state at level 10.
+
+## 2026-11-25 v1.9.131: horizontal, larger pills; score without the word (branch v1131-wide-pills)
+- Pills are now horizontal and bigger: 8 x 5 px with 1 px gap (was 4 x 7 vertical), light stripe along the top. 10 pills are 89 px wide, centred; the wave pips start at about x 168, so they fit side by side (unverified with pips visible on a phone).
+- The HUD shows only the number for the score (no 'SCORE'). The game-over screen still says SCORE.

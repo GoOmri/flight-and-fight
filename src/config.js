@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.130", // bump on every push so the player/Omri can see the build
+  version: "1.9.131", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -348,7 +348,7 @@ export const CONFIG = {
     versionSize: 8, versionAlpha: 0.9, versionStroke: 3, versionGap: 2, // version text under the medals (px, 0..1, outline px, gap under medals)
     rowOffset: 22,                  // bars (and wave dots) start this far below the top margin; below the score text even when it pops
     heartStep: z(26), heartY: 6,    // distance between hearts; heart centre below the top margin
-    barW: 4, barH: 7, barGap: 2,
+    barW: 8, barH: 5, barGap: 1,
     showWaveIndicator: false, // the 10 wave dots under the hearts: false = hidden (Omri, v0.3.2). true brings them back
     pip: 5, pipGap: 2, pipBlinkMs: 350
   }
