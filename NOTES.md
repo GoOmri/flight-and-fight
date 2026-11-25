@@ -1050,3 +1050,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Weapon potions are pulled by the magnet like coins. Coins and potions now shrink on the way in and are taken at her middle (feel.magnetTakeDist 8).
 - Pause screen: CONTINUE, OPTIONS, RESTART, MENU. OPTIONS has SOUND, MUSIC, BACK.
 - Checked in the browser pane (potion shrinks and levels up; options page shows). UNVERIFIED on phone.
+
+## 2026-11-25 v1.9.138: volume bars instead of SOUND and MUSIC buttons (branch v1138-volume-bars)
+- New src/volbar.js: a 10-pill bar, tap or drag, 0..10. In the menu settings and the pause OPTIONS page, one for SOUND and one for MUSIC. 7 = the mix as before, 10 = louder, 0 = silent; saved; an old OFF choice becomes 0.
+- Checked in the browser pane (drag and tap change the level and it is saved). UNVERIFIED on phone: touch size, how the steps sound.
