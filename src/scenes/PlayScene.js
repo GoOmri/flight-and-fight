@@ -72,7 +72,7 @@ export class PlayScene extends Phaser.Scene {
 
   create() {
     makeAllTextures(this);
-    ringSound(false); pauseSound(false); music(this.bg === 'forest' ? 'forest' : null); // only the forest has its own music so far
+    ringSound(null); pauseSound(false); music(this.bg === 'forest' ? 'forest' : null); // only the forest has its own music so far
     if (C.sprites.poof) { // death smoke in the main colour of each enemy (and the chest): a tinted copy of the poof sheet per type, made once (no tint at draw time, so it also works in CANVAS mode)
       const smoke = { ...Object.fromEntries(Object.keys(C.enemies.sprites).map(t => [t, C.enemies.sprites[t].smokeColor !== undefined ? C.enemies.sprites[t].smokeColor : this.mainColour('en_' + t)])), crate: DEATH_TINTS.crate[0] };
       for (const t in smoke) {
@@ -1612,7 +1612,7 @@ export class PlayScene extends Phaser.Scene {
   cheated() { return this.god || C.testing.god > 0 || C.testing.level >= 0 || this.startWaveN > 0 || this.tainted; }
 
   gameOver() {
-    music(null); ringSound(false); sfx('gameOver', 350); // after the hit sound
+    music(null); ringSound(null); sfx('gameOver', 350); // after the hit sound
     this.vx = this.vy = 0; // clouds stop boosting
     if (!this.cheated()) saveBest(this.score, this.stageTheme); // the high score also counts when the run ends in a game over (it was only saved on STAGE CLEAR before)
     this.endScreen('GAME OVER', hex(C.menu.pal.pink), false);
@@ -1620,7 +1620,7 @@ export class PlayScene extends Phaser.Scene {
   }
 
   stageClear() {
-    music(null); ringSound(false); sfx('stageClear');
+    music(null); ringSound(null); sfx('stageClear');
     this.vx = this.vy = 0;
     this.medals.finish(this.enemiesKilled, this.cats.allSaved());
     this.syncMedals();

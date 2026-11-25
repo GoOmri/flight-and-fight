@@ -36,7 +36,7 @@ export class MenuScene extends Phaser.Scene {
     const q = new URLSearchParams(window.location.search);
     if (DEBUG_PARAMS.some(k => q.has(k))) { this.scene.start('Play'); return; }
     try { const s = localStorage.getItem(CTL_KEY); if (s === 'drag' || s === 'stick') C.ship.controls = s; } catch (e) { /* no saved choice */ }
-    ringSound(false); pauseSound(false); music('menu');
+    ringSound(null); pauseSound(false); music('menu');
     this.fxLow = false; try { this.fxLow = localStorage.getItem(FX_KEY) === 'low'; } catch (e) { /* full effects */ } // settings: EFFECTS LOW keeps the menu calm (no sparks, bubbles, fireflies, shooting stars, tilt)
     makeAllTextures(this); // star pictures (made once, skipped when they exist)
     makeGoalIcons(this);   // goal pictures (the lightbox shows them)

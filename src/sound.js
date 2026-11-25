@@ -17,7 +17,7 @@ const SFX = {
   tap: { f: ['tap'], v: 0.3 }
 };
 const LP = 6000, ATTACK = 0.006; // every effect: softer highs and a very short fade-in (no click)
-const RING = { f: ['ring-a', 'ring-b', 'ring-c'], v: 0.3 }; // while a cat's ring fills: one of the three, picked each time she starts hovering, looped
+const RING = { f: ['ring-b', 'ring-c', 'ring-a'], v: 0.3 }; // while a cat's ring fills, in this order, one third of the ring each: cauldron bubbling, underwater bubbles, teleport
 const MUSIC = { menu: 0.35, forest: 0.3 }; // name = assets/music/<name>.ogg, value = volume
 const WEB = typeof window !== 'undefined';
 // Volumes 0..10 (the bars in the settings and on the pause screen), saved. 7 = the mix as designed, 10 = louder, 0 = silent.
@@ -31,7 +31,7 @@ for (const k of ['sound', 'music']) {
   level[k] = v >= 0 && v <= 10 ? v : DEF;
 }
 const gainOf = k => (level[k] / DEF) ** 2; // squared: even steps to the ear
-let ctx = null, out = null, sfxMaster = null, musicMaster = null, node = null, ringNode = null, paused = false;
+let ringStage = -1, ctx = null, out = null, sfxMaster = null, musicMaster = null, node = null, ringNode = null, paused = false;
 let want = null; // the music that should be playing now (a name of MUSIC, or null)
 const buffers = {}, last = {}, tracks = {}, at = {};
 
@@ -41,7 +41,7 @@ export function setVolume(k, v) {
   level[k] = v;
   try { localStorage.setItem('ff_vol_' + k, String(v)); } catch (e) { /* not saved */ }
   if (ctx) (k === 'music' ? musicMaster : sfxMaster).gain.value = gainOf(k);
-  if (k === 'sound' && !v) ringSound(false);
+  if (k === 'sound' && !v) ringSound(null);
   if (k === 'music') syncMusic();
   return true;
 }
@@ -92,13 +92,16 @@ export function sfx(name, delayMs = 0) {
   for (const f of s.f) play(f, s.v, false, s);
 }
 
-export function ringSound(active) {
-  if (active && level.sound && !paused && ctx && ctx.state === 'running') {
-    if (!ringNode) ringNode = play(RING.f[Math.floor(Math.random() * RING.f.length)], RING.v, true);
-  } else if (ringNode) {
+// fill = how full the ring is (0..1) while she hovers over a cat, or null = silent
+export function ringSound(fill) {
+  const play3 = typeof fill === 'number' && level.sound && !paused && ctx && ctx.state === 'running';
+  const stage = play3 ? Math.min(RING.f.length - 1, Math.floor(fill * RING.f.length)) : -1;
+  if (ringNode && stage !== ringStage) {
     const n = ringNode; ringNode = null;
     n.gain.gain.setTargetAtTime(0, ctx.currentTime, 0.05); n.src.stop(ctx.currentTime + 0.25); // a short fade, no click
   }
+  ringStage = stage;
+  if (stage >= 0 && !ringNode) ringNode = play(RING.f[stage], RING.v, true);
 }
 
 // Music goes through Web Audio too (not through an <audio> player): Android then does not treat the game as a "media player",
@@ -146,6 +149,6 @@ export function music(name) {
 
 export function pauseSound(p) {
   paused = p;
-  if (p) ringSound(false);
+  if (p) ringSound(null);
   syncMusic();
 }

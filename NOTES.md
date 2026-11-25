@@ -1078,3 +1078,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-25 v1.9.145: quieter coin (branch v1145-coin-quieter)
 - Coin volume 0.28 to 0.2. UNVERIFIED: unheard.
+
+## 2026-11-25 v1.9.146: ring sounds play in succession (branch v1146-ring-stages)
+- Omri's order: cauldron bubbling (first third of the ring), underwater bubbles (second third), teleport (last third). Before: one of the three at random. ringSound(fill) in src/sound.js.
+- Checked in the browser pane (switches at one third and two thirds, stops on leaving). UNVERIFIED: how it sounds.
