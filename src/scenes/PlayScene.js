@@ -896,6 +896,7 @@ export class PlayScene extends Phaser.Scene {
       const ground = this.bgF.scroll * this.cloudMul * dt;
       this.crates.children.iterate(c => { if (c && c.active) { c.y += ground; c.body.reset(c.x, c.y); } });
       this.enemies.children.iterate(e => { if (e && e.active) this.decorEnemy(e, time); }); // outlines and flash copies keep following their enemies
+      this.cats.update(dt); // cats and their rocks keep scrolling with the ground too (a cat that scrolls off now is not counted as lost)
       this.updateFx(dt); return;
     }
 
