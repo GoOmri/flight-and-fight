@@ -102,12 +102,20 @@ export function ringSound(active) {
 }
 
 // Music goes through Web Audio too (not through an <audio> player): Android then does not treat the game as a "media player",
-// so a video or music app can keep playing at the same time. A track is unpacked once, at 22 kHz to save memory.
+// so a video or music app can keep playing at the same time. A track is unpacked once, at 22 kHz mono to save memory.
 function loadTrack(n) {
   const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
   const dec = OC ? new OC(2, 1, 22050) : ctx;
   fetch('assets/music/' + n + '.ogg').then(r => (r.ok ? r.arrayBuffer() : null))
-    .then(a => a && dec.decodeAudioData(a, b => { tracks[n] = b; syncMusic(); }, () => {})).catch(() => {});
+    .then(a => a && dec.decodeAudioData(a, b => { tracks[n] = mono(b); syncMusic(); }, () => {})).catch(() => {});
+}
+
+// both channels mixed into one: half the memory (a phone speaker is nearly mono anyway)
+function mono(b) {
+  if (b.numberOfChannels < 2) return b;
+  const m = ctx.createBuffer(1, b.length, b.sampleRate), out = m.getChannelData(0), l = b.getChannelData(0), r = b.getChannelData(1);
+  for (let i = 0; i < out.length; i++) out[i] = (l[i] + r[i]) / 2;
+  return m;
 }
 
 function stopTrack() {

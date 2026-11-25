@@ -1067,3 +1067,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-25 v1.9.142: slider a little darker (branch v1142-volume-darker)
 - Fill 0xa87c50, empty 0xd4bb90, outline 0x6e5030, handle 0xeedcb8. UNVERIFIED on phone.
+
+## 2026-11-25 v1.9.143: text and drawn pictures disappearing after leaving the game (branch v1143-keep-drawn-art)
+- Omri: after leaving and coming back, text and things disappear. NOT reproduced here. Likely: Android drops graphics memory of background apps and canvases the game draws itself are not redrawn.
+- index.html: when the game runs on WebGL, all 2D canvases are made with willReadFrequently (kept in normal memory). sound.js: music kept mono (half the memory).
+- Checked in the browser pane: WebGL, text canvas has the flag, menu draws normally. UNVERIFIED: whether it cures the phone. If not: redraw the screen on return.
