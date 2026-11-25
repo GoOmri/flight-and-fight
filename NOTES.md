@@ -1118,3 +1118,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Still silent: box being hit, swamp music, end screen music.
 - Meow files: added by Omri, who confirmed they are free to use (source not recorded).
 - UNVERIFIED: everything heard.
+
+## 2026-11-25 v1.9.155: the witch flies off at the end of the stage (branch v1155-fly-off)
+- After the last wave, when nothing is left (enemies, cats, boxes, pickups) and 1.5 s passed: controls and shooting stop, enemy shots are removed, she cannot be hit, dips a little and speeds off the top; then STAGE CLEAR. Numbers: config stage.flyOffDip / flyOffAccel / flyOffGone.
+- Checked in the browser pane by forcing the end of a stage. UNVERIFIED on phone: how it feels at the end of a real stage.
+- Boss at the end of stage 1: Omri is not sure it is needed (open question).
