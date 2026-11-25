@@ -207,9 +207,10 @@ export class Cats {
     c.state = 'saved'; c.t = 0; c.x0 = c.x; c.sy = c.y; // sy = the stone's y (it stays on the ground)
     c.ring.clear(); c.ringBack.clear(); c.fx.setVisible(false);
     c.cat.anims.stop(); c.cat.play('cat' + c.id + '_run');
-    for (let i = 0; i < 5; i++) { // a few big gold stars shoot off like fireworks, each to a random place, slow down and fade
-      const a = Math.random() * Math.PI * 2, v = 90 + Math.random() * 90, im = s.add.sprite(c.x, c.y - c.top - 10, 'star_spin').setScale(0.25).setDepth(CC.depth + 0.5); im.play({ key: 'star_spin', startFrame: Math.floor(Math.random() * 24) }); // the spinning power-star, each at its own point of the spin
-      c.bits.push({ im, s1: 0.8 + Math.random() * 0.3, age: 0, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 25, life: 1 + Math.random() * 0.4 });
+    for (let i = 0; i < 7; i++) { // 3 small hearts and 4 tiny sparkles shoot off like fireworks (no stars: a gold star means a goal), slow down and fade
+      const heart = i < 3, a = Math.random() * Math.PI * 2, v = (heart ? 70 : 90) + Math.random() * 70, x = c.x, y = c.y - c.top - 10;
+      const im = (heart ? s.add.image(x, y, 'goal_noHit_earned') : s.add.image(x, y, 'cat_spark').setTint([0xffd0e8, 0xffffff, 0xffe9a8][i % 3])).setDepth(CC.depth + 0.5);
+      c.bits.push({ im, s1: heart ? goalScale(s, 'noHit', 8) * (0.9 + Math.random() * 0.3) : 1.5 + Math.random(), age: 0, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 25, life: 0.8 + Math.random() * 0.3 });
     }
     for (let i = 0; i < 2; i++) { // small thank-you hearts float out of the cat's head
       const h = s.add.image(c.x + (i ? 5 : -2), c.y - c.top + CC.headDy, 'goal_noHit_earned').setScale(goalScale(s, 'noHit', 9)).setDepth(CC.depth + 0.5).setAlpha(0);
