@@ -21,7 +21,7 @@ Kept short on purpose. Per-version history is in NOTES.md, the look rules are in
 - To decide when building: where the cats sit (the forest has big rocks, config bigRockCount; the swamp needs a spot), the ring look (DESIGN.md "Ring look"), the cat goal icon top left (turns to colour per cat) and what the saved cats do (live in the hut later).
 
 ## Smaller open items
-- Shop and upgrades (magnet, shot damage, unlockable spells): STILL IN DISCUSSION, see DESIGN.md "Shop and upgrades". Nothing built.
+- Shop and upgrades (magnet, shot damage, unlockable spells): first version planned in PLAN-cauldron.md (4 steps), see DESIGN.md "Shop and upgrades". Nothing built.
 - Sound (none yet) and vibration (short buzz on hit and pickup).
 - Reduce effects switch for the GAME as well (the menu has one: settings, EFFECTS).
 - Pause and game-over screens keep some effects (explosions): need a way to tell world things from effects.
