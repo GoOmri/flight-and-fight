@@ -5,7 +5,7 @@ import { CONFIG as C, hex } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale } from '../sprites.js';
 import { FONT, FONT_TITLE, FONT_MONO, titleCase, fpx, drawPlate } from '../hud.js';
 import { goalsOf, loadMedals, loadBest, totalStars, isCleared } from '../medals.js';
-import { loadBank } from '../bank.js';
+import { loadBank, loadLevel, nextPrice, buyUpgrade } from '../bank.js';
 import { latestVersion, refreshFiles } from '../update.js';
 import { toggleTune } from '../tune.js';
 
@@ -84,9 +84,12 @@ export class MenuScene extends Phaser.Scene {
     });
 
     // ---- saved coins, top left (drawn over the path, so a bubble scrolled under it does not hide it)
-    const bankTxt = txt(M.bankX, M.bankY, 'COINS ' + loadBank(), M.bankSize, 3, 0, 0xf2b632);
-    this.add.graphics().fillStyle(P.dark, 0.8).fillRoundedRect(M.bankX - 3, M.bankY - 7, bankTxt.width + 6, 14, 4);
-    this.children.bringToTop(bankTxt);
+    const bankBack = this.add.graphics(), bankTxt = txt(M.bankX, M.bankY, '', M.bankSize, 3, 0, 0xf2b632);
+    this.showBank = () => { // drawn again after a purchase
+      bankTxt.setText('COINS ' + loadBank());
+      bankBack.clear().fillStyle(P.dark, 0.8).fillRoundedRect(M.bankX - 3, M.bankY - 7, bankTxt.width + 6, 14, 4);
+    };
+    this.showBank();
 
     // ---- UPDATE button: gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser or the installed app).
     // When the menu opens it asks the server for the newest version number; if it is newer the button turns orange.
@@ -128,8 +131,14 @@ export class MenuScene extends Phaser.Scene {
     gear.draw = () => (gear.img || gear.g).setAlpha(gear.down ? 0.65 : 1);
     gear.action = () => this.openSettings(true);
 
-    this.modal = false;
-    this.buttons = [...this.bubbles.filter(b => !b.locked), btn, gear];
+    // ---- the cauldron (bottom left) opens the shop
+    const boiler = this.decorItems.find(i => i.key === 'boiler'), shop = { ...C.shop.button, down: false };
+    shop.draw = () => boiler.s.setTint(shop.down ? 0xbbbbbb : 0xffffff);
+    shop.action = () => this.openShop();
+
+    this.modal = false; this.boxObjs = null; // boxObjs: set while the goals box or the shop is open
+    this.buyAt = -Infinity; // time of the last purchase
+    this.buttons = [...this.bubbles.filter(b => !b.locked), btn, gear, shop];
     this.makeSettings();
     this.settingsButtons = this.panelButtons;
     if (this.scene.settings.data && this.scene.settings.data.settings) { this.scene.settings.data = {}; this.openSettings(true, false); } // reopened after EFFECTS changed: no pop
@@ -145,7 +154,7 @@ export class MenuScene extends Phaser.Scene {
       if (setVolume(held.key, v)) { drawVolBar(held.g, held.x, held.y, v); if (held.key === 'sound') sfx('coin'); }
     };
     const onDown = p => {
-      held = this.modal && !this.goalsObjs ? this.volBars.find(b => volHit(p.x / R, p.y / R, b.x, b.y)) || null : null;
+      held = this.modal && !this.boxObjs ? this.volBars.find(b => volHit(p.x / R, p.y / R, b.x, b.y)) || null : null;
       volTouch(p);
       if (!this.modal && Math.abs(p.x / R - W / 2) < 40 && Math.abs(p.y / R - (H - M.versionBottom)) < 12) {
         verTaps = this.time.now - verAt < 800 ? verTaps + 1 : 1; verAt = this.time.now;
@@ -476,11 +485,77 @@ export class MenuScene extends Phaser.Scene {
       return bt;
     }, art2 = this.textures.exists('ui_med-button');
     let box = null;
-    const close = () => { if (this.popTween) this.popTween.remove(); objs.forEach(o => o.destroy()); box.destroy(); this.goalsObjs = null; this.modal = false; this.panelButtons = this.settingsButtons; };
+    const close = () => { if (this.popTween) this.popTween.remove(); objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.modal = false; this.panelButtons = this.settingsButtons; };
     const back = mk(L.x + 14, 'BACK', close), play = mk(L.x + L.w - 14 - bw, 'PLAY', () => { close(); this.scene.start('Play', { theme }); });
     box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(D);
     this.popIn(box, veil, W / 2, y0 + h / 2);
-    this.goalsObjs = objs; this.modal = true; this.panelButtons = [play, back];
+    this.boxObjs = objs; this.modal = true; this.panelButtons = [play, back];
+  }
+
+  // The shop (tap the cauldron): the coin total, one row per upgrade of CONFIG.shop.upgrades (name, level bar, price, BUY), CLOSE.
+  // It is built when opened and thrown away when closed. While it is open only its own buttons take taps.
+  openShop() {
+    if (this.modal) return;
+    const S = C.shop, B = S.panel, list = S.upgrades, h = B.headH + list.length * B.rowH + B.footH, y0 = Math.round((H - h) / 2), mid = B.x + B.w / 2;
+    const objs = [], buttons = [], rows = [], cream = hex(P.cream), gold = hex(0xf2b632), ink = hex(M.settings.ink);
+    const keep = (o, dz = 0) => { o.setDepth(B.depth + dz); objs.push(o); return o; }; // made from back to front
+    const T = (x, y, s, color = cream, ox = 0.5) => keep(this.add.text(x, y, s, { ...FONT_MONO, color }).setOrigin(ox, 0.5), 2);
+    const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
+    if (this.textures.exists('ui_panel-parchment')) keep(this.add.image(B.x, y0, this.parchment(B.w, h)).setOrigin(0, 0));
+    else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(B.x, y0, B.w, h, M.plateRadius));
+    keep(this.add.text(mid, y0 + 30, 'Cauldron', { ...FONT_TITLE, fontSize: '24px', color: gold }).setOrigin(0.5), 2);
+    const total = T(mid, y0 + 56, '', gold);
+    const mkBtn = (x, y, w, label, action) => { // the flat parchment button of the settings; off = faded
+      const bt = { x: x - 4, y: y - 5, w: w + 8, h: 36, down: false, off: false, action };
+      const img = keep(this.add.nineslice(x, y, 'ui_flat1', undefined, w, 26, 10, 10, 0, 0).setOrigin(0, 0), 1), text = T(x + w / 2, y + 12, label, ink);
+      bt.draw = () => {
+        const sink = bt.down && !bt.off ? 1 : 0;
+        img.setTint(sink ? 0xbbbbbb : 0xffffff).setAlpha(bt.off ? 0.4 : 1).setY(y + sink);
+        text.setAlpha(bt.off ? 0.4 : 1).setY(y + 12 + sink);
+      };
+      buttons.push(bt);
+      return bt;
+    };
+    const left = B.x + 16, right = B.x + B.w - 16;
+    const refresh = () => {
+      total.setText('COINS ' + loadBank());
+      for (const r of rows) {
+        const level = loadLevel(r.u.id), price = nextPrice(r.u.id);
+        r.pips.clear();
+        for (let i = 0; i < r.u.prices.length; i++) {
+          const x = left + i * (B.pipW + B.pipGap);
+          r.pips.fillStyle(0x120622, 1).fillRect(x, r.pipY, B.pipW, B.pipH);
+          r.pips.fillStyle(i < level ? 0xf2b632 : 0x52288f, 1).fillRect(x + 1, r.pipY + 1, B.pipW - 2, B.pipH - 2);
+        }
+        r.price.setText(price === null ? 'MAX' : String(price)).setX(right - B.buyW / 2 + (price === null || !r.coin ? 0 : 6));
+        if (r.coin) r.coin.setVisible(price !== null).setX(r.price.x - r.price.width / 2 - 7);
+        r.buy.off = price === null || loadBank() < price;
+        r.buy.draw();
+      }
+      this.showBank();
+    };
+    list.forEach((u, i) => {
+      const y = y0 + B.headH + i * B.rowH;
+      T(left, y + 12, u.name, cream, 0);
+      const row = { u, pipY: y + 26, pips: keep(this.add.graphics(), 1) };
+      row.price = T(0, y + 8, '', gold);
+      row.coin = this.textures.exists('sp_coin') ? keep(this.add.image(0, y + 9, 'sp_coin', 0).setScale(0.6), 2) : null;
+      row.buy = mkBtn(right - B.buyW, y + 18, B.buyW, 'BUY', () => {
+        if (this.time.now - this.buyAt < S.buyGapMs || !buyUpgrade(u.id)) return; // a double tap buys once
+        this.buyAt = this.time.now; sfx('coin'); refresh();
+      });
+      rows.push(row);
+    });
+    let box = null;
+    const closeBtn = mkBtn(mid - 45, y0 + h - B.footH + 6, 90, 'CLOSE', () => {
+      if (this.popTween) this.popTween.remove();
+      objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.modal = false; this.panelButtons = this.settingsButtons;
+    });
+    closeBtn.draw();
+    refresh();
+    box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(B.depth);
+    this.popIn(box, veil, mid, y0 + h / 2);
+    this.boxObjs = objs; this.modal = true; this.panelButtons = buttons;
   }
 
   openSettings(on, pop = true) {
