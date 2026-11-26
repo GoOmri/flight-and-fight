@@ -1245,3 +1245,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - The goal icon is now the black cat of the cat pack (assets/cats/cat-2-sitting.png), not the recoloured menu cat. The menu cat itself is unchanged.
 - Colour swaps only: earned = night-blue black with yellow eyes (plain black vanished on the dark end screen), not yet = white with dark eyes, failed = grey.
 - Checked in the browser: end screen and the stage goals box. UNVERIFIED: phone (is the small icon at the top of the game readable?).
+
+## 2026-11-27 v1.9.173: stage name shadow 1 px lower (branch name-shadow-lower)
+- The dark copy behind the stage name on the main menu now sits 2 px below the name (was 1).
+- Checked in the browser. UNVERIFIED: phone.
