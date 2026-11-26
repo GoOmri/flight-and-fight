@@ -1,4 +1,4 @@
-import { buttonKey, BTN_INK, BTN_HOT } from '../buttons.js';
+import { buttonKey, addSlice, BTN_INK, BTN_HOT } from '../buttons.js';
 import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
 import { drawVolBar, volFrom, volHit, VOL_W } from '../volbar.js';
 import { CONFIG as C, hex } from '../config.js';
@@ -98,7 +98,7 @@ export class MenuScene extends Phaser.Scene {
     const art = this.textures.exists('ui_med-button'), UB = M.updateBtn; // the tan button of the Medieval UI pack (9-slice: the round ends stay, the middle stretches); without the picture the old drawn plate is used
     const ubw = art ? UB.w : M.updateW, ubh = art ? 26 : M.updateH, bx = (W - ubw) / 2, by = M.updateTop;
     const btn = { btn: true, x: bx - 8, y: by - 4, w: ubw + 16, h: ubh + 8, g: this.add.graphics(), down: false, hot: false, busy: false }; // x / y / w / h = the touch area, bigger than the picture (a thumb needs about 44 phone px)
-    btn.img = art ? this.add.nineslice(bx, by, buttonKey(this), undefined, ubw, 26, 10, 10, 0, 0).setOrigin(0, 0) : null;
+    btn.img = art ? addSlice(this, bx, by, buttonKey(this), ubw, 26, 10, 10, 0, 0).setOrigin(0, 0) : null;
     btn.label = this.add.text(W / 2, by + ubh / 2, 'UPDATE', { ...FONT, fontSize: fpx(M.updateSize) + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5);
     btn.draw = () => {
       btn.g.clear();
@@ -425,7 +425,7 @@ export class MenuScene extends Phaser.Scene {
     // Omri's flat parchment buttons (80 x 26, 10 px ends). isOn = null: a plain button; else a choice, faded when it is not the chosen one
     const mkBtn = (x, y, w, key, label, action, isOn = null) => {
       const h = 26, bt = { btn: true, x: x - 2, y: y - 4, w: w + 4, h: h + 8, down: false, action, shown: false };
-      bt.img = keep(this.add.nineslice(x, y, key, undefined, w, h, 10, 10, 0, 0).setOrigin(0, 0), 1);
+      bt.img = keep(addSlice(this, x, y, key, w, h, 10, 10, 0, 0).setOrigin(0, 0), 1);
       bt.label = T(x + w / 2, y + 12, label, ink);
       bt.draw = () => {
         const on = !isOn || isOn(), sink = bt.down ? 1 : 0;
@@ -468,7 +468,7 @@ export class MenuScene extends Phaser.Scene {
     const keep = (o, dz = 0) => { o.setDepth(D + dz); objs.push(o); return o; };
     const T = (x, y, s, size, align, color) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(align, 0.5), 2);
     const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
-    if (art) keep(this.add.nineslice(L.x, y0, 'ui_med-panel', undefined, L.w, h, 6, 6, 6, 6).setOrigin(0, 0), 0);
+    if (art) keep(addSlice(this, L.x, y0, 'ui_med-panel', L.w, h, 6, 6, 6, 6).setOrigin(0, 0), 0);
     else { const g = keep(this.add.graphics()); g.fillStyle(P.dark, 0.96).fillRoundedRect(L.x, y0, L.w, h, 10); g.lineStyle(3, P.pink, 1).strokeRoundedRect(L.x, y0, L.w, h, 10); }
     const tc = 0xffffff, names = { cats: 'ALL CATS', allCoins: 'ALL COINS', killAll: 'ALL ENEMIES', noHit: 'NO HIT' };
     keep(this.add.text(W / 2, y0 + 22, titleCase(node ? node.name : ''), { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(0xf2b632), stroke: hex(P.shadow), strokeThickness: 4 }).setOrigin(0.5), 2); // the ornate title font
@@ -480,7 +480,7 @@ export class MenuScene extends Phaser.Scene {
     });
     const bw = 80, by = y0 + h - 38, mk = (x, label, action) => { // two buttons: the same picture as the other buttons
       const bt = { btn: true, x: x - 4, y: by - 3, w: bw + 8, h: 31, down: false, action, shown: true };
-      bt.img = art2 ? keep(this.add.nineslice(x, by, buttonKey(this), undefined, bw, 26, 10, 10, 0, 0).setOrigin(0, 0), 1) : null;
+      bt.img = art2 ? keep(addSlice(this, x, by, buttonKey(this), bw, 26, 10, 10, 0, 0).setOrigin(0, 0), 1) : null;
       bt.g = keep(this.add.graphics(), 1);
       bt.label = T(x + bw / 2, by + 12, label, 10, 0.5, P.cream); if (art2) bt.label.setColor(BTN_INK).setStroke(BTN_INK, 0); else bt.label.setStroke(hex(P.shadow), 3);
       bt.draw = () => { if (bt.img) bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(by + (bt.down ? 1 : 0)); bt.label.setY(by + 12 + (bt.down ? 1 : 0)); };
@@ -509,7 +509,7 @@ export class MenuScene extends Phaser.Scene {
     const total = T(mid, y0 + 56, '', gold);
     const mkBtn = (x, y, w, label, action) => { // the flat parchment button of the settings; off = faded
       const bt = { x: x - 4, y: y - 5, w: w + 8, h: 36, down: false, off: false, action };
-      const img = keep(this.add.nineslice(x, y, 'ui_flat1', undefined, w, 26, 10, 10, 0, 0).setOrigin(0, 0), 1), text = T(x + w / 2, y + 12, label, ink);
+      const img = keep(addSlice(this, x, y, 'ui_flat1', w, 26, 10, 10, 0, 0).setOrigin(0, 0), 1), text = T(x + w / 2, y + 12, label, ink);
       bt.draw = () => {
         const sink = bt.down && !bt.off ? 1 : 0;
         img.setTint(sink ? 0xbbbbbb : 0xffffff).setAlpha(bt.off ? 0.4 : 1).setY(y + sink);
@@ -596,7 +596,7 @@ export class MenuScene extends Phaser.Scene {
     }
   }
 
-  // The word SHOP over the cauldron and the gold glow behind it (showBank turns the glow on and off). Both move with the cauldron when the phone tilts.
+  // The word SHOP on the cauldron's pot (title font) and the gold glow behind it (showBank turns the glow on and off). Both move with the cauldron when the phone tilts.
   // The glow is a picture painted once (a radial fade), so it also works in canvas mode.
   makeShopSign() {
     const S = C.shop.sign, G = C.shop.glow, par = this.decorItems.find(i => i.key === 'boiler').par;
@@ -608,7 +608,7 @@ export class MenuScene extends Phaser.Scene {
     }
     this.shopGlow = this.add.image(G.x, G.y, 'menu_shopglow').setDisplaySize(G.rx * 2, G.ry * 2).setDepth(49).setAlpha(G.alphaMin).setVisible(false); // just behind the cauldron (50)
     this.tweens.add({ targets: this.shopGlow, alpha: G.alphaMax, duration: G.ms, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    this.shopSign = this.add.text(S.x, S.y, 'SHOP', { ...FONT, fontSize: fpx(S.size) + 'px', color: hex(S.color), stroke: hex(P.shadow), strokeThickness: S.stroke }).setOrigin(0.5).setDepth(52);
+    this.shopSign = this.add.text(S.x, S.y, 'SHOP', { ...FONT_TITLE, fontSize: S.size + 'px', color: hex(S.color), stroke: hex(P.shadow), strokeThickness: S.stroke }).setOrigin(0.5).setDepth(52);
     this.decorItems.push({ s: this.shopGlow, pos: { x: G.x, y: G.y }, par, key: 'shopglow' }, { s: this.shopSign, pos: { x: S.x, y: S.y }, par, key: 'shopsign' });
   }
 
@@ -671,7 +671,7 @@ export class MenuScene extends Phaser.Scene {
 
   // A small pop on a pressed button (UPDATE's text, the gear picture).
   bounce(c) {
-    const t = [c.label, c.img && c.img.type !== 'NineSlice' ? c.img : null].filter(Boolean);
+    const t = [c.label, c.img && !c.img.sliced ? c.img : null].filter(Boolean);
     if (t.length) this.tweens.add({ targets: t, scale: 1.18, duration: 90, yoyo: true, ease: 'Sine.easeOut' });
   }
 

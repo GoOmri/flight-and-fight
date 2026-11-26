@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.166", // bump on every push so the player/Omri can see the build
+  version: "1.9.167", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -86,7 +86,7 @@ export const CONFIG = {
       { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 198, y: 246,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 6, bobMs: 3400, swayX: 4, swayMs: 5200, fade: [0.7, 1], fadeMs: 2800, par: 8 },
       { key: 'bat',    file: 'menu/bat.png',    frameW: 32, frameH: 28, frames: 4, fps: 5, x: 160, y: 0,   originX: 0.5, originY: 0,   scale: 1,     bob: 0, bobMs: 1000 },
       { key: 'cat',    file: 'menu/cat.png',    frameW: 21, frameH: 25, frames: 5, fps: 4, x: 208, y: 392, originX: 0.5, originY: 1,   scale: 1.333, depth: 50, bob: 0, bobMs: 1000, par: 6 },
-      { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 34,  y: 422, originX: 0.5, originY: 1,   scale: 2, depth: 50, bob: 0, bobMs: 1000, par: 6 }
+      { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 34,  y: 422, originX: 0.5, originY: 1,   scale: 5 / 3, depth: 50, bob: 0, bobMs: 1000, par: 6 }
     ]
   },
   // The CAULDRON shop (menu: tap the cauldron bottom left, picture = menu.decor "boiler"). Bought levels are saved (src/bank.js).
@@ -98,11 +98,11 @@ export const CONFIG = {
       { id: 'magnet', name: 'MAGNET', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 100 }
     ],
     buyGapMs: 450, // after a purchase, BUY ignores taps this long (a double tap buys only once)
-    button: { x: 0, y: 354, w: 58, h: 73 }, // touch area of the cauldron AND its SHOP word on the menu (keep it clear of UPDATE and the version text)
-    sign: { x: 34, y: 364, size: 10, color: 0xf2b632, stroke: 3 }, // the word SHOP over the cauldron: middle point, text size, colour, outline px
+    button: { x: 6, y: 370, w: 56, h: 57 }, // touch area of the cauldron (with SHOP on it) on the menu (keep it clear of UPDATE and the version text)
+    sign: { x: 34, y: 403, size: 16, color: 0xf2b632, stroke: 3 }, // the word SHOP on the cauldron's pot: middle point, text size (title font, plain px), colour, outline px. Cauldron size: menu.decor "boiler" scale
     // soft gold glow behind the cauldron while at least one upgrade level can be bought: middle point, half width / height (px), colour,
     // alpha at the bright and the dim end of the pulse, ms for one way (dim to bright)
-    glow: { x: 34, y: 396, rx: 36, ry: 36, color: 0xffd040, alphaMax: 0.9, alphaMin: 0.35, ms: 900 },
+    glow: { x: 34, y: 402, rx: 30, ry: 30, color: 0xffd040, alphaMax: 0.9, alphaMin: 0.35, ms: 900 },
     panel: { x: 14, w: 212, headH: 74, rowH: 50, footH: 46, buyW: 54, pipW: 8, pipH: 8, pipGap: 1, depth: 100 } // the shop box: left edge, width, heights of the top part / one row / bottom part, BUY width, level bar pips
   },
   // Cat rescue (src/cats.js). atWave = the (0-based) stage waves at whose start the 3 cats appear; ringR = rescue ring radius (game px), fillS = seconds to fill, drainMul = drain speed (x the fill speed),
