@@ -1172,3 +1172,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Unverified: feel on the phone, sound by ear, frame rate with many shining coins. ALL COINS is probably harder now.
 - Check on phone: is the scatter fun and catchable? Is the coin sound too busy?
 - Tested here: syntax check of src; in the browser, forced drops stayed on screen (middle, both edges, top) with no console errors. Not a full played run. tools/check.py only tests SCRiTCH; scratch/menu-smoke.mjs is out of date and fails.
+
+## 2026-11-26 v1.9.163: saved coins and box scatter (Cauldron plan, step 2)
+- Every coin picked up adds 1 to a saved bank (browser storage, key ff_coins, file src/bank.js). Saved at once, so dying, restarting or leaving keeps it. Cheating runs add nothing.
+- Total shown top left on the menu ("COINS n") and on both end screens ("BANK total +this run").
+- Coins from boxes now fan out with a small hop and stay on screen (config crate.coinSpread 130, coinHop 75). Coin counts unchanged.
+- Unverified: not played on the phone; box scatter feel; whether the menu counter and the end screen line look right on the phone.
+- Check on phone: are the box coins fun and catchable? Is the total readable? Does it survive closing the game and UPDATE?

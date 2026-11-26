@@ -29,6 +29,7 @@ All numbers here are first guesses, to be tuned by Omri on the phone. Keep them 
 - A coin bank in localStorage. 1 coin picked up = 1 in the bank (not the score value 5).
 - Add it at the moment of pickup, so dying, restarting or leaving keeps the coins. Runs that cheat (this.tainted: god mode, tune changes, wave jump) add nothing.
 - Show the total on the main menu and on the end screens ("+N" for this run). Broken or missing saved data = 0, never a crash.
+- Added by Omri: coins from boxes (chests) scatter too, in a visible fan with a small hop that stays on screen (config crate.coinSpread / coinHop; coin counts unchanged).
 
 ## Step 3: the Cauldron, with MAGNET (size: medium to large)
 - Cauldron icon bottom left on the main menu (use a cauldron picture the game already has; check it does not cover the version label and its 5 taps).
