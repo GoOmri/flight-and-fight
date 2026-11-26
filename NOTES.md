@@ -1171,3 +1171,4 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Coin sound not changed (it already plays at most once per 50 ms).
 - Unverified: feel on the phone, sound by ear, frame rate with many shining coins. ALL COINS is probably harder now.
 - Check on phone: is the scatter fun and catchable? Is the coin sound too busy?
+- Tested here: syntax check of src; in the browser, forced drops stayed on screen (middle, both edges, top) with no console errors. Not a full played run. tools/check.py only tests SCRiTCH; scratch/menu-smoke.mjs is out of date and fails.
