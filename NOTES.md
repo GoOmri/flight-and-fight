@@ -1206,3 +1206,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Tested here: syntax check; scratch/shopsign-test.mjs (when the glow should be on). NOT run in a browser: looks, placing and canvas mode are unchecked.
 - Check on phone (and with ?render=canvas): is SHOP readable and clear of the cat and UPDATE? Is the glow visible but soft? Does it stop after spending the coins?
 - Then tested in the browser (normal and canvas): SHOP opens the shop, glow on at 40 and 500 coins, off at 10 after buying. Seen: in canvas mode the BUY, CLOSE and UPDATE button pictures do not show (only faint text); the normal mode shows UPDATE correctly. Not fixed here.
+
+## 2026-11-26 v1.9.167: buttons in canvas mode, smaller cauldron (branch fix-canvas-buttons-small-cauldron)
+- Fixed: in canvas mode the stretched button and box pictures did not show (Phaser NineSlice draws only with WebGL). All now go through addSlice in src/buttons.js.
+- Menu cauldron about 17% smaller (scale 5/3). SHOP is in the heading font, on the middle of the pot. Glow and tap area follow.
+- Tested in the browser, canvas mode: menu, shop, settings, stage box, pause, game over. Normal mode: menu and shop only. No console errors.
+- Not checked: pressed (darker) button look, other screens in normal mode, phone.
+- Check on phone: is SHOP readable? Is the cauldron easy to tap? Is the size right?
