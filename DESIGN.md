@@ -533,21 +533,26 @@ Where this differs from the older "Hut and cauldron loop" (recipes, ingredients,
 
 ### Decided
 - Coins picked up are saved after each run. You keep them when you die.
-- The shop is the simplest kind: a list of upgrades. No refunds.
+- The shop is called the CAULDRON. An icon bottom left on the main menu opens it. A simple list of upgrades. No refunds.
 - Open from the start: SHOT DAMAGE and MAGNET (magnet = pulls things from further away than today's short pull).
-- Spells: pay a fee once to unlock one, then a smaller price for each improvement. Kept forever.
-- First idea for a spell: lightning. It happens by itself (no button).
+- Shot damage goes up by 1 per level (today 2).
+- FIRE SPEED upgrade too: Omri likes seeing faster shots.
+- Spells: pay a fee once to unlock one, then a smaller price for each improvement. Kept forever. They happen by themselves.
+- ALL unlocked spells work at the same time. The stages get harder to match.
+- Enemies get tougher (they die too fast today).
 - Stars are only for opening stages. Stars do not lock shop items.
 - Shield spell (later): a blocked hit does NOT cost the no-hit star. That is the point of the shield.
 
 ### Proposed, not yet agreed
-- One spell equipped at a time. Upgrading a spell shortens its wait, not its damage. Bosses take less from spells.
-- Lightning: zaps the 3 toughest enemies on screen, about every 10 s. Shield: blocks one hit, back after about 25 s. Later ideas: star burst (clears nearby shots, 15 s), ghost helper (shoots with you, 20 s).
-- Magnet and shot damage: 3 levels each.
-- Prices counted in runs (measure coins per run first): magnet and damage about 1, 2, 4 runs; unlock lightning about 4; each lightning improvement about 2.
-- Build order: save coins and show the total; shop with magnet and damage; lightning; play it and adjust prices.
+- Upgrading a spell shortens its wait, not its damage. Bosses take less from spells.
+- First spell: lightning, zaps the 3 toughest enemies about every 10 s. Shield: blocks one hit, back after about 25 s. Later ideas: star burst (clears nearby shots, 15 s), ghost helper (shoots with you, 20 s), side shots, homing sparks, extra heart, coin bonus.
+- Damage 3 levels (2 -> 3, 4, 5). Magnet 3 levels. Fire speed 3 levels (170 ms between shots -> 155, 140, 125).
+- Tougher enemies: health grunt 3 -> 5, zigzag 4 -> 7, shooter 7 -> 14. Shots to kill at damage 2 / 3 / 4 / 5: grunt 3/2/2/1, zigzag 4/3/2/2, shooter 7/5/4/3 (every damage level changes something).
+- Prices counted in runs (measure coins per run first): magnet, damage, fire speed about 1, 2, 4 runs; unlock lightning about 4; each lightning improvement about 2.
+- Build order: save coins and show the total; Cauldron with magnet, damage and fire speed, together with the tougher enemies; lightning; play it and adjust prices.
 
 ### Watch out
-- Shot damage is 2 today; enemy health is 3 (grunt), 4 (zigzag), 7 (shooter). Small damage steps only change the number of shots for some enemies, so each level must be checked to be something you can feel.
-- Damage upgrades stack with the in-stage potions; too much makes the stages and the no-hit star easy.
+- Today: shot damage 2; enemy health 3 (grunt), 4 (zigzag), 7 (shooter). With today's health, damage 5 kills no faster than damage 4.
+- A new player has no upgrades: with tougher enemies the first runs must still be beatable and fun.
+- Damage upgrades stack with the in-stage potions; with fire speed and all spells at once, the stages and the no-hit star can get easy.
 - Art: art-packs/effects-vfx/free-spell-effects-24 lists lightning and shield effects (check each effect's licence in its index.json; not previewed).

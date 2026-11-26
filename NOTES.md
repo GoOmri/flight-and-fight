@@ -1152,3 +1152,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-26 shop and upgrades written down (notes only, no version change)
 - New DESIGN.md section "Shop and upgrades": what Omri decided and what is still only proposed. Nothing built, nothing to check on the phone.
+
+## 2026-11-26 shop notes updated (notes only)
+- DESIGN.md "Shop and upgrades": name Cauldron, icon bottom left, damage +1, fire speed, all spells at once, tougher enemies. Nothing built.
