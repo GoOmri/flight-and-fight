@@ -1161,3 +1161,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-26 shop notes: 10 levels, Nine Lives, side shots (notes only)
 - DESIGN.md "Shop and upgrades" updated. Coin scatter still open. Nothing built.
+
+## 2026-11-26 build plan for the Cauldron (notes only)
+- New PLAN-cauldron.md: coin tiers and scatter, saved coins, Cauldron with magnet, damage + fire speed + tougher enemies. Numbers untested.
