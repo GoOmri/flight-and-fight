@@ -1205,3 +1205,4 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - A soft gold glow pulses behind the cauldron only while at least one upgrade level can be bought. Numbers: config shop.sign, shop.glow, shop.button.
 - Tested here: syntax check; scratch/shopsign-test.mjs (when the glow should be on). NOT run in a browser: looks, placing and canvas mode are unchecked.
 - Check on phone (and with ?render=canvas): is SHOP readable and clear of the cat and UPDATE? Is the glow visible but soft? Does it stop after spending the coins?
+- Then tested in the browser (normal and canvas): SHOP opens the shop, glow on at 40 and 500 coins, off at 10 after buying. Seen: in canvas mode the BUY, CLOSE and UPDATE button pictures do not show (only faint text); the normal mode shows UPDATE correctly. Not fixed here.
