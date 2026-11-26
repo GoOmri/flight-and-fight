@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.168", // bump on every push so the player/Omri can see the build
+  version: "1.9.169", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -93,9 +93,13 @@ export const CONFIG = {
   // upgrades = ONE list, one row each in the shop: id (saved name, never change it), name, prices (price of level 1, 2, ... ; the number of prices = the top level),
   // top = the value at the top level. Level 0 is the game's normal number; the levels between go in even steps.
   // magnet: pull radius, from feel.magnetRadius (34) at level 0 to top (100).
+  // damage: shot damage multiplier, x1 at level 0 to x top (2.5 = +15% per level). fire: time between shots multiplier, x1 to x top (0.65 = 3.5% less per level).
+  // Both multiply with the green potion levels of the stage (weaponLevels).
   shop: {
     upgrades: [
-      { id: 'magnet', name: 'MAGNET', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 100 }
+      { id: 'magnet', name: 'MAGNET', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 100 },
+      { id: 'damage', name: 'DAMAGE', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 2.5 },
+      { id: 'fire', name: 'FIRE SPEED', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 0.65 }
     ],
     buyGapMs: 450, // after a purchase, BUY ignores taps this long (a double tap buys only once)
     button: { x: 4, y: 370, w: 56, h: 57 }, // touch area of the cauldron (with SHOP on it) on the menu (keep it clear of UPDATE and the version text)
@@ -162,7 +166,7 @@ export const CONFIG = {
     refSpeed: z(333), gap: 1, // gap = spacing between shots (1 = normal). The time between volleys is fireRateMs x gap x refSpeed / speed, so a faster or slower shot keeps the same spacing unless you change gap; keep refSpeed equal to the normal speed above
     // The witch's shot: one orange fire bolt straight up ("flight_smooth" of the SovDigital fire pack, north row, shrunk 5x and cut to 6 fire colours). Delete this entry to get the old twin code-drawn shots back (then set pattern TWIN).
     fire: { file: 'shots/fox-shot-6.png', frameW: 13, frameH: 19, frames: 1, fps: 1, scale: 1, hitW: 6, hitH: 14 }, // the witch's shot: Fox shot 6, colour 5 (a blue teardrop, one picture) from the FoX71 shot sheet. Old fire strip: fx/fire-shot.png (frameW 8, frameH 22, frames 12, fps 24, hueShift 195)
-    poolSize: 90         // level 10 fires 7 shots every 145 ms and they live about 1 s: about 50 alive at once
+    poolSize: 90         // fastest fire (potion 10 + FIRE SPEED 10) = 1 shot every 72 ms; a shot flies at most 407 px at 222 px/s (1.8 s): about 26 alive at once
   },
 
   // WEAPON LEVELS 0..10 (the 10 bars). The player starts a stage at 0; each green pickup = +1.
@@ -218,10 +222,10 @@ export const CONFIG = {
     depth: 33.5, // enemies are drawn ABOVE the colour tint (33) so the tint does not dim them (pickups are 34, enemy shots 35). 0 = below the tint like before. Their glow and outline follow.
     // coins = how many coins one drops (WHICH enemies drop is in src/waves.js). coinSpread = sideways start speed of the outermost coins (px/s, 0 = straight down).
     // coinHop = upward start speed (px/s, 0 = no hop). See also coin.scatterFadeSec / scatterJitter / hopGravity.
-    grunt:   { hp: 3, score: 10, coins: 1, coinSpread: 0, coinHop: 0 },   // tier 1
-    zigzag:  { hp: 4, score: 20, coins: 2, coinSpread: 50, coinHop: 50 }, // tier 2
-    shooter: { hp: 7, score: 50, coins: 4, coinSpread: 110, coinHop: 75 }, // tier 3
-    vulture: { hp: 5, score: 30, coins: 2, coinSpread: 50, coinHop: 50 }, // tier 2, not in any wave yet
+    grunt:   { hp: 5, score: 10, coins: 1, coinSpread: 0, coinHop: 0 },   // tier 1
+    zigzag:  { hp: 7, score: 20, coins: 2, coinSpread: 50, coinHop: 50 }, // tier 2
+    shooter: { hp: 14, score: 50, coins: 4, coinSpread: 110, coinHop: 75 }, // tier 3
+    vulture: { hp: 10, score: 30, coins: 2, coinSpread: 50, coinHop: 50 }, // tier 2, not in any wave yet
     poolSize: 40,
     hitFlashMs: 110,    // white flash of a hit enemy (ms)
     // Animated pictures. A type WITH an entry here uses its sheet (assets/enemies); a type WITHOUT one keeps its code-drawn picture (src/sprites.js).

@@ -110,7 +110,7 @@ export class PlayScene extends Phaser.Scene {
     this.shipFlashUntil = 0; this.muzzleUntil = 0;
     this.recoil = 0; this.trailT = 0; this.trailN = 0; this.vx = 0; this.vy = 0; this.cloudMul = 1; // feel state
     this.hearts = C.ship.hearts;
-    this.over = false; this.menuBtn = null; this.bankLine = null;
+    this.over = false; this.menuBtn = null; this.bankLine = null; this.newTags = [];
     this.invulnUntil = 0;
     this.nextShot = 0;
     // Debug helpers (type them after the web address): ?wave=N starts the stage at wave N (1-10); ?god=1 = no damage (hits still counted).
@@ -1024,7 +1024,11 @@ export class PlayScene extends Phaser.Scene {
   }
 
   // The saved upgrade levels, read at the start of a run (and again when the tune panel resets them).
-  refreshUpgrades() { this.magnetLevel = loadLevel('magnet'); }
+  refreshUpgrades() {
+    this.magnetLevel = loadLevel('magnet');
+    this.damageMul = upgradeValue('damage', loadLevel('damage'), 1);
+    this.fireMul = upgradeValue('fire', loadLevel('fire'), 1); // x the time between shots
+  }
   magnetRadius() { const base = C.feel.magnetRadius; return base > 0 ? Math.max(base, upgradeValue('magnet', this.magnetLevel, base)) : 0; }
 
   // Coins, potions and (when a heart is missing) hearts close to the witch fly to her (magnet).
@@ -1060,7 +1064,9 @@ export class PlayScene extends Phaser.Scene {
   autoFire(time) {
     if (time < this.nextShot) return;
     const lv = C.weaponLevels[this.weaponLevel], sp = C.bullet.speed;
-    this.nextShot = time + lv.fireRateMs * C.bullet.gap * C.bullet.refSpeed / sp; // spacing stays the same when only the speed changes
+    const wait = lv.fireRateMs * this.fireMul * C.bullet.gap * C.bullet.refSpeed / sp; // spacing stays the same when only the speed changes
+    // Shots only leave on a screen frame. Counting from when this shot was DUE (not from this frame) keeps the average right, so every FIRE SPEED level counts.
+    this.nextShot = (time - this.nextShot < wait ? this.nextShot : time) + wait;
     for (const sh of lv.pattern) {
       const fs = C.bullet.fire;
       const b = this.spawn(this.bullets, fs ? (this.textures.exists('sp_fire_b') ? 'sp_fire_b' : 'sp_fire') : 'pbullet', this.ship.x + sh.dx, this.ship.y - C.ship.shotY, fs ? fs.scale : PX);
@@ -1069,7 +1075,7 @@ export class PlayScene extends Phaser.Scene {
       if (fs) { b.body.setSize(fs.hitW, fs.hitH); b.play('fire_shot'); } else b.anims.stop();
       const a = sh.deg * DEG;
       b.setRotation(a);
-      b.dmg = (sh.dmg === undefined ? lv.damage : sh.dmg) * C.difficulty.myDamage;
+      b.dmg = (sh.dmg === undefined ? lv.damage : sh.dmg) * this.damageMul * C.difficulty.myDamage;
       b.body.setVelocity(Math.sin(a) * sp, -Math.cos(a) * sp);
     }
     const F = C.feel;
@@ -1678,6 +1684,13 @@ export class PlayScene extends Phaser.Scene {
   testLose() { this.hearts = 0; this.hud.setHearts(0); this.gameOver(); }
   refreshBank() { if (this.bankLine) this.bankLine.setText(this.bankLabel()); } // the end screen shows the new total
   bankLabel() { return 'BANK ' + loadBank() + '  +' + this.coinsBanked; } // saved total and what this run added
+  // the tune panel erased all saved progress: forget what this run already put in the bank, drop the upgrades, update the end screen
+  progressReset() {
+    this.coinsBanked = 0;
+    this.refreshUpgrades();
+    this.refreshBank();
+    this.newTags.forEach(o => o.setVisible(false)); // NEW beside a star: it is not saved any more
+  }
 
   gameOver() {
     music(null); ringSound(null); sfx('gameOver', 350); // after the hit sound
@@ -1734,7 +1747,7 @@ export class PlayScene extends Phaser.Scene {
         const star = this.add.image(W / 2 + 62, y, done ? 'star_earned' : 'star_off').setScale(1.3).setDepth(61);
         fade.push(star);
         if (done && ease > 0) this.tweens.add({ targets: star, scale: { from: 2.4, to: 1.3 }, duration: 260, delay: ease + i * 220, ease: 'Back.easeOut' }); // the star lands
-        if (isNew && isNew[k]) rowTxt(W / 2 + 80, y, 'NEW', hex(P.orange));
+        if (isNew && isNew[k]) this.newTags.push(rowTxt(W / 2 + 80, y, 'NEW', hex(P.orange)));
       });
       const V = C.coin.value, sy = 176 + this.goalKeys.length * gap + 4;
       t(sy, 'COINS ' + this.coinsCollected * V + '/' + this.coinsSpawned * V, 16, CR);
