@@ -272,7 +272,7 @@ export class MenuScene extends Phaser.Scene {
         add(txt(cx + 10, y + 45, String(nd.need), B.nameSize + 2, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 45);
       }
     } else {
-      add(txt(cx, y + 15, nd.name, B.nameSize, shadow, 0.5, B.nameShadow), y + 15); // drop shadow: a dark copy 1 px lower, behind the name
+      add(txt(cx, y + 16, nd.name, B.nameSize, shadow, 0.5, B.nameShadow), y + 16); // drop shadow: a dark copy 2 px lower, behind the name
       add(txt(cx, y + 14, nd.name, B.nameSize, shadow, 0.5, ink), y + 14);
       const medals = loadMedals(nd.theme), best = loadBest(nd.theme), keys = goalsOf(nd.theme), n = keys.length;
       keys.forEach((k, j) => {
