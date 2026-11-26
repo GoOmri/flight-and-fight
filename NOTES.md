@@ -1144,3 +1144,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-25 v1.9.160: no outline on stage tile text (branch v1160-tile-text)
 - Stage names, locked '???', star count and BEST score have no dark outline now. Checked in the browser pane. UNVERIFIED: readability over the pictures on a phone.
+
+## 2026-11-26 v1.9.161: hearts are pulled in (branch v1161-heart-magnet)
+- When a heart is missing, a falling heart near the witch is pulled in and shrinks, like coins and potions. With all hearts full it is not pulled.
+- Magnet upgrade (pull from a distance): written in ROADMAP, not built.
+- Check on the phone: does the heart pull feel right?
