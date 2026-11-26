@@ -272,6 +272,7 @@ export class MenuScene extends Phaser.Scene {
         add(txt(cx + 10, y + 45, String(nd.need), B.nameSize + 2, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 45);
       }
     } else {
+      add(txt(cx, y + 15, nd.name, B.nameSize, shadow, 0.5, B.nameShadow), y + 15); // drop shadow: a dark copy 1 px lower, behind the name
       add(txt(cx, y + 14, nd.name, B.nameSize, shadow, 0.5, ink), y + 14);
       const medals = loadMedals(nd.theme), best = loadBest(nd.theme), keys = goalsOf(nd.theme), n = keys.length;
       keys.forEach((k, j) => {
@@ -510,10 +511,12 @@ export class MenuScene extends Phaser.Scene {
     const mkBtn = (x, y, w, label, action) => { // the flat parchment button of the settings; off = faded
       const bt = { x: x - 4, y: y - 5, w: w + 8, h: 36, down: false, off: false, action };
       const img = keep(addSlice(this, x, y, 'ui_flat1', w, 26, 10, 10, 0, 0).setOrigin(0, 0), 1), text = T(x + w / 2, y + 12, label, ink);
+      bt.text = text; bt.coin = null;
       bt.draw = () => {
         const sink = bt.down && !bt.off ? 1 : 0;
         img.setTint(sink ? 0xbbbbbb : 0xffffff).setAlpha(bt.off ? 0.4 : 1).setY(y + sink);
         text.setAlpha(bt.off ? 0.4 : 1).setY(y + 12 + sink);
+        if (bt.coin) bt.coin.setAlpha(bt.off ? 0.4 : 1).setY(y + 13 + sink);
       };
       buttons.push(bt);
       return bt;
@@ -529,8 +532,9 @@ export class MenuScene extends Phaser.Scene {
           r.pips.fillStyle(0x120622, 1).fillRect(x, r.pipY, B.pipW, B.pipH);
           r.pips.fillStyle(i < level ? 0xf2b632 : 0x52288f, 1).fillRect(x + 1, r.pipY + 1, B.pipW - 2, B.pipH - 2);
         }
-        r.price.setText(price === null ? 'MAX' : String(price)).setX(right - B.buyW / 2 + (price === null || !r.coin ? 0 : 6));
-        if (r.coin) r.coin.setVisible(price !== null).setX(r.price.x - r.price.width / 2 - 7);
+        const coin = r.buy.coin, text = r.buy.text, mx = right - B.buyW / 2; // the middle of the scroll
+        text.setText(price === null ? 'MAX' : String(price)).setX(mx + (price === null || !coin ? 0 : 6));
+        if (coin) coin.setVisible(price !== null).setX(text.x - text.width / 2 - 7);
         r.buy.off = price === null || loadBank() < price;
         r.buy.draw();
       }
@@ -540,12 +544,11 @@ export class MenuScene extends Phaser.Scene {
       const y = y0 + B.headH + i * B.rowH;
       T(left, y + 12, u.name, cream, 0);
       const row = { u, pipY: y + 26, pips: keep(this.add.graphics(), 1) };
-      row.price = T(0, y + 8, '', gold);
-      row.coin = this.textures.exists('sp_coin') ? keep(this.add.image(0, y + 9, 'sp_coin', 0).setScale(0.6), 2) : null;
-      row.buy = mkBtn(right - B.buyW, y + 18, B.buyW, 'BUY', () => {
+      row.buy = mkBtn(right - B.buyW, y + 8, B.buyW, '', () => {
         if (this.time.now - this.buyAt < S.buyGapMs || !buyUpgrade(u.id)) return; // a double tap buys once
         this.buyAt = this.time.now; sfx('coin'); refresh();
       });
+      if (this.textures.exists('sp_coin')) row.buy.coin = keep(this.add.image(0, y + 21, 'sp_coin', 0).setScale(0.6), 2);
       rows.push(row);
     });
     let box = null;

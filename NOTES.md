@@ -1227,3 +1227,10 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Tested: syntax check, scratch tests, reviewer found no real bugs. Browser (canvas mode): three-row shop, buying, RESET ALL, menu after it, no console errors.
 - Not checked: a real play-through of Stage 1, normal drawing mode, phone.
 - Check on phone: can Stage 1 be cleared with nothing bought? If too hard, lower shooter health (config enemies) first.
+
+## 2026-11-27 v1.9.170: price on the scroll, drop shadow on stage names (branch price-scroll-name-shadow)
+- Shop: the coin and price are written on the scroll button (no BUY word). MAX at level 10.
+- Menu stage cards: the name has a dark copy 1 px lower as a drop shadow.
+- The level squares in the shop are unchanged: Omri dislikes them, a new look is to be chosen.
+- Tested: syntax check; browser, normal mode: menu, shop, one purchase, no console errors. Not checked: canvas mode, phone.
+- Check on phone: is the price easy to read and clear that the scroll is the buy button? Is the shadow visible?
