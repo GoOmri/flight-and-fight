@@ -1213,3 +1213,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Tested in the browser, canvas mode: menu, shop, settings, stage box, pause, game over. Normal mode: menu and shop only. No console errors.
 - Not checked: pressed (darker) button look, other screens in normal mode, phone.
 - Check on phone: is SHOP readable? Is the cauldron easy to tap? Is the size right?
+
+## 2026-11-26 v1.9.168: "Shop" and cauldron 2px left (branch cauldron-shop-word)
+- The word is now Shop (was SHOP). Cauldron, word, glow and tap area moved 2px left.
+- Tested here: syntax check; menu seen in the browser, no console errors. Not tried on the phone.
+- Check on phone: is Shop readable, and is the cauldron in the right place?
