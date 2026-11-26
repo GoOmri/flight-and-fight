@@ -1188,3 +1188,4 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Note: FINISH STAGE gives every star not already lost (so an early tap gives ALL COINS and NO HIT), and marks the stage as finished.
 - Unverified: thumb size and feel on the phone.
 - Check on phone: are the buttons easy to hit? Do the stars and coins stay after closing the game?
+- Then tested in the browser: all four buttons, the two-tap reset, STAGE CLEAR and GAME OVER, bank line updates, LOSE NOW after the end does nothing, no console errors. Not tried on the phone.
