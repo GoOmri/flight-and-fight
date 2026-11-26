@@ -1024,7 +1024,11 @@ export class PlayScene extends Phaser.Scene {
   }
 
   // The saved upgrade levels, read at the start of a run (and again when the tune panel resets them).
-  refreshUpgrades() { this.magnetLevel = loadLevel('magnet'); }
+  refreshUpgrades() {
+    this.magnetLevel = loadLevel('magnet');
+    this.damageMul = upgradeValue('damage', loadLevel('damage'), 1);
+    this.fireMul = upgradeValue('fire', loadLevel('fire'), 1); // x the time between shots
+  }
   magnetRadius() { const base = C.feel.magnetRadius; return base > 0 ? Math.max(base, upgradeValue('magnet', this.magnetLevel, base)) : 0; }
 
   // Coins, potions and (when a heart is missing) hearts close to the witch fly to her (magnet).
@@ -1060,7 +1064,9 @@ export class PlayScene extends Phaser.Scene {
   autoFire(time) {
     if (time < this.nextShot) return;
     const lv = C.weaponLevels[this.weaponLevel], sp = C.bullet.speed;
-    this.nextShot = time + lv.fireRateMs * C.bullet.gap * C.bullet.refSpeed / sp; // spacing stays the same when only the speed changes
+    const wait = lv.fireRateMs * this.fireMul * C.bullet.gap * C.bullet.refSpeed / sp; // spacing stays the same when only the speed changes
+    // Shots only leave on a screen frame. Counting from when this shot was DUE (not from this frame) keeps the average right, so every FIRE SPEED level counts.
+    this.nextShot = (time - this.nextShot < wait ? this.nextShot : time) + wait;
     for (const sh of lv.pattern) {
       const fs = C.bullet.fire;
       const b = this.spawn(this.bullets, fs ? (this.textures.exists('sp_fire_b') ? 'sp_fire_b' : 'sp_fire') : 'pbullet', this.ship.x + sh.dx, this.ship.y - C.ship.shotY, fs ? fs.scale : PX);
@@ -1069,7 +1075,7 @@ export class PlayScene extends Phaser.Scene {
       if (fs) { b.body.setSize(fs.hitW, fs.hitH); b.play('fire_shot'); } else b.anims.stop();
       const a = sh.deg * DEG;
       b.setRotation(a);
-      b.dmg = (sh.dmg === undefined ? lv.damage : sh.dmg) * C.difficulty.myDamage;
+      b.dmg = (sh.dmg === undefined ? lv.damage : sh.dmg) * this.damageMul * C.difficulty.myDamage;
       b.body.setVelocity(Math.sin(a) * sp, -Math.cos(a) * sp);
     }
     const F = C.feel;

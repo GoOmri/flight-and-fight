@@ -65,7 +65,7 @@ const TABS = [
 ];
 const DROPS_TAB = 2, TEST_TAB = 4;
 const CHEAT = { w: 108, h: 24, gap: 6 };                   // TEST tab: the big thumb buttons (two per line)
-const CHEATS_H = 3 * (CHEAT.h + CHEAT.gap) + 14;           // their three lines plus the BANK line
+const CHEATS_H = 3 * (CHEAT.h + CHEAT.gap) + 24;           // their three lines plus the BANK line and the upgrade levels line
 const CONFIRM_MS = 3000;                                   // RESET COINS / RESET UPGRADES: the second tap must come within this time
 const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'WITCH SHOT: SIZE, SPEED, SPACING', 'TAP THE DROP NAME TO SWITCH DROP', '(X) 1 = NORMAL. DELAY MORE = EASIER', 'PRESS RESTART. LEVEL -1 = BY WAVE'];
 const rowsOf = (tab, pick) => tab === DROPS_TAB ? dropRows(KINDS[pick]) : tab === 0 ? (C.ship.controls === 'stick' ? STICK_ROWS : DRAG_ROWS) : TABS[tab][1];
@@ -204,7 +204,8 @@ export class Tune {
       button(x1, y2, CHEAT.w, CHEAT.h, '+500 COINS', () => this.addCoins(), false);
       button(x2, y2, CHEAT.w, CHEAT.h, sure ? 'SURE? TAP AGAIN' : 'RESET COINS', () => this.resetCoins(), false, sure ? P.pink : P.purple);
       button(x1, y3, 2 * CHEAT.w + CHEAT.gap, CHEAT.h, sureUps ? 'SURE? TAP AGAIN' : 'RESET UPGRADES', () => this.resetUps(), false, sureUps ? P.pink : P.purple);
-      T(PANEL.x + PANEL.w / 2, y3 + CHEAT.h + 9, 'BANK ' + loadBank() + C.shop.upgrades.map(u => '  ' + u.name + ' ' + loadLevel(u.id)).join(''), 8, P.cyan, 0.5);
+      T(PANEL.x + PANEL.w / 2, y3 + CHEAT.h + 9, 'BANK ' + loadBank(), 8, P.cyan, 0.5);
+      T(PANEL.x + PANEL.w / 2, y3 + CHEAT.h + 19, C.shop.upgrades.map(u => u.name + ' ' + loadLevel(u.id)).join('  '), 8, P.cyan, 0.5);
     }
     const by = rowsEnd + extra + 2;
     button(PANEL.x + 8, by, 52, BTN.h + 2, 'COPY', () => this.copy(), false);
