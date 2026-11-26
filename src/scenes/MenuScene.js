@@ -5,7 +5,7 @@ import { CONFIG as C, hex } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale } from '../sprites.js';
 import { FONT, FONT_TITLE, FONT_MONO, titleCase, fpx, drawPlate } from '../hud.js';
 import { goalsOf, loadMedals, loadBest, totalStars, isCleared } from '../medals.js';
-import { loadBank, loadLevel, nextPrice, buyUpgrade } from '../bank.js';
+import { loadBank, loadLevel, nextPrice, buyUpgrade, canBuyAny } from '../bank.js';
 import { latestVersion, refreshFiles } from '../update.js';
 import { toggleTune } from '../tune.js';
 
@@ -45,6 +45,7 @@ export class MenuScene extends Phaser.Scene {
     makeGoalIcons(this);   // goal pictures (the lightbox shows them)
     this.cameras.main.setZoom(R).centerOn(W / 2, H / 2).setBackgroundColor(M.bgColor);
     this.addArt();
+    this.makeShopSign();
     this.makeBits(); this.startEffects(); this.setupTilt(); // little pictures for the sparks, then cauldron bubbles, witch trail, fireflies, shooting stars, and the tilt parallax
     const txt = (x, y, s, size, stroke, align = 0.5, color = P.cream) => this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: stroke }).setOrigin(align, 0.5);
     this.txt = txt;
@@ -86,6 +87,7 @@ export class MenuScene extends Phaser.Scene {
     // ---- saved coins, top left (drawn over the path, so a bubble scrolled under it does not hide it)
     const bankBack = this.add.graphics(), bankTxt = txt(M.bankX, M.bankY, '', M.bankSize, 3, 0, 0xf2b632);
     this.showBank = () => { // drawn again after a purchase
+      this.shopGlow.setVisible(canBuyAny()); // the cauldron glows only while something can be bought
       bankTxt.setText('COINS ' + loadBank());
       bankBack.clear().fillStyle(P.dark, 0.8).fillRoundedRect(M.bankX - 3, M.bankY - 7, bankTxt.width + 6, 14, 4);
     };
@@ -131,9 +133,9 @@ export class MenuScene extends Phaser.Scene {
     gear.draw = () => (gear.img || gear.g).setAlpha(gear.down ? 0.65 : 1);
     gear.action = () => this.openSettings(true);
 
-    // ---- the cauldron (bottom left) opens the shop
+    // ---- the cauldron (bottom left) and its SHOP word open the shop
     const boiler = this.decorItems.find(i => i.key === 'boiler'), shop = { ...C.shop.button, down: false };
-    shop.draw = () => boiler.s.setTint(shop.down ? 0xbbbbbb : 0xffffff);
+    shop.draw = () => { boiler.s.setTint(shop.down ? 0xbbbbbb : 0xffffff); this.shopSign.setAlpha(shop.down ? 0.65 : 1); }; // alpha: text tint does not work in canvas mode
     shop.action = () => this.openShop();
 
     this.modal = false; this.boxObjs = null; // boxObjs: set while the goals box or the shop is open
@@ -550,6 +552,7 @@ export class MenuScene extends Phaser.Scene {
     const closeBtn = mkBtn(mid - 45, y0 + h - B.footH + 6, 90, 'CLOSE', () => {
       if (this.popTween) this.popTween.remove();
       objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.modal = false; this.panelButtons = this.settingsButtons;
+      this.showBank();
     });
     closeBtn.draw();
     refresh();
@@ -591,6 +594,22 @@ export class MenuScene extends Phaser.Scene {
       };
       if (d.introX) { pos.x = d.x + d.introX; this.tweens.add({ targets: pos, x: d.x, duration: 1100, delay: 350, ease: 'Cubic.easeOut', onComplete: motion }); } else motion();
     }
+  }
+
+  // The word SHOP over the cauldron and the gold glow behind it (showBank turns the glow on and off). Both move with the cauldron when the phone tilts.
+  // The glow is a picture painted once (a radial fade), so it also works in canvas mode.
+  makeShopSign() {
+    const S = C.shop.sign, G = C.shop.glow, par = this.decorItems.find(i => i.key === 'boiler').par;
+    if (!this.textures.exists('menu_shopglow')) {
+      const cv = this.textures.createCanvas('menu_shopglow', 64, 64), c = cv.getContext(), f = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+      const rgb = [(G.color >> 16) & 255, (G.color >> 8) & 255, G.color & 255].join(',');
+      f.addColorStop(0, 'rgba(' + rgb + ',1)'); f.addColorStop(0.55, 'rgba(' + rgb + ',0.65)'); f.addColorStop(1, 'rgba(' + rgb + ',0)');
+      c.fillStyle = f; c.fillRect(0, 0, 64, 64); cv.refresh();
+    }
+    this.shopGlow = this.add.image(G.x, G.y, 'menu_shopglow').setDisplaySize(G.rx * 2, G.ry * 2).setDepth(49).setAlpha(G.alphaMin).setVisible(false); // just behind the cauldron (50)
+    this.tweens.add({ targets: this.shopGlow, alpha: G.alphaMax, duration: G.ms, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.shopSign = this.add.text(S.x, S.y, 'SHOP', { ...FONT, fontSize: fpx(S.size) + 'px', color: hex(S.color), stroke: hex(P.shadow), strokeThickness: S.stroke }).setOrigin(0.5).setDepth(52);
+    this.decorItems.push({ s: this.shopGlow, pos: { x: G.x, y: G.y }, par, key: 'shopglow' }, { s: this.shopSign, pos: { x: S.x, y: S.y }, par, key: 'shopsign' });
   }
 
   // ---- little pictures and effects -------------------------------------------------------------------------------------------------

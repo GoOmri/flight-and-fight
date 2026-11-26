@@ -42,6 +42,12 @@ export function nextPrice(id) {
   return u && lv < u.prices.length ? u.prices[lv] : null;
 }
 
+// true = the coins are enough for at least one more upgrade level (false when too poor or all at the top)
+export function canBuyAny() {
+  const bank = loadBank();
+  return C.shop.upgrades.some(u => { const p = nextPrice(u.id); return p !== null && bank >= p; });
+}
+
 // the number the game uses: base at level 0, the upgrade's top at the top level, even steps between
 export function upgradeValue(id, level, base) {
   const u = upgradeOf(id);
