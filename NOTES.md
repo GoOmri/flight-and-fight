@@ -1234,3 +1234,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - The level squares in the shop are unchanged: Omri dislikes them, a new look is to be chosen.
 - Tested: syntax check; browser, normal mode: menu, shop, one purchase, no console errors. Not checked: canvas mode, phone.
 - Check on phone: is the price easy to read and clear that the scroll is the buy button? Is the shadow visible?
+
+## 2026-11-27 v1.9.171: glowing potion tube instead of level squares (branch shop-glowing-tube)
+- Shop: each upgrade level is a glass tube of pink glowing potion with a few bubbles and "7/10" beside the name. Omri picked this style. Numbers: config shop.panel.tube.
+- The bubbles do not move.
+- Tested: syntax check; browser, normal and canvas mode, levels 0, 1, 3, 7 and 10, no console errors. Not tried on the phone.
+- Check on phone: is the tube nice, and is the level easy to read?
