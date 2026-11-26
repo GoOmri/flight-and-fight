@@ -213,7 +213,7 @@ export class PlayScene extends Phaser.Scene {
       this.burst(c.x, c.y, C.feel.coinSparkCount, COIN_TINTS, C.feel.coinSparkSpeedMul, 3); // coin pop
     }, (s, c) => this.pulledIn(c));
     this.physics.add.overlap(this.ship, this.weaponUps, (s, p) => { this.kill(p); this.weaponUp(); }, (s, p) => this.pulledIn(p));
-    this.physics.add.overlap(this.ship, this.heartUps, (s, p) => { this.kill(p); this.heartUp(p.x, p.y); }, () => this.hearts < C.ship.hearts); // with all hearts full the heart is not picked up: it keeps falling and can be caught after a hit
+    this.physics.add.overlap(this.ship, this.heartUps, (s, p) => { this.kill(p); this.heartUp(p.x, p.y); }, (s, p) => this.hearts < C.ship.hearts && this.pulledIn(p)); // with all hearts full the heart is not picked up: it keeps falling and can be caught after a hit
     // (crates are in no ship overlap: the ship flies through them)
   }
 
@@ -1020,13 +1020,18 @@ export class PlayScene extends Phaser.Scene {
       F.trailLifeMs / 1000, Phaser.Math.FloatBetween(F.trailSize[0], F.trailSize[1]) * SS, F.trailColors[this.trailN++ % F.trailColors.length], C.ship.depth - 0.02, true); // colours go round in order, so the stream looks striped and colourful
   }
 
-  // Coins close to the witch fly to her (magnet).
+  // Coins, potions and (when a heart is missing) hearts close to the witch fly to her (magnet).
   updateCoins(dt) {
     const F = C.feel, R = F.magnetRadius;
     if (R <= 0) return;
     const sh = this.ship;
-    for (const grp of [this.coins, this.weaponUps]) grp.children.iterate(c => { // coins and weapon potions
+    const need = this.hearts < C.ship.hearts;
+    for (const grp of [this.coins, this.weaponUps, this.heartUps]) grp.children.iterate(c => {
       if (!c || !c.active) return;
+      if (grp === this.heartUps && !need) { // all hearts full: no pull; one already on its way falls on again
+        if (c.mag) { c.mag = false; c.setScale(c.s0); c.body.setVelocity(0, c.baseV); }
+        return;
+      }
       const dx = sh.x - c.x, dy = sh.y - c.y, d = Math.hypot(dx, dy);
       if (!c.mag && d < R) { c.mag = true; c.s0 = c.scaleX; c.body.setDragX(0); }
       if (!c.mag) return;
@@ -1282,7 +1287,7 @@ export class PlayScene extends Phaser.Scene {
     if (PB && PB.bobAmp) this.weaponUps.children.iterate(p => { if (p && p.active && p.baseV && !p.mag) p.body.setVelocityY(p.baseV + PB.bobAmp * Math.sin(time / 1000 * PB.bobSpeed + p.bobPh)); });
     this.heartUps.children.iterate(p => {
       if (!p || !p.active) return;
-      if (p.baseV) p.body.setVelocityY(p.baseV + HS.bobAmp * Math.sin(time / 1000 * HS.bobSpeed + p.bobPh));
+      if (p.baseV && !p.mag) p.body.setVelocityY(p.baseV + HS.bobAmp * Math.sin(time / 1000 * HS.bobSpeed + p.bobPh));
       if (!shSp || !p.anims.currentAnim || p.anims.currentAnim.key !== 'heart_idle') return;
       const o = shSp[ns] || (shSp[ns] = this.add.image(0, 0, 'sp_heart_shine').setDepth(C.pickup.depth + 0.05));
       ns++;
