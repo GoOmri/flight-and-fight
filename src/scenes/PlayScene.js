@@ -110,7 +110,7 @@ export class PlayScene extends Phaser.Scene {
     this.shipFlashUntil = 0; this.muzzleUntil = 0;
     this.recoil = 0; this.trailT = 0; this.trailN = 0; this.vx = 0; this.vy = 0; this.cloudMul = 1; // feel state
     this.hearts = C.ship.hearts;
-    this.over = false; this.menuBtn = null; this.bankLine = null;
+    this.over = false; this.menuBtn = null; this.bankLine = null; this.newTags = [];
     this.invulnUntil = 0;
     this.nextShot = 0;
     // Debug helpers (type them after the web address): ?wave=N starts the stage at wave N (1-10); ?god=1 = no damage (hits still counted).
@@ -1684,6 +1684,13 @@ export class PlayScene extends Phaser.Scene {
   testLose() { this.hearts = 0; this.hud.setHearts(0); this.gameOver(); }
   refreshBank() { if (this.bankLine) this.bankLine.setText(this.bankLabel()); } // the end screen shows the new total
   bankLabel() { return 'BANK ' + loadBank() + '  +' + this.coinsBanked; } // saved total and what this run added
+  // the tune panel erased all saved progress: forget what this run already put in the bank, drop the upgrades, update the end screen
+  progressReset() {
+    this.coinsBanked = 0;
+    this.refreshUpgrades();
+    this.refreshBank();
+    this.newTags.forEach(o => o.setVisible(false)); // NEW beside a star: it is not saved any more
+  }
 
   gameOver() {
     music(null); ringSound(null); sfx('gameOver', 350); // after the hit sound
@@ -1740,7 +1747,7 @@ export class PlayScene extends Phaser.Scene {
         const star = this.add.image(W / 2 + 62, y, done ? 'star_earned' : 'star_off').setScale(1.3).setDepth(61);
         fade.push(star);
         if (done && ease > 0) this.tweens.add({ targets: star, scale: { from: 2.4, to: 1.3 }, duration: 260, delay: ease + i * 220, ease: 'Back.easeOut' }); // the star lands
-        if (isNew && isNew[k]) rowTxt(W / 2 + 80, y, 'NEW', hex(P.orange));
+        if (isNew && isNew[k]) this.newTags.push(rowTxt(W / 2 + 80, y, 'NEW', hex(P.orange)));
       });
       const V = C.coin.value, sy = 176 + this.goalKeys.length * gap + 4;
       t(sy, 'COINS ' + this.coinsCollected * V + '/' + this.coinsSpawned * V, 16, CR);

@@ -4,6 +4,7 @@
 import { CONFIG as C, hex } from './config.js';
 import { FONT, fpx, drawPlate } from './hud.js';
 import { loadBank, addBank, resetBank, loadLevel, resetUpgrades } from './bank.js';
+import { resetStages } from './medals.js';
 
 const W = C.game.width; // logical width (240)
 const P = C.menu.pal;
@@ -66,7 +67,7 @@ const TABS = [
 const DROPS_TAB = 2, TEST_TAB = 4;
 const CHEAT = { w: 108, h: 24, gap: 6 };                   // TEST tab: the big thumb buttons (two per line)
 const CHEATS_H = 3 * (CHEAT.h + CHEAT.gap) + 24;           // their three lines plus the BANK line and the upgrade levels line
-const CONFIRM_MS = 3000;                                   // RESET COINS / RESET UPGRADES: the second tap must come within this time
+const CONFIRM_MS = 3000;                                   // the RESET buttons of the TEST tab: the second tap must come within this time
 const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'WITCH SHOT: SIZE, SPEED, SPACING', 'TAP THE DROP NAME TO SWITCH DROP', '(X) 1 = NORMAL. DELAY MORE = EASIER', 'PRESS RESTART. LEVEL -1 = BY WAVE'];
 const rowsOf = (tab, pick) => tab === DROPS_TAB ? dropRows(KINDS[pick]) : tab === 0 ? (C.ship.controls === 'stick' ? STICK_ROWS : DRAG_ROWS) : TABS[tab][1];
 const ALL = [...STICK_ROWS, ...DRAG_ROWS, ...TABS.flatMap((t, i) => i === DROPS_TAB ? KINDS.flatMap(dropRows) : t[1] || [])];
@@ -147,6 +148,9 @@ export class Tune {
 
   resetUps() { this.confirm('ups', () => { resetUpgrades(); this.scene.refreshUpgrades(); this.draw(); }); }
 
+  // all game progress: coins, upgrades, stars and best scores. Settings (volume, controls, effects, tune on) stay.
+  resetAll() { this.confirm('all', () => { resetBank(); resetUpgrades(); resetStages(); this.scene.progressReset(); this.draw(); }); }
+
   bankChanged() { this.scene.refreshBank(); this.draw(); }
 
   // Only the numbers you changed, ready to paste to Claude
@@ -198,12 +202,13 @@ export class Tune {
     const rowsEnd = PANEL.y + PANEL.pad + TABH + (ROWS.length + top) * PANEL.rowH;
     if (this.tab === TEST_TAB) {
       const x1 = PANEL.x + (PANEL.w - 2 * CHEAT.w - CHEAT.gap) / 2, x2 = x1 + CHEAT.w + CHEAT.gap;
-      const y1 = rowsEnd + CHEAT.gap, y2 = y1 + CHEAT.h + CHEAT.gap, y3 = y2 + CHEAT.h + CHEAT.gap, sure = this.isSure('coins'), sureUps = this.isSure('ups');
+      const y1 = rowsEnd + CHEAT.gap, y2 = y1 + CHEAT.h + CHEAT.gap, y3 = y2 + CHEAT.h + CHEAT.gap, sure = this.isSure('coins'), sureUps = this.isSure('ups'), sureAll = this.isSure('all');
       button(x1, y1, CHEAT.w, CHEAT.h, 'FINISH STAGE', () => this.endRun(true), false);
       button(x2, y1, CHEAT.w, CHEAT.h, 'LOSE NOW', () => this.endRun(false), false);
       button(x1, y2, CHEAT.w, CHEAT.h, '+500 COINS', () => this.addCoins(), false);
       button(x2, y2, CHEAT.w, CHEAT.h, sure ? 'SURE? TAP AGAIN' : 'RESET COINS', () => this.resetCoins(), false, sure ? P.pink : P.purple);
-      button(x1, y3, 2 * CHEAT.w + CHEAT.gap, CHEAT.h, sureUps ? 'SURE? TAP AGAIN' : 'RESET UPGRADES', () => this.resetUps(), false, sureUps ? P.pink : P.purple);
+      button(x1, y3, CHEAT.w, CHEAT.h, sureUps ? 'SURE? TAP AGAIN' : 'RESET UPGRADES', () => this.resetUps(), false, sureUps ? P.pink : P.purple);
+      button(x2, y3, CHEAT.w, CHEAT.h, sureAll ? 'SURE? TAP AGAIN' : 'RESET ALL', () => this.resetAll(), false, sureAll ? P.pink : P.purple);
       T(PANEL.x + PANEL.w / 2, y3 + CHEAT.h + 9, 'BANK ' + loadBank(), 8, P.cyan, 0.5);
       T(PANEL.x + PANEL.w / 2, y3 + CHEAT.h + 19, C.shop.upgrades.map(u => u.name + ' ' + loadLevel(u.id)).join('  '), 8, P.cyan, 0.5);
     }
