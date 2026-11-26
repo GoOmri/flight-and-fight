@@ -1149,3 +1149,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - When a heart is missing, a falling heart near the witch is pulled in and shrinks, like coins and potions. With all hearts full it is not pulled.
 - Magnet upgrade (pull from a distance): written in ROADMAP, not built.
 - Check on the phone: does the heart pull feel right?
+
+## 2026-11-26 shop and upgrades written down (notes only, no version change)
+- New DESIGN.md section "Shop and upgrades": what Omri decided and what is still only proposed. Nothing built, nothing to check on the phone.

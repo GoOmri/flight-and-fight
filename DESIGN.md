@@ -527,3 +527,27 @@ Counters kept: enemies spawned, enemies killed, coins dropped (a crate coins cou
 - No hit vs the current ram rule (crashing kills the enemy but costs a heart): fine, but "no hit" means no crashing too.
 - A fixed script replaces the looping wave list in config.js: the stage must END after wave 10 and show a result screen with the 4 icons. No loop any more.
 - Stage balance depends on the weak gun (170 ms, twin). Upgrades later change how hard "kill all" is. Balance stage 1 for the base ship first.
+
+## Shop and upgrades (STILL IN DISCUSSION with Omri, 26 Nov 2026; nothing built)
+Where this differs from the older "Hut and cauldron loop" (recipes, ingredients, medal unlocks), THIS section counts.
+
+### Decided
+- Coins picked up are saved after each run. You keep them when you die.
+- The shop is the simplest kind: a list of upgrades. No refunds.
+- Open from the start: SHOT DAMAGE and MAGNET (magnet = pulls things from further away than today's short pull).
+- Spells: pay a fee once to unlock one, then a smaller price for each improvement. Kept forever.
+- First idea for a spell: lightning. It happens by itself (no button).
+- Stars are only for opening stages. Stars do not lock shop items.
+- Shield spell (later): a blocked hit does NOT cost the no-hit star. That is the point of the shield.
+
+### Proposed, not yet agreed
+- One spell equipped at a time. Upgrading a spell shortens its wait, not its damage. Bosses take less from spells.
+- Lightning: zaps the 3 toughest enemies on screen, about every 10 s. Shield: blocks one hit, back after about 25 s. Later ideas: star burst (clears nearby shots, 15 s), ghost helper (shoots with you, 20 s).
+- Magnet and shot damage: 3 levels each.
+- Prices counted in runs (measure coins per run first): magnet and damage about 1, 2, 4 runs; unlock lightning about 4; each lightning improvement about 2.
+- Build order: save coins and show the total; shop with magnet and damage; lightning; play it and adjust prices.
+
+### Watch out
+- Shot damage is 2 today; enemy health is 3 (grunt), 4 (zigzag), 7 (shooter). Small damage steps only change the number of shots for some enemies, so each level must be checked to be something you can feel.
+- Damage upgrades stack with the in-stage potions; too much makes the stages and the no-hit star easy.
+- Art: art-packs/effects-vfx/free-spell-effects-24 lists lightning and shield effects (check each effect's licence in its index.json; not previewed).
