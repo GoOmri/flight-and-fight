@@ -1155,3 +1155,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-26 shop notes updated (notes only)
 - DESIGN.md "Shop and upgrades": name Cauldron, icon bottom left, damage +1, fire speed, all spells at once, tougher enemies. Nothing built.
+
+## 2026-11-26 shop notes: extras and levels (notes only)
+- DESIGN.md "Shop and upgrades": chosen extras, 10-level proposal, themed names, coin scatter question. Nothing built.
