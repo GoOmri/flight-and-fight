@@ -1164,3 +1164,11 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-26 build plan for the Cauldron (notes only)
 - New PLAN-cauldron.md: coin tiers and scatter, saved coins, Cauldron with magnet, damage + fire speed + tougher enemies. Numbers untested.
+
+## 2026-11-26 v1.9.162: coin tiers and scatter (Cauldron plan, step 1)
+- Which enemies drop is unchanged. Bat 1 coin (straight down), ghost 2 (small fan), wisp 4 (wider fan), vulture 2. The fan has a small hop and stays on screen. Numbers: config enemies (coins, coinSpread, coinHop) and coin (scatterFadeSec, scatterJitter, hopGravity).
+- Coin pool 40 -> 64. Perfect Stage 1: 105 enemy coins + 22 chest coins = 127 (end screen 635/635; a coin is 5 score, so scores rise a little).
+- Coin sound not changed (it already plays at most once per 50 ms).
+- Unverified: feel on the phone, sound by ear, frame rate with many shining coins. ALL COINS is probably harder now.
+- Check on phone: is the scatter fun and catchable? Is the coin sound too busy?
+- Tested here: syntax check of src; in the browser, forced drops stayed on screen (middle, both edges, top) with no console errors. Not a full played run. tools/check.py only tests SCRiTCH; scratch/menu-smoke.mjs is out of date and fails.

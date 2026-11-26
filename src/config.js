@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.161", // bump on every push so the player/Omri can see the build
+  version: "1.9.162", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -199,10 +199,12 @@ export const CONFIG = {
   // Enemy hp/score. Their movement, shooting and coins come from the wave data in src/waves.js.
   enemies: {
     depth: 33.5, // enemies are drawn ABOVE the colour tint (33) so the tint does not dim them (pickups are 34, enemy shots 35). 0 = below the tint like before. Their glow and outline follow.
-    grunt:   { hp: 3, score: 10 },
-    zigzag:  { hp: 4, score: 20 },
-    shooter: { hp: 7, score: 50 },
-    vulture: { hp: 5, score: 30 }, // not in any wave yet
+    // coins = how many coins one drops (WHICH enemies drop is in src/waves.js). coinSpread = sideways start speed of the outermost coins (px/s, 0 = straight down).
+    // coinHop = upward start speed (px/s, 0 = no hop). See also coin.scatterFadeSec / scatterJitter / hopGravity.
+    grunt:   { hp: 3, score: 10, coins: 1, coinSpread: 0, coinHop: 0 },   // tier 1
+    zigzag:  { hp: 4, score: 20, coins: 2, coinSpread: 50, coinHop: 50 }, // tier 2
+    shooter: { hp: 7, score: 50, coins: 4, coinSpread: 110, coinHop: 75 }, // tier 3
+    vulture: { hp: 5, score: 30, coins: 2, coinSpread: 50, coinHop: 50 }, // tier 2, not in any wave yet
     poolSize: 40,
     hitFlashMs: 110,    // white flash of a hit enemy (ms)
     // Animated pictures. A type WITH an entry here uses its sheet (assets/enemies); a type WITHOUT one keeps its code-drawn picture (src/sprites.js).
@@ -272,7 +274,9 @@ export const CONFIG = {
   enemyBullet: { poolSize: 30, speed: 100, hitSize: 3, depth: 35, scale: 1.5, file: 'shots/orb-red.png' }, // the red orb of the "Shmup Shots, Explosions and Pickups 16x16" pack (16x16 drawn at 1.5x = 24 px, half of the 48 px it was shown at by mistake: the swell effect forced every shot to 3x). Remove `file` to get the code-drawn pink orb back (it then uses scale 2) // depth 35: above all effects (sparks 20, texts 30), below the HUD (50)
 
   // pickupRadius: how close the ship must be to grab a coin (logical px). Bigger than the ship hitbox on purpose.
-  coin: { fallSpeed: 50, value: 5, poolSize: 40, pickupRadius: 10 },
+  // Scatter of enemy coins: scatterFadeSec = the sideways speed fades to 0 in this time; scatterJitter = random part (0.2 = up to 20% more or less);
+  // hopGravity = how fast the hop turns back into a fall (px/s per s). poolSize = coins on screen at once (more are not made, so keep it generous).
+  coin: { fallSpeed: 50, value: 5, poolSize: 64, pickupRadius: 10, scatterFadeSec: 0.6, scatterJitter: 0.2, hopGravity: 160 },
 
   // Crates: hp, coins and speed are set per crate in src/waves.js. coinSpread = sideways speed between coins.
   // coinFadeSec: the sideways burst fades to 0 in this many seconds. poolSize: max crates at once.
