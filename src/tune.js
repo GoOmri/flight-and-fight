@@ -3,6 +3,7 @@
 // COPY puts all values on the clipboard (and shows them in the panel) so they can be pasted into src/config.js.
 import { CONFIG as C, hex } from './config.js';
 import { FONT, fpx, drawPlate } from './hud.js';
+import { loadBank, addBank, resetBank } from './bank.js';
 
 const W = C.game.width; // logical width (240)
 const P = C.menu.pal;
@@ -62,7 +63,10 @@ const TABS = [
     ['START WEAPON LEVEL', 'testing.level', 1, -1, 10, 0],
     ['NO DAMAGE (1 = ON)', 'testing.god', 1, 0, 1, 0]]]
 ];
-const DROPS_TAB = 2;
+const DROPS_TAB = 2, TEST_TAB = 4;
+const CHEAT = { w: 108, h: 24, gap: 6 };                   // TEST tab: the big thumb buttons (two per line)
+const CHEATS_H = 2 * (CHEAT.h + CHEAT.gap) + 14;           // their two lines plus the BANK line
+const CONFIRM_MS = 3000;                                   // RESET COINS: the second tap must come within this time
 const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'WITCH SHOT: SIZE, SPEED, SPACING', 'TAP THE DROP NAME TO SWITCH DROP', '(X) 1 = NORMAL. DELAY MORE = EASIER', 'PRESS RESTART. LEVEL -1 = BY WAVE'];
 const rowsOf = (tab, pick) => tab === DROPS_TAB ? dropRows(KINDS[pick]) : tab === 0 ? (C.ship.controls === 'stick' ? STICK_ROWS : DRAG_ROWS) : TABS[tab][1];
 const ALL = [...STICK_ROWS, ...DRAG_ROWS, ...TABS.flatMap((t, i) => i === DROPS_TAB ? KINDS.flatMap(dropRows) : t[1] || [])];
@@ -94,6 +98,7 @@ export class Tune {
     this.tab = 0; this.pick = 0; // pick = which drop the DROPS tab shows
     this.start = {}; ALL.forEach(r => { this.start[r[1]] = getp(r[1]); }); // for RESET
     this.hold = null; this.holdAt = 0; // button being held: { fn }
+    this.sureUntil = 0;                // RESET COINS was tapped once: a second tap before this time does it
     this.hits = [];                    // clickable boxes while the panel is open: { x, y, w, h, fn, hold }
     this.g = scene.add.graphics().setDepth(DEPTH);
     this.texts = [];
@@ -111,7 +116,6 @@ export class Tune {
   set(r, v) {
     v = Math.round(Math.min(r[4], Math.max(r[3], v)) * 1000) / 1000;
     setp(r[1], v);
-    if ((r[1].startsWith('difficulty.') || r[1].startsWith('testing.')) && this.scene) this.scene.tainted = true; // a run with changed difficulty / test rows is not saved
     if (r[6] && this.scene.rebuildRays) this.scene.rebuildRays();
   }
 
@@ -120,6 +124,23 @@ export class Tune {
   restart() { this.scene.physics.world.resume(); this.scene.scene.restart(this.scene.startData); } // play again with the TEST tab numbers (the other tuned numbers stay)
 
   reset() { ALL.forEach(r => this.set(r, this.start[r[1]])); this.draw(); }
+
+  // FINISH STAGE / LOSE NOW: close the panel and let the scene end the run. Nothing happens when the run has already ended (or is paused).
+  endRun(win) {
+    const s = this.scene;
+    if (s.over || s.paused || (!win && s.leaving)) return; // flying off the top = already won, she cannot lose any more
+    this.toggle();
+    if (win) s.testFinish(); else s.testLose();
+  }
+
+  addCoins() { addBank(500); this.bankChanged(); }
+
+  resetCoins() {
+    if (this.scene.time.now < this.sureUntil) { resetBank(); this.sureUntil = 0; this.bankChanged(); }
+    else { this.sureUntil = this.scene.time.now + CONFIRM_MS; this.draw(); }
+  }
+
+  bankChanged() { this.scene.refreshBank(); this.draw(); }
 
   // Only the numbers you changed, ready to paste to Claude
   summary() { const ch = ALL.filter(r => getp(r[1]) !== this.start[r[1]]); return ch.length ? ch.map(r => r[1] + ' = ' + getp(r[1])).join(', ') : 'nothing changed'; }
@@ -153,11 +174,12 @@ export class Tune {
     if (!this.open) { this.hits = this.hits.slice(0, 1); return; }
     // panel
     const ROWS = rowsOf(this.tab, this.pick), TABH = 18, top = this.tab === DROPS_TAB ? 1 : 0; // top = extra first row for the "which drop" button
-    const h = PANEL.pad * 2 + TABH + (ROWS.length + top) * PANEL.rowH + 36;
+    const extra = this.tab === TEST_TAB ? CHEATS_H : 0;
+    const h = PANEL.pad * 2 + TABH + (ROWS.length + top) * PANEL.rowH + extra + 36;
     g.fillStyle(P.dark, 0.92).fillRect(PANEL.x, PANEL.y, PANEL.w, h);
     g.lineStyle(2, P.pink, 1).strokeRect(PANEL.x, PANEL.y, PANEL.w, h);
     const tw = (PANEL.w - 12) / TABS.length; // tab buttons
-    TABS.forEach((t, i) => button(PANEL.x + 6 + i * tw, PANEL.y + 4, tw - 4, 14, t[0], () => { this.tab = i; this.draw(); }, false, i === this.tab ? P.pink : P.purple));
+    TABS.forEach((t, i) => button(PANEL.x + 6 + i * tw, PANEL.y + 4, tw - 4, 14, t[0], () => { this.tab = i; this.sureUntil = 0; this.draw(); }, false, i === this.tab ? P.pink : P.purple));
     if (top) { const y = PANEL.y + PANEL.pad + TABH; T(PANEL.x + 8, y + PANEL.rowH / 2, 'WHICH DROP', 8, P.cream, 0); button(PANEL.x + 112, y + 1, 110, BTN.h, KINDS[this.pick].toUpperCase() + '  (TAP)', () => { this.pick = (this.pick + 1) % KINDS.length; this.draw(); }, false, P.pink); }
     ROWS.forEach((r, i) => {
       const y = PANEL.y + PANEL.pad + TABH + (i + top) * PANEL.rowH, cy = y + PANEL.rowH / 2;
@@ -166,16 +188,26 @@ export class Tune {
       button(PANEL.x + 172, y + 1, BTN.w, BTN.h, '-', () => this.change(r, -1), true);
       button(PANEL.x + 198, y + 1, BTN.w, BTN.h, '+', () => this.change(r, 1), true);
     });
-    const by = PANEL.y + PANEL.pad + TABH + (ROWS.length + top) * PANEL.rowH + 2;
+    const rowsEnd = PANEL.y + PANEL.pad + TABH + (ROWS.length + top) * PANEL.rowH;
+    if (this.tab === TEST_TAB) {
+      const x1 = PANEL.x + (PANEL.w - 2 * CHEAT.w - CHEAT.gap) / 2, x2 = x1 + CHEAT.w + CHEAT.gap;
+      const y1 = rowsEnd + CHEAT.gap, y2 = y1 + CHEAT.h + CHEAT.gap, sure = this.scene.time.now < this.sureUntil;
+      button(x1, y1, CHEAT.w, CHEAT.h, 'FINISH STAGE', () => this.endRun(true), false);
+      button(x2, y1, CHEAT.w, CHEAT.h, 'LOSE NOW', () => this.endRun(false), false);
+      button(x1, y2, CHEAT.w, CHEAT.h, '+500 COINS', () => this.addCoins(), false);
+      button(x2, y2, CHEAT.w, CHEAT.h, sure ? 'SURE? TAP AGAIN' : 'RESET COINS', () => this.resetCoins(), false, sure ? P.pink : P.purple);
+      T(PANEL.x + PANEL.w / 2, y2 + CHEAT.h + 9, 'BANK ' + loadBank(), 8, P.cyan, 0.5);
+    }
+    const by = rowsEnd + extra + 2;
     button(PANEL.x + 8, by, 52, BTN.h + 2, 'COPY', () => this.copy(), false);
     button(PANEL.x + 66, by, 52, BTN.h + 2, 'RESET', () => this.reset(), false);
-    if (this.tab === 4) button(PANEL.x + 124, by, 60, BTN.h + 2, 'RESTART', () => this.restart(), false, P.pink);
+    if (this.tab === TEST_TAB) button(PANEL.x + 124, by, 60, BTN.h + 2, 'RESTART', () => this.restart(), false, P.pink);
     T(PANEL.x + 190, by + 8, this.note || '', 8, P.orange, 0);
     T(PANEL.x + 8, by + BTN.h + 14, HINTS[this.tab], 8, P.cream, 0);
   }
 
   toggle() {
-    this.open = !this.open; this.note = ''; this.hold = null;
+    this.open = !this.open; this.note = ''; this.hold = null; this.sureUntil = 0;
     this.draw();
     if (this.open) this.onOpen(); else this.onClose();
   }
@@ -196,5 +228,6 @@ export class Tune {
 
   update(now) {
     if (this.hold && now >= this.holdAt) { this.hold.fn(); this.holdAt = now + 70; } // hold a button = repeat
+    if (this.sureUntil && now >= this.sureUntil) { this.sureUntil = 0; this.draw(); } // too late for the second tap: the button goes back
   }
 }

@@ -110,14 +110,13 @@ export class PlayScene extends Phaser.Scene {
     this.shipFlashUntil = 0; this.muzzleUntil = 0;
     this.recoil = 0; this.trailT = 0; this.trailN = 0; this.vx = 0; this.vy = 0; this.cloudMul = 1; // feel state
     this.hearts = C.ship.hearts;
-    this.over = false; this.menuBtn = null;
+    this.over = false; this.menuBtn = null; this.bankLine = null;
     this.invulnUntil = 0;
     this.nextShot = 0;
     // Debug helpers (type them after the web address): ?wave=N starts the stage at wave N (1-10); ?god=1 = no damage (hits still counted).
     const q = new URLSearchParams(window.location.search);
     this.god = q.get('god') === '1';
     const startWave = Phaser.Math.Clamp(parseInt(q.get('wave'), 10) || C.testing.wave, 1, STAGE1.length) - 1; // ?wave=N, or the tune panel's TEST tab
-    this.startWaveN = startWave; this.tainted = false; // runs that cheat (god mode, a jump to a later wave, a chosen weapon level, changed difficulty rows) are not saved; a plain run with the tune panel only open IS saved
     this.weaponLevel = C.testing.level >= 0 ? Math.min(C.pickup.maxLevel, C.testing.level) : Math.min(C.pickup.maxLevel, startWave); // wave=N starts with weapon level N-1 so later waves can be tried fairly
     this.runner = new WaveRunner(STAGE1, startWave, C.stage.firstWaveDelay);
     this.hooks = { enemy: (cg, i) => { if (this.cats) this.cats.onWave(cg.w); this.spawnEnemy(cg, i); }, // a cat appears when the first enemy of its wave spawns
@@ -211,7 +210,7 @@ export class PlayScene extends Phaser.Scene {
     this.physics.add.overlap(this.ship, this.enemies, (s, e) => { if (e.onScreen && this.hurtPlayer() && C.ship.ramKillsEnemy) this.crashEnemy(e); });
     this.physics.add.overlap(this.ship, this.coins, (s, c) => {
       this.kill(c); sfx('coin'); this.coinsCollected++; this.addScore(C.coin.value);
-      if (!this.cheated()) { addBank(1); this.coinsBanked++; } // saved at once, so dying or leaving keeps it
+      addBank(1); this.coinsBanked++; // saved at once, so dying or leaving keeps it
       this.pop(c.x, c.y, '+' + C.coin.value);
       this.burst(c.x, c.y, C.feel.coinSparkCount, COIN_TINTS, C.feel.coinSparkSpeedMul, 3); // coin pop
     }, (s, c) => this.pulledIn(c));
@@ -1669,12 +1668,16 @@ export class PlayScene extends Phaser.Scene {
     p.life = C.feel.popTextMs / 1000;
   }
 
-  cheated() { return this.god || C.testing.god > 0 || C.testing.level >= 0 || this.startWaveN > 0 || this.tainted; }
+  // Tune panel, TEST tab (it checks first that the run has not ended).
+  testFinish() { this.ship.setVisible(false); this.stageClear(); } // hidden: in a real clear she has flown off the top
+  testLose() { this.hearts = 0; this.hud.setHearts(0); this.gameOver(); }
+  refreshBank() { if (this.bankLine) this.bankLine.setText(this.bankLabel()); } // the end screen shows the new total
+  bankLabel() { return 'BANK ' + loadBank() + '  +' + this.coinsBanked; } // saved total and what this run added
 
   gameOver() {
     music(null); ringSound(null); sfx('gameOver', 350); // after the hit sound
     this.vx = this.vy = 0; // clouds stop boosting
-    if (!this.cheated()) saveBest(this.score, this.stageTheme); // the high score also counts when the run ends in a game over (it was only saved on STAGE CLEAR before)
+    saveBest(this.score, this.stageTheme); // the high score also counts when the run ends in a game over (it was only saved on STAGE CLEAR before)
     this.endScreen('GAME OVER', hex(C.menu.pal.pink), false);
     this.ship.setVisible(false).setAlpha(1);
   }
@@ -1684,9 +1687,8 @@ export class PlayScene extends Phaser.Scene {
     this.vx = this.vy = 0;
     this.medals.finish(this.enemiesKilled, this.cats.allSaved());
     this.syncMedals();
-    const cheat = this.cheated();
-    const isNew = cheat ? null : saveMedals(this.medals.state, this.stageTheme); // cheating runs are not saved
-    if (!cheat) saveBest(this.score, this.stageTheme);
+    const isNew = saveMedals(this.medals.state, this.stageTheme);
+    saveBest(this.score, this.stageTheme);
     this.endScreen('STAGE CLEAR', hex(C.menu.pal.cyan), true, isNew);
     this.ship.setAlpha(1);
   }
@@ -1708,11 +1710,11 @@ export class PlayScene extends Phaser.Scene {
       fade.push(o); return o;
     };
     let tapY = H / 2 + z(60);
-    const bank = 'BANK ' + loadBank() + '  +' + this.coinsBanked, GOLD = hex(0xf2b632); // saved total and what this run added
+    const bank = this.bankLabel(), GOLD = hex(0xf2b632);
     if (!stats) {
       t(H / 2 - z(70), title, 36, col, z(5), true);
       t(H / 2 - z(10), 'SCORE ' + this.score, 26, CR);
-      t(H / 2 + z(24), bank, 16, GOLD);
+      this.bankLine = t(H / 2 + z(24), bank, 16, GOLD);
     } else {
       t(100, title, 36, col, z(5), true);
       t(138, 'SCORE ' + this.score, 26, CR);
@@ -1733,7 +1735,7 @@ export class PlayScene extends Phaser.Scene {
       t(sy, 'COINS ' + this.coinsCollected * V + '/' + this.coinsSpawned * V, 16, CR);
       t(sy + 17, 'KILLS ' + this.enemiesKilled + '/' + this.enemiesSpawned, 16, CR);
       t(sy + 34, 'HITS ' + this.hitsTaken, 16, CR);
-      t(sy + 53, bank, 16, GOLD);
+      this.bankLine = t(sy + 53, bank, 16, GOLD);
       tapY = sy + 80;
     }
     const tap = t(tapY, 'TAP TO PLAY AGAIN', 18, hex(P.pink));
