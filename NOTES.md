@@ -1181,3 +1181,11 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Check on phone: are the box coins fun and catchable? Is the total readable? Does it survive closing the game and UPDATE?
 - Tested here: syntax check of changed src files; the bank read/write in node (missing or broken data gives 0). Not run in a browser.
 - Then tested in the browser: menu total, bank +N on STAGE CLEAR and GAME OVER, box-style fan stays on screen (middle and both edges), no console errors. Forced events, not a real played run.
+
+## 2026-11-26 v1.9.164: test buttons, test runs are saved (branch test-buttons)
+- Tune panel, TEST tab: FINISH STAGE, LOSE NOW, +500 COINS, RESET COINS (tap twice within 3 s), and the bank total. The panel exists only during play and on the end screens; the menu shows the new total when you go back.
+- Omri decided: test cheats no longer block saving. God mode, wave jump, weapon level and difficulty runs save coins, stars and high score. The cheat rule is removed.
+- Note: FINISH STAGE gives every star not already lost (so an early tap gives ALL COINS and NO HIT), and marks the stage as finished.
+- Unverified: thumb size and feel on the phone.
+- Check on phone: are the buttons easy to hit? Do the stars and coins stay after closing the game?
+- Then tested in the browser: all four buttons, the two-tap reset, STAGE CLEAR and GAME OVER, bank line updates, LOSE NOW after the end does nothing, no console errors. Not tried on the phone.

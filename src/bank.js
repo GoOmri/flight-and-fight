@@ -12,3 +12,7 @@ export function loadBank() {
 export function addBank(n = 1) {
   try { window.localStorage.setItem(BANK_KEY, String(loadBank() + n)); } catch (e) { /* not saved: play on */ }
 }
+
+export function resetBank() {
+  try { window.localStorage.setItem(BANK_KEY, '0'); } catch (e) { /* not saved: play on */ }
+}
