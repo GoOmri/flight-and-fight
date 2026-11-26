@@ -1198,3 +1198,4 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Tested here: syntax check; scratch/cauldron3-test.mjs (broken saved data, buying, failed saving, double tap, shop opens and closes with stand-in drawing). NOT run in a browser: the looks are unchecked.
 - Unverified: how the menu and shop look, tap areas, magnet feel on the phone.
 - Check on phone: is the cauldron easy to tap (and UPDATE still easy)? Does the shop look right? Can you feel the magnet grow? Do levels stay after closing the game?
+- Then: designer and reviewer found no real bugs. Browser: shop opens from the cauldron, a double tap bought one level (200 -> 170), CLOSE works, magnet pull checked at levels 0, 5 and 10, RESET UPGRADES works, no console errors. Not tried on the phone.
