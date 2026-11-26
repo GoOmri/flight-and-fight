@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.170", // bump on every push so the player/Omri can see the build
+  version: "1.9.171", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -107,7 +107,9 @@ export const CONFIG = {
     // soft gold glow behind the cauldron while at least one upgrade level can be bought: middle point, half width / height (px), colour,
     // alpha at the bright and the dim end of the pulse, ms for one way (dim to bright)
     glow: { x: 32, y: 402, rx: 30, ry: 30, color: 0xffd040, alphaMax: 0.9, alphaMin: 0.35, ms: 900 },
-    panel: { x: 14, w: 212, headH: 74, rowH: 50, footH: 46, buyW: 54, pipW: 8, pipH: 8, pipGap: 1, depth: 100 } // the shop box: left edge, width, heights of the top part / one row / bottom part, BUY width, level bar pips
+    panel: { x: 14, w: 212, headH: 74, rowH: 50, footH: 46, buyW: 54, depth: 100,
+      // upgrade level = a glowing potion tube: width / height (px) and colours (rim, empty glass, liquid, top shine, surface edge, bubbles)
+      tube: { w: 112, h: 12, rim: 0xc9b8ff, empty: 0x1a0830, liquid: 0xff5ac8, shine: 0xffc2ea, edge: 0xffe3f7, bubble: 0xffd6f2 } } // the shop box: left edge, width, heights of the top part / one row / bottom part, BUY width, level bar pips
   },
   // Cat rescue (src/cats.js). atWave = the (0-based) stage waves at whose start the 3 cats appear; ringR = rescue ring radius (game px), fillS = seconds to fill, drainMul = drain speed (x the fill speed),
   // hitLoss = share of the ring lost when she is hit inside, scale = picture scale (art pixel = 2 game px), footY = where the cat's feet are in its 50 px picture (0..1), ringDy = ring centre above the stone,

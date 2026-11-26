@@ -526,12 +526,8 @@ export class MenuScene extends Phaser.Scene {
       total.setText('COINS ' + loadBank());
       for (const r of rows) {
         const level = loadLevel(r.u.id), price = nextPrice(r.u.id);
-        r.pips.clear();
-        for (let i = 0; i < r.u.prices.length; i++) {
-          const x = left + i * (B.pipW + B.pipGap);
-          r.pips.fillStyle(0x120622, 1).fillRect(x, r.pipY, B.pipW, B.pipH);
-          r.pips.fillStyle(i < level ? 0xf2b632 : 0x52288f, 1).fillRect(x + 1, r.pipY + 1, B.pipW - 2, B.pipH - 2);
-        }
+        this.drawTube(r.tube, left, r.tubeY, level / r.u.prices.length);
+        r.count.setText(level + '/' + r.u.prices.length);
         const coin = r.buy.coin, text = r.buy.text, mx = right - B.buyW / 2; // the middle of the scroll
         text.setText(price === null ? 'MAX' : String(price)).setX(mx + (price === null || !coin ? 0 : 6));
         if (coin) coin.setVisible(price !== null).setX(text.x - text.width / 2 - 7);
@@ -543,7 +539,8 @@ export class MenuScene extends Phaser.Scene {
     list.forEach((u, i) => {
       const y = y0 + B.headH + i * B.rowH;
       T(left, y + 12, u.name, cream, 0);
-      const row = { u, pipY: y + 26, pips: keep(this.add.graphics(), 1) };
+      const row = { u, tubeY: y + 23, tube: keep(this.add.graphics(), 1) };
+      row.count = T(left + B.tube.w, y + 12, '', gold, 1);
       row.buy = mkBtn(right - B.buyW, y + 8, B.buyW, '', () => {
         if (this.time.now - this.buyAt < S.buyGapMs || !buyUpgrade(u.id)) return; // a double tap buys once
         this.buyAt = this.time.now; sfx('coin'); refresh();
@@ -562,6 +559,22 @@ export class MenuScene extends Phaser.Scene {
     box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(B.depth);
     this.popIn(box, veil, mid, y0 + h / 2);
     this.boxObjs = objs; this.modal = true; this.panelButtons = buttons;
+  }
+
+  // An upgrade level as a glass tube of glowing potion: filled = 0 (empty) to 1 (full). Plain rectangles, so it also works in canvas mode.
+  drawTube(g, x, y, filled) {
+    const U = C.shop.panel.tube, w = U.w, h = U.h, inX = x + 2, inY = y + 2, inW = w - 4, inH = h - 4;
+    const R = (color, rx, ry, rw, rh, alpha = 1) => g.fillStyle(color, alpha).fillRect(rx, ry, rw, rh);
+    const fw = Math.round(inW * filled);
+    g.clear();
+    if (fw) { R(U.liquid, x - 1, y - 2, fw + 6, h + 4, 0.18); R(U.liquid, x - 3, y, fw + 10, h, 0.12); } // soft glow around the filled part
+    R(U.rim, x + 2, y, w - 4, h); R(U.rim, x, y + 2, w, h - 4); // the glass, corners cut
+    R(U.empty, inX, inY, inW, inH);
+    if (!fw) return;
+    R(U.liquid, inX, inY, fw, inH);
+    R(U.shine, inX, inY + 1, fw, 1);
+    if (filled < 1) R(U.edge, inX + Math.max(0, fw - 2), inY, Math.min(2, fw), inH);
+    for (const [bx, by] of [[7, 4], [22, 3], [36, 5], [51, 4], [67, 3], [82, 5], [96, 4]]) if (bx + 2 < fw) R(U.bubble, inX + bx, inY + by, 2, 2);
   }
 
   openSettings(on, pop = true) {
