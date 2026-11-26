@@ -1218,3 +1218,12 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - The word is now Shop (was SHOP). Cauldron, word, glow and tap area moved 2px left.
 - Tested here: syntax check; menu seen in the browser, no console errors. Not tried on the phone.
 - Check on phone: is Shop readable, and is the cauldron in the right place?
+
+## 2026-11-27 v1.9.169: DAMAGE, FIRE SPEED, tougher enemies, RESET ALL (branch cauldron-damage-fire)
+- Shop: DAMAGE (up to x2.5) and FIRE SPEED (170 ms down to about 110 ms), 10 levels each, same prices as MAGNET.
+- Enemy health: grunt 5, zigzag 7, shooter 14, vulture 10.
+- Shot timing now counts from when a shot was due, so each level has an effect. With nothing bought a 60 Hz screen fires about 8% faster than before.
+- Tune panel, TEST tab: RESET ALL (tap twice) erases coins, upgrades, stars and best scores. Settings stay.
+- Tested: syntax check, scratch tests, reviewer found no real bugs. Browser (canvas mode): three-row shop, buying, RESET ALL, menu after it, no console errors.
+- Not checked: a real play-through of Stage 1, normal drawing mode, phone.
+- Check on phone: can Stage 1 be cleared with nothing bought? If too hard, lower shooter health (config enemies) first.
