@@ -3,7 +3,7 @@
 // COPY puts all values on the clipboard (and shows them in the panel) so they can be pasted into src/config.js.
 import { CONFIG as C, hex } from './config.js';
 import { FONT, fpx, drawPlate } from './hud.js';
-import { loadBank, addBank, resetBank } from './bank.js';
+import { loadBank, addBank, resetBank, loadLevel, resetUpgrades } from './bank.js';
 
 const W = C.game.width; // logical width (240)
 const P = C.menu.pal;
@@ -65,8 +65,8 @@ const TABS = [
 ];
 const DROPS_TAB = 2, TEST_TAB = 4;
 const CHEAT = { w: 108, h: 24, gap: 6 };                   // TEST tab: the big thumb buttons (two per line)
-const CHEATS_H = 2 * (CHEAT.h + CHEAT.gap) + 14;           // their two lines plus the BANK line
-const CONFIRM_MS = 3000;                                   // RESET COINS: the second tap must come within this time
+const CHEATS_H = 3 * (CHEAT.h + CHEAT.gap) + 14;           // their three lines plus the BANK line
+const CONFIRM_MS = 3000;                                   // RESET COINS / RESET UPGRADES: the second tap must come within this time
 const HINTS = ['HOLD + OR - TO KEEP CHANGING', 'WITCH SHOT: SIZE, SPEED, SPACING', 'TAP THE DROP NAME TO SWITCH DROP', '(X) 1 = NORMAL. DELAY MORE = EASIER', 'PRESS RESTART. LEVEL -1 = BY WAVE'];
 const rowsOf = (tab, pick) => tab === DROPS_TAB ? dropRows(KINDS[pick]) : tab === 0 ? (C.ship.controls === 'stick' ? STICK_ROWS : DRAG_ROWS) : TABS[tab][1];
 const ALL = [...STICK_ROWS, ...DRAG_ROWS, ...TABS.flatMap((t, i) => i === DROPS_TAB ? KINDS.flatMap(dropRows) : t[1] || [])];
@@ -98,7 +98,7 @@ export class Tune {
     this.tab = 0; this.pick = 0; // pick = which drop the DROPS tab shows
     this.start = {}; ALL.forEach(r => { this.start[r[1]] = getp(r[1]); }); // for RESET
     this.hold = null; this.holdAt = 0; // button being held: { fn }
-    this.sureUntil = 0;                // RESET COINS was tapped once: a second tap before this time does it
+    this.sureUntil = 0; this.sureWhat = null; // a RESET button was tapped once: a second tap on the SAME one before this time does it
     this.hits = [];                    // clickable boxes while the panel is open: { x, y, w, h, fn, hold }
     this.g = scene.add.graphics().setDepth(DEPTH);
     this.texts = [];
@@ -135,10 +135,17 @@ export class Tune {
 
   addCoins() { addBank(500); this.bankChanged(); }
 
-  resetCoins() {
-    if (this.scene.time.now < this.sureUntil) { resetBank(); this.sureUntil = 0; this.bankChanged(); }
-    else { this.sureUntil = this.scene.time.now + CONFIRM_MS; this.draw(); }
+  isSure(what) { return this.sureWhat === what && this.scene.time.now < this.sureUntil; }
+
+  // first tap asks, second tap does it
+  confirm(what, fn) {
+    if (this.isSure(what)) { this.sureUntil = 0; fn(); }
+    else { this.sureWhat = what; this.sureUntil = this.scene.time.now + CONFIRM_MS; this.draw(); }
   }
+
+  resetCoins() { this.confirm('coins', () => { resetBank(); this.bankChanged(); }); }
+
+  resetUps() { this.confirm('ups', () => { resetUpgrades(); this.scene.refreshUpgrades(); this.draw(); }); }
 
   bankChanged() { this.scene.refreshBank(); this.draw(); }
 
@@ -191,12 +198,13 @@ export class Tune {
     const rowsEnd = PANEL.y + PANEL.pad + TABH + (ROWS.length + top) * PANEL.rowH;
     if (this.tab === TEST_TAB) {
       const x1 = PANEL.x + (PANEL.w - 2 * CHEAT.w - CHEAT.gap) / 2, x2 = x1 + CHEAT.w + CHEAT.gap;
-      const y1 = rowsEnd + CHEAT.gap, y2 = y1 + CHEAT.h + CHEAT.gap, sure = this.scene.time.now < this.sureUntil;
+      const y1 = rowsEnd + CHEAT.gap, y2 = y1 + CHEAT.h + CHEAT.gap, y3 = y2 + CHEAT.h + CHEAT.gap, sure = this.isSure('coins'), sureUps = this.isSure('ups');
       button(x1, y1, CHEAT.w, CHEAT.h, 'FINISH STAGE', () => this.endRun(true), false);
       button(x2, y1, CHEAT.w, CHEAT.h, 'LOSE NOW', () => this.endRun(false), false);
       button(x1, y2, CHEAT.w, CHEAT.h, '+500 COINS', () => this.addCoins(), false);
       button(x2, y2, CHEAT.w, CHEAT.h, sure ? 'SURE? TAP AGAIN' : 'RESET COINS', () => this.resetCoins(), false, sure ? P.pink : P.purple);
-      T(PANEL.x + PANEL.w / 2, y2 + CHEAT.h + 9, 'BANK ' + loadBank(), 8, P.cyan, 0.5);
+      button(x1, y3, 2 * CHEAT.w + CHEAT.gap, CHEAT.h, sureUps ? 'SURE? TAP AGAIN' : 'RESET UPGRADES', () => this.resetUps(), false, sureUps ? P.pink : P.purple);
+      T(PANEL.x + PANEL.w / 2, y3 + CHEAT.h + 9, 'BANK ' + loadBank() + C.shop.upgrades.map(u => '  ' + u.name + ' ' + loadLevel(u.id)).join(''), 8, P.cyan, 0.5);
     }
     const by = rowsEnd + extra + 2;
     button(PANEL.x + 8, by, 52, BTN.h + 2, 'COPY', () => this.copy(), false);

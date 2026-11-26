@@ -12,7 +12,7 @@ import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
 import { Tune, tuneEnabled } from '../tune.js';
 import { Medals, goalsOf, saveMedals, saveBest } from '../medals.js';
-import { loadBank, addBank } from '../bank.js';
+import { loadBank, addBank, loadLevel, upgradeValue } from '../bank.js';
 
 // Which background is shown: ?bg=forest | swamp | sky in the web address, else config.background.mode.
 // The menu passes data.theme ('forest' | 'swamp'); ?bg still wins, with no data config.background.mode is used.
@@ -127,6 +127,7 @@ export class PlayScene extends Phaser.Scene {
     // Counters for the medals later (shown only on the result screen for now)
     this.enemiesSpawned = 0; this.enemiesKilled = 0; this.coinsSpawned = 0; this.coinsCollected = 0; this.hitsTaken = 0;
     this.coinsBanked = 0; // coins of this run that went into the saved bank
+    this.refreshUpgrades(); // bought levels (Cauldron shop)
 
     this.makeBackground();
     this.makeLanterns();
@@ -1022,9 +1023,13 @@ export class PlayScene extends Phaser.Scene {
       F.trailLifeMs / 1000, Phaser.Math.FloatBetween(F.trailSize[0], F.trailSize[1]) * SS, F.trailColors[this.trailN++ % F.trailColors.length], C.ship.depth - 0.02, true); // colours go round in order, so the stream looks striped and colourful
   }
 
+  // The saved upgrade levels, read at the start of a run (and again when the tune panel resets them).
+  refreshUpgrades() { this.magnetLevel = loadLevel('magnet'); }
+  magnetRadius() { const base = C.feel.magnetRadius; return base > 0 ? Math.max(base, upgradeValue('magnet', this.magnetLevel, base)) : 0; }
+
   // Coins, potions and (when a heart is missing) hearts close to the witch fly to her (magnet).
   updateCoins(dt) {
-    const F = C.feel, R = F.magnetRadius;
+    const F = C.feel, R = this.magnetRadius();
     this.coins.children.iterate(c => { // the little hop of scattered coins turns back into the normal fall
       if (!c || !c.active || !c.hopping || c.mag) return;
       const vy = Math.min(C.coin.fallSpeed, c.body.velocity.y + C.coin.hopGravity * dt);

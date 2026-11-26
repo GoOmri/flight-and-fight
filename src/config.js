@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.164", // bump on every push so the player/Omri can see the build
+  version: "1.9.165", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -85,9 +85,21 @@ export const CONFIG = {
       { key: 'witch',  file: 'menu/witch.png',  frameW: 61, frameH: 55, frames: 4, fps: 5, x: 52,  y: 266,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 3, bobMs: 3200, swayX: 3, swayDeg: 2, swayMs: 4200, introX: 0, par: 6 },
       { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 198, y: 246,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 6, bobMs: 3400, swayX: 4, swayMs: 5200, fade: [0.7, 1], fadeMs: 2800, par: 8 },
       { key: 'bat',    file: 'menu/bat.png',    frameW: 32, frameH: 28, frames: 4, fps: 5, x: 160, y: 0,   originX: 0.5, originY: 0,   scale: 1,     bob: 0, bobMs: 1000 },
-      { key: 'cat',    file: 'menu/cat.png',    frameW: 21, frameH: 25, frames: 5, fps: 4, x: 32,  y: 392, originX: 0.5, originY: 1,   scale: 1.333, depth: 50, bob: 0, bobMs: 1000, par: 6 },
-      { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 204, y: 422, originX: 0.5, originY: 1,   scale: 2, depth: 50, bob: 0, bobMs: 1000, par: 6 }
+      { key: 'cat',    file: 'menu/cat.png',    frameW: 21, frameH: 25, frames: 5, fps: 4, x: 208, y: 392, originX: 0.5, originY: 1,   scale: 1.333, depth: 50, bob: 0, bobMs: 1000, par: 6 },
+      { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 34,  y: 422, originX: 0.5, originY: 1,   scale: 2, depth: 50, bob: 0, bobMs: 1000, par: 6 }
     ]
+  },
+  // The CAULDRON shop (menu: tap the cauldron bottom left, picture = menu.decor "boiler"). Bought levels are saved (src/bank.js).
+  // upgrades = ONE list, one row each in the shop: id (saved name, never change it), name, prices (price of level 1, 2, ... ; the number of prices = the top level),
+  // top = the value at the top level. Level 0 is the game's normal number; the levels between go in even steps.
+  // magnet: pull radius, from feel.magnetRadius (34) at level 0 to top (100).
+  shop: {
+    upgrades: [
+      { id: 'magnet', name: 'MAGNET', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 100 }
+    ],
+    buyGapMs: 450, // after a purchase, BUY ignores taps this long (a double tap buys only once)
+    button: { x: 0, y: 362, w: 58, h: 65 }, // touch area of the cauldron on the menu (keep it clear of UPDATE and the version text)
+    panel: { x: 14, w: 212, headH: 74, rowH: 50, footH: 46, buyW: 54, pipW: 8, pipH: 8, pipGap: 1, depth: 100 } // the shop box: left edge, width, heights of the top part / one row / bottom part, BUY width, level bar pips
   },
   // Cat rescue (src/cats.js). atWave = the (0-based) stage waves at whose start the 3 cats appear; ringR = rescue ring radius (game px), fillS = seconds to fill, drainMul = drain speed (x the fill speed),
   // hitLoss = share of the ring lost when she is hit inside, scale = picture scale (art pixel = 2 game px), footY = where the cat's feet are in its 50 px picture (0..1), ringDy = ring centre above the stone,
@@ -334,7 +346,7 @@ export const CONFIG = {
     deathRingScale: 1.45, bigDeathRingScale: 2.4, // final ring size in art pixels x PX (small enemies / imp, crate, pickups)
 
     popText: false, popTextMs: 650, popTextRise: z(26), popTextSize: 12, popPoolSize: 10, popTextEdge: 14, popTextOffsetY: 24, // floating "+10" at kills and coins
-    magnetRadius: 34, magnetTakeDist: 8, magnetSpeed: z(300),  // coins fly to the witch from this far (0 = off)
+    magnetRadius: 34, magnetTakeDist: 8, magnetSpeed: z(300),  // coins, potions and needed hearts fly to the witch from this far (0 = off). This is MAGNET level 0; the shop raises it (CONFIG.shop)
 
     hitFlashMs: 140,                        // white-pink screen flash when the witch is hit (0 = off)
     hitFlashStrength: 0.3, flashColor: 0xffcdd7, flashDepth: 25, // start strength 0..1 (low so shots stay visible); depth must stay below enemyBullet.depth

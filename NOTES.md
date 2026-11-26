@@ -1189,3 +1189,12 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Unverified: thumb size and feel on the phone.
 - Check on phone: are the buttons easy to hit? Do the stars and coins stay after closing the game?
 - Then tested in the browser: all four buttons, the two-tap reset, STAGE CLEAR and GAME OVER, bank line updates, LOSE NOW after the end does nothing, no console errors. Not tried on the phone.
+
+## 2026-11-26 v1.9.165: the Cauldron shop with MAGNET (Cauldron plan, step 3, branch cauldron-3-shop-magnet)
+- The cauldron moved to the bottom left of the menu and opens the shop. The black cat moved to the bottom right. The coin total stays top left and updates after buying.
+- Shop box: coin total, one row per upgrade (name, 10-step bar, price, BUY), CLOSE. BUY is faded when too poor or at level 10. A second tap within 450 ms does not buy.
+- MAGNET: pull radius 34 (level 0) to 100 (level 10), 6.6 per level, for coins, potions and needed hearts. Upgrades are one list in config shop.upgrades. Levels saved in browser storage (ff_upgrades, src/bank.js).
+- Tune panel, TEST tab: RESET UPGRADES (tap twice). Coins are not given back.
+- Tested here: syntax check; scratch/cauldron3-test.mjs (broken saved data, buying, failed saving, double tap, shop opens and closes with stand-in drawing). NOT run in a browser: the looks are unchecked.
+- Unverified: how the menu and shop look, tap areas, magnet feel on the phone.
+- Check on phone: is the cauldron easy to tap (and UPDATE still easy)? Does the shop look right? Can you feel the magnet grow? Do levels stay after closing the game?
