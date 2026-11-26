@@ -1158,3 +1158,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-26 shop notes: extras and levels (notes only)
 - DESIGN.md "Shop and upgrades": chosen extras, 10-level proposal, themed names, coin scatter question. Nothing built.
+
+## 2026-11-26 shop notes: 10 levels, Nine Lives, side shots (notes only)
+- DESIGN.md "Shop and upgrades" updated. Coin scatter still open. Nothing built.

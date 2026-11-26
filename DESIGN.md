@@ -540,6 +540,9 @@ Where this differs from the older "Hut and cauldron loop" (recipes, ingredients,
 - Spells: pay a fee once to unlock one, then a smaller price for each improvement. Kept forever. They happen by themselves.
 - ALL unlocked spells work at the same time. The stages get harder to match.
 - Enemies get tougher (they die too fast today), in the same step as the shop. Tougher enemies do NOT drop more coins.
+- DAMAGE, MAGNET and FIRE SPEED have 10 levels each.
+- Nine Lives: bought once, saves her once in every stage.
+- Side shots: thinner spell bolts. No bats or other creatures beside her (visual clutter).
 - Extras Omri wants (later than the first three): extra heart, side shots with a witch-themed spin, homing shot, more coins, revive once.
 - Stars are only for opening stages. Stars do not lock shop items.
 - Shield spell (later): a blocked hit does NOT cost the no-hit star. That is the point of the shield.
@@ -547,9 +550,9 @@ Where this differs from the older "Hut and cauldron loop" (recipes, ingredients,
 ### Proposed, not yet agreed
 - Upgrading a spell shortens its wait, not its damage. Bosses take less from spells.
 - First spell: lightning, zaps the 3 toughest enemies about every 10 s. Shield: blocks one hit, back after about 25 s. Later ideas: star burst (clears nearby shots, 15 s), ghost helper (shoots with you, 20 s), (other extras: see below).
-- Omri asked "why not 10 levels?". Proposal: 10 levels for damage (+0.3 each, 2 -> 5; this replaces +1 each), magnet and fire speed (170 -> 110 ms), a visible change at level 5 and 10. First levels cost under 1 run, the last ones 4-5 runs.
-- Themed names: extra heart = Heart Jar (2 levels), side shots = two little wisps beside her, homing shot = seeking bats, more coins = Lucky Clover, revive = Nine Lives (a cat saves her).
-- Coins scattering when they drop (as in Sky Force), so the magnet matters more: open question.
+- The 10 levels, proposed sizes: damage (+0.3 each, 2 -> 5; this replaces +1 each), magnet and fire speed (170 -> 110 ms), a visible change at level 5 and 10. First levels cost under 1 run, the last ones 4-5 runs.
+- Themed names: extra heart = Heart Jar (2 levels), side shots = thin spell bolts, homing shot = seeking bats, more coins = Lucky Clover, revive = Nine Lives (a cat saves her).
+- Coin scatter, open question: the one coin an enemy drops pops out to a random side with a small hop, slows down, then falls. Same value, same number of coins; the magnet helps to catch it.
 - Tougher enemies: health grunt 3 -> 5, zigzag 4 -> 7, shooter 7 -> 14. Shots to kill at damage 2 / 3 / 4 / 5: grunt 3/2/2/1, zigzag 4/3/2/2, shooter 7/5/4/3 (with 10 smaller damage steps some levels only show on tougher enemies and bosses).
 - Prices counted in runs (measure coins per run first): unlock lightning about 4; each lightning improvement about 2.
 - Build order: save coins and show the total; Cauldron with magnet, damage and fire speed, together with the tougher enemies; lightning; play it and adjust prices.
