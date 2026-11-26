@@ -1199,3 +1199,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Unverified: how the menu and shop look, tap areas, magnet feel on the phone.
 - Check on phone: is the cauldron easy to tap (and UPDATE still easy)? Does the shop look right? Can you feel the magnet grow? Do levels stay after closing the game?
 - Then: designer and reviewer found no real bugs. Browser: shop opens from the cauldron, a double tap bought one level (200 -> 170), CLOSE works, magnet pull checked at levels 0, 5 and 10, RESET UPGRADES works, no console errors. Not tried on the phone.
+
+## 2026-11-26 v1.9.166: SHOP word and glow on the cauldron (branch cauldron-shop-sign)
+- The word SHOP sits above the menu cauldron. Tapping the word or the cauldron opens the shop.
+- A soft gold glow pulses behind the cauldron only while at least one upgrade level can be bought. Numbers: config shop.sign, shop.glow, shop.button.
+- Tested here: syntax check; scratch/shopsign-test.mjs (when the glow should be on). NOT run in a browser: looks, placing and canvas mode are unchecked.
+- Check on phone (and with ?render=canvas): is SHOP readable and clear of the cat and UPDATE? Is the glow visible but soft? Does it stop after spending the coins?
