@@ -608,7 +608,7 @@ export class MenuScene extends Phaser.Scene {
     }
     this.shopGlow = this.add.image(G.x, G.y, 'menu_shopglow').setDisplaySize(G.rx * 2, G.ry * 2).setDepth(49).setAlpha(G.alphaMin).setVisible(false); // just behind the cauldron (50)
     this.tweens.add({ targets: this.shopGlow, alpha: G.alphaMax, duration: G.ms, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    this.shopSign = this.add.text(S.x, S.y, 'SHOP', { ...FONT_TITLE, fontSize: S.size + 'px', color: hex(S.color), stroke: hex(P.shadow), strokeThickness: S.stroke }).setOrigin(0.5).setDepth(52);
+    this.shopSign = this.add.text(S.x, S.y, 'Shop', { ...FONT_TITLE, fontSize: S.size + 'px', color: hex(S.color), stroke: hex(P.shadow), strokeThickness: S.stroke }).setOrigin(0.5).setDepth(52);
     this.decorItems.push({ s: this.shopGlow, pos: { x: G.x, y: G.y }, par, key: 'shopglow' }, { s: this.shopSign, pos: { x: S.x, y: S.y }, par, key: 'shopsign' });
   }
 
