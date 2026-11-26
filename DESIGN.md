@@ -528,7 +528,7 @@ Counters kept: enemies spawned, enemies killed, coins dropped (a crate coins cou
 - A fixed script replaces the looping wave list in config.js: the stage must END after wave 10 and show a result screen with the 4 icons. No loop any more.
 - Stage balance depends on the weak gun (170 ms, twin). Upgrades later change how hard "kill all" is. Balance stage 1 for the base ship first.
 
-## Shop and upgrades (26 Nov 2026; coins, saving, the Cauldron and MAGNET are built, v1.9.165, see PLAN-cauldron.md; the rest is still ideas. The menu cauldron, bottom left, opens the shop; the cat sits bottom right.)
+## Shop and upgrades (26 Nov 2026; coins, saving, the Cauldron and MAGNET are built (v1.9.165), DAMAGE, FIRE SPEED and tougher enemies too (v1.9.169), see PLAN-cauldron.md; the rest is still ideas. The menu cauldron, bottom left, opens the shop; the cat sits bottom right.)
 Where this differs from the older "Hut and cauldron loop" (recipes, ingredients, medal unlocks), THIS section counts.
 
 ### Decided
