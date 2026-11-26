@@ -12,7 +12,7 @@ All numbers here are first guesses, to be tuned by Omri on the phone. Keep them 
   - flight-designer (Sonnet): step 3 only, to review the changed screens against DESIGN.md.
   - Steps 1 and 2: no reviewer; the main session reads the diff itself.
 - Each step bumps the version in src/config.js. Every new src or asset file goes in the FILES list in src/update.js.
-- Tests: `python ../tools/check.py` from flight-and-fight. Check in the browser pane, then CLOSE the tab (the game plays music).
+- Tests: `node --check` on every changed file in src/ (../tools/check.py tests SCRiTCH only, not this game). Check in the browser pane, then CLOSE the tab (the game plays music).
 - Never git add Music/ or art-packs/. No new downloads without asking Omri.
 
 ## Step 1: coin tiers and scatter (size: small)
