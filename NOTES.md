@@ -1180,3 +1180,4 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Unverified: not played on the phone; box scatter feel; whether the menu counter and the end screen line look right on the phone.
 - Check on phone: are the box coins fun and catchable? Is the total readable? Does it survive closing the game and UPDATE?
 - Tested here: syntax check of changed src files; the bank read/write in node (missing or broken data gives 0). Not run in a browser.
+- Then tested in the browser: menu total, bank +N on STAGE CLEAR and GAME OVER, box-style fan stays on screen (middle and both edges), no console errors. Forced events, not a real played run.
