@@ -1240,3 +1240,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - The bubbles do not move.
 - Tested: syntax check; browser, normal and canvas mode, levels 0, 1, 3, 7 and 10, no console errors. Not tried on the phone.
 - Check on phone: is the tube nice, and is the level easy to read?
+
+## 2026-11-27 v1.9.172: black cat as the ALL CATS goal icon (branch black-cat-goal)
+- The goal icon is now the black cat of the cat pack (assets/cats/cat-2-sitting.png), not the recoloured menu cat. The menu cat itself is unchanged.
+- Colour swaps only: earned = night-blue black with yellow eyes (plain black vanished on the dark end screen), not yet = white with dark eyes, failed = grey.
+- Checked in the browser: end screen and the stage goals box. UNVERIFIED: phone (is the small icon at the top of the game readable?).
