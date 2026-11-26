@@ -1023,6 +1023,12 @@ export class PlayScene extends Phaser.Scene {
   // Coins, potions and (when a heart is missing) hearts close to the witch fly to her (magnet).
   updateCoins(dt) {
     const F = C.feel, R = F.magnetRadius;
+    this.coins.children.iterate(c => { // the little hop of scattered coins turns back into the normal fall
+      if (!c || !c.active || !c.hopping || c.mag) return;
+      const vy = Math.min(C.coin.fallSpeed, c.body.velocity.y + C.coin.hopGravity * dt);
+      c.body.setVelocityY(vy);
+      c.hopping = vy < C.coin.fallSpeed;
+    });
     if (R <= 0) return;
     const sh = this.ship;
     const need = this.hearts < C.ship.hearts;
@@ -1081,7 +1087,7 @@ export class PlayScene extends Phaser.Scene {
     initPath(e, cg.p, g.spd * C.difficulty.enemySpeed);
     e.kind = g.type; e.hp = Math.max(1, Math.round(cfg.hp * C.difficulty.enemyHp)); e.flashUntil = 0; e.flashSpr = null; e.onScreen = false;
     e.fire = g.fire || null; e.armed = false; e.fireT = 0;
-    e.coin = g.type === 'shooter' || (g.coinEvery > 0 && (i + 1) % g.coinEvery === 0); // shooters always drop 1 coin
+    e.coin = g.type === 'shooter' || (g.coinEvery > 0 && (i + 1) % g.coinEvery === 0); // shooters always drop coins; how many is in config enemies
     e.wave = cg.w;
     e.drop = g.drop && i === g.n - 1 ? g.drop : null; // the last enemy of a marked group is the carrier
     e.halo = null; e.halos = null; e.glow = null;
@@ -1419,7 +1425,22 @@ export class PlayScene extends Phaser.Scene {
     }
   }
 
-  dropCoin(x, y, vx) {
+  // The coins of one dead enemy (cfg = its entry in config enemies): a fan to both sides with a small hop. The whole fan is
+  // pushed inward near a screen edge, so no coin ends up off screen.
+  dropEnemyCoins(x, y, cfg) {
+    const n = cfg.coins, K = C.coin, m = C.ship.margin, fade = K.scatterFadeSec;
+    const rnd = () => 1 + K.scatterJitter * (Math.random() * 2 - 1);
+    const x0 = Phaser.Math.Clamp(x, m, W - m);
+    const reach = n > 1 ? cfg.coinSpread * (1 + K.scatterJitter) * fade / 2 : 0; // farthest a coin can drift sideways (px)
+    const shift = (Math.max(0, m - (x0 - reach)) - Math.max(0, x0 + reach - (W - m))) * 2 / fade; // as a speed
+    const maxHop = Math.sqrt(2 * K.hopGravity * Math.max(0, y - m)); // never hop out of the top
+    for (let i = 0; i < n; i++) {
+      const vx = n > 1 ? cfg.coinSpread * (2 * i / (n - 1) - 1) * rnd() + shift : 0;
+      this.dropCoin(x, y, vx, fade, Math.min(cfg.coinHop * rnd(), maxHop));
+    }
+  }
+
+  dropCoin(x, y, vx, fadeSec = C.crate.coinFadeSec, hop = 0) {
     const m = C.ship.margin;
     const sp = C.sprites.coin;
     const c = this.spawn(this.coins, sp ? 'sp_coin' : 'coin', Phaser.Math.Clamp(x, m, W - m), y, sp ? sp.scale : PX);
@@ -1428,9 +1449,9 @@ export class PlayScene extends Phaser.Scene {
     if (sp) { c.play('coin_spin'); c.anims.setCurrentFrame(c.anims.currentAnim.frames[Phaser.Math.Between(0, sp.frames - 1)]); } else c.anims.stop(); // each coin starts at a random frame
     const hb = 2 * C.coin.pickupRadius / (sp ? sp.scale : PX); // generous pickup area (same size on screen whatever the picture)
     c.body.setSize(hb, hb);
-    c.body.setVelocity(vx, C.coin.fallSpeed);
-    c.mag = false;
-    c.body.setDragX(Math.abs(vx) / C.crate.coinFadeSec); // sideways speed fades to 0 in coinFadeSec
+    c.body.setVelocity(vx, hop > 0 ? -hop : C.coin.fallSpeed);
+    c.mag = false; c.hopping = hop > 0;
+    c.body.setDragX(Math.abs(vx) / fadeSec); // sideways speed fades to 0 in fadeSec
     this.coinsSpawned++;
   }
 
@@ -1503,7 +1524,7 @@ export class PlayScene extends Phaser.Scene {
     this.explode(e.x, e.y, big, DEATH_TINTS[e.kind], true, e.kind);
     this.pop(e.x, e.y - 6, '+' + C.enemies[e.kind].score);
     if (big) this.bigShake();
-    if (e.coin) this.dropCoin(e.x, e.y, 0);
+    if (e.coin) this.dropEnemyCoins(e.x, e.y, C.enemies[e.kind]);
     if (e.drop === 'weapon') this.dropPickup(this.weaponUps, 'weaponUp', C.pickup.weaponFallSpeed, e.x, e.y);
     else if (e.drop === 'heart') this.dropPickup(this.heartUps, 'heartUp', C.pickup.heartFallSpeed, e.x, e.y);
     this.addScore(C.enemies[e.kind].score);
