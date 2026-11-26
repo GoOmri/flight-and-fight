@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.162", // bump on every push so the player/Omri can see the build
+  version: "1.9.163", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -76,6 +76,7 @@ export const CONFIG = {
     updateBtn: { w: 80, textColor: 0xfff3c4 }, // UPDATE button: the button of the Medieval UI pack (recoloured to the game's purple and pink) (assets/ui), 25 px high, w px wide (the middle stretches), dark brown text
     updateW: 120, updateH: 26, updateTop: 384, updateSize: 8, updateColor: 0x3b1478, updateHotColor: 0xff9a2e, updateHotBorder: 0x1a0830, // UPDATE button: size, top edge, text size, plate colour, plate colour + border when a newer version is waiting
     versionSize: 8, versionAlpha: 0.9, versionBottom: 9, // version text: distance of its middle from the bottom edge
+    bankX: 6, bankY: 8, bankSize: 8, // saved coin total (top left): left edge, middle height, text size
     // Halloween menu art (assets/menu, Spooktober set). Sky = animated background (cells in a grid of `cols`), scaled to cover the screen width.
     sky: { file: 'menu/sky.png', frameW: 202, frameH: 360, frames: 18, cols: 6, fps: 5, cover: 1.1, scrollPar: 0.08 }, // cover = how much bigger than the screen (room to shift), scrollPar = how far the sky moves per px the stage path is scrolled (0.08 = slow)
     // Decorations around the cards (never over cards, medals, UPDATE or version; they take no input). file in assets/, frameW/frameH = one cell,
@@ -278,9 +279,9 @@ export const CONFIG = {
   // hopGravity = how fast the hop turns back into a fall (px/s per s). poolSize = coins on screen at once (more are not made, so keep it generous).
   coin: { fallSpeed: 50, value: 5, poolSize: 64, pickupRadius: 10, scatterFadeSec: 0.6, scatterJitter: 0.2, hopGravity: 160 },
 
-  // Crates: hp, coins and speed are set per crate in src/waves.js. coinSpread = sideways speed between coins.
-  // coinFadeSec: the sideways burst fades to 0 in this many seconds. poolSize: max crates at once.
-  crate: { coinSpread: 4, coinFadeSec: 0.4, poolSize: 4,
+  // Crates: hp, coins and speed are set per crate in src/waves.js. coinSpread / coinHop = the fan of coins from an opened box,
+  // same meaning as for enemies (see config enemies and coin.scatterFadeSec). poolSize: max crates at once.
+  crate: { coinSpread: 130, coinHop: 75, poolSize: 4,
     depth: -8.2, onGround: true, // depth: under the tree tops, above shadows and rocks. onGround: the chest scrolls at the ground speed (false = its own speed from waves.js)
     fadeHoldMs: 150, fadeMs: 600 }, // opened chest: stays on its last frame this long, then fades out over fadeMs (0 = vanish at once) // (crate size = its art in src/sprites.js, CRATE, 7x7 art px = 21 px)
 

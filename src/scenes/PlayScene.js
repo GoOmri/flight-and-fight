@@ -12,6 +12,7 @@ import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
 import { Tune, tuneEnabled } from '../tune.js';
 import { Medals, goalsOf, saveMedals, saveBest } from '../medals.js';
+import { loadBank, addBank } from '../bank.js';
 
 // Which background is shown: ?bg=forest | swamp | sky in the web address, else config.background.mode.
 // The menu passes data.theme ('forest' | 'swamp'); ?bg still wins, with no data config.background.mode is used.
@@ -126,6 +127,7 @@ export class PlayScene extends Phaser.Scene {
     this.clearAt = 0;     // time when STAGE CLEAR shows (0 = not yet)
     // Counters for the medals later (shown only on the result screen for now)
     this.enemiesSpawned = 0; this.enemiesKilled = 0; this.coinsSpawned = 0; this.coinsCollected = 0; this.hitsTaken = 0;
+    this.coinsBanked = 0; // coins of this run that went into the saved bank
 
     this.makeBackground();
     this.makeLanterns();
@@ -209,6 +211,7 @@ export class PlayScene extends Phaser.Scene {
     this.physics.add.overlap(this.ship, this.enemies, (s, e) => { if (e.onScreen && this.hurtPlayer() && C.ship.ramKillsEnemy) this.crashEnemy(e); });
     this.physics.add.overlap(this.ship, this.coins, (s, c) => {
       this.kill(c); sfx('coin'); this.coinsCollected++; this.addScore(C.coin.value);
+      if (!this.cheated()) { addBank(1); this.coinsBanked++; } // saved at once, so dying or leaving keeps it
       this.pop(c.x, c.y, '+' + C.coin.value);
       this.burst(c.x, c.y, C.feel.coinSparkCount, COIN_TINTS, C.feel.coinSparkSpeedMul, 3); // coin pop
     }, (s, c) => this.pulledIn(c));
@@ -1425,7 +1428,7 @@ export class PlayScene extends Phaser.Scene {
     }
   }
 
-  // The coins of one dead enemy (cfg = its entry in config enemies): a fan to both sides with a small hop. The whole fan is
+  // The coins of one dead enemy or opened box (cfg = { coins, coinSpread, coinHop }): a fan to both sides with a small hop. The whole fan is
   // pushed inward near a screen edge, so no coin ends up off screen.
   dropEnemyCoins(x, y, cfg) {
     const n = cfg.coins, K = C.coin, m = C.ship.margin, fade = K.scatterFadeSec;
@@ -1440,7 +1443,7 @@ export class PlayScene extends Phaser.Scene {
     }
   }
 
-  dropCoin(x, y, vx, fadeSec = C.crate.coinFadeSec, hop = 0) {
+  dropCoin(x, y, vx, fadeSec, hop = 0) {
     const m = C.ship.margin;
     const sp = C.sprites.coin;
     const c = this.spawn(this.coins, sp ? 'sp_coin' : 'coin', Phaser.Math.Clamp(x, m, W - m), y, sp ? sp.scale : PX);
@@ -1545,7 +1548,7 @@ export class PlayScene extends Phaser.Scene {
     const cs = C.sprites.crate;
     if (cs) this.playFx(this.fxPool, 'sp_crate_break', 'crate_break', c.x, c.y, cs.scale, cs.breakDepth, cs.tint); // chest bursts at the same moment as the coins
     this.bigShake();
-    for (let i = 0; i < c.coins; i++) this.dropCoin(c.x, c.y, (i - (c.coins - 1) / 2) * C.crate.coinSpread);
+    this.dropEnemyCoins(c.x, c.y, { coins: c.coins, coinSpread: C.crate.coinSpread, coinHop: C.crate.coinHop });
     this.kill(c);
   }
 
@@ -1705,9 +1708,11 @@ export class PlayScene extends Phaser.Scene {
       fade.push(o); return o;
     };
     let tapY = H / 2 + z(60);
+    const bank = 'BANK ' + loadBank() + '  +' + this.coinsBanked, GOLD = hex(0xf2b632); // saved total and what this run added
     if (!stats) {
       t(H / 2 - z(70), title, 36, col, z(5), true);
       t(H / 2 - z(10), 'SCORE ' + this.score, 26, CR);
+      t(H / 2 + z(24), bank, 16, GOLD);
     } else {
       t(100, title, 36, col, z(5), true);
       t(138, 'SCORE ' + this.score, 26, CR);
@@ -1728,7 +1733,8 @@ export class PlayScene extends Phaser.Scene {
       t(sy, 'COINS ' + this.coinsCollected * V + '/' + this.coinsSpawned * V, 16, CR);
       t(sy + 17, 'KILLS ' + this.enemiesKilled + '/' + this.enemiesSpawned, 16, CR);
       t(sy + 34, 'HITS ' + this.hitsTaken, 16, CR);
-      tapY = sy + 66;
+      t(sy + 53, bank, 16, GOLD);
+      tapY = sy + 80;
     }
     const tap = t(tapY, 'TAP TO PLAY AGAIN', 18, hex(P.pink));
     fade.pop(); // the tap text blinks on its own

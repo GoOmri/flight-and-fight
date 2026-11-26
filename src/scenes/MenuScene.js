@@ -5,6 +5,7 @@ import { CONFIG as C, hex } from '../config.js';
 import { makeAllTextures, makeGoalIcons, loadGoalArt, goalScale } from '../sprites.js';
 import { FONT, FONT_TITLE, FONT_MONO, titleCase, fpx, drawPlate } from '../hud.js';
 import { goalsOf, loadMedals, loadBest, totalStars, isCleared } from '../medals.js';
+import { loadBank } from '../bank.js';
 import { latestVersion, refreshFiles } from '../update.js';
 import { toggleTune } from '../tune.js';
 
@@ -81,6 +82,11 @@ export class MenuScene extends Phaser.Scene {
       b.cont.x = b.left ? -140 : 140;
       this.tweens.add({ targets: b.cont, x: 0, duration: 650, delay: 200 + i * 140, ease: 'Back.easeOut' });
     });
+
+    // ---- saved coins, top left (drawn over the path, so a bubble scrolled under it does not hide it)
+    const bankTxt = txt(M.bankX, M.bankY, 'COINS ' + loadBank(), M.bankSize, 3, 0, 0xf2b632);
+    this.add.graphics().fillStyle(P.dark, 0.8).fillRoundedRect(M.bankX - 3, M.bankY - 7, bankTxt.width + 6, 14, 4);
+    this.children.bringToTop(bankTxt);
 
     // ---- UPDATE button: gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser or the installed app).
     // When the menu opens it asks the server for the newest version number; if it is newer the button turns orange.
