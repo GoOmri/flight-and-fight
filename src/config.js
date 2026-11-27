@@ -33,11 +33,11 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.188", // bump on every push so the player/Omri can see the build
+  version: "1.9.189", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
-    pal: { purple: 0x3b1478, pink: 0xff5ac8, dark: 0x1a0830, cream: 0xfff3c4, orange: 0xff9a2e, cyan: 0x3df2ff, shadow: 0x12062e },
+    pal: { purple: 0x3b1478, pink: 0xff5ac8, dark: 0x1a0830, cream: 0xffffff, orange: 0xff9a2e, cyan: 0x3df2ff, shadow: 0x12062e },
     plateDrop: 4, plateDownShift: 2, plateBorderW: 3, plateRadius: 10, tabW: 6, // chunky button plate: bottom edge height, how far a pressed plate sinks, border, corner, stage colour tab
     tabColors: { forest: 0xff9a2e, swamp: 0x3df2ff },
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4, // titleY..titleStroke: the old plain-text title (used only if the logo picture is missing)
@@ -65,7 +65,7 @@ export const CONFIG = {
       { theme: 'stage3', name: 'Stage 3', side: 'L', locked: true, need: 5 },
       { theme: 'stage4', name: 'Stage 4', side: 'R', locked: true, need: 8 },
       { theme: 'stage5', name: 'Stage 5', side: 'L', locked: true, need: 11 }] },
-    bubble: { picAlpha: 0.85, picTint: 0xece4ff, lockedTint: 0x9a9a9a, ink: 0xfff3c4, bestInk: 0xf2b632, lockedInk: 0x8a80a8, inset: 0x1a0830, nameShadow: 0x1a0830, /* stage name drop shadow, 2 px lower */ nameSize: 10, titleSize: 18, /* stage names: the ornate title font */ medalScale: 0.9, medalGap: 3, bestPx: 2 }, /* best score on a stage card: canvas px per art pixel (2 = a step below the smallest other text) */ // text and medal sizes inside a stage bubble
+    bubble: { picAlpha: 0.85, picTint: 0xece4ff, lockedTint: 0x9a9a9a, ink: 0xffffff, bestInk: 0xffffff, lockedInk: 0x8a80a8, inset: 0x1a0830, nameShadow: 0x1a0830, /* stage name drop shadow, 2 px lower */ nameSize: 10, titleSize: 18, /* stage names: the ornate title font */ medalScale: 0.9, medalGap: 3, bestPx: 2 }, /* best score on a stage card: canvas px per art pixel (2 = a step below the smallest other text) */ // text and medal sizes inside a stage bubble
     lockedFill: 0x241c3a, lockedBorder: 0x6b5a90, lockedText: 0x9a90b8, // a locked stage bubble
     gear: { x: 215, y: 24, hit: 32, scale: 1, art: 12, px: 2, color: 0x38b6f5, shade: 0x1c6fb5 }, // settings gear: the medallion picture at scale (the art / px / colour numbers are only for the code-drawn fallback cog)
     settings: { x: 20, y: 74, w: 200, h: 292, btnW: 60, btnSize: 10, titleSize: 16, ink: 0x3b2410, hintInk: 0x7a5a3a, depth: 100 }, // settings panel (parchment): position, size, button width, text sizes, ink colours
@@ -102,7 +102,7 @@ export const CONFIG = {
     ],
     buyGapMs: 450, // after a purchase, BUY ignores taps this long (a double tap buys only once)
     button: { x: 4, y: 370, w: 56, h: 57 }, // touch area of the cauldron (with SHOP on it) on the menu (keep it clear of UPDATE and the version text)
-    sign: { x: 32, y: 403, size: 16, color: 0xf2b632, stroke: 3 }, // the word SHOP on the cauldron's pot: middle point, text size (title font, plain px), colour, outline px. Cauldron size: menu.decor "boiler" scale
+    sign: { x: 32, y: 403, size: 16, color: 0xffffff, stroke: 3 }, // the word SHOP on the cauldron's pot: middle point, text size (title font, plain px), colour, outline px. Cauldron size: menu.decor "boiler" scale
     // soft gold glow behind the cauldron while at least one upgrade level can be bought: middle point, half width / height (px), colour,
     // alpha at the bright and the dim end of the pulse, ms for one way (dim to bright)
     glow: { x: 32, y: 402, rx: 30, ry: 30, color: 0xffd040, alphaMax: 0.9, alphaMin: 0.35, ms: 900 },
@@ -117,10 +117,10 @@ export const CONFIG = {
   // The stage box in the menu (tap a stage): purple parchment left edge and width; picW / picH = the stage picture tile on top (2x size, cut to a band; the full height would be 120 for the
   // 88 x 56 picture exactly 2x); row spacing of the goals, icon size, text size, how faded a goal not earned yet is; Play / Back button widths, Play text size, btnGap = space between the two buttons.
   lightbox: { x: 14, w: 212, picW: 184, picH: 80, rowGap: 24, iconBox: 18, textSize: 10, dim: 0.6, playW: 112, playSize: 13, backW: 74, btnGap: 14, depth: 110, titleSize: 36 },
-  pauseBtn: { x: 226, y: 32, size: 20, hit: 36, fill: 0x3b1478, border: 0xf2b632, ink: 0xfff3c4, btnW: 96, btnH: 30, gap: 14, textSize: 10 }, // PAUSE button (top right, under the hearts) and the pause screen buttons
+  pauseBtn: { x: 226, y: 32, size: 20, hit: 36, fill: 0x3b1478, border: 0xf2b632, ink: 0xffffff, btnW: 96, btnH: 30, gap: 14, textSize: 10 }, // PAUSE button (top right, under the hearts) and the pause screen buttons
   // End of stage box (stage clear / game over): left edge and width of the purple parchment, row spacing of the goals, button width, star size;
   // starGapMs = one star after the other, countMs = the score and the coin total counting up, coinsFly = most coins that fly into the total.
-  endScreen: { x: 14, w: 212, rowGap: 22, btnW: 82, starScale: 1.8, starGapMs: 220, countMs: 600, coinsFly: 6 },
+  endScreen: { x: 14, w: 212, picW: 184, picH: 80, titleSize: 30, rowGap: 24, iconBox: 18, dim: 0.6, btnW: 82, starScale: 1, starGapMs: 220, countMs: 600, coinsFly: 6 },
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
   smallPx: 32 / 3, // the small crisp text size (2 canvas px per art pixel): shop words and numbers, the coin counter

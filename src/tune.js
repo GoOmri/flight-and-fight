@@ -108,7 +108,7 @@ export class Tune {
   }
 
   text(x, y, s, size, color, ox = 0) {
-    const t = this.scene.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 2 }).setOrigin(ox, 0.5).setDepth(DEPTH + 1);
+    const t = this.scene.add.text(x, y, s, { ...FONT, fontSize: C.smallPx + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 2 }).setOrigin(ox, 0.5).setDepth(DEPTH + 1);
     this.texts.push(t); return t;
   }
 
@@ -171,7 +171,7 @@ export class Tune {
     const T = (x, y, s, size, color, ox) => { // reuse text objects by index
       const t = this.texts[this.tn + 1] || this.text(0, 0, '', size, color, ox); // index 0 is the gear label
       this.tn++;
-      t.setPosition(x, y).setText(s).setFontSize(fpx(size) + 'px').setColor(hex(color)).setOrigin(ox, 0.5).setVisible(true); return t;
+      t.setPosition(x, y).setText(s).setFontSize(C.smallPx + 'px').setColor(hex(color)).setOrigin(ox, 0.5).setVisible(true); return t;
     };
     const button = (x, y, w, h, label, fn, hold, fill = P.purple) => {
       g.fillStyle(P.dark, 1).fillRect(x, y + 2, w, h);

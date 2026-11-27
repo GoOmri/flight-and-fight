@@ -1,3 +1,4 @@
+import { CONFIG } from './config.js';
 // The wide buttons are Omri's two scroll pictures (assets/ui/ui-med-button.png and ui-med-button2.png, 80 x 26), each also mirrored
 // left-right: 4 looks, handed out one after another so buttons next to each other differ. Never flipped upside down: the scrolls face up.
 const BASE = 'ui_med-button', SECOND = 'ui_med-button2';
@@ -78,6 +79,38 @@ export function parchmentKey(scene, w, h) {
   for (let i = 0; i < d.length; i += 4) {
     const to = SWAP[(d[i] << 16) | (d[i + 1] << 8) | d[i + 2]];
     if (d[i + 3] && to !== undefined) { d[i] = to >> 16; d[i + 1] = (to >> 8) & 255; d[i + 2] = to & 255; }
+  }
+  c.putImageData(px, 0, 0);
+  cv.refresh();
+  return key;
+}
+
+// A stage tile with its picture inside the parchment's own ragged edge: the picture is painted only on the panel's inner pixels
+// (found by flooding from the middle over the three inner purples), so the torn rim stays on top all around it.
+export function tileKey(scene, theme, w, h) {
+  const key = 'ui_tile_' + theme + '_' + w + 'x' + h;
+  if (scene.textures.exists(key)) return key;
+  const base = scene.textures.get(parchmentKey(scene, w, h)).getSourceImage(), cv = scene.textures.createCanvas(key, w, h), c = cv.getContext();
+  c.drawImage(base, 0, 0);
+  const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h;
+  const t = tmp.getContext('2d'), pic = scene.textures.get('stage_' + theme).getSourceImage();
+  t.imageSmoothingEnabled = false; t.globalAlpha = CONFIG.menu.bubble.picAlpha;
+  const band = Math.min(pic.height, (h - 8) * pic.width / (w - 8)), top = Math.round((pic.height - band) * 0.7); // a short tile shows a band of the picture (a bit below the middle), not a squashed one
+  t.drawImage(pic, 0, top, pic.width, band, 4, 4, w - 8, h - 8);
+  const px = c.getImageData(0, 0, w, h), d = px.data, p = t.getImageData(0, 0, w, h).data;
+  const INNER = new Set([0x3a1a72, 0x452180, 0x52288f]), tint = CONFIG.menu.bubble.picTint, k = [(tint >> 16) / 255, ((tint >> 8) & 255) / 255, (tint & 255) / 255];
+  const seen = new Uint8Array(w * h), todo = [(h >> 1) * w + (w >> 1)];
+  while (todo.length) {
+    const n = todo.pop(), i = n * 4;
+    if (seen[n] || !INNER.has((d[i] << 16) | (d[i + 1] << 8) | d[i + 2])) continue;
+    seen[n] = 1;
+    const a = p[i + 3] / 255;
+    for (let j = 0; j < 3; j++) d[i + j] = Math.round(p[i + j] * k[j] * a + d[i + j] * (1 - a));
+    const x = n % w;
+    if (x > 0) todo.push(n - 1);
+    if (x < w - 1) todo.push(n + 1);
+    if (n >= w) todo.push(n - w);
+    if (n < w * (h - 1)) todo.push(n + w);
   }
   c.putImageData(px, 0, 0);
   cv.refresh();

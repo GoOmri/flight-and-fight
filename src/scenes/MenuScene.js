@@ -1,4 +1,4 @@
-import { buttonKey, addSlice, BTN_INK, BTN_HOT, parchmentKey } from '../buttons.js';
+import { buttonKey, addSlice, BTN_INK, BTN_HOT, parchmentKey, tileKey } from '../buttons.js';
 import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
 import { drawVolBar, volFrom, volHit, VOL_W } from '../volbar.js';
 import { CONFIG as C, hex } from '../config.js';
@@ -51,7 +51,7 @@ export class MenuScene extends Phaser.Scene {
     this.txt = txt;
     if (this.textures.exists('menu_logo')) this.makeLogo(); // pixel logo: "Fight & Flight", tilted up in perspective: drops in, floats, and a glint sweeps over it now and then
     else txt(W / 2, M.titleY, 'Flight and Fight', M.titleSize, M.titleStroke);
-    const verTxt = txt(W / 2, H - M.versionBottom, 'v' + C.version, M.versionSize, 2).setAlpha(M.versionAlpha);
+    const verTxt = txt(W / 2, H - M.versionBottom, 'v' + C.version, M.versionSize, 2).setFontSize(C.smallPx).setAlpha(M.versionAlpha);
     let verTaps = 0, verAt = 0; // 5 quick taps on the version text turn the tuning panel on or off (see tune.js)
 
     // ---- the path: a line up the middle, bubbles left and right of it. Stage 1 is at the bottom; with more stages than fit, drag up / down to scroll (applyScroll).
@@ -86,7 +86,7 @@ export class MenuScene extends Phaser.Scene {
 
     // ---- saved coins, top left (drawn over the path, so a bubble scrolled under it does not hide it)
     const bankBack = this.add.graphics(), bankCoin = this.textures.exists('sp_coin') ? this.add.image(M.bankX + 4, M.bankY, 'sp_coin', 0).setScale(0.6) : null; // a coin picture instead of the word
-    const bankX = M.bankX + (bankCoin ? 11 : 0), bankTxt = txt(bankX, M.bankY, '', M.bankSize, 2, 0, 0xf2b632).setFontSize(C.smallPx);
+    const bankX = M.bankX + (bankCoin ? 11 : 0), bankTxt = txt(bankX, M.bankY, '', M.bankSize, 2, 0, P.cream).setFontSize(C.smallPx);
     this.showBank = () => { // drawn again after a purchase
       this.shopGlow.setVisible(canBuyAny()); // the cauldron glows only while something can be bought
       bankTxt.setText(String(loadBank()));
@@ -330,37 +330,7 @@ export class MenuScene extends Phaser.Scene {
 
   parchment(w, h) { return parchmentKey(this, w, h); }
 
-  // A stage tile with its picture inside the parchment's own ragged edge: the picture is painted only on the panel's inner pixels
-  // (found by flooding from the middle over the three inner purples), so the torn rim stays on top all around it.
-  tilePicture(theme, w, h) {
-    const key = 'ui_tile_' + theme + '_' + w + 'x' + h;
-    if (this.textures.exists(key)) return key;
-    const base = this.textures.get(this.parchment(w, h)).getSourceImage(), cv = this.textures.createCanvas(key, w, h), c = cv.getContext();
-    c.drawImage(base, 0, 0);
-    const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h;
-    const t = tmp.getContext('2d'), pic = this.textures.get('stage_' + theme).getSourceImage();
-    t.imageSmoothingEnabled = false; t.globalAlpha = M.bubble.picAlpha;
-    const band = Math.min(pic.height, (h - 8) * pic.width / (w - 8)), top = Math.round((pic.height - band) * 0.7); // a short tile shows a band of the picture (a bit below the middle), not a squashed one
-    t.drawImage(pic, 0, top, pic.width, band, 4, 4, w - 8, h - 8);
-    const px = c.getImageData(0, 0, w, h), d = px.data, p = t.getImageData(0, 0, w, h).data;
-    const INNER = new Set([0x3a1a72, 0x452180, 0x52288f]), tint = M.bubble.picTint, k = [(tint >> 16) / 255, ((tint >> 8) & 255) / 255, (tint & 255) / 255];
-    const seen = new Uint8Array(w * h), todo = [(h >> 1) * w + (w >> 1)];
-    while (todo.length) {
-      const n = todo.pop(), i = n * 4;
-      if (seen[n] || !INNER.has((d[i] << 16) | (d[i + 1] << 8) | d[i + 2])) continue;
-      seen[n] = 1;
-      const a = p[i + 3] / 255;
-      for (let j = 0; j < 3; j++) d[i + j] = Math.round(p[i + j] * k[j] * a + d[i + j] * (1 - a));
-      const x = n % w;
-      if (x > 0) todo.push(n - 1);
-      if (x < w - 1) todo.push(n + 1);
-      if (n >= w) todo.push(n - w);
-      if (n < w * (h - 1)) todo.push(n + w);
-    }
-    c.putImageData(px, 0, 0);
-    cv.refresh();
-    return key;
-  }
+  tilePicture(theme, w, h) { return tileKey(this, theme, w, h); }
 
   // The UPDATE button (in the settings): gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser
   // or the installed app). When the menu opens it asks the server for the newest version number; if it is newer, the button turns
@@ -425,7 +395,7 @@ export class MenuScene extends Phaser.Scene {
     const veil = keep(this.add.graphics(), -1); veil.fillStyle(0x000000, 0.55).fillRect(0, 0, W, H);
     if (this.textures.exists('ui_panel-parchment')) keep(this.add.image(S.x, S.y, this.parchment(S.w, S.h)).setOrigin(0, 0));
     else { const back = keep(this.add.graphics()); back.fillStyle(0x3a1a72, 1).fillRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius); }
-    keep(this.add.text(mid, S.y + 30, 'Settings', { ...FONT_TITLE, fontSize: '24px', color: hex(0xf2b632) }).setOrigin(0.5), 2); // the ornate title font
+    keep(this.add.text(mid, S.y + 30, 'Settings', { ...FONT_TITLE, fontSize: '24px', color: hex(P.cream) }).setOrigin(0.5), 2); // the ornate title font
     this.panelButtons = [];
     // Omri's flat parchment buttons (80 x 26, 10 px ends). isOn = null: a plain button; else a choice, faded when it is not the chosen one
     const mkBtn = (x, y, w, key, label, action, isOn = null) => {
@@ -479,7 +449,7 @@ export class MenuScene extends Phaser.Scene {
     else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(L.x, y0, L.w, h, 10), 0);
     // the stage picture in its own ragged frame, the name on it
     if (art && this.textures.exists('stage_' + theme)) keep(this.add.image(W / 2, y0 + 14, this.tilePicture(theme, L.picW, L.picH)).setOrigin(0.5, 0), 1);
-    keep(this.add.text(W / 2, y0 + 14 + L.picH / 2, titleCase(node ? node.name : ''), { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(0xf2b632), stroke: hex(P.shadow), strokeThickness: 4 }).setOrigin(0.5), 2); // the ornate title font
+    keep(this.add.text(W / 2, y0 + 14 + L.picH / 2, titleCase(node ? node.name : ''), { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 4 }).setOrigin(0.5), 2); // the ornate title font
     const names = { cats: 'Cats', allCoins: 'Coins', killAll: 'Enemies', noHit: 'No hit' };
     keys.forEach((k, i) => { // a goal not earned yet: the same icon, faded
       const y = y0 + 30 + L.picH + i * L.rowGap, done = saved[k];
@@ -511,7 +481,7 @@ export class MenuScene extends Phaser.Scene {
   openShop() {
     if (this.modal) return;
     const S = C.shop, B = S.panel, list = S.upgrades, h = B.headH + list.length * B.rowH + B.footH, y0 = Math.round((H - h) / 2), mid = B.x + B.w / 2;
-    const objs = [], buttons = [], rows = [], cream = hex(P.cream), gold = hex(0xf2b632), ink = hex(M.settings.ink);
+    const objs = [], buttons = [], rows = [], cream = hex(P.cream), gold = hex(P.cream), ink = hex(M.settings.ink);
     const keep = (o, dz = 0) => { o.setDepth(B.depth + dz); objs.push(o); return o; }; // made from back to front
     const T = (x, y, s, color = cream, ox = 0.5) => keep(this.add.text(x, y, s, { ...FONT_MONO, color }).setFontSize(C.smallPx).setOrigin(ox, 0.5), 2);
     const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);

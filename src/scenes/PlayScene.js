@@ -1,5 +1,5 @@
 import { popIn, popOut } from '../popin.js';
-import { buttonKey, addSlice, parchmentKey, BTN_INK, BTN_HOT } from '../buttons.js';
+import { buttonKey, addSlice, parchmentKey, tileKey, BTN_INK, BTN_HOT } from '../buttons.js';
 import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
 import { drawVolBar, volFrom, volHit, VOL_W } from '../volbar.js';
 import { CONFIG as C, z, hex, snap4 } from '../config.js';
@@ -50,6 +50,7 @@ export class PlayScene extends Phaser.Scene {
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
     loadCatArt(this, C.version); // the cats (assets/cats)
     loadGoalArt(this, C.version); // goal icons and the star (the menu loads them too)
+    if (!this.textures.exists('stage_' + this.stageTheme)) this.load.image('stage_' + this.stageTheme, 'assets/ui/stage-' + this.stageTheme + '.png?v=' + C.version); // its picture, on top of the end screen
     if (!this.textures.exists('ui_panel-parchment')) this.load.image('ui_panel-parchment', 'assets/ui/ui-panel-parchment.png?v=' + C.version); // the box of the end screen
     if (!this.textures.exists('ui_med-button')) this.load.image('ui_med-button', 'assets/ui/ui-med-button.png?v=' + C.version); // the menu's button (a stage started from the menu has it already)
     if (!this.textures.exists('ui_med-button2')) this.load.image('ui_med-button2', 'assets/ui/ui-med-button2.png?v=' + C.version);
@@ -1722,44 +1723,41 @@ export class PlayScene extends Phaser.Scene {
     this.enemyBullets.children.iterate(b => { if (b && b.active) this.kill(b); });
     this.bullets.children.iterate(b => { if (b && b.active) this.kill(b); });
     this.muzzle.forEach(m => m.setVisible(false));
-    const E = C.endScreen, P = C.menu.pal, CR = hex(P.cream), GOLD = hex(0xf2b632), DIM = '#a89cd0';
+    const E = C.endScreen, P = C.menu.pal, CR = hex(P.cream), DIM = '#a89cd0';
     const ease = C.feel.endEaseMs, live = ease > 0; // live = things move (stars land, numbers count)
     const keys = stats ? this.goalKeys : [];
-    const h = stats ? 222 + keys.length * E.rowGap : 170, y0 = Math.round((H - h) / 2), left = E.x + 20, right = E.x + E.w - 20, mid = E.x + E.w / 2;
+    // the same layout as the stage box: picture with the title, one short row per goal with its own star, then score and coins
+    const h = (stats ? 204 + keys.length * E.rowGap : 196), y0 = Math.round((H - h) / 2), left = E.x + 20, right = E.x + E.w - 20, mid = E.x + E.w / 2;
     const veil = this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.55).setDepth(60);
     const parts = [], add = o => { parts.push(o); return o; }; // everything in the box, drawn in this order
     const t = (x, y, s, size, color, ox = 0.5) => add(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(ox, 0.5));
-    if (this.textures.exists('ui_panel-parchment')) add(this.add.image(E.x, y0, parchmentKey(this, E.w, h)).setOrigin(0, 0));
+    const art0 = this.textures.exists('ui_panel-parchment');
+    if (art0) add(this.add.image(E.x, y0, parchmentKey(this, E.w, h)).setOrigin(0, 0));
     else add(this.add.rectangle(E.x, y0, E.w, h, 0x3a1a72).setOrigin(0, 0));
-    add(this.add.text(mid, y0 + 28, titleCase(title), { ...FONT_TITLE, fontSize: '28px', color: col, stroke: hex(P.shadow), strokeThickness: z(5) }).setOrigin(0.5));
-    const node = C.menu.path.nodes.find(n => n.theme === this.stageTheme);
-    add(this.add.text(mid, y0 + 52, node ? titleCase(node.name) : '', { ...FONT_TITLE, fontSize: C.menu.bubble.titleSize + 'px', color: GOLD, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5)); // the stage name, ornate font
-    let y = y0 + 80, starsDone = 0;
+    if (art0 && this.textures.exists('stage_' + this.stageTheme)) add(this.add.image(mid, y0 + 14, tileKey(this, this.stageTheme, E.picW, E.picH)).setOrigin(0.5, 0));
+    add(this.add.text(mid, y0 + 14 + E.picH / 2, titleCase(title), { ...FONT_TITLE, fontSize: E.titleSize + 'px', color: col, stroke: hex(P.shadow), strokeThickness: z(5) }).setOrigin(0.5));
+    let y = y0 + 30 + E.picH, starsDone = 0;
     if (stats) {
-      const V = C.coin.value, hits = this.hitsTaken;
-      const names = { cats: 'All cats', allCoins: 'All coins', killAll: 'All enemies', noHit: 'No hit' };
+      const V = C.coin.value, hits = this.hitsTaken, starX = E.x + E.w - 30;
+      const names = { cats: 'Cats', allCoins: 'Coins', killAll: 'Enemies', noHit: 'No hit' };
       const values = { cats: this.cats.saved + '/' + this.cats.total, allCoins: this.coinsCollected * V + '/' + this.coinsSpawned * V,
         killAll: this.enemiesKilled + '/' + this.enemiesSpawned, noHit: hits + (hits === 1 ? ' hit' : ' hits') };
-      keys.forEach((k, i) => { // the stars: one per goal, in the order of the rows
-        const done = this.medals.state[k] === 'earned', sx = mid + (i - (keys.length - 1) / 2) * 42;
-        const star = add(this.add.image(sx, y, done ? 'star_earned' : 'star_off').setScale(E.starScale));
-        if (done && live) {
+      keys.forEach(k => {
+        const done = this.medals.state[k] === 'earned';
+        add(this.add.image(E.x + 34, y, 'goal_' + k + '_earned').setScale(goalScale(this, k, E.iconBox)).setAlpha(done ? 1 : E.dim));
+        t(E.x + 52, y, names[k], 10, done ? CR : DIM, 0);
+        add(this.add.text(starX - 16, y, values[k], { ...FONT, fontSize: C.smallPx + 'px', color: done ? CR : DIM, stroke: hex(P.shadow), strokeThickness: 2 }).setOrigin(1, 0.5));
+        const star = add(this.add.image(starX, y, done ? 'star_earned' : 'star_off').setScale(E.starScale));
+        if (done && live) { // the earned stars land one after the other
           star.setVisible(false);
           this.time.delayedCall(ease + starsDone * E.starGapMs, () => { star.setVisible(true); sfx('coin'); this.tweens.add({ targets: star, scale: { from: E.starScale * 2, to: E.starScale }, duration: 260, ease: 'Back.easeOut' }); });
         }
         if (done) starsDone++;
-        if (isNew && isNew[k]) this.newTags.push(t(sx, y + 22, 'New', 8, hex(P.orange)));
-      });
-      y += 42;
-      keys.forEach(k => {
-        const done = this.medals.state[k] === 'earned';
-        add(this.add.image(left + 8, y, 'goal_' + k + '_' + (done ? 'earned' : 'failed')).setScale(goalScale(this, k, 18)));
-        t(left + 22, y, names[k], 10, done ? CR : DIM, 0);
-        t(right, y, values[k], 10, done ? GOLD : DIM, 1);
+        if (isNew && isNew[k]) this.newTags.push(add(this.add.text(E.x + 118, y, 'New', { ...FONT, fontSize: C.smallPx + 'px', color: hex(P.orange), stroke: hex(P.shadow), strokeThickness: 2 }).setOrigin(0.5)));
         y += E.rowGap;
       });
-      add(this.add.rectangle(mid, y - 6, E.w - 40, 1, 0x9a6ad8));
-      y += 12;
+      add(this.add.rectangle(mid, y - 8, E.w - 40, 1, 0x9a6ad8));
+      y += 8;
     }
     // the score and the saved coins, both counting up
     const count = (from, to, delay, show, end) => {
@@ -1767,13 +1765,14 @@ export class PlayScene extends Phaser.Scene {
       show(from);
       return this.tweens.addCounter({ from, to, delay, duration: E.countMs, onUpdate: tw => show(Math.round(tw.getValue())), onComplete: () => { show(to); if (end) end(); } });
     };
-    t(left, y, 'Score', 12, CR, 0);
-    const scoreText = t(right, y, '', 12, CR, 1);
+    t(left, y, 'Score', 10, CR, 0);
+    const scoreText = t(right, y, '', 10, CR, 1);
     count(0, this.score, ease, v => scoreText.setText(String(v)));
-    y += 24;
-    t(left, y, 'Bank', 12, GOLD, 0);
-    const gainText = t(right, y, '', 12, hex(P.orange), 1), totalText = t(right, y, '', 12, GOLD, 1);
-    const coin = this.textures.exists('sp_coin') ? add(this.add.image(right, y, 'sp_coin', 0).setScale(0.7)) : null;
+    y += 22;
+    t(left, y, 'Bank', 10, CR, 0);
+    const small = (color) => add(this.add.text(right, y, '', { ...FONT, fontSize: C.smallPx + 'px', color, stroke: hex(P.shadow), strokeThickness: 2 }).setOrigin(1, 0.5));
+    const gainText = small(hex(P.orange)), totalText = small(CR); // the coin numbers are small, like the coin beside them
+    const coin = this.textures.exists('sp_coin') ? add(this.add.image(right, y, 'sp_coin', 0).setScale(0.6)) : null;
     const showTotal = v => { // from the right: +gained, the total, the coin picture
       gainText.setText(this.coinsBanked ? '+' + this.coinsBanked : '');
       totalText.setText(String(v)).setX(right - (gainText.text ? gainText.width + 8 : 0));
@@ -1790,7 +1789,7 @@ export class PlayScene extends Phaser.Scene {
     // a run that stops counting while the box is open (a test cheat): drop the animation and show the final numbers
     this.bankDraw = () => { if (counting) counting.remove(); flying.forEach(f => { this.tweens.killTweensOf(f); f.setVisible(false); }); showTotal(loadBank()); };
     // the buttons
-    const by = y + 36, art = this.textures.exists('ui_med-button');
+    const by = y + 34, art = this.textures.exists('ui_med-button');
     this.endBtns = [['Again', mid - E.btnW / 2 - 4, () => this.scene.restart(this.startData)], ['Menu', mid + E.btnW / 2 + 4, () => this.scene.start('Menu')]].map(([label, x, action]) => {
       if (art) add(addSlice(this, x - E.btnW / 2, by - 13, buttonKey(this), E.btnW, 26, 10, 10, 0, 0).setOrigin(0, 0));
       else add(this.add.rectangle(x, by, E.btnW, 26, 0x3b1478));
