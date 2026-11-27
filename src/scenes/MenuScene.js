@@ -85,11 +85,12 @@ export class MenuScene extends Phaser.Scene {
     });
 
     // ---- saved coins, top left (drawn over the path, so a bubble scrolled under it does not hide it)
-    const bankBack = this.add.graphics(), bankTxt = txt(M.bankX, M.bankY, '', M.bankSize, 3, 0, 0xf2b632);
+    const bankBack = this.add.graphics(), bankCoin = this.textures.exists('sp_coin') ? this.add.image(M.bankX + 4, M.bankY, 'sp_coin', 0).setScale(0.6) : null; // a coin picture instead of the word
+    const bankX = M.bankX + (bankCoin ? 11 : 0), bankTxt = txt(bankX, M.bankY, '', M.bankSize, 3, 0, 0xf2b632);
     this.showBank = () => { // drawn again after a purchase
       this.shopGlow.setVisible(canBuyAny()); // the cauldron glows only while something can be bought
-      bankTxt.setText('COINS ' + loadBank());
-      bankBack.clear().fillStyle(P.dark, 0.8).fillRoundedRect(M.bankX - 3, M.bankY - 7, bankTxt.width + 6, 14, 4);
+      bankTxt.setText(String(loadBank()));
+      bankBack.clear().fillStyle(P.dark, 0.8).fillRoundedRect(M.bankX - 3, M.bankY - 7, bankX - M.bankX + bankTxt.width + 6, 14, 4);
     };
     this.showBank();
 
@@ -507,7 +508,8 @@ export class MenuScene extends Phaser.Scene {
     if (this.textures.exists('ui_panel-parchment')) keep(this.add.image(B.x, y0, this.parchment(B.w, h)).setOrigin(0, 0));
     else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(B.x, y0, B.w, h, M.plateRadius));
     keep(this.add.text(mid, y0 + 30, 'Cauldron', { ...FONT_TITLE, fontSize: '24px', color: gold }).setOrigin(0.5), 2);
-    const total = T(mid, y0 + 56, '', gold);
+    const total = T(B.x + B.w - 16, y0 + 56, '', gold, 1); // the saved coins: right side, a coin picture before the number
+    const totalCoin = this.textures.exists('sp_coin') ? keep(this.add.image(0, y0 + 56, 'sp_coin', 0).setScale(0.6), 2) : null;
     const mkBtn = (x, y, w, label, action) => { // the flat parchment button of the settings; off = faded
       const bt = { x: x - 4, y: y - 5, w: w + 8, h: 36, down: false, off: false, action };
       const img = keep(addSlice(this, x, y, 'ui_flat1', w, 26, 10, 10, 0, 0).setOrigin(0, 0), 1), text = T(x + w / 2, y + 12, label, ink);
@@ -523,7 +525,8 @@ export class MenuScene extends Phaser.Scene {
     };
     const left = B.x + 16, right = B.x + B.w - 16;
     const refresh = () => {
-      total.setText('COINS ' + loadBank());
+      total.setText(String(loadBank()));
+      if (totalCoin) totalCoin.setX(total.x - total.width - 7);
       for (const r of rows) {
         const level = loadLevel(r.u.id), price = nextPrice(r.u.id);
         this.drawTube(r.tube, left, r.tubeY, level / r.u.prices.length);
@@ -591,8 +594,10 @@ export class MenuScene extends Phaser.Scene {
   addArt() {
     const mk = (key, tex, fps, frames) => { if (!this.anims.exists(key)) this.anims.create({ key, frames: this.anims.generateFrameNumbers(tex, { start: 0, end: frames - 1 }), frameRate: fps, repeat: -1 }); };
     const sky = M.sky;
+    this.cutMoon();
     mk('menu_sky', 'menu_sky', sky.fps, sky.frames);
     this.skySprite = this.add.sprite(W / 2, H / 2, 'menu_sky').setScale(W / sky.frameW * sky.cover).setDepth(-10).play('menu_sky'); // bigger than the screen (sky.cover) so the tilt and the stage scroll can shift it without showing an edge
+    this.moon = this.add.image(sky.moon.x, sky.moon.y, 'menu_moon').setScale(this.skySprite.scaleX).setDepth(-9);
     this.decorItems = [];
     for (const d of M.decor) {
       mk('menu_' + d.key, 'menu_' + d.key, d.fps, d.frames);
@@ -610,6 +615,28 @@ export class MenuScene extends Phaser.Scene {
       };
       if (d.introX) { pos.x = d.x + d.introX; this.tweens.add({ targets: pos, x: d.x, duration: 1100, delay: 350, ease: 'Cubic.easeOut', onComplete: motion }); } else motion();
     }
+  }
+
+  // The orange moon is painted into every frame of the sky: paint it out (with the sky colour beside it) and keep one copy as its own
+  // picture 'menu_moon', so it can sit anywhere. Done once; the textures stay for later visits to the menu.
+  cutMoon() {
+    const T = this.textures, S = M.sky, [bx, by, bw, bh] = S.moon.box;
+    if (T.exists('menu_moon')) return;
+    const src = T.get('menu_sky').getSourceImage(), cv = document.createElement('canvas'); cv.width = src.width; cv.height = src.height;
+    const cx = cv.getContext('2d'); cx.drawImage(src, 0, 0);
+    const moon = T.createCanvas('menu_moon', bw, bh), mx = moon.getContext(), out = mx.createImageData(bw, bh);
+    for (let f = 0; f < S.frames; f++) {
+      const fx = (f % S.cols) * S.frameW + bx, fy = Math.floor(f / S.cols) * S.frameH + by, d = cx.getImageData(fx, fy, bw, bh), p = d.data;
+      for (let i = 0; i < p.length; i += 4) {
+        if (p[i] < 200 || p[i + 1] < 100) continue; // not moon orange
+        if (f === 0) out.data.set(p.slice(i, i + 4), i);
+        const edge = i - (i % (bw * 4)); // the first pixel of this row: plain sky
+        p.set(p.slice(edge, edge + 4), i);
+      }
+      cx.putImageData(d, fx, fy);
+    }
+    mx.putImageData(out, 0, 0); moon.refresh();
+    T.remove('menu_sky'); T.addSpriteSheet('menu_sky', cv, { frameWidth: S.frameW, frameHeight: S.frameH });
   }
 
   // The word SHOP on the cauldron's pot (title font) and the gold glow behind it (showBank turns the glow on and off). Both move with the cauldron when the phone tilts.
@@ -714,5 +741,6 @@ export class MenuScene extends Phaser.Scene {
     this.tilt.x += (this.tiltTarget.x - this.tilt.x) * k; this.tilt.y += (this.tiltTarget.y - this.tilt.y) * k;
     for (const it of this.decorItems) it.s.setPosition(it.pos.x - this.tilt.x * it.par, it.pos.y - this.tilt.y * it.par);
     if (this.skySprite) this.skySprite.setPosition(W / 2 + this.tilt.x * T.sky, H / 2 + this.tilt.y * T.sky + this.scroll * M.sky.scrollPar); // the sky follows the stage scroll, slowly: parallax
+    if (this.moon) this.moon.setPosition(M.sky.moon.x + this.skySprite.x - W / 2, M.sky.moon.y + this.skySprite.y - H / 2); // the moon moves with the sky
   }
 }

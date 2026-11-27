@@ -1249,3 +1249,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-27 v1.9.173: stage name shadow 1 px lower (branch name-shadow-lower)
 - The dark copy behind the stage name on the main menu now sits 2 px below the name (was 1).
 - Checked in the browser. UNVERIFIED: phone.
+
+## 2026-11-27 v1.9.174: coin picture for the word COINS, one moon, no purple bats (branch menu-coins-moon)
+- Main menu and shop show a coin picture and the number. In the shop it sits on the right.
+- White moon removed. The orange moon is cut out of the sky at start (art file unchanged) and sits between the Forest and the third stage.
+- The two purple bats of the logo decorations (above the cauldron, behind the ghost) are gone.
+- Checked in the browser (normal and canvas mode). UNVERIFIED: phone, tilt.
