@@ -1312,3 +1312,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Stage box, shop and settings close with a small scroll with a drawn pixel X, top right. The Back and Close buttons are gone and the boxes are shorter.
 - Rulebook for text, buttons and boxes written into DESIGN.md (the two button pictures: uses not agreed yet).
 - Checked in the browser (all three open and close). UNVERIFIED: phone, thumb reach of the X.
+
+## 2026-11-27: button rule agreed (branch button-rule)
+- Rolled scroll = does something or takes you somewhere; flat button = pick or buy. The screens already follow it, so no code change.
