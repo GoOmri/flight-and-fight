@@ -1255,3 +1255,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - White moon removed. The orange moon is cut out of the sky at start (art file unchanged) and sits between the Forest and the third stage.
 - The two purple bats of the logo decorations (above the cauldron, behind the ghost) are gone.
 - Checked in the browser (normal and canvas mode). UNVERIFIED: phone, tilt.
+
+## 2026-11-27 v1.9.175: pop-up menus close the way they open (branch menu-close-anim)
+- Shop, stage goals box (BACK), settings and the pause screen (CONTINUE) now shrink away: the opening played backwards (240 ms). PLAY, RESTART and MENU still switch at once.
+- Checked in the browser by stepping through the scales. UNVERIFIED: how it looks and feels on the phone.

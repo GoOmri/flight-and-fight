@@ -457,7 +457,7 @@ export class MenuScene extends Phaser.Scene {
       drawVolBar(bar.g, bar.x, bar.y, volume(key));
       return bar;
     });
-    mkBtn(mid - 45, S.y + 238, 90, 'ui_flat1', 'CLOSE', () => this.openSettings(false));
+    mkBtn(mid - 45, S.y + 238, 90, 'ui_flat1', 'CLOSE', () => this.popOut(this.panelBox, this.panelVeil, S.x + S.w / 2, S.y + S.h / 2, () => this.openSettings(false)));
     this.panelVeil = veil; this.panelBox = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(S.depth);
     this.panelObjs = objs;
   }
@@ -490,7 +490,7 @@ export class MenuScene extends Phaser.Scene {
     }, art2 = this.textures.exists('ui_med-button');
     let box = null;
     const close = () => { if (this.popTween) this.popTween.remove(); objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.modal = false; this.panelButtons = this.settingsButtons; };
-    const back = mk(L.x + 14, 'BACK', close), play = mk(L.x + L.w - 14 - bw, 'PLAY', () => { close(); this.scene.start('Play', { theme }); });
+    const back = mk(L.x + 14, 'BACK', () => this.popOut(box, veil, W / 2, y0 + h / 2, close)), play = mk(L.x + L.w - 14 - bw, 'PLAY', () => { close(); this.scene.start('Play', { theme }); });
     box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(D);
     this.popIn(box, veil, W / 2, y0 + h / 2);
     this.boxObjs = objs; this.modal = true; this.panelButtons = [play, back];
@@ -552,11 +552,10 @@ export class MenuScene extends Phaser.Scene {
       rows.push(row);
     });
     let box = null;
-    const closeBtn = mkBtn(mid - 45, y0 + h - B.footH + 6, 90, 'CLOSE', () => {
-      if (this.popTween) this.popTween.remove();
+    const closeBtn = mkBtn(mid - 45, y0 + h - B.footH + 6, 90, 'CLOSE', () => this.popOut(box, veil, mid, y0 + h / 2, () => {
       objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.modal = false; this.panelButtons = this.settingsButtons;
       this.showBank();
-    });
+    }));
     closeBtn.draw();
     refresh();
     box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(B.depth);
@@ -578,6 +577,15 @@ export class MenuScene extends Phaser.Scene {
     R(U.shine, inX, inY + 1, fw, 1);
     if (filled < 1) R(U.edge, inX + Math.max(0, fw - 2), inY, Math.min(2, fw), inH);
     for (const [bx, by] of [[7, 4], [22, 3], [36, 5], [51, 4], [67, 3], [82, 5], [96, 4]]) if (bx + 2 < fw) R(U.bubble, inX + bx, inY + by, 2, 2);
+  }
+
+  // Closing a box = popIn played backwards (a little bigger, then down to 70%; the veil fades out at the end). No taps meanwhile; done() removes it.
+  popOut(box, veil, cx, cy, done) {
+    if (this.popTween) this.popTween.remove();
+    this.panelButtons = [];
+    this.tweens.killTweensOf(veil);
+    this.tweens.add({ targets: veil, alpha: 0, duration: 150, delay: 90 });
+    this.popTween = this.tweens.addCounter({ from: 1, to: 0.7, duration: 240, ease: 'Back.easeIn', onUpdate: t => { const k = t.getValue(); if (box.active) box.setScale(k).setPosition(cx * (1 - k), cy * (1 - k)); }, onComplete: done });
   }
 
   openSettings(on, pop = true) {
