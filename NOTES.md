@@ -1315,3 +1315,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-27: button rule agreed (branch button-rule)
 - Rolled scroll = does something or takes you somewhere; flat button = pick or buy. The screens already follow it, so no code change.
+
+## 2026-11-27 v1.9.187: red words on Restart and Menu in the pause screen (branch red-danger)
+- They throw away the current run, so their words are red. Continue and Options unchanged.
+- Checked in the browser. UNVERIFIED: phone.
