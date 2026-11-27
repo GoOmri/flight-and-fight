@@ -570,10 +570,10 @@ Text:
 - Small (best score, version, "New"): Alagard, smallest size.
 - Capital first letter only, never all caps.
 - Gold = titles and coins. Faded = not earned / off. Red = warning or new version only.
-Buttons (two pictures by Omri: the rolled scroll, and the flat button he made from it. PROPOSED, not agreed: scroll = does something and moves on; flat = picks or buys):
+Buttons (two pictures by Omri: the rolled scroll, and the flat button he made from it. agreed: scroll = does something or takes you somewhere; flat = picks or buys, you stay):
 - Main (Play, Again, Continue): one per box, biggest.
 - Normal (Options, price, Update): same scroll, smaller.
 - Close: a small X in the top right corner of every box (MenuScene closeX). Not red.
 - Danger (erases something, leaves a run): red words.
 Boxes: purple ragged parchment; title at the top, content, main button; the same space around the edges.
-Status: close X done (stage box, shop, settings). Still to apply: agree the two button uses, Danger red, equal margins, text sizes.
+Status: close X done (stage box, shop, settings). Still to apply: Danger red, equal margins, text sizes.
