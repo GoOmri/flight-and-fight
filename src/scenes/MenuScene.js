@@ -86,7 +86,7 @@ export class MenuScene extends Phaser.Scene {
 
     // ---- saved coins, top left (drawn over the path, so a bubble scrolled under it does not hide it)
     const bankBack = this.add.graphics(), bankCoin = this.textures.exists('sp_coin') ? this.add.image(M.bankX + 4, M.bankY, 'sp_coin', 0).setScale(0.6) : null; // a coin picture instead of the word
-    const bankX = M.bankX + (bankCoin ? 11 : 0), bankTxt = txt(bankX, M.bankY, '', M.bankSize, 2, 0, P.cream).setFontSize(C.smallPx);
+    const bankX = M.bankX + (bankCoin ? 11 : 0), bankTxt = txt(bankX, M.bankY + 1, '', M.bankSize, 2, 0, P.cream).setFontSize(C.smallPx);
     this.showBank = () => { // drawn again after a purchase
       this.shopGlow.setVisible(canBuyAny()); // the cauldron glows only while something can be bought
       bankTxt.setText(String(loadBank()));
@@ -487,9 +487,9 @@ export class MenuScene extends Phaser.Scene {
     const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
     if (this.textures.exists('ui_panel-parchment')) keep(this.add.image(B.x, y0, this.parchment(B.w, h)).setOrigin(0, 0));
     else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(B.x, y0, B.w, h, M.plateRadius));
-    keep(this.add.text(mid, y0 + 30, 'Cauldron', { ...FONT_TITLE, fontSize: '24px', color: hex(P.title) }).setOrigin(0.5), 2);
-    const total = T(B.x + B.w - 16, y0 + 56, '', gold, 1); // the saved coins: right side, a coin picture before the number
-    const totalCoin = this.textures.exists('sp_coin') ? keep(this.add.image(0, y0 + 56, 'sp_coin', 0).setScale(0.6), 2) : null;
+    keep(this.add.text(mid, y0 + 37, 'Cauldron', { ...FONT_TITLE, fontSize: '32px', color: hex(P.title) }).setOrigin(0.5), 2);
+    const total = T(0, y0 + 70, '', gold, 0).setFontSize(16); // the saved coins: a coin picture and the number, centred above the price buttons (text 1.5 px low: the font draws high)
+    const totalCoin = this.textures.exists('sp_coin') ? keep(this.add.image(0, y0 + 68, 'sp_coin', 0).setScale(0.9), 2) : null;
     const mkBtn = (x, y, w, label, action) => { // the flat parchment button of the settings; off = faded
       const bt = { x: x - 4, y: y - 5, w: w + 8, h: 36, down: false, off: false, action };
       const img = keep(addSlice(this, x, y, 'ui_flat1', w, 26, 10, 10, 0, 0).setOrigin(0, 0), 1), text = T(x + w / 2, y + 12 + C.btnTextDy, label, ink);
@@ -506,7 +506,9 @@ export class MenuScene extends Phaser.Scene {
     const left = B.x + 16, right = B.x + B.w - 16;
     const refresh = () => {
       total.setText(String(loadBank()));
-      if (totalCoin) totalCoin.setX(total.x - total.width - 7);
+      const cw = totalCoin ? totalCoin.displayWidth + 3 : 0, from = right - B.buyW / 2 - (cw + total.width) / 2; // centre of the button column
+      total.setX(from + cw);
+      if (totalCoin) totalCoin.setX(from + totalCoin.displayWidth / 2);
       for (const r of rows) {
         const level = loadLevel(r.u.id), price = nextPrice(r.u.id);
         this.drawTube(r.tube, left, r.tubeY, level / r.u.prices.length);
