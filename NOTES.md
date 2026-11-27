@@ -1307,3 +1307,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-27 v1.9.185: scroll banner removed again (branch stage-banner-undo)
 - Omri preferred the name on the picture: stage box is as in v1.9.183 (gold name with dark outline).
 - Checked in the browser. UNVERIFIED: phone.
+
+## 2026-11-27 v1.9.186: X in the corner closes the boxes; UI rulebook (branch close-x)
+- Stage box, shop and settings close with a small scroll with a drawn pixel X, top right. The Back and Close buttons are gone and the boxes are shorter.
+- Rulebook for text, buttons and boxes written into DESIGN.md (the two button pictures: uses not agreed yet).
+- Checked in the browser (all three open and close). UNVERIFIED: phone, thumb reach of the X.
