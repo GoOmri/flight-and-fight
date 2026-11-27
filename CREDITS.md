@@ -37,3 +37,4 @@
 - **monogram** (assets/fonts/monogram-extended.ttf): pixel font by datagoblin, https://datagoblin.itch.io/monogram, CC0. Used on the settings screen.
 - **Flat parchment and scroll buttons** (assets/ui/regular-scroll-button*.png, ui-med-button*.png): made by Omri.
 - **Sounds, update 25 Nov** (picked by Omri): coin2, tap2 = Cosy UI Sound Pack free sampler by Leckie Pixel Studio (use in games; no re-sharing on their own). shoot2, enemy-die2 = Cartoon Sound Effects by Qvantor (CC0). box-open = Toolbox SFX Free, Arcade UI Forge. (coin, tap, shoot and rescue-a are no longer used.) meow-1, meow-2: two cat meows added by Omri; Omri confirmed they are free to use (source not recorded).
+- **Alagard** (assets/fonts/alagard.ttf): fantasy pixel font by Pix3M, https://opengameart.org/content/pixel-fonts-by-pix3m, listed there as CC-BY 3.0 (credit required; the download has no licence file). The text font of the game.

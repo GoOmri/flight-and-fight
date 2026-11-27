@@ -1289,3 +1289,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-27 v1.9.181: stage box buttons (branch play-button)
 - Play is narrower with bigger text, more space between Play and Back.
 - Checked in the browser (Swamp). UNVERIFIED: phone, taps.
+
+## 2026-11-27 v1.9.182: Alagard is the text font (branch alagard-font)
+- Omri downloaded Alagard; moved to art-packs/fonts/alagard, copied to assets/fonts. Credited in CREDITS.md (CC-BY, no licence file in the download).
+- It is wider than monogram, so the text sizes went one step down (config fontScale 0.38 -> 0.3) and the shop tube is a bit wider.
+- Checked in the browser: stage box, shop, end screen (settings and pause seen at the bigger size, not again after shrinking). UNVERIFIED: phone, how numbers read during play, tune panel.
