@@ -1303,3 +1303,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-27 v1.9.184: stage name on a scroll banner (branch stage-banner)
 - A try: in the stage box the name sits on a bigger scroll of Omri's above the picture, dark brown, no outline or yellow. The picture has no text on it now.
 - Checked in the browser (Forest, Swamp in canvas mode). UNVERIFIED: phone.
+
+## 2026-11-27 v1.9.185: scroll banner removed again (branch stage-banner-undo)
+- Omri preferred the name on the picture: stage box is as in v1.9.183 (gold name with dark outline).
+- Checked in the browser. UNVERIFIED: phone.
