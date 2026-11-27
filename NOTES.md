@@ -1385,3 +1385,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-27 v1.9.200: enemy shots beat between two sizes (branch shot-two-sizes)
 - Full size (18 px across) and 2 px smaller, 130 ms each, instead of the smooth swell. The small state's hit box is a hair smaller. TUNE switch off = the old shot as before.
 - Checked in the browser (sizes read from the game). UNVERIFIED: how it looks moving, phone.
+
+## 2026-11-27 v1.9.201: shop cauldron lower (branch cauldron-lower)
+- Cauldron, "Shop" word, glow and touch area moved down 4 px. It now sits almost on the bottom edge.
+- Checked in the browser. UNVERIFIED: phone (tilting may push the very bottom off screen).
