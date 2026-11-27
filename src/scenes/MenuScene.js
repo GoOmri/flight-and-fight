@@ -100,9 +100,13 @@ export class MenuScene extends Phaser.Scene {
     if (!gear.img) { gear.g = this.add.graphics(); this.drawGear(gear.g, GE); }
     gear.draw = () => (gear.img || gear.g).setAlpha(gear.down ? 0.65 : 1);
     gear.action = () => this.openSettings(true);
-    // a red ! on the cog while a newer version is waiting (see makeUpdate)
-    const bang = this.add.graphics().fillStyle(0xc0331c, 1).fillCircle(0, 0, 6).lineStyle(1, P.cream, 1).strokeCircle(0, 0, 6);
-    this.gearBadge = this.add.container(GE.x + 9, GE.y - 9, [bang, txt(0, 0, '!', 10, 0)]).setVisible(false);
+    // a small red pixel mark with a white "!" on the cog while a newer version is waiting (see makeUpdate)
+    const bang = this.add.graphics();
+    const px = (color, rows) => rows.forEach(([x, y, w, h]) => bang.fillStyle(color, 1).fillRect(x, y, w, h));
+    px(P.shadow, [[-3, -5, 6, 10], [-5, -3, 10, 6], [-4, -4, 8, 8]]); // dark rim
+    px(0xd8402a, [[-3, -4, 6, 8], [-4, -3, 8, 6]]);                    // red
+    px(0xffffff, [[-1, -3, 2, 4], [-1, 2, 2, 2]]);                     // !
+    this.gearBadge = this.add.container(GE.x + 9, GE.y - 9, [bang]).setVisible(false);
 
     // ---- the cauldron (bottom left) and its SHOP word open the shop
     const boiler = this.decorItems.find(i => i.key === 'boiler'), shop = { ...C.shop.button, down: false };

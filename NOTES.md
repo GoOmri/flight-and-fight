@@ -1375,3 +1375,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Enemy shots: dark ring, near-white middle, faster pulse (src/shots.js). Hit box unchanged. Switch: TUNE > New enemy shots.
 - Test menu: one small panel (start at wave, no damage, finish, lose, restart, reset all, shot switch). Removed: the Move / Shot / Drops / Enemy sliders, +500 coins, separate reset coins / upgrades, weapon level, bank lines, Copy / Reset, the boom switch (new explosions stay on). Balance numbers are changed in config.js.
 - Checked in the browser (shots placed by hand beside the old ones; panel buttons). UNVERIFIED: phone, dodging in real play.
+
+## 2026-11-27 v1.9.199: thinner shot ring, cauldron lower, new update mark (branch shot-ring-cauldron-badge)
+- Enemy shot ring is 1 art px (was 2) and the pulse is no stronger than the old shots (still faster).
+- Cauldron moved down 30 px to the cat's floor line, with its Shop word, glow and tap area.
+- The "!" on the cog is a small pixel mark instead of a smooth circle with a font "!".
+- Checked in the browser (mark switched on by hand). UNVERIFIED: phone.
