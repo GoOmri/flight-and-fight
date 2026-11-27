@@ -211,7 +211,7 @@ export class Tune {
       button(x1, y3, CHEAT.w, CHEAT.h, sureUps ? 'SURE? TAP AGAIN' : 'RESET UPGRADES', () => this.resetUps(), false, sureUps ? P.pink : P.purple);
       button(x2, y3, CHEAT.w, CHEAT.h, sureAll ? 'SURE? TAP AGAIN' : 'RESET ALL', () => this.resetAll(), false, sureAll ? P.pink : P.purple);
       const y4 = y3 + CHEAT.h + CHEAT.gap;
-      button(x1, y4, 2 * CHEAT.w + CHEAT.gap, CHEAT.h, 'NEW BOOM (BAT): ' + (boomOn() ? 'ON' : 'OFF'), () => { toggleBoom(); this.draw(); }, false, boomOn() ? P.pink : P.purple);
+      button(x1, y4, 2 * CHEAT.w + CHEAT.gap, CHEAT.h, 'NEW BOOM: ' + (boomOn() ? 'ON' : 'OFF'), () => { toggleBoom(); this.draw(); }, false, boomOn() ? P.pink : P.purple);
       T(PANEL.x + PANEL.w / 2, y4 + CHEAT.h + 9, 'BANK ' + loadBank(), 8, P.cyan, 0.5);
       T(PANEL.x + PANEL.w / 2, y4 + CHEAT.h + 19, C.shop.upgrades.map(u => u.name + ' ' + loadLevel(u.id)).join('  '), 8, P.cyan, 0.5);
     }

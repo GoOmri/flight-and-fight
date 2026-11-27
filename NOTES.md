@@ -1365,3 +1365,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Our smoke puffs (3 plus a white middle), our sparks (falling) and ring, the white flash and lingering smoke, drawn in front of the enemies and under coins and enemy shots. The pack frames added in 1.9.195 are removed.
 - Faint leftover pixels are stripped from the tinted puff copies (they showed as a square).
 - Same TUNE > TEST switch. Checked in the browser by setting it off by hand. UNVERIFIED: phone, real play, slowdown.
+
+## 2026-11-27 v1.9.197: the bigger explosion for all enemies (branch boom-all)
+- Bat, ghost, dino and vulture, each in its own smoke colour; the dino's is 1.35x bigger. The chest is unchanged. TUNE > TEST > NEW BOOM switches all of it.
+- To watch: dino and vulture booms look orange / red, close to enemy shots and coins.
+- Checked in the browser by setting all four off by hand. UNVERIFIED: phone, real play, slowdown.

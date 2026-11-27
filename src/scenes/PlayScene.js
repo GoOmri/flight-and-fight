@@ -1602,7 +1602,7 @@ export class PlayScene extends Phaser.Scene {
   // Pop in the creature's colours plus a ring puff. big = imp / chest (more sparks, bigger ring).
   explode(x, y, big, tints, puff = true, smokeType = null) {
     const F = C.feel, P = C.sprites.poof;
-    if (puff && boom(this, x, y, smokeType, tints)) return; // the bigger explosion replaces puff, sparks and ring
+    if (puff && boom(this, x, y, smokeType, tints, big)) return; // the bigger explosion replaces puff, sparks and ring
     if (P && puff) { // smoke puff under the sparks: in the colour of what died, turned a random way
       const has = smokeType && this.textures.exists('sp_poof_' + smokeType);
       const sm = this.playFx(this.poofPool, has ? 'sp_poof_' + smokeType : 'sp_poof', has ? 'poof_' + smokeType : 'poof', x, y, P.scale * (big ? P.bigMul : 1), P.depth, null);
