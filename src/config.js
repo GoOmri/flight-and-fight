@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.173", // bump on every push so the player/Omri can see the build
+  version: "1.9.174", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -41,7 +41,7 @@ export const CONFIG = {
     plateDrop: 4, plateDownShift: 2, plateBorderW: 3, plateRadius: 10, tabW: 6, // chunky button plate: bottom edge height, how far a pressed plate sinks, border, corner, stage colour tab
     tabColors: { forest: 0xff9a2e, swamp: 0x3df2ff },
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4, // titleY..titleStroke: the old plain-text title (used only if the logo picture is missing)
-    logo: { file: 'menu/logo-text.png', decor: 'menu/logo-decor.png', decorParts: [[2,1,7,8],[26,8,1,1],[39,3,5,5],[52,7,1,1],[64,2,5,5],[81,6,1,1],[102,2,11,5],[111,73,5,5],[4,67,11,5],[8,53,5,5]], decorAt: { 0: [157, 192] }, decorScale: { 0: 2.8 }, decorPop: false, decorDelay: 1500, decorStepMs: 140, wordStepMs: 100, riseMs: 1200, overshoot: 0.6, x: 120, y: 252, scale: 1.7 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
+    logo: { file: 'menu/logo-text.png', decor: 'menu/logo-decor.png', decorParts: [[26,8,1,1],[39,3,5,5],[52,7,1,1],[64,2,5,5],[81,6,1,1],[111,73,5,5],[8,53,5,5]], /* stars and dots only: the white moon and the two purple bats of the picture are left out */ decorAt: {}, decorScale: {}, decorPop: false, decorDelay: 1500, decorStepMs: 140, wordStepMs: 100, riseMs: 1200, overshoot: 0.6, x: 120, y: 252, scale: 1.7 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
     // Small effects of the menu (src/scenes/MenuScene.js startEffects): cauldron bubbles, sparks behind the witch's broom (dx, dy from her centre), fireflies, shooting stars (every ms [min, max],
     // start x / y ranges, travel dx / dy, ms) and the sparks on a touch (count, how far, ms). tilt: the sky and the friends shift when the phone is tilted (range = degrees for the full shift, sky = px).
     bits: {
@@ -78,7 +78,7 @@ export const CONFIG = {
     versionSize: 8, versionAlpha: 0.9, versionBottom: 9, // version text: distance of its middle from the bottom edge
     bankX: 6, bankY: 8, bankSize: 8, // saved coin total (top left): left edge, middle height, text size
     // Halloween menu art (assets/menu, Spooktober set). Sky = animated background (cells in a grid of `cols`), scaled to cover the screen width.
-    sky: { file: 'menu/sky.png', frameW: 202, frameH: 360, frames: 18, cols: 6, fps: 5, cover: 1.1, scrollPar: 0.08 }, // cover = how much bigger than the screen (room to shift), scrollPar = how far the sky moves per px the stage path is scrolled (0.08 = slow)
+    sky: { file: 'menu/sky.png', frameW: 202, frameH: 360, frames: 18, cols: 6, fps: 5, cover: 1.1, scrollPar: 0.08, moon: { box: [86, 45, 30, 30], x: 62, y: 119 } }, // moon = the orange moon painted in the sky: box = where it is in one frame (art px: left, top, w, h), x / y = where its middle sits on screen (between the Forest and the third stage). cover = how much bigger than the screen (room to shift), scrollPar = how far the sky moves per px the stage path is scrolled (0.08 = slow)
     // Decorations around the cards (never over cards, medals, UPDATE or version; they take no input). file in assets/, frameW/frameH = one cell,
     // x/y = the point of the picture that sits at (x,y) (originX/originY 0..1), scale (multiples of 1/3 keep the pixels even), fps, bob = up-down swing in px (0 = still), bobMs = swing period, flipX.
     decor: [
