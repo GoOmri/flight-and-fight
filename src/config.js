@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.180", // bump on every push so the player/Omri can see the build
+  version: "1.9.181", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -115,8 +115,8 @@ export const CONFIG = {
   // meow*S = seconds between meows (empty ring / full ring), fxDx/fxDy = where the meow puff sits, jumpS/jumpPx = the two happy jumps, runSpeed = how fast the saved cat runs to the closest side edge. spark* = the colourful sparks rising from the rings (per second idle / hovering, rise speed px/s, life s, most at once).
   cats: { atWave: [0, 4, 8], ringRx: 9, ringRy: 9, ringW: 5, ringRxBig: 14, ringRyBig: 14, ringWBig: 7, ringGrowSpeed: 6, ringHitR: 24, fillS: 2.0, drainMul: 0.5, hitLoss: 0.25, scale: 1.5, stoneScale: 1.2, footY: 0.62, footDrop: 1.5, depth: 33.6, stoneDepth: 3, meowSlowS: 4, meowFastS: 1.2, fxDx: 10, fxDy: -20, headDy: -22, jumpS: 0.9, jumpPx: 12, runSpeed: 110, glowSize: 70, glowAlpha: 1, glowPulse: 4, sparkRate: 2.5, sparkRateHover: 9, sparkFillMul: 4, sparkFillLife: 0.8, shakeFrom: 0.25, shakePx: 2.5, catShake: 0.2, suckUpS: 0.22, suckUp: 650, suckSharp: 9000, fastShare: 0.35, farShare: 0.7, fastGrow: 1, riseFillMul: 5, sparkRise: 22, sparkLife: 1.2, sparkMax: 40, catDx: -2, catDy: 1, ringColors: [0xff7ad9, 0xc89cff, 0x8fb4ff, 0x5fe6d0, 0xb15bd6, 0xffffff], ringColorSpeed: 3 }, // catDx/catDy = the cat's offset from the ring's middle (px); ring fill colours (the trail particle colours) and how many colours per second pass // runSpeed = px/s of the run to the closest edge after a rescue
   // The stage box in the menu (tap a stage): purple parchment left edge and width; picW / picH = the stage picture tile on top (2x size, cut to a band; the full height would be 120 for the
-  // 88 x 56 picture exactly 2x); row spacing of the goals, icon size, text size, how faded a goal not earned yet is; Play / Back button widths.
-  lightbox: { x: 14, w: 212, picW: 184, picH: 80, rowGap: 24, iconBox: 18, textSize: 10, dim: 0.6, playW: 150, backW: 74, depth: 110, titleSize: 36 },
+  // 88 x 56 picture exactly 2x); row spacing of the goals, icon size, text size, how faded a goal not earned yet is; Play / Back button widths, Play text size, btnGap = space between the two buttons.
+  lightbox: { x: 14, w: 212, picW: 184, picH: 80, rowGap: 24, iconBox: 18, textSize: 10, dim: 0.6, playW: 112, playSize: 16, backW: 74, btnGap: 14, depth: 110, titleSize: 36 },
   pauseBtn: { x: 226, y: 32, size: 20, hit: 36, fill: 0x3b1478, border: 0xf2b632, ink: 0xfff3c4, btnW: 96, btnH: 30, gap: 14, textSize: 10 }, // PAUSE button (top right, under the hearts) and the pause screen buttons
   // End of stage box (stage clear / game over): left edge and width of the purple parchment, row spacing of the goals, button width, star size;
   // starGapMs = one star after the other, countMs = the score and the coin total counting up, coinsFly = most coins that fly into the total.

@@ -1285,3 +1285,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-27 v1.9.180: shorter picture and bigger name in the stage box (branch stage-box-picture)
 - The picture is a band (not squashed), the stage name is 36 instead of 24, in the middle of it.
 - Checked in the browser (Forest). UNVERIFIED: phone, Swamp box.
+
+## 2026-11-27 v1.9.181: stage box buttons (branch play-button)
+- Play is narrower with bigger text, more space between Play and Back.
+- Checked in the browser (Swamp). UNVERIFIED: phone, taps.
