@@ -1351,3 +1351,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Cauldron (with Shop, glow and tap area) and cat swapped places on the main menu.
 - Shop title "Cauldron" is now "Upgrades", left, a bit smaller, on the same line as the coin counter; box shorter.
 - Checked in the browser. UNVERIFIED: phone, tapping the cauldron in its new place.
+
+## 2026-11-27 v1.9.194: drop shadow on the Shop word (branch shop-shadow)
+- A 1 px dark shadow under "Shop" on the cauldron.
+- Checked in the browser. UNVERIFIED: phone.
