@@ -1276,3 +1276,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - A try, Omri decides: settings, shop, goals box, pause, end screen, stage cards. Only the letter case changed. The tune panel stays as it was.
 - Note: in this font the small l looks much like a capital L ("All").
 - Checked in the browser (shop, settings, end screen). UNVERIFIED: phone; pause screen and goals box not looked at.
+
+## 2026-11-27 v1.9.179: stage box rebuilt (branch stage-box)
+- Same ragged purple box as the other menus, the stage picture on top with the name, shorter rows (Cats, Coins, Enemies, No hit), goals not earned yet = the real icon faded (the white blobs are gone here), big Play and a small Back under it.
+- The icons at the top of the screen during play are unchanged.
+- Checked in the browser (both stages, normal and canvas, Back and Play). UNVERIFIED: phone.

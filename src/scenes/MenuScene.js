@@ -450,35 +450,41 @@ export class MenuScene extends Phaser.Scene {
     this.panelObjs = objs;
   }
 
-  // The goals box (lightbox): tap a stage, see its goals with the stars you already have, then PLAY (or BACK).
+  // The stage box: tap a stage, see its picture and name, its goals with the stars you already have, then a big Play (small Back).
+  // The same purple parchment as the shop, settings and end screen.
   openGoals(theme) {
     if (this.modal) return;
     const L = C.lightbox, node = M.path.nodes.find(n => n.theme === theme), keys = goalsOf(theme), saved = loadMedals(theme), objs = [];
-    const D = L.depth, h = 46 + keys.length * L.rowGap + 46, y0 = Math.round((H - 40 - h) / 2), art = this.textures.exists('ui_med-panel');
+    const D = L.depth, h = 214 + keys.length * L.rowGap, y0 = Math.round((H - h) / 2), art = this.textures.exists('ui_panel-parchment');
     const keep = (o, dz = 0) => { o.setDepth(D + dz); objs.push(o); return o; };
     const T = (x, y, s, size, align, color) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(align, 0.5), 2);
     const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
-    if (art) keep(addSlice(this, L.x, y0, 'ui_med-panel', L.w, h, 6, 6, 6, 6).setOrigin(0, 0), 0);
-    else { const g = keep(this.add.graphics()); g.fillStyle(P.dark, 0.96).fillRoundedRect(L.x, y0, L.w, h, 10); g.lineStyle(3, P.pink, 1).strokeRoundedRect(L.x, y0, L.w, h, 10); }
-    const tc = 0xffffff, names = { cats: 'All cats', allCoins: 'All coins', killAll: 'All enemies', noHit: 'No hit' };
-    keep(this.add.text(W / 2, y0 + 22, titleCase(node ? node.name : ''), { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(0xf2b632), stroke: hex(P.shadow), strokeThickness: 4 }).setOrigin(0.5), 2); // the ornate title font
-    keys.forEach((k, i) => {
-      const y = y0 + 50 + i * L.rowGap + L.rowGap / 2 - 4, done = saved[k];
-      keep(this.add.image(L.x + 26, y, 'goal_' + k + '_' + (done ? 'earned' : 'open')).setScale(goalScale(this, k, L.iconBox)), 2);
-      T(L.x + 46, y, names[k], L.textSize, 0, tc);
-      keep(this.add.image(L.x + L.w - 24, y, done ? 'star_earned' : 'star_off').setScale(1), 2);
+    if (art) keep(this.add.image(L.x, y0, this.parchment(L.w, h)).setOrigin(0, 0), 0);
+    else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(L.x, y0, L.w, h, 10), 0);
+    // the stage picture in its own ragged frame, the name on it
+    if (art && this.textures.exists('stage_' + theme)) keep(this.add.image(W / 2, y0 + 14, this.tilePicture(theme, L.picW, L.picH)).setOrigin(0.5, 0), 1);
+    keep(this.add.text(W / 2, y0 + 36, titleCase(node ? node.name : ''), { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(0xf2b632), stroke: hex(P.shadow), strokeThickness: 4 }).setOrigin(0.5), 2); // the ornate title font
+    const names = { cats: 'Cats', allCoins: 'Coins', killAll: 'Enemies', noHit: 'No hit' };
+    keys.forEach((k, i) => { // a goal not earned yet: the same icon, faded
+      const y = y0 + 150 + i * L.rowGap, done = saved[k];
+      keep(this.add.image(L.x + 34, y, 'goal_' + k + '_earned').setScale(goalScale(this, k, L.iconBox)).setAlpha(done ? 1 : L.dim), 2);
+      T(L.x + 52, y, names[k], L.textSize, 0, done ? P.cream : 0xa89cd0);
+      keep(this.add.image(L.x + L.w - 30, y, done ? 'star_earned' : 'star_off').setScale(1), 2);
     });
-    const bw = 80, by = y0 + h - 38, mk = (x, label, action) => { // two buttons: the same picture as the other buttons
-      const bt = { btn: true, x: x - 4, y: by - 3, w: bw + 8, h: 31, down: false, action, shown: true };
+    const art2 = this.textures.exists('ui_med-button');
+    const mk = (by, bw, size, label, action) => { // a centred button, the same picture as the other buttons
+      const x = (W - bw) / 2, bt = { btn: true, x: x - 4, y: by - 2, w: bw + 8, h: 30, down: false, action, shown: true };
       bt.img = art2 ? keep(addSlice(this, x, by, buttonKey(this), bw, 26, 10, 10, 0, 0).setOrigin(0, 0), 1) : null;
       bt.g = keep(this.add.graphics(), 1);
-      bt.label = T(x + bw / 2, by + 12, label, 10, 0.5, P.cream); if (art2) bt.label.setColor(BTN_INK).setStroke(BTN_INK, 0); else bt.label.setStroke(hex(P.shadow), 3);
+      bt.label = T(W / 2, by + 12, label, size, 0.5, P.cream); if (art2) bt.label.setColor(BTN_INK).setStroke(BTN_INK, 0); else bt.label.setStroke(hex(P.shadow), 3);
       bt.draw = () => { if (bt.img) bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(by + (bt.down ? 1 : 0)); bt.label.setY(by + 12 + (bt.down ? 1 : 0)); };
       return bt;
-    }, art2 = this.textures.exists('ui_med-button');
+    };
     let box = null;
     const close = () => { if (this.popTween) this.popTween.remove(); objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.modal = false; this.panelButtons = this.settingsButtons; };
-    const back = mk(L.x + 14, 'Back', () => this.popOut(box, veil, W / 2, y0 + h / 2, close)), play = mk(L.x + L.w - 14 - bw, 'Play', () => { close(); this.scene.start('Play', { theme }); });
+    const by = y0 + 144 + keys.length * L.rowGap;
+    const play = mk(by, L.playW, 14, 'Play', () => { close(); this.scene.start('Play', { theme }); });
+    const back = mk(by + 32, L.backW, 8, 'Back', () => this.popOut(box, veil, W / 2, y0 + h / 2, close));
     box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(D);
     this.popIn(box, veil, W / 2, y0 + h / 2);
     this.boxObjs = objs; this.modal = true; this.panelButtons = [play, back];
