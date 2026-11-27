@@ -1265,3 +1265,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Stage clear: purple box, stars on top (land one by one), a row per goal with the numbers (cats, coins, enemies, hits), score and coin total counting up, coins flying in. A tap outside the buttons does nothing.
 - The parchment painter moved to src/buttons.js so both screens use it. The old KILLS / HITS / COINS lines and TAP TO PLAY AGAIN are gone.
 - Checked in the browser (normal and canvas mode) with forced finish and lose. UNVERIFIED: phone, a real full stage, sounds, how the motion feels.
+
+## 2026-11-27 v1.9.177: UPDATE in the settings, ornate stage names, no bat (branch menu-tidy-fonts)
+- UPDATE moved from the main menu into the settings box (a bit taller). When a newer version waits, the cog gets a red ! and the button says NEW VERSION.
+- Stage names are in the ornate title font with a capital first letter (menu cards and end screen). ??? stays in the plain font.
+- Bat removed from the main menu. Menu version number fainter.
+- Checked in the browser (the ! was switched on by hand). UNVERIFIED: phone readability, a real new-version check.

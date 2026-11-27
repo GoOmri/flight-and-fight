@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.176", // bump on every push so the player/Omri can see the build
+  version: "1.9.177", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -65,17 +65,17 @@ export const CONFIG = {
       { theme: 'stage3', name: 'STAGE 3', side: 'L', locked: true, need: 5 },
       { theme: 'stage4', name: 'STAGE 4', side: 'R', locked: true, need: 8 },
       { theme: 'stage5', name: 'STAGE 5', side: 'L', locked: true, need: 11 }] },
-    bubble: { picAlpha: 0.85, picTint: 0xece4ff, lockedTint: 0x9a9a9a, ink: 0xfff3c4, bestInk: 0xf2b632, lockedInk: 0x8a80a8, inset: 0x1a0830, nameShadow: 0x1a0830, /* stage name drop shadow, 1 px lower */ nameSize: 10, medalScale: 0.9, medalGap: 3, bestSize: 8 }, // text and medal sizes inside a stage bubble
+    bubble: { picAlpha: 0.85, picTint: 0xece4ff, lockedTint: 0x9a9a9a, ink: 0xfff3c4, bestInk: 0xf2b632, lockedInk: 0x8a80a8, inset: 0x1a0830, nameShadow: 0x1a0830, /* stage name drop shadow, 2 px lower */ nameSize: 10, titleSize: 18, /* stage names: the ornate title font */ medalScale: 0.9, medalGap: 3, bestSize: 8 }, // text and medal sizes inside a stage bubble
     lockedFill: 0x241c3a, lockedBorder: 0x6b5a90, lockedText: 0x9a90b8, // a locked stage bubble
     gear: { x: 215, y: 24, hit: 32, scale: 1, art: 12, px: 2, color: 0x38b6f5, shade: 0x1c6fb5 }, // settings gear: the medallion picture at scale (the art / px / colour numbers are only for the code-drawn fallback cog)
-    settings: { x: 20, y: 74, w: 200, h: 292, btnW: 60, btnSize: 10, titleSize: 16, ink: 0x3b2410, hintInk: 0x7a5a3a, depth: 100 }, // settings panel (parchment): position, size, button width, text sizes, ink colours
+    settings: { x: 20, y: 58, w: 200, h: 326, btnW: 60, btnSize: 10, titleSize: 16, ink: 0x3b2410, hintInk: 0x7a5a3a, depth: 100 }, // settings panel (parchment): position, size, button width, text sizes, ink colours
     cardW: 200, cardH: 110, cardGap: 18, cardTop: 100, // first card top edge; the second sits cardGap below it
     cardRadius: 10, pressBrighten: 0.15, // pressed: plate fill mixed this much towards white
     numberSize: 32, nameSize: 20, bestSize: 12, // text sizes (px): pixel font looks best at multiples of 4
     medalScale: 2, medalGap: 8,   // medal icons in the row (scale of the art, px between icons)
     updateBtn: { w: 80, textColor: 0xfff3c4 }, // UPDATE button: the button of the Medieval UI pack (recoloured to the game's purple and pink) (assets/ui), 25 px high, w px wide (the middle stretches), dark brown text
-    updateW: 120, updateH: 26, updateTop: 384, updateSize: 8, updateColor: 0x3b1478, updateHotColor: 0xff9a2e, updateHotBorder: 0x1a0830, // UPDATE button: size, top edge, text size, plate colour, plate colour + border when a newer version is waiting
-    versionSize: 8, versionAlpha: 0.9, versionBottom: 9, // version text: distance of its middle from the bottom edge
+    updateW: 120, updateH: 26, updateSize: 8, updateColor: 0x3b1478, updateHotColor: 0xff9a2e, updateHotBorder: 0x1a0830, // UPDATE button (in the settings): size, text size, plate colour, plate colour + border when a newer version is waiting
+    versionSize: 8, versionAlpha: 0.4, versionBottom: 9, // version text: distance of its middle from the bottom edge
     bankX: 6, bankY: 8, bankSize: 8, // saved coin total (top left): left edge, middle height, text size
     // Halloween menu art (assets/menu, Spooktober set). Sky = animated background (cells in a grid of `cols`), scaled to cover the screen width.
     sky: { file: 'menu/sky.png', frameW: 202, frameH: 360, frames: 18, cols: 6, fps: 5, cover: 1.1, scrollPar: 0.08, moon: { box: [86, 45, 30, 30], x: 62, y: 119 } }, // moon = the orange moon painted in the sky: box = where it is in one frame (art px: left, top, w, h), x / y = where its middle sits on screen (between the Forest and the third stage). cover = how much bigger than the screen (room to shift), scrollPar = how far the sky moves per px the stage path is scrolled (0.08 = slow)
@@ -84,7 +84,6 @@ export const CONFIG = {
     decor: [
       { key: 'witch',  file: 'menu/witch.png',  frameW: 61, frameH: 55, frames: 4, fps: 5, x: 52,  y: 266,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 3, bobMs: 3200, swayX: 3, swayDeg: 2, swayMs: 4200, introX: 0, par: 6 },
       { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 198, y: 246,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 6, bobMs: 3400, swayX: 4, swayMs: 5200, fade: [0.7, 1], fadeMs: 2800, par: 8 },
-      { key: 'bat',    file: 'menu/bat.png',    frameW: 32, frameH: 28, frames: 4, fps: 5, x: 160, y: 0,   originX: 0.5, originY: 0,   scale: 1,     bob: 0, bobMs: 1000 },
       { key: 'cat',    file: 'menu/cat.png',    frameW: 21, frameH: 25, frames: 5, fps: 4, x: 208, y: 392, originX: 0.5, originY: 1,   scale: 1.333, depth: 50, bob: 0, bobMs: 1000, par: 6 },
       { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 32,  y: 422, originX: 0.5, originY: 1,   scale: 5 / 3, depth: 50, bob: 0, bobMs: 1000, par: 6 }
     ]
