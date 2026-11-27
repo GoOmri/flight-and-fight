@@ -5,6 +5,12 @@ export const shotsOn = () => { try { return localStorage.getItem(KEY) !== '0'; }
 export const toggleShots = () => { try { localStorage.setItem(KEY, shotsOn() ? '0' : '1'); } catch (e) { /* not saved */ } return shotsOn(); };
 
 const RING = 1; // ring width in art pixels
+// The shot beats between two sizes: its full size and SHRINK game px smaller, STEP_MS each (no smooth swelling).
+const SHRINK = 2, STEP_MS = 130;
+export function boldScale(scene, scale, time, offset) {
+  const across = (scene.textures.get('eb_bold').customData.across || 12) * scale; // the drawn width in game px
+  return Math.floor((time + offset) / STEP_MS) % 2 ? scale * (across - SHRINK) / across : scale;
+}
 
 // Makes the texture 'eb_bold' once from 'eb_pic' (the plain orb stays for "off").
 export function makeBoldShot(scene) {
@@ -31,4 +37,6 @@ export function makeBoldShot(scene) {
     if (near) set(i, 26, 0, 18, 235);
   }
   ctx.putImageData(px, 0, 0); cv.refresh();
+  let l = w, r = 0; for (let i = 0; i < w * h; i++) if (d[i * 4 + 3] > 128) { l = Math.min(l, i % w); r = Math.max(r, i % w); }
+  scene.textures.get('eb_bold').customData.across = r - l + 1; // how wide the shot is actually drawn, ring included (art px)
 }

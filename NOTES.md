@@ -1381,3 +1381,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Cauldron moved down 30 px to the cat's floor line, with its Shop word, glow and tap area.
 - The "!" on the cog is a small pixel mark instead of a smooth circle with a font "!".
 - Checked in the browser (mark switched on by hand). UNVERIFIED: phone.
+
+## 2026-11-27 v1.9.200: enemy shots beat between two sizes (branch shot-two-sizes)
+- Full size (18 px across) and 2 px smaller, 130 ms each, instead of the smooth swell. The small state's hit box is a hair smaller. TUNE switch off = the old shot as before.
+- Checked in the browser (sizes read from the game). UNVERIFIED: how it looks moving, phone.
