@@ -251,7 +251,7 @@ export class MenuScene extends Phaser.Scene {
         const im = add(this.add.image(0, y + 35, 'star_' + (medals[k] ? 'earned' : 'off')).setScale(B.medalScale), y + 35);
         im.x = cx + (j - (n - 1) / 2) * (im.displayWidth + B.medalGap);
       });
-      if (best > 0) add(txt(cx, y + h - 13, 'BEST ' + best, B.bestSize, shadow, 0.5, art ? B.bestInk : P.cyan), y + h - 13);
+      if (best > 0) add(txt(cx, y + h - 13, 'Best ' + best, B.bestSize, shadow, 0.5, art ? B.bestInk : P.cyan), y + h - 13);
     }
     b.complete = !b.locked && goalsOf(nd.theme).every(k => loadMedals(nd.theme)[k]);
     b.halo = art && !b.locked ? this.add.graphics().setVisible(false) : null; // gold edge, shown only on the next stage to play
@@ -369,7 +369,7 @@ export class MenuScene extends Phaser.Scene {
     const ubw = art ? UB.w : M.updateW, ubh = art ? 26 : M.updateH, bx = (W - ubw) / 2, by = y;
     const btn = { btn: true, x: bx - 8, y: by - 4, w: ubw + 16, h: ubh + 8, g: keep(this.add.graphics(), 1), down: false, hot: false, busy: false }; // x / y / w / h = the touch area, bigger than the picture (a thumb needs about 44 phone px)
     btn.img = art ? keep(addSlice(this, bx, by, buttonKey(this), ubw, 26, 10, 10, 0, 0).setOrigin(0, 0), 1) : null;
-    btn.label = keep(this.add.text(W / 2, by + ubh / 2, 'UPDATE', { ...FONT, fontSize: fpx(M.updateSize) + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5), 2);
+    btn.label = keep(this.add.text(W / 2, by + ubh / 2, 'Update', { ...FONT, fontSize: fpx(M.updateSize) + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5), 2);
     btn.draw = () => {
       btn.g.clear();
       if (art) {
@@ -387,13 +387,13 @@ export class MenuScene extends Phaser.Scene {
     btn.draw();
     btn.action = async () => {
       if (btn.busy) return;
-      btn.busy = true; btn.label.setText('UPDATING...'); btn.draw();
+      btn.busy = true; btn.label.setText('Updating...'); btn.draw();
       try { await refreshFiles(); window.location.reload(); }
-      catch (e) { btn.label.setText('NO INTERNET'); btn.draw(); this.time.delayedCall(2200, () => { btn.busy = false; btn.label.setText(btn.hot ? 'NEW VERSION' : 'UPDATE'); btn.draw(); }); }
+      catch (e) { btn.label.setText('No internet'); btn.draw(); this.time.delayedCall(2200, () => { btn.busy = false; btn.label.setText(btn.hot ? 'New version' : 'Update'); btn.draw(); }); }
     };
     latestVersion().then(v => {
       if (!v || v === C.version || !btn.label.active) return; // same version, offline, or the menu was already left
-      btn.hot = true; btn.label.setText('NEW VERSION'); btn.draw();
+      btn.hot = true; btn.label.setText('New version'); btn.draw();
       this.gearBadge.setVisible(true); // the ! on the cog
     });
     return btn;
@@ -427,25 +427,25 @@ export class MenuScene extends Phaser.Scene {
     const pair = (y, options, current, choose) => { // two buttons side by side
       const w = 62, gap = 6, list = options.map(([value, label], i) => mkBtn(mid - w - gap / 2 + i * (w + gap), y, w, i ? 'ui_flat2' : 'ui_flat1', label, () => { choose(value); list.forEach(b => b.draw()); }, () => current() === value));
     };
-    T(mid, S.y + 56, 'CONTROLS');
-    pair(S.y + 66, [['drag', 'DRAG'], ['stick', 'STICK']], () => (C.ship.controls === 'stick' ? 'stick' : 'drag'), v => {
+    T(mid, S.y + 56, 'Controls');
+    pair(S.y + 66, [['drag', 'Drag'], ['stick', 'Stick']], () => (C.ship.controls === 'stick' ? 'stick' : 'drag'), v => {
       C.ship.controls = v;
       try { localStorage.setItem(CTL_KEY, v); } catch (e) { /* not saved */ }
     });
-    T(mid, S.y + 104, 'EFFECTS');
-    pair(S.y + 114, [['full', 'FULL'], ['low', 'LOW']], () => (this.fxLow ? 'low' : 'full'), v => {
+    T(mid, S.y + 104, 'Effects');
+    pair(S.y + 114, [['full', 'Full'], ['low', 'Low']], () => (this.fxLow ? 'low' : 'full'), v => {
       if (v === (this.fxLow ? 'low' : 'full')) return;
       try { localStorage.setItem(FX_KEY, v); } catch (e) { /* not saved */ }
       this.scene.restart({ settings: true }); // the menu is rebuilt with the new setting, then the settings open again
     });
-    this.volBars = [['sound', 'SOUND', S.y + 154], ['music', 'MUSIC', S.y + 193]].map(([key, label, y]) => {
+    this.volBars = [['sound', 'Sound', S.y + 154], ['music', 'Music', S.y + 193]].map(([key, label, y]) => {
       T(mid, y, label);
       const bar = { key, x: Math.round(mid - VOL_W / 2), y: y + 16, g: keep(this.add.graphics(), 1) };
       drawVolBar(bar.g, bar.x, bar.y, volume(key));
       return bar;
     });
     this.panelButtons.push(this.makeUpdate(S.y + 238, keep));
-    mkBtn(mid - 45, S.y + 272, 90, 'ui_flat1', 'CLOSE', () => this.popOut(this.panelBox, this.panelVeil, S.x + S.w / 2, S.y + S.h / 2, () => this.openSettings(false)));
+    mkBtn(mid - 45, S.y + 272, 90, 'ui_flat1', 'Close', () => this.popOut(this.panelBox, this.panelVeil, S.x + S.w / 2, S.y + S.h / 2, () => this.openSettings(false)));
     this.panelVeil = veil; this.panelBox = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(S.depth);
     this.panelObjs = objs;
   }
@@ -460,7 +460,7 @@ export class MenuScene extends Phaser.Scene {
     const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
     if (art) keep(addSlice(this, L.x, y0, 'ui_med-panel', L.w, h, 6, 6, 6, 6).setOrigin(0, 0), 0);
     else { const g = keep(this.add.graphics()); g.fillStyle(P.dark, 0.96).fillRoundedRect(L.x, y0, L.w, h, 10); g.lineStyle(3, P.pink, 1).strokeRoundedRect(L.x, y0, L.w, h, 10); }
-    const tc = 0xffffff, names = { cats: 'ALL CATS', allCoins: 'ALL COINS', killAll: 'ALL ENEMIES', noHit: 'NO HIT' };
+    const tc = 0xffffff, names = { cats: 'All cats', allCoins: 'All coins', killAll: 'All enemies', noHit: 'No hit' };
     keep(this.add.text(W / 2, y0 + 22, titleCase(node ? node.name : ''), { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(0xf2b632), stroke: hex(P.shadow), strokeThickness: 4 }).setOrigin(0.5), 2); // the ornate title font
     keys.forEach((k, i) => {
       const y = y0 + 50 + i * L.rowGap + L.rowGap / 2 - 4, done = saved[k];
@@ -478,7 +478,7 @@ export class MenuScene extends Phaser.Scene {
     }, art2 = this.textures.exists('ui_med-button');
     let box = null;
     const close = () => { if (this.popTween) this.popTween.remove(); objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.modal = false; this.panelButtons = this.settingsButtons; };
-    const back = mk(L.x + 14, 'BACK', () => this.popOut(box, veil, W / 2, y0 + h / 2, close)), play = mk(L.x + L.w - 14 - bw, 'PLAY', () => { close(); this.scene.start('Play', { theme }); });
+    const back = mk(L.x + 14, 'Back', () => this.popOut(box, veil, W / 2, y0 + h / 2, close)), play = mk(L.x + L.w - 14 - bw, 'Play', () => { close(); this.scene.start('Play', { theme }); });
     box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(D);
     this.popIn(box, veil, W / 2, y0 + h / 2);
     this.boxObjs = objs; this.modal = true; this.panelButtons = [play, back];
@@ -520,7 +520,7 @@ export class MenuScene extends Phaser.Scene {
         this.drawTube(r.tube, left, r.tubeY, level / r.u.prices.length);
         r.count.setText(level + '/' + r.u.prices.length);
         const coin = r.buy.coin, text = r.buy.text, mx = right - B.buyW / 2; // the middle of the scroll
-        text.setText(price === null ? 'MAX' : String(price)).setX(mx + (price === null || !coin ? 0 : 6));
+        text.setText(price === null ? 'Max' : String(price)).setX(mx + (price === null || !coin ? 0 : 6));
         if (coin) coin.setVisible(price !== null).setX(text.x - text.width / 2 - 7);
         r.buy.off = price === null || loadBank() < price;
         r.buy.draw();
@@ -540,7 +540,7 @@ export class MenuScene extends Phaser.Scene {
       rows.push(row);
     });
     let box = null;
-    const closeBtn = mkBtn(mid - 45, y0 + h - B.footH + 6, 90, 'CLOSE', () => this.popOut(box, veil, mid, y0 + h / 2, () => {
+    const closeBtn = mkBtn(mid - 45, y0 + h - B.footH + 6, 90, 'Close', () => this.popOut(box, veil, mid, y0 + h / 2, () => {
       objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.modal = false; this.panelButtons = this.settingsButtons;
       this.showBank();
     }));

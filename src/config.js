@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.177", // bump on every push so the player/Omri can see the build
+  version: "1.9.178", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -60,11 +60,11 @@ export const CONFIG = {
     // stops, friction = how fast it stops gliding. Bubbles and line fade out below fadeStart (to nothing at lineBottom = about the witch's hat) and at the top (fadeTop px / fadeTopBubble px).
     path: { x: 120, lineColor: 0xf2b632, lineW: 4, lineTop: 0, lineBottom: 258, fadeStart: 226, fadeTop: 6, fadeTopBubble: 14, viewBottom: 250, gap: 8, bubbleW: 100, bubbleH: 68,
       lookAhead: 3, overMax: 40, step: 71, bottomCy: 192, topStop: 50, friction: 4, nodes: [
-      { theme: 'forest', name: 'FOREST', side: 'L' },
-      { theme: 'swamp', name: 'SWAMP', side: 'R', need: 2 },
-      { theme: 'stage3', name: 'STAGE 3', side: 'L', locked: true, need: 5 },
-      { theme: 'stage4', name: 'STAGE 4', side: 'R', locked: true, need: 8 },
-      { theme: 'stage5', name: 'STAGE 5', side: 'L', locked: true, need: 11 }] },
+      { theme: 'forest', name: 'Forest', side: 'L' },
+      { theme: 'swamp', name: 'Swamp', side: 'R', need: 2 },
+      { theme: 'stage3', name: 'Stage 3', side: 'L', locked: true, need: 5 },
+      { theme: 'stage4', name: 'Stage 4', side: 'R', locked: true, need: 8 },
+      { theme: 'stage5', name: 'Stage 5', side: 'L', locked: true, need: 11 }] },
     bubble: { picAlpha: 0.85, picTint: 0xece4ff, lockedTint: 0x9a9a9a, ink: 0xfff3c4, bestInk: 0xf2b632, lockedInk: 0x8a80a8, inset: 0x1a0830, nameShadow: 0x1a0830, /* stage name drop shadow, 2 px lower */ nameSize: 10, titleSize: 18, /* stage names: the ornate title font */ medalScale: 0.9, medalGap: 3, bestSize: 8 }, // text and medal sizes inside a stage bubble
     lockedFill: 0x241c3a, lockedBorder: 0x6b5a90, lockedText: 0x9a90b8, // a locked stage bubble
     gear: { x: 215, y: 24, hit: 32, scale: 1, art: 12, px: 2, color: 0x38b6f5, shade: 0x1c6fb5 }, // settings gear: the medallion picture at scale (the art / px / colour numbers are only for the code-drawn fallback cog)
@@ -96,9 +96,9 @@ export const CONFIG = {
   // Both multiply with the green potion levels of the stage (weaponLevels).
   shop: {
     upgrades: [
-      { id: 'magnet', name: 'MAGNET', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 100 },
-      { id: 'damage', name: 'DAMAGE', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 2.5 },
-      { id: 'fire', name: 'FIRE SPEED', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 0.65 }
+      { id: 'magnet', name: 'Magnet', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 100 },
+      { id: 'damage', name: 'Damage', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 2.5 },
+      { id: 'fire', name: 'Fire speed', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 0.65 }
     ],
     buyGapMs: 450, // after a purchase, BUY ignores taps this long (a double tap buys only once)
     button: { x: 4, y: 370, w: 56, h: 57 }, // touch area of the cauldron (with SHOP on it) on the menu (keep it clear of UPDATE and the version text)
