@@ -59,3 +59,27 @@ function sliceTexture(scene, key, w, h, l, r, t, b, tint) {
   cv.refresh();
   return out;
 }
+
+// The parchment picture as a bigger PURPLE panel: its 24 px ragged edges and its middle are REPEATED, never stretched (stretching smeared its specks into dashes)
+export function parchmentKey(scene, w, h) {
+  const key = 'ui_parchment_' + w + 'x' + h, B = 24, N = 96, M2 = N - 2 * B;
+  if (scene.textures.exists(key)) return key;
+  const img = scene.textures.get('ui_panel-parchment').getSourceImage(), cv = scene.textures.createCanvas(key, w, h), c = cv.getContext();
+  const tile = (sx, sy, sw, sh, dx, dy, dw, dh) => {
+    for (let y = 0; y < dh; y += sh) for (let x = 0; x < dw; x += sw) { const cw = Math.min(sw, dw - x), ch = Math.min(sh, dh - y); c.drawImage(img, sx, sy, cw, ch, dx + x, dy + y, cw, ch); }
+  };
+  tile(B, B, M2, M2, B, B, w - 2 * B, h - 2 * B);
+  tile(B, 0, M2, B, B, 0, w - 2 * B, B); tile(B, N - B, M2, B, B, h - B, w - 2 * B, B);
+  tile(0, B, B, M2, 0, B, B, h - 2 * B); tile(N - B, B, B, M2, w - B, B, B, h - 2 * B);
+  for (const [sx, sy, dx, dy] of [[0, 0, 0, 0], [N - B, 0, w - B, 0], [0, N - B, 0, h - B], [N - B, N - B, w - B, h - B]]) c.drawImage(img, sx, sy, B, B, dx, dy, B, B);
+  // colour swap only (no pixel moves): each of the picture's 8 colours becomes one of our purples, light stays light and dark stays dark
+  const SWAP = { 0xead4aa: 0x3a1a72, 0xe8b796: 0x452180, 0xe4a672: 0x52288f, 0xc28569: 0x7b43b8, 0xb86f50: 0x6630a0, 0x733e39: 0x2c1058, 0x3e2731: 0x1e0a40, 0x181425: 0x120622 };
+  const px = c.getImageData(0, 0, w, h), d = px.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const to = SWAP[(d[i] << 16) | (d[i + 1] << 8) | d[i + 2]];
+    if (d[i + 3] && to !== undefined) { d[i] = to >> 16; d[i + 1] = (to >> 8) & 255; d[i + 2] = to & 255; }
+  }
+  c.putImageData(px, 0, 0);
+  cv.refresh();
+  return key;
+}
