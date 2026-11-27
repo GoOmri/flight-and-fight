@@ -12,6 +12,7 @@ import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
 import { Tune, tuneEnabled } from '../tune.js';
 import { boom } from '../boom.js';
+import { makeBoldShot, shotsOn } from '../shots.js';
 import { Medals, goalsOf, saveMedals, saveBest } from '../medals.js';
 import { loadBank, addBank, loadLevel, upgradeValue } from '../bank.js';
 
@@ -79,6 +80,7 @@ export class PlayScene extends Phaser.Scene {
 
   create() {
     makeAllTextures(this);
+    makeBoldShot(this); // the enemy shot that stands out (src/shots.js)
     ringSound(null); pauseSound(false); music(this.bg === 'forest' ? 'forest' : null); // only the forest has its own music so far
     if (C.sprites.poof) { // death smoke in the main colour of each enemy (and the chest): a tinted copy of the poof sheet per type, made once (no tint at draw time, so it also works in CANVAS mode)
       const smoke = { ...Object.fromEntries(Object.keys(C.enemies.sprites).map(t => [t, C.enemies.sprites[t].smokeColor !== undefined ? C.enemies.sprites[t].smokeColor : this.mainColour('en_' + t)])), crate: DEATH_TINTS.crate[0] };
@@ -1436,7 +1438,7 @@ export class PlayScene extends Phaser.Scene {
     const hit = C.enemyBullet.hitSize;
     if (C.feel.fireFlashScale > 0) this.ring(e.x, e.y + 14, 0xffffff, C.feel.fireFlashScale, C.feel.fireFlashMs, C.feel.fireFlashAlpha); // telegraph
     for (let i = 0; i < n; i++) {
-      const b = this.spawn(this.enemyBullets, this.textures.exists('eb_pic') ? 'eb_pic' : 'ebullet', e.x, e.y + 14, this.textures.exists('eb_pic') ? C.enemyBullet.scale : 2);
+      const b = this.spawn(this.enemyBullets, this.textures.exists('eb_pic') ? (shotsOn() && this.textures.exists('eb_bold') ? 'eb_bold' : 'eb_pic') : 'ebullet', e.x, e.y + 14, this.textures.exists('eb_pic') ? C.enemyBullet.scale : 2);
       if (!b) return;
       b.setDepth(C.enemyBullet.depth); // above all play effects, below the HUD
       b.body.setSize(hit, hit); // only the bright core hurts
@@ -1515,7 +1517,7 @@ export class PlayScene extends Phaser.Scene {
 
   cullOffscreen(time) {
     this.bullets.children.iterate(b => { if (b && b.active && b.y < -20) this.kill(b); });
-    const pulse = C.feel.enemyShotPulse, pm = C.feel.enemyShotPulseMs;
+    const bold = shotsOn(), pulse = C.feel.enemyShotPulse * (bold ? 1.4 : 1), pm = C.feel.enemyShotPulseMs * (bold ? 0.55 : 1); // the new shots beat faster and a bit stronger
     this.enemyBullets.children.iterate(b => {
       if (b && b.active && pulse > 0) b.setScale((this.textures.exists('eb_pic') ? C.enemyBullet.scale : PX) * (1 + pulse * Math.sin(time * TAU / pm + b.x * 0.2))); // gentle swell around the shot's OWN size (it used to reset every shot to 3x)
       if (b && b.active && (b.y > H + 20 || b.y < -20 || b.x < -20 || b.x > W + 20)) this.kill(b);
