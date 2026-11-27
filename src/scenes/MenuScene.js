@@ -400,8 +400,23 @@ export class MenuScene extends Phaser.Scene {
     return btn;
   }
 
+  // The close button of every box: a small scroll with an X in the top right corner (its tap area is bigger than the picture).
+  // (right, top) = the box's own right edge and top; keep = the box's way of collecting its objects.
+  closeX(right, top, keep, action) {
+    const w = 24, x = right - w - 8, y = top + 8, art = this.textures.exists('ui_med-button');
+    const bt = { btn: true, x: x - 8, y: y - 7, w: w + 16, h: 40, down: false, shown: true, action };
+    bt.img = art ? keep(addSlice(this, x, y, 'ui_med-button', w, 26, 10, 10, 0, 0).setOrigin(0, 0), 1) : null;
+    const g = keep(this.add.graphics(), 2), cx = x + w / 2, cy = y + 13; // a drawn pixel X (the text font's X reads as another letter)
+    g.fillStyle(art ? Phaser.Display.Color.HexStringToColor(BTN_INK).color : P.cream, 1);
+    for (let i = 0; i < 7; i++) g.fillRect(cx - 4 + i, cy - 4 + i, 2, 2).fillRect(cx + 2 - i, cy - 4 + i, 2, 2);
+    bt.label = g;
+    bt.draw = () => { const sink = bt.down ? 1 : 0; if (bt.img) bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(y + sink); g.setY(sink); };
+    bt.draw();
+    return bt;
+  }
+
   // The settings panel (closed at first), everything centred: CONTROLS (drag / stick) and EFFECTS (full / low) as two buttons side by side,
-  // SOUND and MUSIC volume sliders (music at 0: your own music or video can play alone), UPDATE, CLOSE. All saved. (Tune panel: 5 taps on the version number.)
+  // SOUND and MUSIC volume sliders (music at 0: your own music or video can play alone), UPDATE; X closes. All saved. (Tune panel: 5 taps on the version number.)
   makeSettings() {
     const S = M.settings, objs = [], mid = S.x + S.w / 2, ink = hex(S.ink);
     const keep = (o, dz = 0) => { o.setDepth(S.depth + dz).setVisible(false); objs.push(o); return o; };
@@ -446,17 +461,17 @@ export class MenuScene extends Phaser.Scene {
       return bar;
     });
     this.panelButtons.push(this.makeUpdate(S.y + 238, keep));
-    mkBtn(mid - 45, S.y + 272, 90, 'ui_flat1', 'Close', () => this.popOut(this.panelBox, this.panelVeil, S.x + S.w / 2, S.y + S.h / 2, () => this.openSettings(false)));
+    this.panelButtons.push(this.closeX(S.x + S.w, S.y, keep, () => this.popOut(this.panelBox, this.panelVeil, S.x + S.w / 2, S.y + S.h / 2, () => this.openSettings(false))));
     this.panelVeil = veil; this.panelBox = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(S.depth);
     this.panelObjs = objs;
   }
 
-  // The stage box: tap a stage, see its picture and name, its goals with the stars you already have, then a big Play (small Back).
+  // The stage box: tap a stage, see its picture and name, its goals with the stars you already have, then a big Play; X closes.
   // The same purple parchment as the shop, settings and end screen.
   openGoals(theme) {
     if (this.modal) return;
     const L = C.lightbox, node = M.path.nodes.find(n => n.theme === theme), keys = goalsOf(theme), saved = loadMedals(theme), objs = [];
-    const D = L.depth, h = 88 + L.btnGap + L.picH + keys.length * L.rowGap, y0 = Math.round((H - h) / 2), art = this.textures.exists('ui_panel-parchment');
+    const D = L.depth, h = 70 + L.picH + keys.length * L.rowGap, y0 = Math.round((H - h) / 2), art = this.textures.exists('ui_panel-parchment');
     const keep = (o, dz = 0) => { o.setDepth(D + dz); objs.push(o); return o; };
     const T = (x, y, s, size, align, color) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(align, 0.5), 2);
     const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
@@ -485,7 +500,7 @@ export class MenuScene extends Phaser.Scene {
     const close = () => { if (this.popTween) this.popTween.remove(); objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.modal = false; this.panelButtons = this.settingsButtons; };
     const by = y0 + 24 + L.picH + keys.length * L.rowGap;
     const play = mk(by, L.playW, L.playSize, 'Play', () => { close(); this.scene.start('Play', { theme }); });
-    const back = mk(by + 26 + L.btnGap, L.backW, 8, 'Back', () => this.popOut(box, veil, W / 2, y0 + h / 2, close));
+    const back = this.closeX(L.x + L.w, y0, keep, () => this.popOut(box, veil, W / 2, y0 + h / 2, close));
     box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(D);
     this.popIn(box, veil, W / 2, y0 + h / 2);
     this.boxObjs = objs; this.modal = true; this.panelButtons = [play, back];
@@ -547,11 +562,10 @@ export class MenuScene extends Phaser.Scene {
       rows.push(row);
     });
     let box = null;
-    const closeBtn = mkBtn(mid - 45, y0 + h - B.footH + 6, 90, 'Close', () => this.popOut(box, veil, mid, y0 + h / 2, () => {
+    buttons.push(this.closeX(B.x + B.w, y0, keep, () => this.popOut(box, veil, mid, y0 + h / 2, () => {
       objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.modal = false; this.panelButtons = this.settingsButtons;
       this.showBank();
-    }));
-    closeBtn.draw();
+    })));
     refresh();
     box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(B.depth);
     this.popIn(box, veil, mid, y0 + h / 2);

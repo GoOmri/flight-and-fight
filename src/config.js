@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.185", // bump on every push so the player/Omri can see the build
+  version: "1.9.186", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -68,7 +68,7 @@ export const CONFIG = {
     bubble: { picAlpha: 0.85, picTint: 0xece4ff, lockedTint: 0x9a9a9a, ink: 0xfff3c4, bestInk: 0xf2b632, lockedInk: 0x8a80a8, inset: 0x1a0830, nameShadow: 0x1a0830, /* stage name drop shadow, 2 px lower */ nameSize: 10, titleSize: 18, /* stage names: the ornate title font */ medalScale: 0.9, medalGap: 3, bestPx: 2 }, /* best score on a stage card: canvas px per art pixel (2 = a step below the smallest other text) */ // text and medal sizes inside a stage bubble
     lockedFill: 0x241c3a, lockedBorder: 0x6b5a90, lockedText: 0x9a90b8, // a locked stage bubble
     gear: { x: 215, y: 24, hit: 32, scale: 1, art: 12, px: 2, color: 0x38b6f5, shade: 0x1c6fb5 }, // settings gear: the medallion picture at scale (the art / px / colour numbers are only for the code-drawn fallback cog)
-    settings: { x: 20, y: 58, w: 200, h: 326, btnW: 60, btnSize: 10, titleSize: 16, ink: 0x3b2410, hintInk: 0x7a5a3a, depth: 100 }, // settings panel (parchment): position, size, button width, text sizes, ink colours
+    settings: { x: 20, y: 74, w: 200, h: 292, btnW: 60, btnSize: 10, titleSize: 16, ink: 0x3b2410, hintInk: 0x7a5a3a, depth: 100 }, // settings panel (parchment): position, size, button width, text sizes, ink colours
     cardW: 200, cardH: 110, cardGap: 18, cardTop: 100, // first card top edge; the second sits cardGap below it
     cardRadius: 10, pressBrighten: 0.15, // pressed: plate fill mixed this much towards white
     numberSize: 32, nameSize: 20, bestSize: 12, // text sizes (px): pixel font looks best at multiples of 4
@@ -106,7 +106,7 @@ export const CONFIG = {
     // soft gold glow behind the cauldron while at least one upgrade level can be bought: middle point, half width / height (px), colour,
     // alpha at the bright and the dim end of the pulse, ms for one way (dim to bright)
     glow: { x: 32, y: 402, rx: 30, ry: 30, color: 0xffd040, alphaMax: 0.9, alphaMin: 0.35, ms: 900 },
-    panel: { x: 14, w: 212, headH: 74, rowH: 50, footH: 46, buyW: 54, depth: 100,
+    panel: { x: 14, w: 212, headH: 74, rowH: 50, footH: 14, buyW: 54, depth: 100,
       // upgrade level = a glowing potion tube: width / height (px) and colours (rim, empty glass, liquid, top shine, surface edge, bubbles)
       tube: { w: 120, h: 12, rim: 0xc9b8ff, empty: 0x1a0830, liquid: 0xff5ac8, shine: 0xffc2ea, edge: 0xffe3f7, bubble: 0xffd6f2 } } // the shop box: left edge, width, heights of the top part / one row / bottom part, BUY width, level bar pips
   },

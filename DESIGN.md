@@ -562,3 +562,18 @@ Where this differs from the older "Hut and cauldron loop" (recipes, ingredients,
 - A new player has no upgrades: with tougher enemies the first runs must still be beatable and fun.
 - Damage upgrades stack with the in-stage potions; with fire speed and all spells at once, the stages and the no-hit star can get easy.
 - Art: art-packs/effects-vfx/free-spell-effects-24 lists lightning and shield effects (check each effect's licence in its index.json; not previewed).
+
+## UI rulebook (agreed 2026-11-27, applied box by box)
+Text:
+- Title (box and stage names): ornate font (DungeonFont), gold.
+- Normal (rows, buttons, numbers): Alagard, cream; dark brown on buttons.
+- Small (best score, version, "New"): Alagard, smallest size.
+- Capital first letter only, never all caps.
+- Gold = titles and coins. Faded = not earned / off. Red = warning or new version only.
+Buttons (two pictures by Omri: the rolled scroll, and the flat button he made from it. PROPOSED, not agreed: scroll = does something and moves on; flat = picks or buys):
+- Main (Play, Again, Continue): one per box, biggest.
+- Normal (Options, price, Update): same scroll, smaller.
+- Close: a small X in the top right corner of every box (MenuScene closeX). Not red.
+- Danger (erases something, leaves a run): red words.
+Boxes: purple ragged parchment; title at the top, content, main button; the same space around the edges.
+Status: close X done (stage box, shop, settings). Still to apply: agree the two button uses, Danger red, equal margins, text sizes.
