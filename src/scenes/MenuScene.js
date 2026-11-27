@@ -340,7 +340,8 @@ export class MenuScene extends Phaser.Scene {
     const tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h;
     const t = tmp.getContext('2d'), pic = this.textures.get('stage_' + theme).getSourceImage();
     t.imageSmoothingEnabled = false; t.globalAlpha = M.bubble.picAlpha;
-    t.drawImage(pic, 4, 4, w - 8, h - 8);
+    const band = Math.min(pic.height, (h - 8) * pic.width / (w - 8)), top = Math.round((pic.height - band) * 0.7); // a short tile shows a band of the picture (a bit below the middle), not a squashed one
+    t.drawImage(pic, 0, top, pic.width, band, 4, 4, w - 8, h - 8);
     const px = c.getImageData(0, 0, w, h), d = px.data, p = t.getImageData(0, 0, w, h).data;
     const INNER = new Set([0x3a1a72, 0x452180, 0x52288f]), tint = M.bubble.picTint, k = [(tint >> 16) / 255, ((tint >> 8) & 255) / 255, (tint & 255) / 255];
     const seen = new Uint8Array(w * h), todo = [(h >> 1) * w + (w >> 1)];
@@ -455,7 +456,7 @@ export class MenuScene extends Phaser.Scene {
   openGoals(theme) {
     if (this.modal) return;
     const L = C.lightbox, node = M.path.nodes.find(n => n.theme === theme), keys = goalsOf(theme), saved = loadMedals(theme), objs = [];
-    const D = L.depth, h = 214 + keys.length * L.rowGap, y0 = Math.round((H - h) / 2), art = this.textures.exists('ui_panel-parchment');
+    const D = L.depth, h = 94 + L.picH + keys.length * L.rowGap, y0 = Math.round((H - h) / 2), art = this.textures.exists('ui_panel-parchment');
     const keep = (o, dz = 0) => { o.setDepth(D + dz); objs.push(o); return o; };
     const T = (x, y, s, size, align, color) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(align, 0.5), 2);
     const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
@@ -463,10 +464,10 @@ export class MenuScene extends Phaser.Scene {
     else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(L.x, y0, L.w, h, 10), 0);
     // the stage picture in its own ragged frame, the name on it
     if (art && this.textures.exists('stage_' + theme)) keep(this.add.image(W / 2, y0 + 14, this.tilePicture(theme, L.picW, L.picH)).setOrigin(0.5, 0), 1);
-    keep(this.add.text(W / 2, y0 + 36, titleCase(node ? node.name : ''), { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(0xf2b632), stroke: hex(P.shadow), strokeThickness: 4 }).setOrigin(0.5), 2); // the ornate title font
+    keep(this.add.text(W / 2, y0 + 14 + L.picH / 2, titleCase(node ? node.name : ''), { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(0xf2b632), stroke: hex(P.shadow), strokeThickness: 4 }).setOrigin(0.5), 2); // the ornate title font
     const names = { cats: 'Cats', allCoins: 'Coins', killAll: 'Enemies', noHit: 'No hit' };
     keys.forEach((k, i) => { // a goal not earned yet: the same icon, faded
-      const y = y0 + 150 + i * L.rowGap, done = saved[k];
+      const y = y0 + 30 + L.picH + i * L.rowGap, done = saved[k];
       keep(this.add.image(L.x + 34, y, 'goal_' + k + '_earned').setScale(goalScale(this, k, L.iconBox)).setAlpha(done ? 1 : L.dim), 2);
       T(L.x + 52, y, names[k], L.textSize, 0, done ? P.cream : 0xa89cd0);
       keep(this.add.image(L.x + L.w - 30, y, done ? 'star_earned' : 'star_off').setScale(1), 2);
@@ -482,7 +483,7 @@ export class MenuScene extends Phaser.Scene {
     };
     let box = null;
     const close = () => { if (this.popTween) this.popTween.remove(); objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.modal = false; this.panelButtons = this.settingsButtons; };
-    const by = y0 + 144 + keys.length * L.rowGap;
+    const by = y0 + 24 + L.picH + keys.length * L.rowGap;
     const play = mk(by, L.playW, 14, 'Play', () => { close(); this.scene.start('Play', { theme }); });
     const back = mk(by + 32, L.backW, 8, 'Back', () => this.popOut(box, veil, W / 2, y0 + h / 2, close));
     box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(D);
