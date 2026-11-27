@@ -1,5 +1,5 @@
 import { popIn, popOut } from '../popin.js';
-import { buttonKey, addSlice, parchmentKey, BTN_INK } from '../buttons.js';
+import { buttonKey, addSlice, parchmentKey, BTN_INK, BTN_HOT } from '../buttons.js';
 import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
 import { drawVolBar, volFrom, volHit, VOL_W } from '../volbar.js';
 import { CONFIG as C, z, hex, snap4 } from '../config.js';
@@ -884,7 +884,8 @@ export class PlayScene extends Phaser.Scene {
       if (this.textures.exists('ui_med-button')) ui.push(addSlice(this, W / 2 - B.btnW / 2, y - 12, buttonKey(this), B.btnW, 26, 10, 10, 0, 0).setOrigin(0, 0).setDepth(71));
       else { const gg = this.add.graphics().setDepth(71); drawPlate(gg, W / 2 - B.btnW / 2, y - B.btnH / 2, B.btnW, B.btnH, { fill: B.fill, border: B.border, down: false }); ui.push(gg); }
       const art = this.textures.exists('ui_med-button');
-      ui.push(this.add.text(W / 2, y + C.btnTextDy, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: art ? BTN_INK : CR, stroke: hex(P.shadow), strokeThickness: art ? 0 : 3, align: 'center' }).setOrigin(0.5).setDepth(72));
+      const risky = id === 'restart' || id === 'menu'; // these throw the run away: red words
+      ui.push(this.add.text(W / 2, y + C.btnTextDy, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: risky ? BTN_HOT : art ? BTN_INK : CR, stroke: hex(P.shadow), strokeThickness: art ? 0 : 3, align: 'center' }).setOrigin(0.5).setDepth(72));
       return { id, x: W / 2, y, w: B.btnW, h: B.btnH };
     });
     this.pauseUi.box.add(ui);

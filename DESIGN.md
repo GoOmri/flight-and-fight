@@ -576,4 +576,4 @@ Buttons (two pictures by Omri: the rolled scroll, and the flat button he made fr
 - Close: a small X in the top right corner of every box (MenuScene closeX). Not red.
 - Danger (erases something, leaves a run): red words.
 Boxes: purple ragged parchment; title at the top, content, main button; the same space around the edges.
-Status: close X done (stage box, shop, settings). Still to apply: Danger red, equal margins, text sizes.
+Status: close X done (stage box, shop, settings). Danger red done on the pause screen. Still to apply: equal margins, text sizes.
