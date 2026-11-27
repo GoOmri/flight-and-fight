@@ -1281,3 +1281,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Same ragged purple box as the other menus, the stage picture on top with the name, shorter rows (Cats, Coins, Enemies, No hit), goals not earned yet = the real icon faded (the white blobs are gone here), big Play and a small Back under it.
 - The icons at the top of the screen during play are unchanged.
 - Checked in the browser (both stages, normal and canvas, Back and Play). UNVERIFIED: phone.
+
+## 2026-11-27 v1.9.180: shorter picture and bigger name in the stage box (branch stage-box-picture)
+- The picture is a band (not squashed), the stage name is 36 instead of 24, in the middle of it.
+- Checked in the browser (Forest). UNVERIFIED: phone, Swamp box.
