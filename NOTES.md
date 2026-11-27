@@ -1324,3 +1324,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Shop names, levels, prices and coin total, and the main menu coin counter, use the small text size.
 - The end screen coin number is unchanged.
 - Checked in the browser. UNVERIFIED: phone readability.
+
+## 2026-11-27 v1.9.189: white text, end screen like the stage box, smaller tune and version text (branch white-text-endscreen)
+- All yellow text is white (pictures, the gold path line and Stage Clear/Game Over title colours unchanged).
+- End screen: stage picture with the title, one row per goal (Cats, Coins, Enemies, No hit) with its count and its own star, Score and Bank, Again and Menu.
+- Tune panel text and both version numbers use the small size. The stage tile painter moved to src/buttons.js.
+- Checked in the browser (clear, game over, menu, stage box, tune MOVE tab). UNVERIFIED: phone, a real full stage.

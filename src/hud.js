@@ -49,7 +49,7 @@ export class Hud {
       im.x = gx; gx += im.displayWidth + H.medalGap; return im;
     });
     this.medalLook = this.goalKeys.map(() => 'pending');
-    this.versionText = scene.add.text(H.margin, H.margin + H.medalSize + H.versionGap, 'v' + C.version, { ...FONT, fontSize: fpx(H.versionSize) + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: H.versionStroke }).setAlpha(H.versionAlpha).setDepth(depth);
+    this.versionText = scene.add.text(H.margin, H.margin + H.medalSize + H.versionGap, 'v' + C.version, { ...FONT, fontSize: C.smallPx + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: H.versionStroke }).setAlpha(H.versionAlpha).setDepth(depth);
 
     // CENTRE: score, weapon bars under it
     this.scoreText = scene.add.text(W / 2, H.margin, '0', { ...FONT, fontSize: fpx(z(18)) + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: z(4) }).setOrigin(0.5, 0.5).setDepth(depth);

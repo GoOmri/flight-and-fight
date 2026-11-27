@@ -565,11 +565,11 @@ Where this differs from the older "Hut and cauldron loop" (recipes, ingredients,
 
 ## UI rulebook (agreed 2026-11-27, applied box by box)
 Text:
-- Title (box and stage names): ornate font (DungeonFont), gold.
-- Normal (rows, buttons, numbers): Alagard, cream; dark brown on buttons.
+- Title (box and stage names): ornate font (DungeonFont), white.
+- Normal (rows, buttons, numbers): Alagard, white; dark brown on buttons.
 - Small (best score, version, "New"): Alagard, smallest size.
 - Capital first letter only, never all caps.
-- Gold = titles and coins. Faded = not earned / off. Red = warning or new version only.
+- No yellow text anywhere (Omri, 2026-11-27); coin and star pictures stay gold. Faded = not earned / off. Red = warning or new version only.
 Buttons (two pictures by Omri: the rolled scroll, and the flat button he made from it. agreed: scroll = does something or takes you somewhere; flat = picks or buys, you stay):
 - Main (Play, Again, Continue): one per box, biggest.
 - Normal (Options, price, Update): same scroll, smaller.
