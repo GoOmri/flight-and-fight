@@ -1732,7 +1732,7 @@ export class PlayScene extends Phaser.Scene {
     else add(this.add.rectangle(E.x, y0, E.w, h, 0x3a1a72).setOrigin(0, 0));
     add(this.add.text(mid, y0 + 28, titleCase(title), { ...FONT_TITLE, fontSize: '28px', color: col, stroke: hex(P.shadow), strokeThickness: z(5) }).setOrigin(0.5));
     const node = C.menu.path.nodes.find(n => n.theme === this.stageTheme);
-    t(mid, y0 + 50, node ? node.name : '', 10, GOLD);
+    add(this.add.text(mid, y0 + 52, node ? titleCase(node.name) : '', { ...FONT_TITLE, fontSize: C.menu.bubble.titleSize + 'px', color: GOLD, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5)); // the stage name, ornate font
     let y = y0 + 80, starsDone = 0;
     if (stats) {
       const V = C.coin.value, hits = this.hitsTaken;

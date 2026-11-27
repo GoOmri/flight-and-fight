@@ -94,45 +94,15 @@ export class MenuScene extends Phaser.Scene {
     };
     this.showBank();
 
-    // ---- UPDATE button: gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser or the installed app).
-    // When the menu opens it asks the server for the newest version number; if it is newer the button turns orange.
-    const art = this.textures.exists('ui_med-button'), UB = M.updateBtn; // the tan button of the Medieval UI pack (9-slice: the round ends stay, the middle stretches); without the picture the old drawn plate is used
-    const ubw = art ? UB.w : M.updateW, ubh = art ? 26 : M.updateH, bx = (W - ubw) / 2, by = M.updateTop;
-    const btn = { btn: true, x: bx - 8, y: by - 4, w: ubw + 16, h: ubh + 8, g: this.add.graphics(), down: false, hot: false, busy: false }; // x / y / w / h = the touch area, bigger than the picture (a thumb needs about 44 phone px)
-    btn.img = art ? addSlice(this, bx, by, buttonKey(this), ubw, 26, 10, 10, 0, 0).setOrigin(0, 0) : null;
-    btn.label = this.add.text(W / 2, by + ubh / 2, 'UPDATE', { ...FONT, fontSize: fpx(M.updateSize) + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5);
-    btn.draw = () => {
-      btn.g.clear();
-      if (art) {
-        const w = Math.max(ubw, 2 * Math.ceil((btn.label.width + 28) / 2)), x = (W - w) / 2; // the button widens when its text needs it (the scroll ends take about 14 px each side)
-        btn.img.setSize(w, 26).setX(x); btn.x = x - 8; btn.w = w + 16; // normal, pressed, or hover (a newer version is waiting); dark brown text
-        btn.img.setTint(btn.down ? 0xbbbbbb : 0xffffff).setY(by + (btn.down ? 1 : 0)); // pressed: darker and 1 px lower
-        btn.label.setColor(btn.hot ? BTN_HOT : BTN_INK).setStroke(BTN_INK, 0); // a newer version waiting: red text
-        btn.label.setY(by + ubh / 2 + (btn.down ? 1 : 0));
-        return;
-      }
-      const sink = drawPlate(btn.g, bx, by, M.updateW, M.updateH, { fill: btn.hot ? M.updateHotColor : M.updateColor, border: btn.hot ? M.updateHotBorder : P.pink, down: btn.down, radius: 8 });
-      btn.label.setColor(btn.hot ? hex(P.dark) : hex(P.cream)).setStroke(hex(P.shadow), btn.hot ? 0 : 3); // dark text on the orange plate
-      btn.label.setY(by + (M.updateH - M.plateDrop) / 2 + sink + 1);
-    };
-    btn.draw();
-    btn.action = async () => {
-      if (btn.busy) return;
-      btn.busy = true; btn.label.setText('UPDATING...'); btn.draw();
-      try { await refreshFiles(); window.location.reload(); }
-      catch (e) { btn.label.setText('NO INTERNET'); btn.draw(); this.time.delayedCall(2200, () => { btn.busy = false; btn.label.setText(btn.hot ? 'NEW VERSION' : 'UPDATE'); btn.draw(); }); }
-    };
-    latestVersion().then(v => {
-      if (!v || v === C.version || !btn.label.active) return; // same version, offline, or the menu was already left
-      btn.hot = true; btn.label.setText('NEW VERSION'); btn.draw();
-    });
-
     // ---- gear (top right): opens the settings panel
     const GE = M.gear, gear = { btn: true, x: GE.x - GE.hit / 2, y: GE.y - GE.hit / 2, w: GE.hit, h: GE.hit, down: false };
     gear.img = this.textures.exists('ui_gear') ? this.add.image(GE.x, GE.y, 'ui_gear').setScale(GE.scale) : null; // the medallion; without the picture a code-drawn cog
     if (!gear.img) { gear.g = this.add.graphics(); this.drawGear(gear.g, GE); }
     gear.draw = () => (gear.img || gear.g).setAlpha(gear.down ? 0.65 : 1);
     gear.action = () => this.openSettings(true);
+    // a red ! on the cog while a newer version is waiting (see makeUpdate)
+    const bang = this.add.graphics().fillStyle(0xc0331c, 1).fillCircle(0, 0, 6).lineStyle(1, P.cream, 1).strokeCircle(0, 0, 6);
+    this.gearBadge = this.add.container(GE.x + 9, GE.y - 9, [bang, txt(0, 0, '!', 10, 0)]).setVisible(false);
 
     // ---- the cauldron (bottom left) and its SHOP word open the shop
     const boiler = this.decorItems.find(i => i.key === 'boiler'), shop = { ...C.shop.button, down: false };
@@ -141,7 +111,7 @@ export class MenuScene extends Phaser.Scene {
 
     this.modal = false; this.boxObjs = null; // boxObjs: set while the goals box or the shop is open
     this.buyAt = -Infinity; // time of the last purchase
-    this.buttons = [...this.bubbles.filter(b => !b.locked), btn, gear, shop];
+    this.buttons = [...this.bubbles.filter(b => !b.locked), gear, shop];
     this.makeSettings();
     this.settingsButtons = this.panelButtons;
     if (this.scene.settings.data && this.scene.settings.data.settings) { this.scene.settings.data = {}; this.openSettings(true, false); } // reopened after EFFECTS changed: no pop
@@ -257,6 +227,7 @@ export class MenuScene extends Phaser.Scene {
     const img = art ? this.add.image(x, y, pictured ? this.tilePicture(nd.theme, w, h) : this.parchment(w, h)).setOrigin(0, 0) : null;
     const add = (o, oy) => { b.items.push({ o, oy }); return o; }; // texts and medals sink with the plate when pressed
     const B = M.bubble, cx = x + w / 2, ink = art ? B.ink : P.cream, shadow = 0; // no outline: the thin font stays thin
+    const title = (ty, s, color) => this.add.text(cx, ty, titleCase(s), { ...FONT_TITLE, fontSize: B.titleSize + 'px', color: hex(color) }).setOrigin(0.5); // stage names
     b.draw = () => {
       g.clear();
       const sink = art ? (b.down ? 1 : 0) : drawPlate(g, x, y, w, h, { fill: b.locked ? M.lockedFill : P.purple, border: b.locked ? M.lockedBorder : P.pink, down: b.down, radius: M.cardRadius });
@@ -267,14 +238,14 @@ export class MenuScene extends Phaser.Scene {
       b.items.forEach(i => i.o.setY(i.oy + sink));
     };
     if (b.locked) {
-      add(txt(cx, y + 24, nd.named ? nd.name : '???', B.nameSize, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 24);
+      add(nd.named ? title(y + 24, nd.name, art ? B.lockedInk : M.lockedText) : txt(cx, y + 24, '???', B.nameSize, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 24); // '???' stays in the plain font (unreadable in the ornate one)
       if (nd.need) { // the stars still needed: a small star and a number, no words
         const star = add(this.add.image(cx - 12, y + 45, 'star_earned').setScale(0.7).setTint(0x9a9a9a), y + 45);
         add(txt(cx + 10, y + 45, String(nd.need), B.nameSize + 2, shadow, 0.5, art ? B.lockedInk : M.lockedText), y + 45);
       }
     } else {
-      add(txt(cx, y + 16, nd.name, B.nameSize, shadow, 0.5, B.nameShadow), y + 16); // drop shadow: a dark copy 2 px lower, behind the name
-      add(txt(cx, y + 14, nd.name, B.nameSize, shadow, 0.5, ink), y + 14);
+      add(title(y + 16, nd.name, B.nameShadow), y + 16); // drop shadow: a dark copy 2 px lower, behind the name
+      add(title(y + 14, nd.name, ink), y + 14);
       const medals = loadMedals(nd.theme), best = loadBest(nd.theme), keys = goalsOf(nd.theme), n = keys.length;
       keys.forEach((k, j) => {
         const im = add(this.add.image(0, y + 35, 'star_' + (medals[k] ? 'earned' : 'off')).setScale(B.medalScale), y + 35);
@@ -390,8 +361,46 @@ export class MenuScene extends Phaser.Scene {
     return key;
   }
 
+  // The UPDATE button (in the settings): gets fresh copies of all game files and reloads (also fixes an old saved copy in the browser
+  // or the installed app). When the menu opens it asks the server for the newest version number; if it is newer, the button turns
+  // red and the cog gets a !.
+  makeUpdate(y, keep) {
+    const art = this.textures.exists('ui_med-button'), UB = M.updateBtn; // the tan button of the Medieval UI pack (9-slice: the round ends stay, the middle stretches); without the picture the old drawn plate is used
+    const ubw = art ? UB.w : M.updateW, ubh = art ? 26 : M.updateH, bx = (W - ubw) / 2, by = y;
+    const btn = { btn: true, x: bx - 8, y: by - 4, w: ubw + 16, h: ubh + 8, g: keep(this.add.graphics(), 1), down: false, hot: false, busy: false }; // x / y / w / h = the touch area, bigger than the picture (a thumb needs about 44 phone px)
+    btn.img = art ? keep(addSlice(this, bx, by, buttonKey(this), ubw, 26, 10, 10, 0, 0).setOrigin(0, 0), 1) : null;
+    btn.label = keep(this.add.text(W / 2, by + ubh / 2, 'UPDATE', { ...FONT, fontSize: fpx(M.updateSize) + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5), 2);
+    btn.draw = () => {
+      btn.g.clear();
+      if (art) {
+        const w = Math.max(ubw, 2 * Math.ceil((btn.label.width + 28) / 2)), x = (W - w) / 2; // the button widens when its text needs it (the scroll ends take about 14 px each side)
+        btn.img.setSize(w, 26).setX(x); btn.x = x - 8; btn.w = w + 16; // normal, pressed, or hover (a newer version is waiting); dark brown text
+        btn.img.setTint(btn.down ? 0xbbbbbb : 0xffffff).setY(by + (btn.down ? 1 : 0)); // pressed: darker and 1 px lower
+        btn.label.setColor(btn.hot ? BTN_HOT : BTN_INK).setStroke(BTN_INK, 0); // a newer version waiting: red text
+        btn.label.setY(by + ubh / 2 + (btn.down ? 1 : 0));
+        return;
+      }
+      const sink = drawPlate(btn.g, bx, by, M.updateW, M.updateH, { fill: btn.hot ? M.updateHotColor : M.updateColor, border: btn.hot ? M.updateHotBorder : P.pink, down: btn.down, radius: 8 });
+      btn.label.setColor(btn.hot ? hex(P.dark) : hex(P.cream)).setStroke(hex(P.shadow), btn.hot ? 0 : 3); // dark text on the orange plate
+      btn.label.setY(by + (M.updateH - M.plateDrop) / 2 + sink + 1);
+    };
+    btn.draw();
+    btn.action = async () => {
+      if (btn.busy) return;
+      btn.busy = true; btn.label.setText('UPDATING...'); btn.draw();
+      try { await refreshFiles(); window.location.reload(); }
+      catch (e) { btn.label.setText('NO INTERNET'); btn.draw(); this.time.delayedCall(2200, () => { btn.busy = false; btn.label.setText(btn.hot ? 'NEW VERSION' : 'UPDATE'); btn.draw(); }); }
+    };
+    latestVersion().then(v => {
+      if (!v || v === C.version || !btn.label.active) return; // same version, offline, or the menu was already left
+      btn.hot = true; btn.label.setText('NEW VERSION'); btn.draw();
+      this.gearBadge.setVisible(true); // the ! on the cog
+    });
+    return btn;
+  }
+
   // The settings panel (closed at first), everything centred: CONTROLS (drag / stick) and EFFECTS (full / low) as two buttons side by side,
-  // SOUND and MUSIC volume sliders (music at 0: your own music or video can play alone), CLOSE. All saved. (Tune panel: 5 taps on the version number.)
+  // SOUND and MUSIC volume sliders (music at 0: your own music or video can play alone), UPDATE, CLOSE. All saved. (Tune panel: 5 taps on the version number.)
   makeSettings() {
     const S = M.settings, objs = [], mid = S.x + S.w / 2, ink = hex(S.ink);
     const keep = (o, dz = 0) => { o.setDepth(S.depth + dz).setVisible(false); objs.push(o); return o; };
@@ -435,7 +444,8 @@ export class MenuScene extends Phaser.Scene {
       drawVolBar(bar.g, bar.x, bar.y, volume(key));
       return bar;
     });
-    mkBtn(mid - 45, S.y + 238, 90, 'ui_flat1', 'CLOSE', () => this.popOut(this.panelBox, this.panelVeil, S.x + S.w / 2, S.y + S.h / 2, () => this.openSettings(false)));
+    this.panelButtons.push(this.makeUpdate(S.y + 238, keep));
+    mkBtn(mid - 45, S.y + 272, 90, 'ui_flat1', 'CLOSE', () => this.popOut(this.panelBox, this.panelVeil, S.x + S.w / 2, S.y + S.h / 2, () => this.openSettings(false)));
     this.panelVeil = veil; this.panelBox = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(S.depth);
     this.panelObjs = objs;
   }
