@@ -1517,7 +1517,7 @@ export class PlayScene extends Phaser.Scene {
 
   cullOffscreen(time) {
     this.bullets.children.iterate(b => { if (b && b.active && b.y < -20) this.kill(b); });
-    const bold = shotsOn(), pulse = C.feel.enemyShotPulse * (bold ? 1.4 : 1), pm = C.feel.enemyShotPulseMs * (bold ? 0.55 : 1); // the new shots beat faster and a bit stronger
+    const bold = shotsOn(), pulse = C.feel.enemyShotPulse, pm = C.feel.enemyShotPulseMs * (bold ? 0.55 : 1); // the new shots beat faster
     this.enemyBullets.children.iterate(b => {
       if (b && b.active && pulse > 0) b.setScale((this.textures.exists('eb_pic') ? C.enemyBullet.scale : PX) * (1 + pulse * Math.sin(time * TAU / pm + b.x * 0.2))); // gentle swell around the shot's OWN size (it used to reset every shot to 3x)
       if (b && b.active && (b.y > H + 20 || b.y < -20 || b.x < -20 || b.x > W + 20)) this.kill(b);

@@ -4,7 +4,7 @@ const KEY = 'ff_shots';
 export const shotsOn = () => { try { return localStorage.getItem(KEY) !== '0'; } catch (e) { return true; } };
 export const toggleShots = () => { try { localStorage.setItem(KEY, shotsOn() ? '0' : '1'); } catch (e) { /* not saved */ } return shotsOn(); };
 
-const RING = 2; // ring width in art pixels
+const RING = 1; // ring width in art pixels
 
 // Makes the texture 'eb_bold' once from 'eb_pic' (the plain orb stays for "off").
 export function makeBoldShot(scene) {
@@ -26,7 +26,7 @@ export function makeBoldShot(scene) {
     let near = false; // a see-through pixel close to the orb becomes the dark ring
     for (let dy = -RING; dy <= RING && !near; dy++) for (let dx = -RING; dx <= RING; dx++) {
       const nx = x + dx, ny = y + dy;
-      if (nx >= 0 && ny >= 0 && nx < w && ny < h && Math.abs(dx) + Math.abs(dy) <= RING + 1 && solid[ny * w + nx]) { near = true; break; }
+      if (nx >= 0 && ny >= 0 && nx < w && ny < h && Math.abs(dx) + Math.abs(dy) <= RING && solid[ny * w + nx]) { near = true; break; }
     }
     if (near) set(i, 26, 0, 18, 235);
   }

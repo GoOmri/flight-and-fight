@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.198", // bump on every push so the player/Omri can see the build
+  version: "1.9.199", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -85,7 +85,7 @@ export const CONFIG = {
       { key: 'witch',  file: 'menu/witch.png',  frameW: 61, frameH: 55, frames: 4, fps: 5, x: 52,  y: 266,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 3, bobMs: 3200, swayX: 3, swayDeg: 2, swayMs: 4200, introX: 0, par: 6 },
       { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 198, y: 246,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 6, bobMs: 3400, swayX: 4, swayMs: 5200, fade: [0.7, 1], fadeMs: 2800, par: 8 },
       { key: 'cat',    file: 'menu/cat.png',    frameW: 21, frameH: 25, frames: 5, fps: 4, x: 32,  y: 422, originX: 0.5, originY: 1,   scale: 1.333, depth: 50, bob: 0, bobMs: 1000, par: 6 },
-      { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 208, y: 392, originX: 0.5, originY: 1,   scale: 5 / 3, depth: 50, bob: 0, bobMs: 1000, par: 6 }
+      { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 208, y: 422, originX: 0.5, originY: 1,   scale: 5 / 3, depth: 50, bob: 0, bobMs: 1000, par: 6 }
     ]
   },
   // The CAULDRON shop (menu: tap the cauldron bottom left, picture = menu.decor "boiler"). Bought levels are saved (src/bank.js).
@@ -101,11 +101,11 @@ export const CONFIG = {
       { id: 'fire', name: 'Fire speed', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 0.65 }
     ],
     buyGapMs: 450, // after a purchase, BUY ignores taps this long (a double tap buys only once)
-    button: { x: 180, y: 340, w: 56, h: 57 }, // touch area of the cauldron (with SHOP on it) on the menu (keep it clear of UPDATE and the version text)
-    sign: { x: 208, y: 373, size: 16, color: 0xf2b632, stroke: 3 }, // the word SHOP on the cauldron's pot: middle point, text size (title font, plain px), colour, outline px. Cauldron size: menu.decor "boiler" scale
+    button: { x: 180, y: 370, w: 56, h: 57 }, // touch area of the cauldron (with SHOP on it) on the menu (keep it clear of UPDATE and the version text)
+    sign: { x: 208, y: 403, size: 16, color: 0xf2b632, stroke: 3 }, // the word SHOP on the cauldron's pot: middle point, text size (title font, plain px), colour, outline px. Cauldron size: menu.decor "boiler" scale
     // soft gold glow behind the cauldron while at least one upgrade level can be bought: middle point, half width / height (px), colour,
     // alpha at the bright and the dim end of the pulse, ms for one way (dim to bright)
-    glow: { x: 208, y: 372, rx: 30, ry: 30, color: 0xffd040, alphaMax: 0.9, alphaMin: 0.35, ms: 900 },
+    glow: { x: 208, y: 402, rx: 30, ry: 30, color: 0xffd040, alphaMax: 0.9, alphaMin: 0.35, ms: 900 },
     panel: { x: 14, w: 212, headH: 66, rowH: 50, footH: 14, buyW: 54, depth: 100,
       // upgrade level = a glowing potion tube: width / height (px) and colours (rim, empty glass, liquid, top shine, surface edge, bubbles)
       tube: { w: 120, h: 12, rim: 0xc9b8ff, empty: 0x1a0830, liquid: 0xff5ac8, shine: 0xffc2ea, edge: 0xffe3f7, bubble: 0xffd6f2 } } // the shop box: left edge, width, heights of the top part / one row / bottom part, BUY width, level bar pips
