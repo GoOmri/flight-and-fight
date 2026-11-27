@@ -1367,6 +1367,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Same TUNE > TEST switch. Checked in the browser by setting it off by hand. UNVERIFIED: phone, real play, slowdown.
 
 ## 2026-11-27 v1.9.197: the bigger explosion for all enemies (branch boom-all)
-- Bat, ghost, dino and vulture, each in its own smoke colour; the dino's is 1.35x bigger. The chest is unchanged. TUNE > TEST > NEW BOOM switches all of it.
-- To watch: dino and vulture booms look orange / red, close to enemy shots and coins.
+- The enemies in play are the bat, the ghost and the fire wisp (code name shooter; the 1.35x bigger one). Each uses its own smoke colour. (An earlier version of this note said dino and vulture: old code names; the vulture is in no wave.) The chest is unchanged. TUNE > TEST > NEW BOOM switches all of it.
+- To watch: the wisp boom is orange, close to enemy shots and coins.
 - Checked in the browser by setting all four off by hand. UNVERIFIED: phone, real play, slowdown.
