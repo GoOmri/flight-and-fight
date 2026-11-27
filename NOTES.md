@@ -1294,3 +1294,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Omri downloaded Alagard; moved to art-packs/fonts/alagard, copied to assets/fonts. Credited in CREDITS.md (CC-BY, no licence file in the download).
 - It is wider than monogram, so the text sizes went one step down (config fontScale 0.38 -> 0.3) and the shop tube is a bit wider.
 - Checked in the browser: stage box, shop, end screen (settings and pause seen at the bigger size, not again after shrinking). UNVERIFIED: phone, how numbers read during play, tune panel.
+
+## 2026-11-27 v1.9.183: button words lower, smaller best score (branch button-text)
+- Words on all buttons sit 2 px lower (config btnTextDy). Best score on the stage cards is one step smaller.
+- Not changed: the dark outline and soft yellow, Omri may look for references.
+- Checked in the browser (stage box, settings, menu). UNVERIFIED: phone; shop, pause and end screen buttons not looked at.

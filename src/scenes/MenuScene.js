@@ -251,7 +251,7 @@ export class MenuScene extends Phaser.Scene {
         const im = add(this.add.image(0, y + 35, 'star_' + (medals[k] ? 'earned' : 'off')).setScale(B.medalScale), y + 35);
         im.x = cx + (j - (n - 1) / 2) * (im.displayWidth + B.medalGap);
       });
-      if (best > 0) add(txt(cx, y + h - 13, 'Best ' + best, B.bestSize, shadow, 0.5, art ? B.bestInk : P.cyan), y + h - 13);
+      if (best > 0) add(txt(cx, y + h - 13, 'Best ' + best, 10, shadow, 0.5, art ? B.bestInk : P.cyan).setFontSize(16 * B.bestPx / 3), y + h - 13);
     }
     b.complete = !b.locked && goalsOf(nd.theme).every(k => loadMedals(nd.theme)[k]);
     b.halo = art && !b.locked ? this.add.graphics().setVisible(false) : null; // gold edge, shown only on the next stage to play
@@ -378,7 +378,7 @@ export class MenuScene extends Phaser.Scene {
         btn.img.setSize(w, 26).setX(x); btn.x = x - 8; btn.w = w + 16; // normal, pressed, or hover (a newer version is waiting); dark brown text
         btn.img.setTint(btn.down ? 0xbbbbbb : 0xffffff).setY(by + (btn.down ? 1 : 0)); // pressed: darker and 1 px lower
         btn.label.setColor(btn.hot ? BTN_HOT : BTN_INK).setStroke(BTN_INK, 0); // a newer version waiting: red text
-        btn.label.setY(by + ubh / 2 + (btn.down ? 1 : 0));
+        btn.label.setY(by + ubh / 2 + C.btnTextDy + (btn.down ? 1 : 0));
         return;
       }
       const sink = drawPlate(btn.g, bx, by, M.updateW, M.updateH, { fill: btn.hot ? M.updateHotColor : M.updateColor, border: btn.hot ? M.updateHotBorder : P.pink, down: btn.down, radius: 8 });
@@ -416,11 +416,11 @@ export class MenuScene extends Phaser.Scene {
     const mkBtn = (x, y, w, key, label, action, isOn = null) => {
       const h = 26, bt = { btn: true, x: x - 2, y: y - 4, w: w + 4, h: h + 8, down: false, action, shown: false };
       bt.img = keep(addSlice(this, x, y, key, w, h, 10, 10, 0, 0).setOrigin(0, 0), 1);
-      bt.label = T(x + w / 2, y + 12, label, ink);
+      bt.label = T(x + w / 2, y + 12 + C.btnTextDy, label, ink);
       bt.draw = () => {
         const on = !isOn || isOn(), sink = bt.down ? 1 : 0;
         bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setAlpha(on ? 1 : 0.45).setY(y + sink);
-        bt.label.setAlpha(on ? 1 : 0.5).setY(y + 12 + sink);
+        bt.label.setAlpha(on ? 1 : 0.5).setY(y + 12 + C.btnTextDy + sink);
       };
       this.panelButtons.push(bt);
       return bt;
@@ -477,8 +477,8 @@ export class MenuScene extends Phaser.Scene {
       const x = (W - bw) / 2, bt = { btn: true, x: x - 4, y: by - 2, w: bw + 8, h: 30, down: false, action, shown: true };
       bt.img = art2 ? keep(addSlice(this, x, by, buttonKey(this), bw, 26, 10, 10, 0, 0).setOrigin(0, 0), 1) : null;
       bt.g = keep(this.add.graphics(), 1);
-      bt.label = T(W / 2, by + 12, label, size, 0.5, P.cream); if (art2) bt.label.setColor(BTN_INK).setStroke(BTN_INK, 0); else bt.label.setStroke(hex(P.shadow), 3);
-      bt.draw = () => { if (bt.img) bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(by + (bt.down ? 1 : 0)); bt.label.setY(by + 12 + (bt.down ? 1 : 0)); };
+      bt.label = T(W / 2, by + 12 + C.btnTextDy, label, size, 0.5, P.cream); if (art2) bt.label.setColor(BTN_INK).setStroke(BTN_INK, 0); else bt.label.setStroke(hex(P.shadow), 3);
+      bt.draw = () => { if (bt.img) bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(by + (bt.down ? 1 : 0)); bt.label.setY(by + 12 + C.btnTextDy + (bt.down ? 1 : 0)); };
       return bt;
     };
     let box = null;
@@ -507,12 +507,12 @@ export class MenuScene extends Phaser.Scene {
     const totalCoin = this.textures.exists('sp_coin') ? keep(this.add.image(0, y0 + 56, 'sp_coin', 0).setScale(0.6), 2) : null;
     const mkBtn = (x, y, w, label, action) => { // the flat parchment button of the settings; off = faded
       const bt = { x: x - 4, y: y - 5, w: w + 8, h: 36, down: false, off: false, action };
-      const img = keep(addSlice(this, x, y, 'ui_flat1', w, 26, 10, 10, 0, 0).setOrigin(0, 0), 1), text = T(x + w / 2, y + 12, label, ink);
+      const img = keep(addSlice(this, x, y, 'ui_flat1', w, 26, 10, 10, 0, 0).setOrigin(0, 0), 1), text = T(x + w / 2, y + 12 + C.btnTextDy, label, ink);
       bt.text = text; bt.coin = null;
       bt.draw = () => {
         const sink = bt.down && !bt.off ? 1 : 0;
         img.setTint(sink ? 0xbbbbbb : 0xffffff).setAlpha(bt.off ? 0.4 : 1).setY(y + sink);
-        text.setAlpha(bt.off ? 0.4 : 1).setY(y + 12 + sink);
+        text.setAlpha(bt.off ? 0.4 : 1).setY(y + 12 + C.btnTextDy + sink);
         if (bt.coin) bt.coin.setAlpha(bt.off ? 0.4 : 1).setY(y + 13 + sink);
       };
       buttons.push(bt);
