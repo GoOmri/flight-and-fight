@@ -1259,3 +1259,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-27 v1.9.175: pop-up menus close the way they open (branch menu-close-anim)
 - Shop, stage goals box (BACK), settings and the pause screen (CONTINUE) now shrink away: the opening played backwards (240 ms). PLAY, RESTART and MENU still switch at once.
 - Checked in the browser by stepping through the scales. UNVERIFIED: how it looks and feels on the phone.
+
+## 2026-11-27 v1.9.176: new end of stage box (branch end-screen-redesign)
+- Omri picked: parchment list, AGAIN and MENU buttons, Game Over in the same box, lively.
+- Stage clear: purple box, stars on top (land one by one), a row per goal with the numbers (cats, coins, enemies, hits), score and coin total counting up, coins flying in. A tap outside the buttons does nothing.
+- The parchment painter moved to src/buttons.js so both screens use it. The old KILLS / HITS / COINS lines and TAP TO PLAY AGAIN are gone.
+- Checked in the browser (normal and canvas mode) with forced finish and lose. UNVERIFIED: phone, a real full stage, sounds, how the motion feels.

@@ -1,5 +1,5 @@
 import { popIn, popOut } from '../popin.js';
-import { buttonKey, addSlice, BTN_INK } from '../buttons.js';
+import { buttonKey, addSlice, parchmentKey, BTN_INK } from '../buttons.js';
 import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
 import { drawVolBar, volFrom, volHit, VOL_W } from '../volbar.js';
 import { CONFIG as C, z, hex, snap4 } from '../config.js';
@@ -50,6 +50,7 @@ export class PlayScene extends Phaser.Scene {
     this.load.spritesheet('witch', 'assets/witch/witch-' + w + '.png', { frameWidth: 24, frameHeight: 32 });
     loadCatArt(this, C.version); // the cats (assets/cats)
     loadGoalArt(this, C.version); // goal icons and the star (the menu loads them too)
+    if (!this.textures.exists('ui_panel-parchment')) this.load.image('ui_panel-parchment', 'assets/ui/ui-panel-parchment.png?v=' + C.version); // the box of the end screen
     if (!this.textures.exists('ui_med-button')) this.load.image('ui_med-button', 'assets/ui/ui-med-button.png?v=' + C.version); // the menu's button (a stage started from the menu has it already)
     if (!this.textures.exists('ui_med-button2')) this.load.image('ui_med-button2', 'assets/ui/ui-med-button2.png?v=' + C.version);
     const K = C.sprites; // coin / heart / chest / puff strips (assets/pickups, assets/fx); a thing without an entry keeps its code-drawn picture
@@ -110,7 +111,7 @@ export class PlayScene extends Phaser.Scene {
     this.shipFlashUntil = 0; this.muzzleUntil = 0;
     this.recoil = 0; this.trailT = 0; this.trailN = 0; this.vx = 0; this.vy = 0; this.cloudMul = 1; // feel state
     this.hearts = C.ship.hearts;
-    this.over = false; this.menuBtn = null; this.bankLine = null; this.newTags = [];
+    this.over = false; this.endBtns = []; this.bankDraw = null; this.newTags = [];
     this.invulnUntil = 0;
     this.nextShot = 0;
     // Debug helpers (type them after the web address): ?wave=N starts the stage at wave N (1-10); ?god=1 = no damage (hits still counted).
@@ -172,13 +173,12 @@ export class PlayScene extends Phaser.Scene {
       if (this.paused) { this.pauseTap(p.x / R, p.y / R); return; } // the pause screen takes every touch
       if (this.tune && this.tune.press(p.x / R, p.y / R)) return; // the panel used this touch
       if (!this.over && this.pauseHit(p.x / R, p.y / R)) { this.pauseGame(); return; }
-      if (this.over) {
-      if (this.time.now <= this.restartAt) return;
-      const b = this.menuBtn; // the MENU button is checked first, so it never also restarts the stage
-      if (b && Math.abs(p.x / R - b.x) <= b.w / 2 && Math.abs(p.y / R - b.y) <= b.h / 2) this.scene.start('Menu');
-      else this.scene.restart(this.startData);
-      return;
-    }
+      if (this.over) { // the end screen: only its two buttons do something
+        if (this.time.now <= this.restartAt) return;
+        const b = this.endBtns.find(b => Math.abs(p.x / R - b.x) <= b.w / 2 && Math.abs(p.y / R - b.y) <= b.h / 2);
+        if (b) { sfx('tap'); b.action(); }
+        return;
+      }
       if (this.dragId !== null) return;
       this.dragId = p.id;
       this.dragFrom.set(p.x / R, p.y / R); // pointer is in canvas pixels, the game is R times smaller
@@ -1683,8 +1683,7 @@ export class PlayScene extends Phaser.Scene {
   // Tune panel, TEST tab (it checks first that the run has not ended).
   testFinish() { this.ship.setVisible(false); this.stageClear(); } // hidden: in a real clear she has flown off the top
   testLose() { this.hearts = 0; this.hud.setHearts(0); this.gameOver(); }
-  refreshBank() { if (this.bankLine) this.bankLine.setText(this.bankLabel()); } // the end screen shows the new total
-  bankLabel() { return 'BANK ' + loadBank() + '  +' + this.coinsBanked; } // saved total and what this run added
+  refreshBank() { if (this.bankDraw) this.bankDraw(); } // the end screen shows the new total
   // the tune panel erased all saved progress: forget what this run already put in the bank, drop the upgrades, update the end screen
   progressReset() {
     this.coinsBanked = 0;
@@ -1712,7 +1711,8 @@ export class PlayScene extends Phaser.Scene {
     this.ship.setAlpha(1);
   }
 
-  // Shared end screen (game over / stage clear). A tap after the delay restarts the stage.
+  // Shared end screen (game over / stage clear): a purple parchment box. Stage clear: the stars on top, one row per goal with
+  // what was done, then score and coins. Game over: score and coins. Buttons AGAIN and MENU (a tap elsewhere does nothing).
   endScreen(title, col, stats, isNew) {
     this.over = true;
     this.restartAt = this.time.now + C.ship.restartDelayMs;
@@ -1721,57 +1721,87 @@ export class PlayScene extends Phaser.Scene {
     this.enemyBullets.children.iterate(b => { if (b && b.active) this.kill(b); });
     this.bullets.children.iterate(b => { if (b && b.active) this.kill(b); });
     this.muzzle.forEach(m => m.setVisible(false));
-    const ease = C.feel.endEaseMs, fade = []; // everything on the end screen fades in
+    const E = C.endScreen, P = C.menu.pal, CR = hex(P.cream), GOLD = hex(0xf2b632), DIM = '#a89cd0';
+    const ease = C.feel.endEaseMs, live = ease > 0; // live = things move (stars land, numbers count)
+    const keys = stats ? this.goalKeys : [];
+    const h = stats ? 222 + keys.length * E.rowGap : 170, y0 = Math.round((H - h) / 2), left = E.x + 20, right = E.x + E.w - 20, mid = E.x + E.w / 2;
     const veil = this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.55).setDepth(60);
-    const P = C.menu.pal, CR = hex(P.cream);
-    const t = (y, s, size, c, stroke = z(5), title = false) => {
-      const o = this.add.text(W / 2, y, title ? titleCase(s) : s, title ? { ...FONT_TITLE, fontSize: size + 'px', color: c, stroke: hex(P.shadow), strokeThickness: stroke, align: 'center' } : { ...FONT, fontSize: fpx(snap4(z(size))) + 'px', color: c, stroke: hex(P.shadow), strokeThickness: stroke, align: 'center' }).setOrigin(0.5).setDepth(61);
-      fade.push(o); return o;
-    };
-    let tapY = H / 2 + z(60);
-    const bank = this.bankLabel(), GOLD = hex(0xf2b632);
-    if (!stats) {
-      t(H / 2 - z(70), title, 36, col, z(5), true);
-      t(H / 2 - z(10), 'SCORE ' + this.score, 26, CR);
-      this.bankLine = t(H / 2 + z(24), bank, 16, GOLD);
-    } else {
-      t(100, title, 36, col, z(5), true);
-      t(138, 'SCORE ' + this.score, 26, CR);
-      const names = { cats: 'ALL CATS', allCoins: 'ALL COINS', killAll: 'ALL ENEMIES', noHit: 'NO HIT' }, rowTxt = (x, y, str, color) => { // goal rows: goal icon, its name, and a star for every goal done
-        const o = this.add.text(x, y, str, { ...FONT, fontSize: fpx(12) + 'px', color, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0, 0.5).setDepth(61); fade.push(o); return o;
-      };
-      const gap = this.goalKeys.length > 3 ? 24 : 28;
-      this.goalKeys.forEach((k, i) => {
-        const y = 176 + i * gap, done = this.medals.state[k] === 'earned';
-        fade.push(this.add.image(W / 2 - 84, y, 'goal_' + k + '_' + (done ? 'earned' : 'failed')).setScale(goalScale(this, k, 20)).setDepth(61));
-        rowTxt(W / 2 - 62, y, names[k], done ? CR : '#8a80a8');
-        const star = this.add.image(W / 2 + 62, y, done ? 'star_earned' : 'star_off').setScale(1.3).setDepth(61);
-        fade.push(star);
-        if (done && ease > 0) this.tweens.add({ targets: star, scale: { from: 2.4, to: 1.3 }, duration: 260, delay: ease + i * 220, ease: 'Back.easeOut' }); // the star lands
-        if (isNew && isNew[k]) this.newTags.push(rowTxt(W / 2 + 80, y, 'NEW', hex(P.orange)));
+    const parts = [], add = o => { parts.push(o); return o; }; // everything in the box, drawn in this order
+    const t = (x, y, s, size, color, ox = 0.5) => add(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(ox, 0.5));
+    if (this.textures.exists('ui_panel-parchment')) add(this.add.image(E.x, y0, parchmentKey(this, E.w, h)).setOrigin(0, 0));
+    else add(this.add.rectangle(E.x, y0, E.w, h, 0x3a1a72).setOrigin(0, 0));
+    add(this.add.text(mid, y0 + 28, titleCase(title), { ...FONT_TITLE, fontSize: '28px', color: col, stroke: hex(P.shadow), strokeThickness: z(5) }).setOrigin(0.5));
+    const node = C.menu.path.nodes.find(n => n.theme === this.stageTheme);
+    t(mid, y0 + 50, node ? node.name : '', 10, GOLD);
+    let y = y0 + 80, starsDone = 0;
+    if (stats) {
+      const V = C.coin.value, hits = this.hitsTaken;
+      const names = { cats: 'ALL CATS', allCoins: 'ALL COINS', killAll: 'ALL ENEMIES', noHit: 'NO HIT' };
+      const values = { cats: this.cats.saved + '/' + this.cats.total, allCoins: this.coinsCollected * V + '/' + this.coinsSpawned * V,
+        killAll: this.enemiesKilled + '/' + this.enemiesSpawned, noHit: hits + (hits === 1 ? ' HIT' : ' HITS') };
+      keys.forEach((k, i) => { // the stars: one per goal, in the order of the rows
+        const done = this.medals.state[k] === 'earned', sx = mid + (i - (keys.length - 1) / 2) * 42;
+        const star = add(this.add.image(sx, y, done ? 'star_earned' : 'star_off').setScale(E.starScale));
+        if (done && live) {
+          star.setVisible(false);
+          this.time.delayedCall(ease + starsDone * E.starGapMs, () => { star.setVisible(true); sfx('coin'); this.tweens.add({ targets: star, scale: { from: E.starScale * 2, to: E.starScale }, duration: 260, ease: 'Back.easeOut' }); });
+        }
+        if (done) starsDone++;
+        if (isNew && isNew[k]) this.newTags.push(t(sx, y + 22, 'NEW', 8, hex(P.orange)));
       });
-      const V = C.coin.value, sy = 176 + this.goalKeys.length * gap + 4;
-      t(sy, 'COINS ' + this.coinsCollected * V + '/' + this.coinsSpawned * V, 16, CR);
-      t(sy + 17, 'KILLS ' + this.enemiesKilled + '/' + this.enemiesSpawned, 16, CR);
-      t(sy + 34, 'HITS ' + this.hitsTaken, 16, CR);
-      this.bankLine = t(sy + 53, bank, 16, GOLD);
-      tapY = sy + 80;
+      y += 42;
+      keys.forEach(k => {
+        const done = this.medals.state[k] === 'earned';
+        add(this.add.image(left + 8, y, 'goal_' + k + '_' + (done ? 'earned' : 'failed')).setScale(goalScale(this, k, 18)));
+        t(left + 22, y, names[k], 10, done ? CR : DIM, 0);
+        t(right, y, values[k], 10, done ? GOLD : DIM, 1);
+        y += E.rowGap;
+      });
+      add(this.add.rectangle(mid, y - 6, E.w - 40, 1, 0x9a6ad8));
+      y += 12;
     }
-    const tap = t(tapY, 'TAP TO PLAY AGAIN', 18, hex(P.pink));
-    fade.pop(); // the tap text blinks on its own
-    const M = C.endMenuBtn, my = H - M.bottom; // MENU button: back to the stage menu
-    this.menuBtn = { x: W / 2, y: my, w: M.w, h: M.h };
-    let btnPic; // the same button picture as the menu (9-slice: round ends stay, the middle stretches); without it the old drawn plate
-    if (this.textures.exists('ui_med-button')) btnPic = addSlice(this, W / 2 - M.w / 2, my - 12, buttonKey(this), M.w, 26, 10, 10, 0, 0).setOrigin(0, 0).setDepth(61);
-    else { btnPic = this.add.graphics().setDepth(61); drawPlate(btnPic, W / 2 - M.w / 2, my - M.h / 2, M.w, M.h, { fill: M.color, border: M.border, down: false }); }
-    fade.push(btnPic);
-    t(my, 'MENU', M.size, btnPic ? BTN_INK : CR, btnPic ? 0 : 3);
-    if (ease > 0) {
-      veil.setAlpha(0); fade.forEach(o => o.setAlpha(0)); tap.setAlpha(0);
+    // the score and the saved coins, both counting up
+    const count = (from, to, delay, show, end) => {
+      if (!live || from === to) { show(to); return null; }
+      show(from);
+      return this.tweens.addCounter({ from, to, delay, duration: E.countMs, onUpdate: tw => show(Math.round(tw.getValue())), onComplete: () => { show(to); if (end) end(); } });
+    };
+    t(left, y, 'SCORE', 12, CR, 0);
+    const scoreText = t(right, y, '', 12, CR, 1);
+    count(0, this.score, ease, v => scoreText.setText(String(v)));
+    y += 24;
+    t(left, y, 'BANK', 12, GOLD, 0);
+    const gainText = t(right, y, '', 12, hex(P.orange), 1), totalText = t(right, y, '', 12, GOLD, 1);
+    const coin = this.textures.exists('sp_coin') ? add(this.add.image(right, y, 'sp_coin', 0).setScale(0.7)) : null;
+    const showTotal = v => { // from the right: +gained, the total, the coin picture
+      gainText.setText(this.coinsBanked ? '+' + this.coinsBanked : '');
+      totalText.setText(String(v)).setX(right - (gainText.text ? gainText.width + 8 : 0));
+      if (coin) coin.setX(totalText.x - totalText.width - 8);
+    };
+    const bank = loadBank(), gained = this.coinsBanked, countDelay = ease + starsDone * E.starGapMs;
+    const counting = count(bank - gained, bank, countDelay, showTotal, () => sfx('coin'));
+    const flying = [];
+    if (live && coin) for (let n = 0; n < Math.min(E.coinsFly, gained); n++) { // coins fly into the total
+      const f = add(this.add.image(mid - 20 + (n % 3) * 20, y + 28, 'sp_coin', 0).setScale(0.6).setVisible(false));
+      flying.push(f);
+      this.tweens.add({ targets: f, x: coin.x, y, delay: countDelay + n * 70, duration: 320, ease: 'Quad.easeIn', onStart: () => f.setVisible(true), onComplete: () => f.setVisible(false) });
+    }
+    // a run that stops counting while the box is open (a test cheat): drop the animation and show the final numbers
+    this.bankDraw = () => { if (counting) counting.remove(); flying.forEach(f => { this.tweens.killTweensOf(f); f.setVisible(false); }); showTotal(loadBank()); };
+    // the buttons
+    const by = y + 36, art = this.textures.exists('ui_med-button');
+    this.endBtns = [['AGAIN', mid - E.btnW / 2 - 4, () => this.scene.restart(this.startData)], ['MENU', mid + E.btnW / 2 + 4, () => this.scene.start('Menu')]].map(([label, x, action]) => {
+      if (art) add(addSlice(this, x - E.btnW / 2, by - 13, buttonKey(this), E.btnW, 26, 10, 10, 0, 0).setOrigin(0, 0));
+      else add(this.add.rectangle(x, by, E.btnW, 26, 0x3b1478));
+      const l = t(x, by - 1, label, 10, art ? BTN_INK : CR); if (art) l.setStroke(BTN_INK, 0);
+      return { x, y: by, w: E.btnW, h: 32, action };
+    });
+    const box = this.add.container(0, 0, parts).setDepth(61);
+    if (live) {
+      veil.setAlpha(0); box.setAlpha(0);
       this.tweens.add({ targets: veil, alpha: 0.55, duration: ease });
-      this.tweens.add({ targets: fade, alpha: 1, duration: ease, delay: ease / 3, ease: 'Quad.easeOut' });
+      this.tweens.add({ targets: box, alpha: 1, duration: ease, ease: 'Quad.easeOut' });
     }
-    this.tweens.add({ targets: tap, alpha: { from: 1, to: 0.3 }, yoyo: true, repeat: -1, duration: 600, delay: ease });
-    popIn(this, this.add.container(0, 0, [...fade, tap]).setDepth(61), W / 2, H / 2, ease + 240); // it pops in while it fades in
+    popIn(this, box, W / 2, H / 2, ease + 240); // it pops in while it fades in
   }
 }
