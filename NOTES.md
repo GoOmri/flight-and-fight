@@ -1355,3 +1355,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-27 v1.9.194: drop shadow on the Shop word (branch shop-shadow)
 - A 1 px dark shadow under "Shop" on the cauldron.
 - Checked in the browser. UNVERIFIED: phone.
+
+## 2026-11-27 v1.9.195: bigger bat explosion, a test (branch bat-boom)
+- Bats only: white flash, 3 fireballs, falling bits and lingering smoke in the bat colours with a white-hot middle (src/boom.js; numbers in config boom). Frames from capttainjack's shmup pack (CREDITS.md).
+- TUNE > TEST > NEW BOOM (BAT): ON / OFF compares with the old puff. On by default.
+- Checked in the browser by setting off explosions by hand (normal mode); the switch seen in canvas mode. UNVERIFIED: phone, real play, slowdown with many bats.
