@@ -456,7 +456,7 @@ export class MenuScene extends Phaser.Scene {
   openGoals(theme) {
     if (this.modal) return;
     const L = C.lightbox, node = M.path.nodes.find(n => n.theme === theme), keys = goalsOf(theme), saved = loadMedals(theme), objs = [];
-    const D = L.depth, h = 94 + L.picH + keys.length * L.rowGap, y0 = Math.round((H - h) / 2), art = this.textures.exists('ui_panel-parchment');
+    const D = L.depth, h = 88 + L.btnGap + L.picH + keys.length * L.rowGap, y0 = Math.round((H - h) / 2), art = this.textures.exists('ui_panel-parchment');
     const keep = (o, dz = 0) => { o.setDepth(D + dz); objs.push(o); return o; };
     const T = (x, y, s, size, align, color) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(align, 0.5), 2);
     const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
@@ -484,8 +484,8 @@ export class MenuScene extends Phaser.Scene {
     let box = null;
     const close = () => { if (this.popTween) this.popTween.remove(); objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.modal = false; this.panelButtons = this.settingsButtons; };
     const by = y0 + 24 + L.picH + keys.length * L.rowGap;
-    const play = mk(by, L.playW, 14, 'Play', () => { close(); this.scene.start('Play', { theme }); });
-    const back = mk(by + 32, L.backW, 8, 'Back', () => this.popOut(box, veil, W / 2, y0 + h / 2, close));
+    const play = mk(by, L.playW, L.playSize, 'Play', () => { close(); this.scene.start('Play', { theme }); });
+    const back = mk(by + 26 + L.btnGap, L.backW, 8, 'Back', () => this.popOut(box, veil, W / 2, y0 + h / 2, close));
     box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(D);
     this.popIn(box, veil, W / 2, y0 + h / 2);
     this.boxObjs = objs; this.modal = true; this.panelButtons = [play, back];
