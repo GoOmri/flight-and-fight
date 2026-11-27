@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.194", // bump on every push so the player/Omri can see the build
+  version: "1.9.195", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -328,6 +328,11 @@ export const CONFIG = {
     flyOffDip: 45, flyOffAccel: 430, flyOffGone: 30 // the fly-off: first dip speed (px/s, down), how fast she speeds up (px/s per s), how far above the screen counts as gone
   },
 
+  // The bigger death explosion (src/boom.js). kinds = who gets it ('grunt' = the bat; a test first). frames / fps = the fireball
+  // animation, balls = fireballs per death, spread = how far the extra ones sit (px), gapMs = delay between them, scale = size,
+  // flashR / flashMs = white flash, bits / bitSpeed / bitLife / gravity = falling pieces, smoke* = lingering smoke, pool = most fireballs at once.
+  boom: { kinds: ['grunt'], frames: 8, fps: 16, balls: 3, spread: 14, gapMs: 70, scale: 3.333, depth: 19, flashR: 17, flashMs: 130,
+    bits: 18, bitSpeed: 150, bitLife: 0.8, gravity: 260, smoke: 3, smokeR: 9, smokeDrift: 34, smokeMs: 900, pool: 18 },
   particles: { poolSize: 140, perExplosion: 8, speed: z(140), lifeMs: 450 },
 
   // Game feel (no sound). Every number is a knob; 0 turns most things off.

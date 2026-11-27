@@ -11,6 +11,7 @@ import { Hud, FONT, FONT_TITLE, titleCase, fpx, drawPlate } from '../hud.js';
 import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
 import { Tune, tuneEnabled } from '../tune.js';
+import { boom, makeBoom, loadBoomArt } from '../boom.js';
 import { Medals, goalsOf, saveMedals, saveBest } from '../medals.js';
 import { loadBank, addBank, loadLevel, upgradeValue } from '../bank.js';
 
@@ -60,6 +61,7 @@ export class PlayScene extends Phaser.Scene {
     if (K.heartPickup) for (const n of ['idle', 'drop', 'collect', 'shine']) if (K.heartPickup[n]) strip('sp_heart_' + n, K.heartPickup[n]);
     if (K.crate) { strip('sp_crate_idle', K.crate.idle); strip('sp_crate_break', K.crate.break); }
     if (K.poof) strip('sp_poof', K.poof);
+    loadBoomArt(this); // the bigger explosion
     if (K.weaponGem) strip('sp_gem', K.weaponGem);
     if (K.stunned) strip('sp_stunned', K.stunned);
     if (C.bullet.fire) strip('sp_fire', C.bullet.fire);
@@ -611,6 +613,8 @@ export class PlayScene extends Phaser.Scene {
       return a;
     };
     this.poofPool = K.poof ? mkFx(K.poof.poolSize, 'sp_poof') : [];
+    this.boomPool = mkFx(C.boom.pool, '__DEFAULT');
+    for (const k of C.boom.kinds) makeBoom(this, k, DEATH_TINTS[k]);
     this.fxPool = K.crate || K.heartPickup ? mkFx(K.fxPoolSize, K.crate ? 'sp_crate_break' : 'sp_heart_collect') : [];
     this.pops = []; // floating score texts, made once and reused
     for (let i = 0; i < C.feel.popPoolSize; i++) {
@@ -1598,6 +1602,7 @@ export class PlayScene extends Phaser.Scene {
   // Pop in the creature's colours plus a ring puff. big = imp / chest (more sparks, bigger ring).
   explode(x, y, big, tints, puff = true, smokeType = null) {
     const F = C.feel, P = C.sprites.poof;
+    if (puff && boom(this, x, y, smokeType, tints)) return; // the bigger explosion replaces puff, sparks and ring
     if (P && puff) { // smoke puff under the sparks: in the colour of what died, turned a random way
       const has = smokeType && this.textures.exists('sp_poof_' + smokeType);
       const sm = this.playFx(this.poofPool, has ? 'sp_poof_' + smokeType : 'sp_poof', has ? 'poof_' + smokeType : 'poof', x, y, P.scale * (big ? P.bigMul : 1), P.depth, null);
@@ -1634,6 +1639,7 @@ export class PlayScene extends Phaser.Scene {
       s.life -= dt;
       if (s.life <= 0) { s.setActive(false).setVisible(false); return; }
       const f = s.life / s.max;
+      if (s.g) s.vy += s.g * dt; // bits of an explosion fall
       s.x += s.vx * dt; s.y += s.vy * dt; s.setAlpha(f);
       if (s.shrink) s.setScale(s.s0 * (0.35 + 0.65 * f));
     });
@@ -1658,11 +1664,11 @@ export class PlayScene extends Phaser.Scene {
   }
 
   // A tiny square particle from a pool. shrink = it shrinks as it fades.
-  emit(group, x, y, vx, vy, life, scale, tint, depth, shrink) {
+  emit(group, x, y, vx, vy, life, scale, tint, depth, shrink, g = 0) {
     const s = group.get(x, y, 'square');
     if (!s) return;
     s.setActive(true).setVisible(true).setScale(scale).setPosition(x, y).setTint(tint).setAlpha(1).setDepth(depth);
-    s.vx = vx; s.vy = vy; s.life = s.max = life; s.s0 = scale; s.shrink = shrink;
+    s.vx = vx; s.vy = vy; s.life = s.max = life; s.s0 = scale; s.shrink = shrink; s.g = g;
   }
 
   // An expanding, fading ring. size = final scale in art pixels (PX each).
