@@ -1330,3 +1330,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - End screen: stage picture with the title, one row per goal (Cats, Coins, Enemies, No hit) with its count and its own star, Score and Bank, Again and Menu.
 - Tune panel text and both version numbers use the small size. The stage tile painter moved to src/buttons.js.
 - Checked in the browser (clear, game over, menu, stage box, tune MOVE tab). UNVERIFIED: phone, a real full stage.
+
+## 2026-11-27 v1.9.190: no text outlines (branch no-outlines)
+- A try: every text outline is off (menus, boxes, in-game numbers, tune panel). Why they differed: some text had a 3 px outline and the settings words had none.
+- Weaker now: "Stage Clear" in cyan on the tree picture.
+- Checked in the browser (stage box, end screen). UNVERIFIED: phone, numbers over the game while playing.

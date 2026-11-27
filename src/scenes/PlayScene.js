@@ -200,7 +200,7 @@ export class PlayScene extends Phaser.Scene {
     this.input.on('pointerupoutside', release);
 
     // ?debug=1: a small line under the version (drawing mode, speed, controls) so a problem on one device can be read off the screen
-    this.dbg = q.get('debug') ? this.add.text(4, 38, '', { fontSize: '8px', color: '#ffffff', stroke: '#000000', strokeThickness: 2 }).setDepth(90) : null;
+    this.dbg = q.get('debug') ? this.add.text(4, 38, '', { fontSize: '8px', color: '#ffffff', stroke: '#000000', strokeThickness: 0}).setDepth(90) : null;
     this.dbgAt = 0;
     const glOk = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; } })(); // can this browser make a WebGL picture at all?
     this.dbgInfo = () => 'v' + C.version + ' ' + (this.game.config.renderType === Phaser.WEBGL ? 'WEBGL' : 'CANVAS') + ' gl:' + (glOk ? 'yes' : 'no') + ' ' + Math.round(this.game.loop.actualFps) + 'fps ' + (this.mouseMode ? 'mouse' : (this.stickMode ? 'stick' : 'drag'));
@@ -614,7 +614,7 @@ export class PlayScene extends Phaser.Scene {
     this.fxPool = K.crate || K.heartPickup ? mkFx(K.fxPoolSize, K.crate ? 'sp_crate_break' : 'sp_heart_collect') : [];
     this.pops = []; // floating score texts, made once and reused
     for (let i = 0; i < C.feel.popPoolSize; i++) {
-      this.pops.push(this.add.text(0, 0, '', { ...FONT, fontSize: fpx(C.feel.popTextSize) + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: 3 })
+      this.pops.push(this.add.text(0, 0, '', { ...FONT, fontSize: fpx(C.feel.popTextSize) + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: 0})
         .setOrigin(0.5).setDepth(30).setVisible(false));
     }
     // muzzle flash: two small white pixels at the nose, shown for a few ms on every volley
@@ -862,7 +862,7 @@ export class PlayScene extends Phaser.Scene {
     this.dragId = null; this.stickV.set(0, 0); this.stopping = false; this.stickC.set(W / 2, C.stick.restY);
     const P = C.menu.pal, ui = [];
     ui.push(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.6).setDepth(70));
-    ui.push(this.add.text(W / 2, H / 2 - 80, 'Paused', { ...FONT_TITLE, fontSize: '36px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: z(5), align: 'center' }).setOrigin(0.5).setDepth(71));
+    ui.push(this.add.text(W / 2, H / 2 - 80, 'Paused', { ...FONT_TITLE, fontSize: '36px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 0, align: 'center' }).setOrigin(0.5).setDepth(71));
     const box = this.add.container(0, 0, ui.slice(1)).setDepth(71); // everything but the dark veil
     this.pauseUi = { objs: ui, btnObjs: [], list: [], box };
     this.pauseButtons('main');
@@ -879,14 +879,14 @@ export class PlayScene extends Phaser.Scene {
       if (id === 'sound' || id === 'music') { // a label with a volume bar under it
         const bx = Math.round(W / 2 - VOL_W / 2), by = y + 6, g = this.add.graphics().setDepth(72);
         drawVolBar(g, bx, by, volume(id));
-        ui.push(g, this.add.text(W / 2, y - 9, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5).setDepth(72));
+        ui.push(g, this.add.text(W / 2, y - 9, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: CR, stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(0.5).setDepth(72));
         return { id, bar: true, bx, by, g };
       }
       if (this.textures.exists('ui_med-button')) ui.push(addSlice(this, W / 2 - B.btnW / 2, y - 12, buttonKey(this), B.btnW, 26, 10, 10, 0, 0).setOrigin(0, 0).setDepth(71));
       else { const gg = this.add.graphics().setDepth(71); drawPlate(gg, W / 2 - B.btnW / 2, y - B.btnH / 2, B.btnW, B.btnH, { fill: B.fill, border: B.border, down: false }); ui.push(gg); }
       const art = this.textures.exists('ui_med-button');
       const risky = id === 'restart' || id === 'menu'; // these throw the run away: red words
-      ui.push(this.add.text(W / 2, y + C.btnTextDy, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: risky ? BTN_HOT : art ? BTN_INK : CR, stroke: hex(P.shadow), strokeThickness: art ? 0 : 3, align: 'center' }).setOrigin(0.5).setDepth(72));
+      ui.push(this.add.text(W / 2, y + C.btnTextDy, label, { ...FONT, fontSize: fpx(B.textSize) + 'px', color: risky ? BTN_HOT : art ? BTN_INK : CR, stroke: hex(P.shadow), strokeThickness: 0, align: 'center' }).setOrigin(0.5).setDepth(72));
       return { id, x: W / 2, y, w: B.btnW, h: B.btnH };
     });
     this.pauseUi.box.add(ui);
@@ -1730,12 +1730,12 @@ export class PlayScene extends Phaser.Scene {
     const h = (stats ? 204 + keys.length * E.rowGap : 196), y0 = Math.round((H - h) / 2), left = E.x + 20, right = E.x + E.w - 20, mid = E.x + E.w / 2;
     const veil = this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.55).setDepth(60);
     const parts = [], add = o => { parts.push(o); return o; }; // everything in the box, drawn in this order
-    const t = (x, y, s, size, color, ox = 0.5) => add(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color, stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(ox, 0.5));
+    const t = (x, y, s, size, color, ox = 0.5) => add(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color, stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(ox, 0.5));
     const art0 = this.textures.exists('ui_panel-parchment');
     if (art0) add(this.add.image(E.x, y0, parchmentKey(this, E.w, h)).setOrigin(0, 0));
     else add(this.add.rectangle(E.x, y0, E.w, h, 0x3a1a72).setOrigin(0, 0));
     if (art0 && this.textures.exists('stage_' + this.stageTheme)) add(this.add.image(mid, y0 + 14, tileKey(this, this.stageTheme, E.picW, E.picH)).setOrigin(0.5, 0));
-    add(this.add.text(mid, y0 + 14 + E.picH / 2, titleCase(title), { ...FONT_TITLE, fontSize: E.titleSize + 'px', color: col, stroke: hex(P.shadow), strokeThickness: z(5) }).setOrigin(0.5));
+    add(this.add.text(mid, y0 + 14 + E.picH / 2, titleCase(title), { ...FONT_TITLE, fontSize: E.titleSize + 'px', color: col, stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(0.5));
     let y = y0 + 30 + E.picH, starsDone = 0;
     if (stats) {
       const V = C.coin.value, hits = this.hitsTaken, starX = E.x + E.w - 30;
@@ -1746,14 +1746,14 @@ export class PlayScene extends Phaser.Scene {
         const done = this.medals.state[k] === 'earned';
         add(this.add.image(E.x + 34, y, 'goal_' + k + '_earned').setScale(goalScale(this, k, E.iconBox)).setAlpha(done ? 1 : E.dim));
         t(E.x + 52, y, names[k], 10, done ? CR : DIM, 0);
-        add(this.add.text(starX - 16, y, values[k], { ...FONT, fontSize: C.smallPx + 'px', color: done ? CR : DIM, stroke: hex(P.shadow), strokeThickness: 2 }).setOrigin(1, 0.5));
+        add(this.add.text(starX - 16, y, values[k], { ...FONT, fontSize: C.smallPx + 'px', color: done ? CR : DIM, stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(1, 0.5));
         const star = add(this.add.image(starX, y, done ? 'star_earned' : 'star_off').setScale(E.starScale));
         if (done && live) { // the earned stars land one after the other
           star.setVisible(false);
           this.time.delayedCall(ease + starsDone * E.starGapMs, () => { star.setVisible(true); sfx('coin'); this.tweens.add({ targets: star, scale: { from: E.starScale * 2, to: E.starScale }, duration: 260, ease: 'Back.easeOut' }); });
         }
         if (done) starsDone++;
-        if (isNew && isNew[k]) this.newTags.push(add(this.add.text(E.x + 118, y, 'New', { ...FONT, fontSize: C.smallPx + 'px', color: hex(P.orange), stroke: hex(P.shadow), strokeThickness: 2 }).setOrigin(0.5)));
+        if (isNew && isNew[k]) this.newTags.push(add(this.add.text(E.x + 118, y, 'New', { ...FONT, fontSize: C.smallPx + 'px', color: hex(P.orange), stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(0.5)));
         y += E.rowGap;
       });
       add(this.add.rectangle(mid, y - 8, E.w - 40, 1, 0x9a6ad8));
@@ -1770,7 +1770,7 @@ export class PlayScene extends Phaser.Scene {
     count(0, this.score, ease, v => scoreText.setText(String(v)));
     y += 22;
     t(left, y, 'Bank', 10, CR, 0);
-    const small = (color) => add(this.add.text(right, y, '', { ...FONT, fontSize: C.smallPx + 'px', color, stroke: hex(P.shadow), strokeThickness: 2 }).setOrigin(1, 0.5));
+    const small = (color) => add(this.add.text(right, y, '', { ...FONT, fontSize: C.smallPx + 'px', color, stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(1, 0.5));
     const gainText = small(hex(P.orange)), totalText = small(CR); // the coin numbers are small, like the coin beside them
     const coin = this.textures.exists('sp_coin') ? add(this.add.image(right, y, 'sp_coin', 0).setScale(0.6)) : null;
     const showTotal = v => { // from the right: +gained, the total, the coin picture

@@ -47,7 +47,7 @@ export class MenuScene extends Phaser.Scene {
     this.addArt();
     this.makeShopSign();
     this.makeBits(); this.startEffects(); this.setupTilt(); // little pictures for the sparks, then cauldron bubbles, witch trail, fireflies, shooting stars, and the tilt parallax
-    const txt = (x, y, s, size, stroke, align = 0.5, color = P.cream) => this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: stroke }).setOrigin(align, 0.5);
+    const txt = (x, y, s, size, stroke, align = 0.5, color = P.cream) => this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(align, 0.5);
     this.txt = txt;
     if (this.textures.exists('menu_logo')) this.makeLogo(); // pixel logo: "Fight & Flight", tilted up in perspective: drops in, floats, and a glint sweeps over it now and then
     else txt(W / 2, M.titleY, 'Flight and Fight', M.titleSize, M.titleStroke);
@@ -340,7 +340,7 @@ export class MenuScene extends Phaser.Scene {
     const ubw = art ? UB.w : M.updateW, ubh = art ? 26 : M.updateH, bx = (W - ubw) / 2, by = y;
     const btn = { btn: true, x: bx - 8, y: by - 4, w: ubw + 16, h: ubh + 8, g: keep(this.add.graphics(), 1), down: false, hot: false, busy: false }; // x / y / w / h = the touch area, bigger than the picture (a thumb needs about 44 phone px)
     btn.img = art ? keep(addSlice(this, bx, by, buttonKey(this), ubw, 26, 10, 10, 0, 0).setOrigin(0, 0), 1) : null;
-    btn.label = keep(this.add.text(W / 2, by + ubh / 2, 'Update', { ...FONT, fontSize: fpx(M.updateSize) + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(0.5), 2);
+    btn.label = keep(this.add.text(W / 2, by + ubh / 2, 'Update', { ...FONT, fontSize: fpx(M.updateSize) + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(0.5), 2);
     btn.draw = () => {
       btn.g.clear();
       if (art) {
@@ -352,7 +352,7 @@ export class MenuScene extends Phaser.Scene {
         return;
       }
       const sink = drawPlate(btn.g, bx, by, M.updateW, M.updateH, { fill: btn.hot ? M.updateHotColor : M.updateColor, border: btn.hot ? M.updateHotBorder : P.pink, down: btn.down, radius: 8 });
-      btn.label.setColor(btn.hot ? hex(P.dark) : hex(P.cream)).setStroke(hex(P.shadow), btn.hot ? 0 : 3); // dark text on the orange plate
+      btn.label.setColor(btn.hot ? hex(P.dark) : hex(P.cream)).setStroke(hex(P.shadow), 0); // dark text on the orange plate
       btn.label.setY(by + (M.updateH - M.plateDrop) / 2 + sink + 1);
     };
     btn.draw();
@@ -443,13 +443,13 @@ export class MenuScene extends Phaser.Scene {
     const L = C.lightbox, node = M.path.nodes.find(n => n.theme === theme), keys = goalsOf(theme), saved = loadMedals(theme), objs = [];
     const D = L.depth, h = 70 + L.picH + keys.length * L.rowGap, y0 = Math.round((H - h) / 2), art = this.textures.exists('ui_panel-parchment');
     const keep = (o, dz = 0) => { o.setDepth(D + dz); objs.push(o); return o; };
-    const T = (x, y, s, size, align, color) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 3 }).setOrigin(align, 0.5), 2);
+    const T = (x, y, s, size, align, color) => keep(this.add.text(x, y, s, { ...FONT, fontSize: fpx(size) + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(align, 0.5), 2);
     const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
     if (art) keep(this.add.image(L.x, y0, this.parchment(L.w, h)).setOrigin(0, 0), 0);
     else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(L.x, y0, L.w, h, 10), 0);
     // the stage picture in its own ragged frame, the name on it
     if (art && this.textures.exists('stage_' + theme)) keep(this.add.image(W / 2, y0 + 14, this.tilePicture(theme, L.picW, L.picH)).setOrigin(0.5, 0), 1);
-    keep(this.add.text(W / 2, y0 + 14 + L.picH / 2, titleCase(node ? node.name : ''), { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 4 }).setOrigin(0.5), 2); // the ornate title font
+    keep(this.add.text(W / 2, y0 + 14 + L.picH / 2, titleCase(node ? node.name : ''), { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(0.5), 2); // the ornate title font
     const names = { cats: 'Cats', allCoins: 'Coins', killAll: 'Enemies', noHit: 'No hit' };
     keys.forEach((k, i) => { // a goal not earned yet: the same icon, faded
       const y = y0 + 30 + L.picH + i * L.rowGap, done = saved[k];
@@ -462,7 +462,7 @@ export class MenuScene extends Phaser.Scene {
       const x = (W - bw) / 2, bt = { btn: true, x: x - 4, y: by - 2, w: bw + 8, h: 30, down: false, action, shown: true };
       bt.img = art2 ? keep(addSlice(this, x, by, buttonKey(this), bw, 26, 10, 10, 0, 0).setOrigin(0, 0), 1) : null;
       bt.g = keep(this.add.graphics(), 1);
-      bt.label = T(W / 2, by + 12 + C.btnTextDy, label, size, 0.5, P.cream); if (art2) bt.label.setColor(BTN_INK).setStroke(BTN_INK, 0); else bt.label.setStroke(hex(P.shadow), 3);
+      bt.label = T(W / 2, by + 12 + C.btnTextDy, label, size, 0.5, P.cream); if (art2) bt.label.setColor(BTN_INK).setStroke(BTN_INK, 0); else bt.label.setStroke(hex(P.shadow), 0);
       bt.draw = () => { if (bt.img) bt.img.setTint(bt.down ? 0xbbbbbb : 0xffffff).setY(by + (bt.down ? 1 : 0)); bt.label.setY(by + 12 + C.btnTextDy + (bt.down ? 1 : 0)); };
       return bt;
     };
@@ -638,7 +638,7 @@ export class MenuScene extends Phaser.Scene {
     }
     this.shopGlow = this.add.image(G.x, G.y, 'menu_shopglow').setDisplaySize(G.rx * 2, G.ry * 2).setDepth(49).setAlpha(G.alphaMin).setVisible(false); // just behind the cauldron (50)
     this.tweens.add({ targets: this.shopGlow, alpha: G.alphaMax, duration: G.ms, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
-    this.shopSign = this.add.text(S.x, S.y, 'Shop', { ...FONT_TITLE, fontSize: S.size + 'px', color: hex(S.color), stroke: hex(P.shadow), strokeThickness: S.stroke }).setOrigin(0.5).setDepth(52);
+    this.shopSign = this.add.text(S.x, S.y, 'Shop', { ...FONT_TITLE, fontSize: S.size + 'px', color: hex(S.color), stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(0.5).setDepth(52);
     this.decorItems.push({ s: this.shopGlow, pos: { x: G.x, y: G.y }, par, key: 'shopglow' }, { s: this.shopSign, pos: { x: S.x, y: S.y }, par, key: 'shopsign' });
   }
 

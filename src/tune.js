@@ -108,7 +108,7 @@ export class Tune {
   }
 
   text(x, y, s, size, color, ox = 0) {
-    const t = this.scene.add.text(x, y, s, { ...FONT, fontSize: C.smallPx + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 2 }).setOrigin(ox, 0.5).setDepth(DEPTH + 1);
+    const t = this.scene.add.text(x, y, s, { ...FONT, fontSize: C.smallPx + 'px', color: hex(color), stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(ox, 0.5).setDepth(DEPTH + 1);
     this.texts.push(t); return t;
   }
 

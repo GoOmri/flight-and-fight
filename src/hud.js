@@ -49,10 +49,10 @@ export class Hud {
       im.x = gx; gx += im.displayWidth + H.medalGap; return im;
     });
     this.medalLook = this.goalKeys.map(() => 'pending');
-    this.versionText = scene.add.text(H.margin, H.margin + H.medalSize + H.versionGap, 'v' + C.version, { ...FONT, fontSize: C.smallPx + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: H.versionStroke }).setAlpha(H.versionAlpha).setDepth(depth);
+    this.versionText = scene.add.text(H.margin, H.margin + H.medalSize + H.versionGap, 'v' + C.version, { ...FONT, fontSize: C.smallPx + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: 0}).setAlpha(H.versionAlpha).setDepth(depth);
 
     // CENTRE: score, weapon bars under it
-    this.scoreText = scene.add.text(W / 2, H.margin, '0', { ...FONT, fontSize: fpx(z(18)) + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: z(4) }).setOrigin(0.5, 0.5).setDepth(depth);
+    this.scoreText = scene.add.text(W / 2, H.margin, '0', { ...FONT, fontSize: fpx(z(18)) + 'px', color: hex(C.menu.pal.cream), stroke: hex(C.menu.pal.shadow), strokeThickness: 0}).setOrigin(0.5, 0.5).setDepth(depth);
     this.scoreText.y = H.margin + this.scoreText.height / 2; // anchored at its middle so the pop grows in place
     this.pop = 0; // 1 right after the score changed, falls to 0
     this.rowY = H.margin + H.rowOffset; // the bars and the pips share this line
