@@ -871,8 +871,8 @@ export class PlayScene extends Phaser.Scene {
   pauseButtons(page) {
     const B = C.pauseBtn, P = C.menu.pal, CR = hex(P.cream), ui = this.pauseUi.btnObjs;
     ui.forEach(o => o.destroy()); ui.length = 0;
-    const rows = page === 'main' ? [['cont', 'CONTINUE'], ['options', 'OPTIONS'], ['restart', 'RESTART'], ['menu', 'MENU']]
-      : [['sound', 'SOUND'], ['music', 'MUSIC'], ['back', 'BACK']];
+    const rows = page === 'main' ? [['cont', 'Continue'], ['options', 'Options'], ['restart', 'Restart'], ['menu', 'Menu']]
+      : [['sound', 'Sound'], ['music', 'Music'], ['back', 'Back']];
     this.pauseUi.list = rows.map(([id, label], i) => {
       const y = H / 2 - 25 + i * (B.btnH + B.gap);
       if (id === 'sound' || id === 'music') { // a label with a volume bar under it
@@ -1736,9 +1736,9 @@ export class PlayScene extends Phaser.Scene {
     let y = y0 + 80, starsDone = 0;
     if (stats) {
       const V = C.coin.value, hits = this.hitsTaken;
-      const names = { cats: 'ALL CATS', allCoins: 'ALL COINS', killAll: 'ALL ENEMIES', noHit: 'NO HIT' };
+      const names = { cats: 'All cats', allCoins: 'All coins', killAll: 'All enemies', noHit: 'No hit' };
       const values = { cats: this.cats.saved + '/' + this.cats.total, allCoins: this.coinsCollected * V + '/' + this.coinsSpawned * V,
-        killAll: this.enemiesKilled + '/' + this.enemiesSpawned, noHit: hits + (hits === 1 ? ' HIT' : ' HITS') };
+        killAll: this.enemiesKilled + '/' + this.enemiesSpawned, noHit: hits + (hits === 1 ? ' hit' : ' hits') };
       keys.forEach((k, i) => { // the stars: one per goal, in the order of the rows
         const done = this.medals.state[k] === 'earned', sx = mid + (i - (keys.length - 1) / 2) * 42;
         const star = add(this.add.image(sx, y, done ? 'star_earned' : 'star_off').setScale(E.starScale));
@@ -1747,7 +1747,7 @@ export class PlayScene extends Phaser.Scene {
           this.time.delayedCall(ease + starsDone * E.starGapMs, () => { star.setVisible(true); sfx('coin'); this.tweens.add({ targets: star, scale: { from: E.starScale * 2, to: E.starScale }, duration: 260, ease: 'Back.easeOut' }); });
         }
         if (done) starsDone++;
-        if (isNew && isNew[k]) this.newTags.push(t(sx, y + 22, 'NEW', 8, hex(P.orange)));
+        if (isNew && isNew[k]) this.newTags.push(t(sx, y + 22, 'New', 8, hex(P.orange)));
       });
       y += 42;
       keys.forEach(k => {
@@ -1766,11 +1766,11 @@ export class PlayScene extends Phaser.Scene {
       show(from);
       return this.tweens.addCounter({ from, to, delay, duration: E.countMs, onUpdate: tw => show(Math.round(tw.getValue())), onComplete: () => { show(to); if (end) end(); } });
     };
-    t(left, y, 'SCORE', 12, CR, 0);
+    t(left, y, 'Score', 12, CR, 0);
     const scoreText = t(right, y, '', 12, CR, 1);
     count(0, this.score, ease, v => scoreText.setText(String(v)));
     y += 24;
-    t(left, y, 'BANK', 12, GOLD, 0);
+    t(left, y, 'Bank', 12, GOLD, 0);
     const gainText = t(right, y, '', 12, hex(P.orange), 1), totalText = t(right, y, '', 12, GOLD, 1);
     const coin = this.textures.exists('sp_coin') ? add(this.add.image(right, y, 'sp_coin', 0).setScale(0.7)) : null;
     const showTotal = v => { // from the right: +gained, the total, the coin picture
@@ -1790,7 +1790,7 @@ export class PlayScene extends Phaser.Scene {
     this.bankDraw = () => { if (counting) counting.remove(); flying.forEach(f => { this.tweens.killTweensOf(f); f.setVisible(false); }); showTotal(loadBank()); };
     // the buttons
     const by = y + 36, art = this.textures.exists('ui_med-button');
-    this.endBtns = [['AGAIN', mid - E.btnW / 2 - 4, () => this.scene.restart(this.startData)], ['MENU', mid + E.btnW / 2 + 4, () => this.scene.start('Menu')]].map(([label, x, action]) => {
+    this.endBtns = [['Again', mid - E.btnW / 2 - 4, () => this.scene.restart(this.startData)], ['Menu', mid + E.btnW / 2 + 4, () => this.scene.start('Menu')]].map(([label, x, action]) => {
       if (art) add(addSlice(this, x - E.btnW / 2, by - 13, buttonKey(this), E.btnW, 26, 10, 10, 0, 0).setOrigin(0, 0));
       else add(this.add.rectangle(x, by, E.btnW, 26, 0x3b1478));
       const l = t(x, by - 1, label, 10, art ? BTN_INK : CR); if (art) l.setStroke(BTN_INK, 0);

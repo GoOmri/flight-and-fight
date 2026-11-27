@@ -1271,3 +1271,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Stage names are in the ornate title font with a capital first letter (menu cards and end screen). ??? stays in the plain font.
 - Bat removed from the main menu. Menu version number fainter.
 - Checked in the browser (the ! was switched on by hand). UNVERIFIED: phone readability, a real new-version check.
+
+## 2026-11-27 v1.9.178: running text in sentence case instead of all caps (branch sentence-case)
+- A try, Omri decides: settings, shop, goals box, pause, end screen, stage cards. Only the letter case changed. The tune panel stays as it was.
+- Note: in this font the small l looks much like a capital L ("All").
+- Checked in the browser (shop, settings, end screen). UNVERIFIED: phone; pause screen and goals box not looked at.
