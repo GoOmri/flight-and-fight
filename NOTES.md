@@ -1299,3 +1299,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Words on all buttons sit 2 px lower (config btnTextDy). Best score on the stage cards is one step smaller.
 - Not changed: the dark outline and soft yellow, Omri may look for references.
 - Checked in the browser (stage box, settings, menu). UNVERIFIED: phone; shop, pause and end screen buttons not looked at.
+
+## 2026-11-27 v1.9.184: stage name on a scroll banner (branch stage-banner)
+- A try: in the stage box the name sits on a bigger scroll of Omri's above the picture, dark brown, no outline or yellow. The picture has no text on it now.
+- Checked in the browser (Forest, Swamp in canvas mode). UNVERIFIED: phone.
