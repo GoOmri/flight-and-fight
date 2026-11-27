@@ -86,7 +86,7 @@ export class MenuScene extends Phaser.Scene {
 
     // ---- saved coins, top left (drawn over the path, so a bubble scrolled under it does not hide it)
     const bankBack = this.add.graphics(), bankCoin = this.textures.exists('sp_coin') ? this.add.image(M.bankX + 4, M.bankY, 'sp_coin', 0).setScale(0.6) : null; // a coin picture instead of the word
-    const bankX = M.bankX + (bankCoin ? 11 : 0), bankTxt = txt(bankX, M.bankY, '', M.bankSize, 3, 0, 0xf2b632);
+    const bankX = M.bankX + (bankCoin ? 11 : 0), bankTxt = txt(bankX, M.bankY, '', M.bankSize, 2, 0, 0xf2b632).setFontSize(C.smallPx);
     this.showBank = () => { // drawn again after a purchase
       this.shopGlow.setVisible(canBuyAny()); // the cauldron glows only while something can be bought
       bankTxt.setText(String(loadBank()));
@@ -513,7 +513,7 @@ export class MenuScene extends Phaser.Scene {
     const S = C.shop, B = S.panel, list = S.upgrades, h = B.headH + list.length * B.rowH + B.footH, y0 = Math.round((H - h) / 2), mid = B.x + B.w / 2;
     const objs = [], buttons = [], rows = [], cream = hex(P.cream), gold = hex(0xf2b632), ink = hex(M.settings.ink);
     const keep = (o, dz = 0) => { o.setDepth(B.depth + dz); objs.push(o); return o; }; // made from back to front
-    const T = (x, y, s, color = cream, ox = 0.5) => keep(this.add.text(x, y, s, { ...FONT_MONO, color }).setOrigin(ox, 0.5), 2);
+    const T = (x, y, s, color = cream, ox = 0.5) => keep(this.add.text(x, y, s, { ...FONT_MONO, color }).setFontSize(C.smallPx).setOrigin(ox, 0.5), 2);
     const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
     if (this.textures.exists('ui_panel-parchment')) keep(this.add.image(B.x, y0, this.parchment(B.w, h)).setOrigin(0, 0));
     else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(B.x, y0, B.w, h, M.plateRadius));

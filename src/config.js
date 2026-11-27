@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.187", // bump on every push so the player/Omri can see the build
+  version: "1.9.188", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -123,6 +123,7 @@ export const CONFIG = {
   endScreen: { x: 14, w: 212, rowGap: 22, btnW: 82, starScale: 1.8, starGapMs: 220, countMs: 600, coinsFly: 6 },
   // zoom: 1.5 = everything looks 1.5x bigger on screen. Only this number needs to change.
   // The game is drawn on a smaller canvas (baseWidth/zoom) and Phaser stretches it to fill the phone.
+  smallPx: 32 / 3, // the small crisp text size (2 canvas px per art pixel): shop words and numbers, the coin counter
   btnTextDy: 2, // button words sit this many px lower than the middle of the button (Alagard draws high)
   fontScale: 0.3, // pixel font size steps: asked text size x this = canvas px per art pixel (rounded, at least 3). Bigger = bigger text everywhere (see fpx in hud.js)
   game: { zoom: ZOOM, baseWidth: 360, baseHeight: 640, width: Math.round(360 / ZOOM), height: Math.round(640 / ZOOM), pixelScale: 3, render: 3 }, // render: canvas is drawn this many times bigger than the logical size (sharp text); the camera zooms back. pixelScale: size of one art pixel in game units

@@ -1319,3 +1319,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-27 v1.9.187: red words on Restart and Menu in the pause screen (branch red-danger)
 - They throw away the current run, so their words are red. Continue and Options unchanged.
 - Checked in the browser. UNVERIFIED: phone.
+
+## 2026-11-27 v1.9.188: smaller shop text and coin counter (branch smaller-shop-text)
+- Shop names, levels, prices and coin total, and the main menu coin counter, use the small text size.
+- The end screen coin number is unchanged.
+- Checked in the browser. UNVERIFIED: phone readability.
