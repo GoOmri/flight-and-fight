@@ -1360,3 +1360,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Bats only: white flash, 3 fireballs, falling bits and lingering smoke in the bat colours with a white-hot middle (src/boom.js; numbers in config boom). Frames from capttainjack's shmup pack (CREDITS.md).
 - TUNE > TEST > NEW BOOM (BAT): ON / OFF compares with the old puff. On by default.
 - Checked in the browser by setting off explosions by hand (normal mode); the switch seen in canvas mode. UNVERIFIED: phone, real play, slowdown with many bats.
+
+## 2026-11-27 v1.9.196: bat explosion rebuilt from our own effects (branch boom-ours)
+- Our smoke puffs (3 plus a white middle), our sparks (falling) and ring, the white flash and lingering smoke, drawn in front of the enemies and under coins and enemy shots. The pack frames added in 1.9.195 are removed.
+- Faint leftover pixels are stripped from the tinted puff copies (they showed as a square).
+- Same TUNE > TEST switch. Checked in the browser by setting it off by hand. UNVERIFIED: phone, real play, slowdown.

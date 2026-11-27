@@ -4,7 +4,7 @@
 // always fetched fresh, so a missing name only matters for files that already exist and change).
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'icon.svg', 'assets/fonts/PixelifySans-latin.woff2', 'assets/fonts/Jersey10-latin.woff2',
-  'src/main.js', 'src/config.js', 'src/hud.js', 'src/tune.js', 'src/medals.js', 'src/bank.js', 'src/sprites.js', 'src/forestArt.js', 'src/rocks.js', 'src/cats.js', 'src/sound.js', 'src/popin.js', 'assets/fonts/monogram-extended.ttf', 'assets/fonts/alagard.ttf', 'src/buttons.js', 'src/volbar.js', 'src/boom.js', 'assets/fx/boom-0.png', 'assets/fx/boom-1.png', 'assets/fx/boom-2.png', 'assets/fx/boom-3.png', 'assets/fx/boom-4.png', 'assets/fx/boom-5.png', 'assets/fx/boom-6.png', 'assets/fx/boom-7.png',
+  'src/main.js', 'src/config.js', 'src/hud.js', 'src/tune.js', 'src/medals.js', 'src/bank.js', 'src/sprites.js', 'src/forestArt.js', 'src/rocks.js', 'src/cats.js', 'src/sound.js', 'src/popin.js', 'assets/fonts/monogram-extended.ttf', 'assets/fonts/alagard.ttf', 'src/buttons.js', 'src/volbar.js', 'src/boom.js',
   'src/waves.js', 'src/waves-runner.js', 'src/update.js', 'src/scenes/MenuScene.js', 'src/scenes/PlayScene.js'
 ];
 

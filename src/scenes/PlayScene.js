@@ -11,7 +11,7 @@ import { Hud, FONT, FONT_TITLE, titleCase, fpx, drawPlate } from '../hud.js';
 import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
 import { Tune, tuneEnabled } from '../tune.js';
-import { boom, makeBoom, loadBoomArt } from '../boom.js';
+import { boom } from '../boom.js';
 import { Medals, goalsOf, saveMedals, saveBest } from '../medals.js';
 import { loadBank, addBank, loadLevel, upgradeValue } from '../bank.js';
 
@@ -61,7 +61,6 @@ export class PlayScene extends Phaser.Scene {
     if (K.heartPickup) for (const n of ['idle', 'drop', 'collect', 'shine']) if (K.heartPickup[n]) strip('sp_heart_' + n, K.heartPickup[n]);
     if (K.crate) { strip('sp_crate_idle', K.crate.idle); strip('sp_crate_break', K.crate.break); }
     if (K.poof) strip('sp_poof', K.poof);
-    loadBoomArt(this); // the bigger explosion
     if (K.weaponGem) strip('sp_gem', K.weaponGem);
     if (K.stunned) strip('sp_stunned', K.stunned);
     if (C.bullet.fire) strip('sp_fire', C.bullet.fire);
@@ -613,8 +612,8 @@ export class PlayScene extends Phaser.Scene {
       return a;
     };
     this.poofPool = K.poof ? mkFx(K.poof.poolSize, 'sp_poof') : [];
-    this.boomPool = mkFx(C.boom.pool, '__DEFAULT');
-    for (const k of C.boom.kinds) makeBoom(this, k, DEATH_TINTS[k]);
+    this.boomPool = mkFx(C.boom.pool, K.poof ? 'sp_poof' : '__DEFAULT'); // the puffs of the bigger explosion (src/boom.js)
+    if (K.poof) { this.makeTintSheet('sp_poof', 'sp_poof_core', 0xffffff); if (!this.anims.exists('poof_core')) this.anims.create({ key: 'poof_core', frames: this.anims.generateFrameNumbers('sp_poof_core', { start: 0, end: K.poof.frames - 1 }), frameRate: K.poof.fps, repeat: 0 }); } // its white middle
     this.fxPool = K.crate || K.heartPickup ? mkFx(K.fxPoolSize, K.crate ? 'sp_crate_break' : 'sp_heart_collect') : [];
     this.pops = []; // floating score texts, made once and reused
     for (let i = 0; i < C.feel.popPoolSize; i++) {
@@ -1346,6 +1345,7 @@ export class PlayScene extends Phaser.Scene {
     ctx.drawImage(img, 0, 0);
     ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = hex(color); ctx.fillRect(0, 0, img.width, img.height);
     ctx.globalCompositeOperation = 'destination-in'; ctx.drawImage(img, 0, 0); // keep only the shape (and softness) of the original
+    const px = ctx.getImageData(0, 0, img.width, img.height); for (let i = 3; i < px.data.length; i += 4) if (px.data[i] < 20) px.data[i] = 0; ctx.putImageData(px, 0, 0); // drop the nearly invisible leftovers: in front of everything they showed as a faint square
     cv.refresh();
     src.getFrameNames().forEach(n => { const f = src.get(n); cv.add(n, 0, f.cutX, f.cutY, f.cutWidth, f.cutHeight); });
   }
@@ -1677,6 +1677,7 @@ export class PlayScene extends Phaser.Scene {
     if (!r) return;
     r.setTexture(tex || 'fxRing').setActive(true).setVisible(true).setPosition(x, y).setTint(tint).setDepth(C.feel.ringDepth).setAlpha(alpha);
     r.s1 = tex ? size : size * PX; r.a0 = alpha; r.life = r.max = ms / 1000;
+    return r;
   }
 
   // Floating text that drifts up and fades.
