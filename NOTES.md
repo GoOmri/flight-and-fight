@@ -1370,3 +1370,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - The enemies in play are the bat, the ghost and the fire wisp (code name shooter; the 1.35x bigger one). Each uses its own smoke colour. (An earlier version of this note said dino and vulture: old code names; the vulture is in no wave.) The chest is unchanged. TUNE > TEST > NEW BOOM switches all of it.
 - To watch: the wisp boom is orange, close to enemy shots and coins.
 - Checked in the browser by setting all four off by hand. UNVERIFIED: phone, real play, slowdown.
+
+## 2026-11-27 v1.9.198: enemy shots stand out; small test menu (branch bold-shots-slim-test)
+- Enemy shots: dark ring, near-white middle, faster pulse (src/shots.js). Hit box unchanged. Switch: TUNE > New enemy shots.
+- Test menu: one small panel (start at wave, no damage, finish, lose, restart, reset all, shot switch). Removed: the Move / Shot / Drops / Enemy sliders, +500 coins, separate reset coins / upgrades, weapon level, bank lines, Copy / Reset, the boom switch (new explosions stay on). Balance numbers are changed in config.js.
+- Checked in the browser (shots placed by hand beside the old ones; panel buttons). UNVERIFIED: phone, dodging in real play.

@@ -1,17 +1,12 @@
 // The bigger death explosion (all enemies), built from the game's usual effects, only bigger: several of our smoke
 // puffs, our sparks (these fall) and our ring, plus a short white flash and smoke that stays a while. All in the colours of
 // what died (never red or gold: those belong to shots and coins), drawn in front of the enemies and under the enemy shots.
-// TUNE > TEST has an on / off switch (saved), to compare with the old, smaller one.
 import { CONFIG as C } from './config.js';
 
-const KEY = 'ff_boom';
-export const boomOn = () => { try { return localStorage.getItem(KEY) !== '0'; } catch (e) { return true; } };
-export const toggleBoom = () => { try { localStorage.setItem(KEY, boomOn() ? '0' : '1'); } catch (e) { /* not saved */ } return boomOn(); };
-
-// Plays the whole thing at (x, y). Returns false when it should not (switch off, kind not in the test, no puff picture).
+// Plays the whole thing at (x, y). Returns false when it cannot (kind not listed, no puff picture).
 export function boom(scene, x, y, kind, tints, big = false) {
   const B = C.boom, P = C.sprites.poof, mul = big ? B.bigMul : 1;
-  if (!B.kinds.includes(kind) || !boomOn() || !P || !scene.textures.exists('sp_poof_' + kind)) return false;
+  if (!B.kinds.includes(kind) || !P || !scene.textures.exists('sp_poof_' + kind)) return false;
   // puffs: a big one in the middle at once, smaller ones a moment later off centre, and a quick white one in the heart of it
   const puff = (tex, anim, px, py, scale, depth, wait) => {
     const s = scene.boomPool.find(o => !o.active);
