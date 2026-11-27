@@ -1335,3 +1335,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - A try: every text outline is off (menus, boxes, in-game numbers, tune panel). Why they differed: some text had a 3 px outline and the settings words had none.
 - Weaker now: "Stage Clear" in cyan on the tree picture.
 - Checked in the browser (stage box, end screen). UNVERIFIED: phone, numbers over the game while playing.
+
+## 2026-11-27 v1.9.191: titles in strong yellow (branch yellow-titles)
+- Box titles (Settings, Cauldron, stage box, Stage Clear, Game Over, Paused), stage names on the menu cards and the Shop sign are yellow (0xf2b632). Other text stays white.
+- On the tree picture the yellow is a bit weak without an outline.
+- Checked in the browser (menu, stage box, Stage Clear). UNVERIFIED: phone; Settings, Cauldron, Paused, Game Over not looked at.
