@@ -1340,3 +1340,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Box titles (Settings, Cauldron, stage box, Stage Clear, Game Over, Paused), stage names on the menu cards and the Shop sign are yellow (0xf2b632). Other text stays white.
 - On the tree picture the yellow is a bit weak without an outline.
 - Checked in the browser (menu, stage box, Stage Clear). UNVERIFIED: phone; Settings, Cauldron, Paused, Game Over not looked at.
+
+## 2026-11-27 v1.9.192: shop coin counter and title (branch shop-counter)
+- Coin counter bigger and centred above the price buttons; Cauldron title bigger and a bit lower; the box is 10 px taller.
+- Counter numbers moved down to line up with the coin (shop and top left of the menu).
+- Checked in the browser. UNVERIFIED: phone.
