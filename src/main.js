@@ -12,7 +12,8 @@ const fontReady = Promise.race([
     document.fonts.load('700 16px "GameFont"', 'A0').then(() => document.fonts.load('400 16px "GameFont"', 'A0')).catch(() => null),
     document.fonts.load('400 16px "PackFont"', 'A0').catch(() => null),
     document.fonts.load('400 32px "DungeonFont"', 'A').catch(() => null),
-    document.fonts.load('400 16px "Monogram"', 'A').catch(() => null)
+    document.fonts.load('400 16px "Monogram"', 'A').catch(() => null),
+    document.fonts.load('400 16px "Alagard"', 'A').catch(() => null)
   ]),
   new Promise(r => setTimeout(r, 2000))
 ]);
