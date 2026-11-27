@@ -1,4 +1,4 @@
-import { popIn } from '../popin.js';
+import { popIn, popOut } from '../popin.js';
 import { buttonKey, addSlice, BTN_INK } from '../buttons.js';
 import { sfx, music, ringSound, pauseSound, volume, setVolume } from '../sound.js';
 import { drawVolBar, volFrom, volHit, VOL_W } from '../volbar.js';
@@ -900,12 +900,13 @@ export class PlayScene extends Phaser.Scene {
   }
 
   pauseTap(x, y) {
+    if (this.pauseUi.closing) return;
     this.pauseUi.held = this.pauseUi.list.find(b => b.bar && volHit(x, y, b.bx, b.by)) || null;
     this.pauseVolume(x);
     const b = this.pauseUi.list.find(b => !b.bar && Math.abs(x - b.x) <= b.w / 2 && Math.abs(y - b.y) <= b.h / 2);
     if (!b) return;
     sfx('tap');
-    if (b.id === 'cont') this.resumeGame();
+    if (b.id === 'cont') { this.pauseUi.closing = true; this.pauseUi.held = null; popOut(this, this.pauseUi.box, W / 2, H / 2, () => this.resumeGame()); } // the box shrinks away, then the game goes on
     else if (b.id === 'options') this.pauseButtons('options');
     else if (b.id === 'back') this.pauseButtons('main');
     else if (b.id === 'restart') { this.anims.resumeAll(); this.scene.restart(this.startData); } // start the stage again (the run so far is lost, nothing saved)
