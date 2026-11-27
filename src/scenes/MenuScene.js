@@ -395,7 +395,7 @@ export class MenuScene extends Phaser.Scene {
     const veil = keep(this.add.graphics(), -1); veil.fillStyle(0x000000, 0.55).fillRect(0, 0, W, H);
     if (this.textures.exists('ui_panel-parchment')) keep(this.add.image(S.x, S.y, this.parchment(S.w, S.h)).setOrigin(0, 0));
     else { const back = keep(this.add.graphics()); back.fillStyle(0x3a1a72, 1).fillRoundedRect(S.x, S.y, S.w, S.h, M.plateRadius); }
-    keep(this.add.text(mid, S.y + 30, 'Settings', { ...FONT_TITLE, fontSize: '24px', color: hex(P.cream) }).setOrigin(0.5), 2); // the ornate title font
+    keep(this.add.text(mid, S.y + 30, 'Settings', { ...FONT_TITLE, fontSize: '24px', color: hex(P.title) }).setOrigin(0.5), 2); // the ornate title font
     this.panelButtons = [];
     // Omri's flat parchment buttons (80 x 26, 10 px ends). isOn = null: a plain button; else a choice, faded when it is not the chosen one
     const mkBtn = (x, y, w, key, label, action, isOn = null) => {
@@ -449,7 +449,7 @@ export class MenuScene extends Phaser.Scene {
     else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(L.x, y0, L.w, h, 10), 0);
     // the stage picture in its own ragged frame, the name on it
     if (art && this.textures.exists('stage_' + theme)) keep(this.add.image(W / 2, y0 + 14, this.tilePicture(theme, L.picW, L.picH)).setOrigin(0.5, 0), 1);
-    keep(this.add.text(W / 2, y0 + 14 + L.picH / 2, titleCase(node ? node.name : ''), { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(0.5), 2); // the ornate title font
+    keep(this.add.text(W / 2, y0 + 14 + L.picH / 2, titleCase(node ? node.name : ''), { ...FONT_TITLE, fontSize: L.titleSize + 'px', color: hex(P.title), stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(0.5), 2); // the ornate title font
     const names = { cats: 'Cats', allCoins: 'Coins', killAll: 'Enemies', noHit: 'No hit' };
     keys.forEach((k, i) => { // a goal not earned yet: the same icon, faded
       const y = y0 + 30 + L.picH + i * L.rowGap, done = saved[k];
@@ -487,7 +487,7 @@ export class MenuScene extends Phaser.Scene {
     const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
     if (this.textures.exists('ui_panel-parchment')) keep(this.add.image(B.x, y0, this.parchment(B.w, h)).setOrigin(0, 0));
     else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(B.x, y0, B.w, h, M.plateRadius));
-    keep(this.add.text(mid, y0 + 30, 'Cauldron', { ...FONT_TITLE, fontSize: '24px', color: gold }).setOrigin(0.5), 2);
+    keep(this.add.text(mid, y0 + 30, 'Cauldron', { ...FONT_TITLE, fontSize: '24px', color: hex(P.title) }).setOrigin(0.5), 2);
     const total = T(B.x + B.w - 16, y0 + 56, '', gold, 1); // the saved coins: right side, a coin picture before the number
     const totalCoin = this.textures.exists('sp_coin') ? keep(this.add.image(0, y0 + 56, 'sp_coin', 0).setScale(0.6), 2) : null;
     const mkBtn = (x, y, w, label, action) => { // the flat parchment button of the settings; off = faded

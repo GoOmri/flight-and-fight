@@ -862,7 +862,7 @@ export class PlayScene extends Phaser.Scene {
     this.dragId = null; this.stickV.set(0, 0); this.stopping = false; this.stickC.set(W / 2, C.stick.restY);
     const P = C.menu.pal, ui = [];
     ui.push(this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.6).setDepth(70));
-    ui.push(this.add.text(W / 2, H / 2 - 80, 'Paused', { ...FONT_TITLE, fontSize: '36px', color: hex(P.cream), stroke: hex(P.shadow), strokeThickness: 0, align: 'center' }).setOrigin(0.5).setDepth(71));
+    ui.push(this.add.text(W / 2, H / 2 - 80, 'Paused', { ...FONT_TITLE, fontSize: '36px', color: hex(P.title), stroke: hex(P.shadow), strokeThickness: 0, align: 'center' }).setOrigin(0.5).setDepth(71));
     const box = this.add.container(0, 0, ui.slice(1)).setDepth(71); // everything but the dark veil
     this.pauseUi = { objs: ui, btnObjs: [], list: [], box };
     this.pauseButtons('main');
@@ -1698,7 +1698,7 @@ export class PlayScene extends Phaser.Scene {
     music(null); ringSound(null); sfx('gameOver', 350); // after the hit sound
     this.vx = this.vy = 0; // clouds stop boosting
     saveBest(this.score, this.stageTheme); // the high score also counts when the run ends in a game over (it was only saved on STAGE CLEAR before)
-    this.endScreen('GAME OVER', hex(C.menu.pal.pink), false);
+    this.endScreen('GAME OVER', hex(C.menu.pal.title), false);
     this.ship.setVisible(false).setAlpha(1);
   }
 
@@ -1709,7 +1709,7 @@ export class PlayScene extends Phaser.Scene {
     this.syncMedals();
     const isNew = saveMedals(this.medals.state, this.stageTheme);
     saveBest(this.score, this.stageTheme);
-    this.endScreen('STAGE CLEAR', hex(C.menu.pal.cyan), true, isNew);
+    this.endScreen('STAGE CLEAR', hex(C.menu.pal.title), true, isNew);
     this.ship.setAlpha(1);
   }
 
