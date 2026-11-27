@@ -1345,3 +1345,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Coin counter bigger and centred above the price buttons; Cauldron title bigger and a bit lower; the box is 10 px taller.
 - Counter numbers moved down to line up with the coin (shop and top left of the menu).
 - Checked in the browser. UNVERIFIED: phone.
+
+## 2026-11-27 v1.9.193: taller volume handle, cauldron and cat swapped, shop title (branch swap-cauldron-cat)
+- Volume handle sticks out 2 px above the bar (settings and pause).
+- Cauldron (with Shop, glow and tap area) and cat swapped places on the main menu.
+- Shop title "Cauldron" is now "Upgrades", left, a bit smaller, on the same line as the coin counter; box shorter.
+- Checked in the browser. UNVERIFIED: phone, tapping the cauldron in its new place.

@@ -487,9 +487,9 @@ export class MenuScene extends Phaser.Scene {
     const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
     if (this.textures.exists('ui_panel-parchment')) keep(this.add.image(B.x, y0, this.parchment(B.w, h)).setOrigin(0, 0));
     else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(B.x, y0, B.w, h, M.plateRadius));
-    keep(this.add.text(mid, y0 + 37, 'Cauldron', { ...FONT_TITLE, fontSize: '32px', color: hex(P.title) }).setOrigin(0.5), 2);
-    const total = T(0, y0 + 70, '', gold, 0).setFontSize(16); // the saved coins: a coin picture and the number, centred above the price buttons (text 1.5 px low: the font draws high)
-    const totalCoin = this.textures.exists('sp_coin') ? keep(this.add.image(0, y0 + 68, 'sp_coin', 0).setScale(0.9), 2) : null;
+    keep(this.add.text(B.x + 16, y0 + 44, 'Upgrades', { ...FONT_TITLE, fontSize: '28px', color: hex(P.title) }).setOrigin(0, 0.5), 2); // left, on the coin counter's line
+    const total = T(0, y0 + 46, '', gold, 0).setFontSize(16); // the saved coins: a coin picture and the number, centred above the price buttons (text 1.5 px low: the font draws high)
+    const totalCoin = this.textures.exists('sp_coin') ? keep(this.add.image(0, y0 + 44, 'sp_coin', 0).setScale(0.9), 2) : null;
     const mkBtn = (x, y, w, label, action) => { // the flat parchment button of the settings; off = faded
       const bt = { x: x - 4, y: y - 5, w: w + 8, h: 36, down: false, off: false, action };
       const img = keep(addSlice(this, x, y, 'ui_flat1', w, 26, 10, 10, 0, 0).setOrigin(0, 0), 1), text = T(x + w / 2, y + 12 + C.btnTextDy, label, ink);
