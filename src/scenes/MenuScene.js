@@ -8,6 +8,7 @@ import { goalsOf, loadMedals, loadBest, totalStars, isCleared } from '../medals.
 import { loadBank, loadLevel, nextPrice, buyUpgrade, canBuyAny } from '../bank.js';
 import { latestVersion, refreshFiles } from '../update.js';
 import { toggleTune } from '../tune.js';
+import { CREDIT_PAGES } from '../credits.js';
 
 const W = C.game.width, H = C.game.height, R = C.game.render;
 const M = C.menu;
@@ -435,6 +436,7 @@ export class MenuScene extends Phaser.Scene {
       return bar;
     });
     this.panelButtons.push(this.makeUpdate(S.y + 238, keep));
+    const credits = mkBtn(mid - 40, S.y + 272, 80, 'ui_med-button', 'Credits', () => this.openCredits()); credits.btn = false; // (btn = the little pop, which is for Update and the cog)
     this.panelButtons.push(this.closeX(S.x + S.w, S.y, keep, () => this.popOut(this.panelBox, this.panelVeil, S.x + S.w / 2, S.y + S.h / 2, () => this.openSettings(false))));
     this.panelVeil = veil; this.panelBox = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(S.depth);
     this.panelObjs = objs;
@@ -571,6 +573,42 @@ export class MenuScene extends Phaser.Scene {
     this.tweens.killTweensOf(veil);
     this.tweens.add({ targets: veil, alpha: 0, duration: 150, delay: 90 });
     this.popTween = this.tweens.addCounter({ from: 1, to: 0.7, duration: 240, ease: 'Back.easeIn', onUpdate: t => { const k = t.getValue(); if (box.active) box.setScale(k).setPosition(cx * (1 - k), cy * (1 - k)); }, onComplete: done });
+  }
+
+  // The credits box (settings > Credits): the makers of the art, sounds and fonts (src/credits.js), in pages. Next turns the page,
+  // X goes back to the settings. Built when opened, thrown away when closed.
+  openCredits() {
+    this.openSettings(false);
+    const x = 14, w = 212, h = 342, y0 = Math.round((H - h) / 2), mid = x + w / 2, D = M.settings.depth, objs = [], pages = [];
+    const keep = (o, dz = 0) => { o.setDepth(D + dz); objs.push(o); return o; };
+    const T = (tx, ty, s, color) => keep(this.add.text(tx, ty, s, { ...FONT_MONO, color }).setFontSize(C.smallPx).setOrigin(0.5), 2);
+    const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
+    if (this.textures.exists('ui_panel-parchment')) keep(this.add.image(x, y0, this.parchment(w, h)).setOrigin(0, 0));
+    else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(x, y0, w, h, M.plateRadius));
+    keep(this.add.text(mid, y0 + 30, 'Credits', { ...FONT_TITLE, fontSize: '24px', color: hex(P.title) }).setOrigin(0.5), 2);
+    CREDIT_PAGES.forEach(entries => {
+      const list = []; let y = y0 + 58;
+      entries.forEach(([what, who]) => {
+        if (what) { list.push(T(mid, y, what, '#a89cd0')); y += 11; }
+        who.forEach(line => { list.push(T(mid, y, line, hex(P.cream))); y += 11; });
+        y += 6;
+      });
+      pages.push(list);
+    });
+    let page = 0, box = null;
+    const count = T(x + w - 40, y0 + h - 28, '', hex(P.cream));
+    const show = () => { pages.forEach((list, i) => list.forEach(o => o.setVisible(i === page))); count.setText((page + 1) + ' / ' + pages.length); };
+    const by = y0 + h - 42, bw = 70, next = { x: mid - bw / 2 - 4, y: by - 4, w: bw + 8, h: 34, down: false, shown: true };
+    const img = keep(addSlice(this, mid - bw / 2, by, buttonKey(this), bw, 26, 10, 10, 0, 0).setOrigin(0, 0), 1);
+    next.label = T(mid, by + 12 + C.btnTextDy, 'Next', BTN_INK);
+    next.draw = () => { const sink = next.down ? 1 : 0; img.setTint(sink ? 0xbbbbbb : 0xffffff).setY(by + sink); next.label.setY(by + 12 + C.btnTextDy + sink); };
+    next.action = () => { page = (page + 1) % pages.length; show(); };
+    next.draw(); show();
+    const close = () => { if (this.popTween) this.popTween.remove(); objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.openSettings(true, false); };
+    const back = this.closeX(x + w, y0, keep, () => this.popOut(box, veil, W / 2, y0 + h / 2, close));
+    box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(D);
+    this.popIn(box, veil, W / 2, y0 + h / 2);
+    this.boxObjs = objs; this.modal = true; this.panelButtons = [next, back];
   }
 
   openSettings(on, pop = true) {

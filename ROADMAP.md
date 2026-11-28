@@ -9,7 +9,7 @@ Sizes: **S** = small (one sitting), **M** = medium, **L** = large (plan first, s
 - 2 stages: Forest and Swamp. **Both use the same 10 waves and the same 3 enemies** (bat, ghost, fire wisp). Only the pictures differ. The Swamp has no music of its own.
 - Stages 3, 4, 5 are locked placeholders. They ask for 5, 8, 11 stars; the two stages give 8.
 - 4 stars per stage (cats, coins, all enemies, no hit). Shop (the cauldron): magnet, damage, fire speed, 10 levels each.
-- No boss, no spells, no credits screen. Saves live only in the browser.
+- No boss, no spells. Saves live only in the browser.
 
 ## The order (AGREED by Omri, 28 Nov 2026)
 
@@ -25,7 +25,7 @@ Sizes: **S** = small (one sitting), **M** = medium, **L** = large (plan first, s
 - Shop prices and strength: **do not change yet** (Omri, 28 Nov): later stages may be harder. Look again after step 3.
 - DECIDED (28 Nov), build with the stage work (step 3): **damage has no level cap** (prices keep rising). Fire speed and magnet keep a limit. The shop tube goes; each row shows name, level number, price (or Max).
 - DONE (v1.9.205): rescued cats drop 3 ordinary coins each; they count for the all-coins star (Omri, 28 Nov).
-- **Credits screen (S-M).** The game is public and several art and font licences ask for credit. Today the credit is only in CREDITS.md, not in the game. (20 Nov: "not yet".)
+- DONE (v1.9.206): credits screen in settings. A new picture, sound or font must be added to src/credits.js AND CREDITS.md.
 - **Settings icon** instead of the cog (S): cog with a moon or cat eye, or a wand. Not picked. The spellbook is saved for something else.
 - **UI rulebook leftovers** (S): same margins in every box, text sizes.
 

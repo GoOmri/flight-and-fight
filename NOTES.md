@@ -1416,3 +1416,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-28 v1.9.205: rescued cats drop coins (branch cat-coins)
 - 3 coins per rescued cat, falling like enemy coins; missing one fails the all-coins star. A perfect stage is now 136 coins. config cats.coins.
 - UNVERIFIED: phone, a real rescue (can the coins be caught when the cat is low on the screen?).
+
+## 2026-11-28 v1.9.206: credits screen (branch credits)
+- Settings has a Credits button under Update: three pages (Next), X goes back to settings. Words in src/credits.js. The settings box is a bit taller.
+- Not listed because no maker is known: the fire wisp, the title font DungeonFont, the two cat meows.
+- UNVERIFIED: phone readability.
