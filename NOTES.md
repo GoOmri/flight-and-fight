@@ -1426,3 +1426,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - One scrolling list (drag or wheel) instead of pages. The box is smaller and opens on top of the settings; closing it no longer rebuilds them (that caused the jump).
 - Missing licences listed at the top of CREDITS.md.
 - UNVERIFIED: dragging with a finger on the phone.
+
+## 2026-11-28 v1.9.208: credits scroll bar further from the edge (branch credits-bar)
+- Moved 7 px inward. UNVERIFIED: phone.
