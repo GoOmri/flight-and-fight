@@ -291,6 +291,7 @@ export class MenuScene extends Phaser.Scene {
     }
     const parts = ['fight', 'amp', 'flight'].map(k => 'menu_logo_' + k).filter(k => this.textures.exists(k)); // the words fly in one after the other; without the parts the whole logo rises at once
     const words = (parts.length === 3 ? parts : ['menu_logo']).map(k => this.add.image(L.x, H + 10, k).setOrigin(0.5, 0).setScale(L.scale));
+    if (words.length === 3) this.children.moveBelow(words[1], words[0]); // stacking (Omri's order): & at the bottom, Fight over it, Flight on top
     const keys = [];
     if (SH.on) try {
       const w = src.width, h = src.height, base = document.createElement('canvas'); base.width = w; base.height = h;
