@@ -19,7 +19,10 @@ Sizes: **S** = small (one sitting), **M** = medium, **L** = large (plan first, s
 - White-ringed shots, bigger explosions, menu tilt, new "New" place on the end screen.
 - Why first: every later stage, enemy and spell is balanced on top of this.
 
+**Result (Omri on the phone, v1.9.204): step 1 DONE.** New player: challenging, which is good. Coins come maybe too fast: after the 4th attempt the upgrades make it really easy. Shots good, explosions good, menu tilt okay, "New" okay.
+
 ### 2. Fix what is already out
+- **Slow the shop down (S)** (from the step 1 test; planned, numbers not agreed).
 - **Credits screen (S-M).** The game is public and several art and font licences ask for credit. Today the credit is only in CREDITS.md, not in the game. (20 Nov: "not yet".)
 - **Settings icon** instead of the cog (S): cog with a moon or cat eye, or a wand. Not picked. The spellbook is saved for something else.
 - **UI rulebook leftovers** (S): same margins in every box, text sizes.
