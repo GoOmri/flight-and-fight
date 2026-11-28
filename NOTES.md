@@ -1399,3 +1399,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Shop cauldron scale 5/3 to 2; word, glow and touch area follow.
 - Menu sky moves 12 px on phone tilt (was 4) and 0.1 px per scrolled px (was 0.08); the moon now moves with it. Sky drawn a bit bigger (cover 1.123) to make room.
 - Checked in the browser (tilt faked, no edge shows). UNVERIFIED: real tilting on the phone. EFFECTS LOW turns tilt off.
+
+## 2026-11-28 v1.9.204: end screen "New" no longer overlaps (branch end-new-tag)
+- A new star shows its count higher in the row with "New" under it, instead of beside it (it ran into the count and into "Enemies").
+- Checked in the browser with all four rows new and big numbers. UNVERIFIED: phone.

@@ -1756,14 +1756,15 @@ export class PlayScene extends Phaser.Scene {
         const done = this.medals.state[k] === 'earned';
         add(this.add.image(E.x + 34, y, 'goal_' + k + '_earned').setScale(goalScale(this, k, E.iconBox)).setAlpha(done ? 1 : E.dim));
         t(E.x + 52, y, names[k], 10, done ? CR : DIM, 0);
-        add(this.add.text(starX - 16, y, values[k], { ...FONT, fontSize: C.smallPx + 'px', color: done ? CR : DIM, stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(1, 0.5));
+        const fresh = !!(isNew && isNew[k]); // a new star: the count moves up and "New" sits under it (no room beside it)
+        add(this.add.text(starX - 16, fresh ? y - 5 : y, values[k], { ...FONT, fontSize: C.smallPx + 'px', color: done ? CR : DIM, stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(1, 0.5));
         const star = add(this.add.image(starX, y, done ? 'star_earned' : 'star_off').setScale(E.starScale));
         if (done && live) { // the earned stars land one after the other
           star.setVisible(false);
           this.time.delayedCall(ease + starsDone * E.starGapMs, () => { star.setVisible(true); sfx('coin'); this.tweens.add({ targets: star, scale: { from: E.starScale * 2, to: E.starScale }, duration: 260, ease: 'Back.easeOut' }); });
         }
         if (done) starsDone++;
-        if (isNew && isNew[k]) this.newTags.push(add(this.add.text(E.x + 118, y, 'New', { ...FONT, fontSize: C.smallPx + 'px', color: hex(P.orange), stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(0.5)));
+        if (fresh) this.newTags.push(add(this.add.text(starX - 16, y + 6, 'New', { ...FONT, fontSize: C.smallPx + 'px', color: hex(P.orange), stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(1, 0.5)));
         y += E.rowGap;
       });
       add(this.add.rectangle(mid, y - 8, E.w - 40, 1, 0x9a6ad8));
