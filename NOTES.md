@@ -1465,3 +1465,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-28 gallery checked sheet by sheet (local tool, no game change; branch gallery-check)
 - Nothing moves unless its frame size is known; UI packs are still pictures; big pictures are shrunk. Fixed: wizard cards and attack, silver coin, face / missile / bullet sheets, preview GIFs. New check.html shows every moving card as its frames; all 23 pages were looked at.
+
+## 2026-11-28 gallery cards open on idle or flying (local tool; branch gallery-idle)
+- Idle first, else flying; space ships get a card each (they shared one).
