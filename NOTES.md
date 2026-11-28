@@ -1445,3 +1445,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-28 v1.9.212: the & moved inside the logo pictures (branch logo-amp)
 - logo-amp.png and logo-text.png have the & 8 px lower (pixels moved, none recoloured); the code shift is gone. The logo pictures load with ?v= so a phone does not keep the old ones.
+
+## 2026-11-28 v1.9.213: Omri's new logo pictures (branch logo-new)
+- New logo-fight / amp / flight (same size and colours). Stacking: & at the bottom, Fight, Flight on top. logo-text.png rebuilt to match. Photoshop's extra blocks removed (pixels untouched).
+- UNVERIFIED: phone.
