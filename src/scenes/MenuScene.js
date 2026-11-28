@@ -734,6 +734,7 @@ export class MenuScene extends Phaser.Scene {
     this.tilt.x += (this.tiltTarget.x - this.tilt.x) * k; this.tilt.y += (this.tiltTarget.y - this.tilt.y) * k;
     for (const it of this.decorItems) it.s.setPosition(it.pos.x - this.tilt.x * it.par, it.pos.y - this.tilt.y * it.par);
     if (this.skySprite) this.skySprite.setPosition(W / 2 + this.tilt.x * T.sky, H / 2 + this.tilt.y * T.sky + this.scroll * M.sky.scrollPar); // the sky follows the stage scroll, slowly: parallax
+    if (this.skySprite && this.moon) this.moon.setPosition(M.sky.moon.x + this.skySprite.x - W / 2, M.sky.moon.y + this.skySprite.y - H / 2); // the moon belongs to the sky
     if (this.moon) this.moon.setPosition(M.sky.moon.x + this.skySprite.x - W / 2, M.sky.moon.y + this.skySprite.y - H / 2); // the moon moves with the sky
   }
 }

@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.202", // bump on every push so the player/Omri can see the build
+  version: "1.9.203", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -51,7 +51,7 @@ export const CONFIG = {
       star: { everyMs: [8000, 14000], x: [130, 250], y: [8, 80], dx: -110, dy: 55, ms: 650 },
       tap: { count: 9, dist: [12, 26], ms: 420, tints: [0xf2b632, 0xff5ac8, 0xfff3c4] }
     },
-    tilt: { on: true, range: 20, sky: 4 },
+    tilt: { on: true, range: 20, sky: 12 },
     intro: { bubbles: false }, // true: the stage bubbles slide in from the sides when the menu opens (the witch does it with decor witch introX, a number of px to fly in from, 0 = off). Off: only the logo moves in; everything else is just there
     logoShine: { on: false, frames: 14, band: 26, strength: 0.45, frameMs: 45, everyMs: 4200, firstMs: 2600, float: 2, floatMs: 2800 }, // glint sweep over the logo (frames, band width in art px, brightness 0..1, ms per frame, ms between sweeps, ms until the first one) and the float (px, ms for a full swing)
     // Stage path (the main menu): a line up the middle, a bubble left or right of it at height cy. side L / R. A node with locked: true is faded, says SOON and takes no taps.
@@ -78,14 +78,14 @@ export const CONFIG = {
     versionSize: 8, versionAlpha: 0.4, versionBottom: 9, // version text: distance of its middle from the bottom edge
     bankX: 6, bankY: 8, bankSize: 8, // saved coin total (top left): left edge, middle height, text size
     // Halloween menu art (assets/menu, Spooktober set). Sky = animated background (cells in a grid of `cols`), scaled to cover the screen width.
-    sky: { file: 'menu/sky.png', frameW: 202, frameH: 360, frames: 18, cols: 6, fps: 5, cover: 1.1, scrollPar: 0.08, moon: { box: [86, 45, 30, 30], x: 62, y: 119 } }, // moon = the orange moon painted in the sky: box = where it is in one frame (art px: left, top, w, h), x / y = where its middle sits on screen (between the Forest and the third stage). cover = how much bigger than the screen (room to shift), scrollPar = how far the sky moves per px the stage path is scrolled (0.08 = slow)
+    sky: { file: 'menu/sky.png', frameW: 202, frameH: 360, frames: 18, cols: 6, fps: 5, cover: 1.123, scrollPar: 0.1, moon: { box: [86, 45, 30, 30], x: 62, y: 119 } }, // moon = the orange moon painted in the sky: box = where it is in one frame (art px: left, top, w, h), x / y = where its middle sits on screen (between the Forest and the third stage). cover = how much bigger than the screen (room to shift), scrollPar = how far the sky moves per px the stage path is scrolled (0.08 = slow)
     // Decorations around the cards (never over cards, medals, UPDATE or version; they take no input). file in assets/, frameW/frameH = one cell,
     // x/y = the point of the picture that sits at (x,y) (originX/originY 0..1), scale (multiples of 1/3 keep the pixels even), fps, bob = up-down swing in px (0 = still), bobMs = swing period, flipX.
     decor: [
       { key: 'witch',  file: 'menu/witch.png',  frameW: 61, frameH: 55, frames: 4, fps: 5, x: 52,  y: 266,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 3, bobMs: 3200, swayX: 3, swayDeg: 2, swayMs: 4200, introX: 0, par: 6 },
       { key: 'ghost',  file: 'menu/ghost.png',  frameW: 29, frameH: 31, frames: 5, fps: 6, x: 198, y: 246,  originX: 0.5, originY: 0.5, scale: 1.667, depth: 50, bob: 6, bobMs: 3400, swayX: 4, swayMs: 5200, fade: [0.7, 1], fadeMs: 2800, par: 8 },
       { key: 'cat',    file: 'menu/cat.png',    frameW: 21, frameH: 25, frames: 5, fps: 4, x: 32,  y: 422, originX: 0.5, originY: 1,   scale: 1.333, depth: 50, bob: 0, bobMs: 1000, par: 6 },
-      { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 208, y: 426, originX: 0.5, originY: 1,   scale: 5 / 3, depth: 50, bob: 0, bobMs: 1000, par: 6 }
+      { key: 'boiler', file: 'menu/boiler.png', frameW: 29, frameH: 30, frames: 4, fps: 6, x: 208, y: 426, originX: 0.5, originY: 1,   scale: 2, depth: 50, bob: 0, bobMs: 1000, par: 6 }
     ]
   },
   // The CAULDRON shop (menu: tap the cauldron bottom left, picture = menu.decor "boiler"). Bought levels are saved (src/bank.js).
@@ -101,11 +101,11 @@ export const CONFIG = {
       { id: 'fire', name: 'Fire speed', prices: [30, 45, 60, 80, 105, 135, 170, 210, 260, 320], top: 0.65 }
     ],
     buyGapMs: 450, // after a purchase, BUY ignores taps this long (a double tap buys only once)
-    button: { x: 180, y: 374, w: 56, h: 57 }, // touch area of the cauldron (with SHOP on it) on the menu (keep it clear of UPDATE and the version text)
-    sign: { x: 208, y: 407, size: 16, color: 0xf2b632, stroke: 3 }, // the word SHOP on the cauldron's pot: middle point, text size (title font, plain px), colour, outline px. Cauldron size: menu.decor "boiler" scale
+    button: { x: 178, y: 365, w: 60, h: 62 }, // touch area of the cauldron (with SHOP on it) on the menu (keep it clear of UPDATE and the version text)
+    sign: { x: 208, y: 403, size: 18, color: 0xf2b632, stroke: 3 }, // the word SHOP on the cauldron's pot: middle point, text size (title font, plain px), colour, outline px. Cauldron size: menu.decor "boiler" scale
     // soft gold glow behind the cauldron while at least one upgrade level can be bought: middle point, half width / height (px), colour,
     // alpha at the bright and the dim end of the pulse, ms for one way (dim to bright)
-    glow: { x: 208, y: 406, rx: 30, ry: 30, color: 0xffd040, alphaMax: 0.9, alphaMin: 0.35, ms: 900 },
+    glow: { x: 208, y: 401, rx: 36, ry: 36, color: 0xffd040, alphaMax: 0.9, alphaMin: 0.35, ms: 900 },
     panel: { x: 14, w: 212, headH: 66, rowH: 50, footH: 14, buyW: 54, depth: 100,
       // upgrade level = a glowing potion tube: width / height (px) and colours (rim, empty glass, liquid, top shine, surface edge, bubbles)
       tube: { w: 120, h: 12, rim: 0xc9b8ff, empty: 0x1a0830, liquid: 0xff5ac8, shine: 0xffc2ea, edge: 0xffe3f7, bubble: 0xffd6f2 } } // the shop box: left edge, width, heights of the top part / one row / bottom part, BUY width, level bar pips
