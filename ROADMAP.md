@@ -57,7 +57,6 @@ Decided 24 Nov, in this order. Each is taught alone in an easy wave first. Dange
 ## Needs Omri's decision
 - **Bosses at all?** No boss in the Forest. For the Swamp: never answered (art picked 20 Nov if built: Necromancer; style: shot patterns, spirals and walls).
 - The name (see 7).
-- Shop levels: a more visual look than the potion tube (asked "shelve or work on it?", not answered).
 - A visible change of her shot at damage level 5 and 10 (what should it look like?).
 
 ## Smaller items, no date
