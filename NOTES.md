@@ -1412,3 +1412,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-28 phone test of v1.9.204 (notes only)
 - Stage 1 with nothing bought: challenging (good). Coins maybe too fast: from the 4th attempt upgrades make it really easy. Shots, explosions, tilt, "New": fine.
 - Galleries were unreachable because the preview server was stopped after each test; it is now to be left running.
+
+## 2026-11-28 v1.9.205: rescued cats drop coins (branch cat-coins)
+- 3 coins per rescued cat, falling like enemy coins; missing one fails the all-coins star. A perfect stage is now 136 coins. config cats.coins.
+- UNVERIFIED: phone, a real rescue (can the coins be caught when the cat is low on the screen?).
