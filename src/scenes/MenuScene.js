@@ -616,7 +616,7 @@ export class MenuScene extends Phaser.Scene {
       list.setScale(k).setPosition(box.x, box.y - sc.at * k);
       const th = Math.max(14, view * view / (view + max));
       bar.clear();
-      if (max && k > 0.99) bar.fillStyle(0xa89cd0, 0.8).fillRect(x + w - 11, top + (view - th) * sc.at / max, 2, th); // where you are in the list
+      if (max && k > 0.99) bar.fillStyle(0xa89cd0, 0.8).fillRect(x + w - 18, top + (view - th) * sc.at / max, 2, th); // where you are in the list
     };
     const gone = () => { this.events.off('update', follow); this.events.off('shutdown', gone); this.scroller = null; };
     const close = () => { gone(); objs.forEach(o => o.destroy()); box.destroy(); list.destroy(); clip.destroy(); this.boxObjs = null; this.panelButtons = this.settingsButtons; };
