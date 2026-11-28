@@ -8,7 +8,7 @@ import { goalsOf, loadMedals, loadBest, totalStars, isCleared } from '../medals.
 import { loadBank, loadLevel, nextPrice, buyUpgrade, canBuyAny } from '../bank.js';
 import { latestVersion, refreshFiles } from '../update.js';
 import { toggleTune } from '../tune.js';
-import { CREDIT_PAGES } from '../credits.js';
+import { CREDITS } from '../credits.js';
 
 const W = C.game.width, H = C.game.height, R = C.game.render;
 const M = C.menu;
@@ -134,6 +134,8 @@ export class MenuScene extends Phaser.Scene {
     const onDown = p => {
       held = this.modal && !this.boxObjs ? this.volBars.find(b => volHit(p.x / R, p.y / R, b.x, b.y)) || null : null;
       volTouch(p);
+      const sc = this.scroller, py0 = p.y / R;
+      if (sc && py0 > sc.top && py0 < sc.bottom && p.x / R > sc.x0 && p.x / R < sc.x1) { sc.held = true; sc.v = 0; sc.last = py0; sc.lastT = this.time.now; } // the credits list is picked up
       if (!this.modal && Math.abs(p.x / R - W / 2) < 40 && Math.abs(p.y / R - (H - M.versionBottom)) < 12) {
         verTaps = this.time.now - verAt < 800 ? verTaps + 1 : 1; verAt = this.time.now;
         if (verTaps >= 5) { verTaps = 0; verTxt.setText(toggleTune() ? 'TUNE ON' : 'TUNE OFF'); this.time.delayedCall(1500, () => verTxt.active && verTxt.setText('v' + C.version)); }
@@ -145,6 +147,12 @@ export class MenuScene extends Phaser.Scene {
     };
     const onMove = p => {
       if (p.isDown) volTouch(p);
+      const sc = this.scroller;
+      if (sc && sc.held && p.isDown) {
+        const py = p.y / R, dy = sc.last - py, now = this.time.now, dt = (now - sc.lastT) / 1000;
+        sc.move(dy); if (dt > 0) sc.v = 0.6 * sc.v + 0.4 * (dy / dt); sc.last = py; sc.lastT = now;
+        return;
+      }
       const d = this.drag;
       if (d) {
         const py = p.y / R, dy = py - d.y0;
@@ -161,9 +169,10 @@ export class MenuScene extends Phaser.Scene {
       }
       if (this.pressed && hit(p) !== this.pressed) setPressed(null); // finger slid off: cancel
     };
-    const onWheel = (p, over, dx, dy) => { if (!this.modal && this.scrollMax > 0) { this.scroll = Phaser.Math.Clamp(this.scroll - dy * 0.4, 0, this.scrollMax); this.applyScroll(); } }; // mouse wheel on a computer
+    const onWheel = (p, over, dx, dy) => { if (this.scroller) { this.scroller.move(dy * 0.4); return; } if (!this.modal && this.scrollMax > 0) { this.scroll = Phaser.Math.Clamp(this.scroll - dy * 0.4, 0, this.scrollMax); this.applyScroll(); } }; // mouse wheel on a computer
     const onUp = p => {
       held = null;
+      if (this.scroller && this.scroller.held) { this.scroller.held = false; if (this.time.now - this.scroller.lastT > 90) this.scroller.v = 0; }
       const d = this.drag; this.drag = null;
       if (d && d.moved) { if (this.time.now - d.lastT > 90) this.scrollV = 0; setPressed(null); return; } // the finger lifts: the path keeps gliding a little (update)
       const c = this.pressed, same = c && hit(p) === c;
@@ -176,7 +185,7 @@ export class MenuScene extends Phaser.Scene {
     this.input.on('pointermove', onMove);
     this.input.on('pointerup', onUp);
     this.input.on('wheel', onWheel);
-    this.input.on('pointerupoutside', () => { this.drag = null; setPressed(null); });
+    this.input.on('pointerupoutside', () => { this.drag = null; if (this.scroller) this.scroller.held = false; setPressed(null); });
     this.events.once('shutdown', () => {
       this.input.off('pointerdown', onDown); this.input.off('pointermove', onMove);
       this.input.off('pointerup', onUp); this.input.off('pointerupoutside'); this.input.off('wheel', onWheel);
@@ -575,40 +584,48 @@ export class MenuScene extends Phaser.Scene {
     this.popTween = this.tweens.addCounter({ from: 1, to: 0.7, duration: 240, ease: 'Back.easeIn', onUpdate: t => { const k = t.getValue(); if (box.active) box.setScale(k).setPosition(cx * (1 - k), cy * (1 - k)); }, onComplete: done });
   }
 
-  // The credits box (settings > Credits): the makers of the art, sounds and fonts (src/credits.js), in pages. Next turns the page,
-  // X goes back to the settings. Built when opened, thrown away when closed.
+  // The credits box (settings > Credits): the makers of the art, sounds and fonts (src/credits.js) in one list that scrolls (drag or
+  // mouse wheel). It opens ON TOP of the settings, which stay open behind it; X takes only this box away.
   openCredits() {
-    this.openSettings(false);
-    const x = 14, w = 212, h = 342, y0 = Math.round((H - h) / 2), mid = x + w / 2, D = M.settings.depth, objs = [], pages = [];
+    const w = 190, h = 270, x = (W - w) / 2, y0 = Math.round((H - h) / 2), mid = W / 2, D = M.settings.depth + 10, objs = [];
+    const top = y0 + 52, view = h - 70; // the window the list shows through
     const keep = (o, dz = 0) => { o.setDepth(D + dz); objs.push(o); return o; };
-    const T = (tx, ty, s, color) => keep(this.add.text(tx, ty, s, { ...FONT_MONO, color }).setFontSize(C.smallPx).setOrigin(0.5), 2);
-    const veil = keep(this.add.graphics().fillStyle(0x000000, 0.55).fillRect(0, 0, W, H), -1);
+    const veil = keep(this.add.graphics().fillStyle(0x000000, 0.45).fillRect(0, 0, W, H), -1);
     if (this.textures.exists('ui_panel-parchment')) keep(this.add.image(x, y0, this.parchment(w, h)).setOrigin(0, 0));
     else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(x, y0, w, h, M.plateRadius));
     keep(this.add.text(mid, y0 + 30, 'Credits', { ...FONT_TITLE, fontSize: '24px', color: hex(P.title) }).setOrigin(0.5), 2);
-    CREDIT_PAGES.forEach(entries => {
-      const list = []; let y = y0 + 58;
-      entries.forEach(([what, who]) => {
-        if (what) { list.push(T(mid, y, what, '#a89cd0')); y += 11; }
-        who.forEach(line => { list.push(T(mid, y, line, hex(P.cream))); y += 11; });
-        y += 6;
-      });
-      pages.push(list);
+    // the list is its own container so it can be clipped to the window; it follows the box while the box grows or shrinks
+    const lines = []; let y = top + 6;
+    const T = (s, color) => lines.push(this.add.text(mid, y, s, { ...FONT_MONO, color }).setFontSize(C.smallPx).setOrigin(0.5));
+    CREDITS.forEach(([what, who]) => {
+      if (what) { T(what, '#a89cd0'); y += 11; }
+      who.forEach(line => { T(line, hex(P.cream)); y += 11; });
+      y += 6;
     });
-    let page = 0, box = null;
-    const count = T(x + w - 40, y0 + h - 28, '', hex(P.cream));
-    const show = () => { pages.forEach((list, i) => list.forEach(o => o.setVisible(i === page))); count.setText((page + 1) + ' / ' + pages.length); };
-    const by = y0 + h - 42, bw = 70, next = { x: mid - bw / 2 - 4, y: by - 4, w: bw + 8, h: 34, down: false, shown: true };
-    const img = keep(addSlice(this, mid - bw / 2, by, buttonKey(this), bw, 26, 10, 10, 0, 0).setOrigin(0, 0), 1);
-    next.label = T(mid, by + 12 + C.btnTextDy, 'Next', BTN_INK);
-    next.draw = () => { const sink = next.down ? 1 : 0; img.setTint(sink ? 0xbbbbbb : 0xffffff).setY(by + sink); next.label.setY(by + 12 + C.btnTextDy + sink); };
-    next.action = () => { page = (page + 1) % pages.length; show(); };
-    next.draw(); show();
-    const close = () => { if (this.popTween) this.popTween.remove(); objs.forEach(o => o.destroy()); box.destroy(); this.boxObjs = null; this.openSettings(true, false); };
-    const back = this.closeX(x + w, y0, keep, () => this.popOut(box, veil, W / 2, y0 + h / 2, close));
-    box = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(D);
-    this.popIn(box, veil, W / 2, y0 + h / 2);
-    this.boxObjs = objs; this.modal = true; this.panelButtons = [next, back];
+    const max = Math.max(0, y - top - view);
+    const list = this.add.container(0, 0, lines).setDepth(D + 3);
+    const clip = this.make.graphics({ add: false }).fillStyle(0xffffff, 1).fillRect(x + 6, top, w - 12, view);
+    list.setMask(clip.createGeometryMask());
+    const bar = keep(this.add.graphics(), 3);
+    const sc = { top, bottom: top + view, x0: x, x1: x + w, at: 0, v: 0, held: false };
+    let box = null;
+    sc.move = dy => { sc.at = Phaser.Math.Clamp(sc.at + dy, 0, max); };
+    const follow = (time, delta) => {
+      if (!sc.held && sc.v) { sc.move(sc.v * delta / 1000); sc.v *= Math.exp(-4 * delta / 1000); if (Math.abs(sc.v) < 4) sc.v = 0; } // a little glide after the finger lifts
+      const k = box.scaleX;
+      list.setScale(k).setPosition(box.x, box.y - sc.at * k);
+      const th = Math.max(14, view * view / (view + max));
+      bar.clear();
+      if (max && k > 0.99) bar.fillStyle(0xa89cd0, 0.8).fillRect(x + w - 11, top + (view - th) * sc.at / max, 2, th); // where you are in the list
+    };
+    const gone = () => { this.events.off('update', follow); this.events.off('shutdown', gone); this.scroller = null; };
+    const close = () => { gone(); objs.forEach(o => o.destroy()); box.destroy(); list.destroy(); clip.destroy(); this.boxObjs = null; this.panelButtons = this.settingsButtons; };
+    const back = this.closeX(x + w, y0, keep, () => { sc.v = 0; this.popOut(box, veil, mid, y0 + h / 2, close); });
+    box = this.add.container(0, 0, objs.filter(o => o !== veil && o !== bar)).setDepth(D);
+    this.popIn(box, veil, mid, y0 + h / 2);
+    follow(0, 0);
+    this.events.on('update', follow); this.events.once('shutdown', gone);
+    this.scroller = sc; this.boxObjs = objs; this.panelButtons = [back];
   }
 
   openSettings(on, pop = true) {

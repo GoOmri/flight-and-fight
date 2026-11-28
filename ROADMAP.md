@@ -53,6 +53,7 @@ Decided 24 Nov, in this order. Each is taught alone in an easy wave first. Dange
 - Settle the name: the logo says "Fight & Flight", the game and page say "Flight and Fight".
 - Android app (Capacitor, not set up). Saves made in the browser will probably not carry into the app: decide that before other people play.
 - Loading bar, vibration.
+- Missing or unclear licences (wisp, title font, meows, ghost, skull): listed at the top of CREDITS.md. Settle or replace before a store release.
 
 ## Needs Omri's decision
 - **Bosses at all?** No boss in the Forest. For the Swamp: never answered (art picked 20 Nov if built: Necromancer; style: shot patterns, spirals and walls).

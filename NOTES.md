@@ -1421,3 +1421,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Settings has a Credits button under Update: three pages (Next), X goes back to settings. Words in src/credits.js. The settings box is a bit taller.
 - Not listed because no maker is known: the fire wisp, the title font DungeonFont, the two cat meows.
 - UNVERIFIED: phone readability.
+
+## 2026-11-28 v1.9.207: credits scroll, settings stay open behind (branch credits-scroll)
+- One scrolling list (drag or wheel) instead of pages. The box is smaller and opens on top of the settings; closing it no longer rebuilds them (that caused the jump).
+- Missing licences listed at the top of CREDITS.md.
+- UNVERIFIED: dragging with a finger on the phone.
