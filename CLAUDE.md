@@ -3,8 +3,16 @@
 (Working name. Rules in E:\Projects\GIT\CLAUDE.md about Omri, boundaries and no pushing also apply.)
 
 ## What it is
-- Android vertical-scrolling shoot-'em-up in the style of Sky Force. Prototype: runs in the browser, built with JavaScript + Phaser 3 (decided 2026-11-17). Later: wrap as an Android app (Capacitor), or maybe move to Godot. Style: probably pixel art. Hero: maybe a cat, maybe a kite (undecided).
+- Android vertical-scrolling shoot-'em-up in the style of Sky Force. Prototype: runs in the browser, built with JavaScript + Phaser 3 (decided 2026-11-17). Later: wrap as an Android app (Capacitor), or maybe move to Godot. Style: pixel art. Hero: a cute witch on a broom.
 - Goal number one: it must be FUN. Game feel first (movement, shooting, hits, sound), features second.
+
+## Decisions and roadmap (Omri, 2026-11-28: "be steps in front of me")
+- ROADMAP.md is the ONE list of what is next, parked and refused. Read all of it before suggesting, planning or answering "what is next".
+- The moment Omri decides something (yes, NO, "later", a new idea), write it there in the same turn, under the right heading. A refusal goes under "We said NO" with the date.
+- After building something, move it to "Already done" in the same commit.
+- Before saying something is missing or not built, check the code and NOTES.md. Documents can be old.
+- Say it, unasked, when something is about to be done in the wrong order (it depends on something not built or not tested yet) or when two documents disagree.
+- DESIGN.md "World guide" is an early proposal, not a plan.
 
 ## Rules
 - Work on a branch. Omri's standing permission (2026-11-17): in THIS repo only (flight-and-fight), Claude may merge a finished, committed branch into main and push main and branches, without asking each time. Still never force-push, delete branches/repos, tag, or change repo settings without asking. This permission does NOT cover SCRiTCH, Game Night or anything else.

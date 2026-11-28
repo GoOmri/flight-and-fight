@@ -1403,3 +1403,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-28 v1.9.204: end screen "New" no longer overlaps (branch end-new-tag)
 - A new star shows its count higher in the row with "New" under it, instead of beside it (it ran into the count and into "Enemies").
 - Checked in the browser with all four rows new and big numbers. UNVERIFIED: phone.
+
+## 2026-11-28 roadmap rebuilt (branch roadmap-rebuild, no version change)
+- ROADMAP.md rewritten from the notes, the design file and the code: order of work, open decisions, parked, refused, done.
+- Rule added to CLAUDE.md to keep it current. DESIGN.md "CURRENT LOOK" and NEXT-CHAT.md brought up to date (both described old versions).
+- Omri: no boss in the Forest. The older notes only said "not sure" and had picked boss art.

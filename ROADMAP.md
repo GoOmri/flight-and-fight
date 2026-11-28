@@ -1,49 +1,87 @@
 # Flight and Fight: roadmap
 
-Kept short on purpose. Per-version history is in NOTES.md, the look rules are in DESIGN.md (section CURRENT LOOK). Last updated 24 Nov 2026 (v1.9.161).
+**This file is the one list of what is next, parked and refused.** Rebuilt 28 Nov 2026 (game v1.9.204) from NOTES.md, DESIGN.md and the code.
+History is in NOTES.md. Where an older document disagrees with this file, THIS file wins. Rules for keeping it current are in CLAUDE.md.
 
-## Next up (order agreed with Omri, 24 Nov 2026)
-1. **Stars part 1:** DONE in v1.9.81 (look unverified).
-2. **Stars part 2:** DONE in v1.9.81 (unlock 2, 5, 8, 11).
-3. **Cats: version 1 DONE in v1.9.90 (both stages, 3 cats, rescue, star). Check on the phone; later: cats living in the hut, swamp spots.**
-4. **DungeonFont for big titles:** DONE in v1.9.88 (look unverified).
-5. **Boss:** one per stage. Art candidates in art-packs/characters-and-enemies: wizard-summoner-unknown, floating-skull (zip), mud-enemy-unknown. Bosses get NO enemy glow (noGlow: true).
-6. **Power-up bar at the top:** DONE in v1.9.130 (blue pills drawn in code, src/hud.js; look unverified on phone).
-7. **Sound:** built in v1.9.134 (unheard, check on the phone). Still open: vibration, effects switch for the game, pause and game-over leftovers, sounds for chest and cat meow, swamp and end-screen music.
-8. **New enemy shots: DELAYED** (Omri, 25 Nov: they are for enemies we have not added yet) (Omri: the shots in stages 1 and 2 are good now). The design is kept below. Swamp enemy patterns go with it.
+Sizes: **S** = small (one sitting), **M** = medium, **L** = large (plan first, several steps).
 
-## Cats: DECIDED with Omri (24 Nov 2026, nothing built yet)
-- Spec: DESIGN.md section 5 "Cat rescue". Rescue = HOVER IN A RING until it fills (about 2 s, drains slowly when she leaves, a hit inside takes 25% off the ring). No new button.
-- 3 cats in EVERY stage (Forest and Swamp). Star "ALL CATS" = save all 3 (add 'cats' to GOALS in src/medals.js; the tile row, the goals box and the end screen need room for 4 stars). A cat that scrolls off the bottom is lost for the run (medals.catLost()).
-- A hit is a hit: the no-hit star is not changed by cats. Max about 6 enemies alive while a cat is in the hover zone.
-- CAT ART (decided): Pet Cats Pack (art-packs/characters-and-enemies/pet-cats, CC0, 6 colours Cat-1..Cat-6: Siamese, black, ginger, grey tabby, fluffy white, sphynx; 50x50 frames, the cat is about 16 px wide, faces right, flip for left). Same strips for every colour: Idle 10 frames, Meow 4 (+ Meow-VFX 48x16 = 3 frames), Laying 8, Stretching 13, Itch 2, Licking 5+5, Run 8 (leaps), Sitting / Sleeping1 / Sleeping2 1 frame each. No walk cycle. Each stage uses 3 random colours out of the 6.
-- CAT STATES (decided): WAITING = Sitting (worried) with a Meow + puff every few seconds, faster as the ring fills (one variant only). RESCUE = two happy jumps with the Run frames, sparkles and a small heart, then a leap in an arc to the top left and gone. Stretching is not used.
-- To decide when building: where the cats sit (the forest has big rocks, config bigRockCount; the swamp needs a spot), the ring look (DESIGN.md "Ring look"), the cat goal icon top left (turns to colour per cat) and what the saved cats do (live in the hut later).
+## Where the game is today
+- 2 stages: Forest and Swamp. **Both use the same 10 waves and the same 3 enemies** (bat, ghost, fire wisp). Only the pictures differ. The Swamp has no music of its own.
+- Stages 3, 4, 5 are locked placeholders. They ask for 5, 8, 11 stars; the two stages give 8.
+- 4 stars per stage (cats, coins, all enemies, no hit). Shop (the cauldron): magnet, damage, fire speed, 10 levels each.
+- No boss, no spells, no credits screen. Saves live only in the browser.
 
-## Smaller open items
-- Shop and upgrades (magnet, shot damage, unlockable spells): first version planned in PLAN-cauldron.md (4 steps), see DESIGN.md "Shop and upgrades". Nothing built.
-- Sound (none yet) and vibration (short buzz on hit and pickup).
-- Reduce effects switch for the GAME as well (the menu has one: settings, EFFECTS).
-- Pause and game-over screens keep some effects (explosions): need a way to tell world things from effects.
-- Power-star pickup (recipe parked), mimic chests (pack in art-packs), flying eye, credits screen, loading bar.
-- Menu: an "unlock moment" when a new stage opens; real Stage 3+ (Stage 3, 4, 5 are locked placeholders in config.menu.path.nodes).
-- A new font was added (art-packs/fonts/DungeonFont.ttf): ornate, readable only large (24 px and up). Idea: use it for big titles only (SETTINGS, STAGE CLEAR, GAME OVER, stage names); keep PackFont for everything small. Omri decides.
-- Kenney "UI Pack - Pixel Adventure" (CC0) added in art-packs/ui-buttons/kenney-ui-pixel-adventure: an option for the HUD pills.
+## The order (proposed 28 Nov; Omri decides)
 
-## Goals and stars: DECIDED with Omri (24 Nov 2026). v1.9.81 built stars as the goal icons; v1.9.84 (next) separates GOALS from STARS
-- **3 goals, 1 goal = 1 star:** finish the stage, collect every coin, no hit. Stars are the reward you keep; goals are what you do. Earned once, stay earned. Old goals (70%, kill all) are dropped. Cat and boss come later as a bonus goal.
-- **Before the stage (goal card):** the stage opens with the world still and a card shows the 3 goals (icon + 1 to 2 words: FINISH, ALL COINS, NO HIT). It fades after about 3 s or on a tap, then play starts. (A menu screen before PLAY is a later option.)
-- **During the stage (top left):** 3 small GOAL icons, NOT star shaped, made from pictures already in the game: witch hat = finish (BTL loot pack "witch icon/witch hat.png", licence unconfirmed: ask Omri before pushing the file, add to CREDITS.md), the game coin = all coins, the game heart = no hit. States: WHITE (white silhouette) = still open, FULL COLOUR = done, GREY = failed. NO crosses (Omri dislikes crosses). Omri disliked the 13 px star-shaped icons from v1.9.81 (too small, ugly shapes, star shape): replace them.
-- **End screen (STAGE CLEAR):** 3 rows: goal icon, tick or cross, and a star that flies in for each goal done; NEW under new stars.
-- **Menu tile:** only the 3 STARS (gold earned, grey not). Locked tiles show the stars needed. Unlock: swamp 2, stage 3: 5, stage 4: 8, stage 5: 11 (config path.nodes need).
-- Built in v1.9.81: stars on tile, unlock rule, locked tiles. TO DO: goal icons (non-star), goal card, end screen rows.
+### 1. Check what is built (Omri on the phone, no building)
+- Can a **new player with nothing bought** clear the Forest? (Asked for in PLAN-cauldron.md, never checked.) Note: TUNE > Reset all erases your progress.
+- Do coins come at a good speed for the shop prices? (All upgrades cost about 4200 coins, roughly 33 perfect runs.)
+- White-ringed shots, bigger explosions, menu tilt, new "New" place on the end screen.
+- Why first: every later stage, enemy and spell is balanced on top of this.
 
-## Enemy projectiles (DELAYED, design kept)
-- Today: one red orb (aimed or straight), speed and delay from config difficulty dials.
-- Ideas: a fast thin needle (hard to dodge, small hitbox, only a few), a slow big orb that splits into 3 small ones, a ring that expands then breaks into a spiral, a curving shot (swamp: drifting spores), a laser warning line then a beam (boss), a bouncing shot, a lobbed shot that lands in a circle where it was aimed (marked on the ground first).
-- Rules to keep: danger stays RED/hot, always readable against the background, the hit area is small and honest, a shot type gets taught in an easy wave before it is dangerous.
-- DECIDED with Omri (24 Nov 2026, nothing built yet): shots arrive with new enemies throughout the game, EACH ENEMY GETS ITS OWN SHOT. The basic enemies keep the red orb. First three: (1) a new light forest enemy with a fast thin needle (1 or 2 at a time), (2) a heavy forest enemy with a big slow orb that splits into 3, (3) a swamp enemy with a curving spore. Lobbed shot with a ground circle: later (stage 3). Boss only, later: ring that becomes a spiral, laser warning line then beam. Bouncing shot: not now.
-- Each new shot is taught alone in an easy wave before it shows up in a dangerous one. Needs: new enemy art (check art-packs/CATALOG.md) and a shot picture per type, red/hot, small honest hitbox.
+### 2. Fix what is already out
+- **Credits screen (S-M).** The game is public and several art and font licences ask for credit. Today the credit is only in CREDITS.md, not in the game. (20 Nov: "not yet".)
+- **Settings icon** instead of the cog (S): cog with a moon or cat eye, or a wand. Not picked. The spellbook is saved for something else.
+- **UI rulebook leftovers** (S): same margins in every box, text sizes.
 
-## Done recently (so nobody redoes it)
-Menu rebuilt (scrolling stage path, tiles with pictures, settings, effects, parallax), one font and one button style, drops with shared shine, relative drag control, tune panel (5 tabs), purple forest tint, bigger coins and explosions, enemy aura glow (v1.9.80), blue carrier outline for weapon potions (v1.9.80), high score saving fixed and reset (v1.9.80).
+### 3. Give each stage its own wave list (S-M)
+- Needed **before** new enemies or Stage 3: today a change to the Forest waves also changes the Swamp.
+- Includes a difficulty setting per stage.
+
+### 4. New enemies, each with its own shot (M each)
+Decided 24 Nov, in this order. Each is taught alone in an easy wave first. Danger stays red, hit area small. The three basic enemies keep the red orb.
+1. Light Forest enemy: fast thin needle.
+2. Heavy Forest enemy: big slow orb that splits into 3.
+3. Swamp enemy: curving spore. (Add Swamp music in the same step.)
+
+### 5. Stage 3 (L)
+- Needs: a theme (DESIGN.md idea: Dusk Sea), art, waves, cats, music.
+- Until it exists, a player with 5 stars finds it still locked.
+- With it: a small celebration when a stage unlocks.
+
+### 6. Shop spells and extras (L, one at a time)
+- Lightning first, then shield, extra heart, side shots, homing shot, more coins, revive once. Details: DESIGN.md "Shop and upgrades".
+- **After 3 to 5:** all spells work at once, so the stages must be able to get harder.
+- Ask Omri what each looks like (no creatures flying beside her).
+
+### 7. Release (L)
+- Settle the name: the logo says "Fight & Flight", the game and page say "Flight and Fight".
+- Android app (Capacitor, not set up). Saves made in the browser will probably not carry into the app: decide that before other people play.
+- Loading bar, vibration.
+
+## Needs Omri's decision
+- **Bosses at all?** No boss in the Forest. For the Swamp: never answered (art picked 20 Nov if built: Necromancer; style: shot patterns, spirals and walls).
+- The order above.
+- The name (see 7).
+- Shop levels: a more visual look than the potion tube (asked "shelve or work on it?", not answered).
+- A visible change of her shot at damage level 5 and 10 (what should it look like?).
+
+## Smaller items, no date
+- Sound: hit on a chest, end screen music.
+- An effects-low switch for the stages (the menu has one).
+- Explosions stay on the pause and game over screens (parked 20 Nov).
+- Cats living in a hut; more places for cats to sit in the Swamp.
+- Menu: bubble previews.
+
+## Parked (do not build unless Omri brings it up)
+- Flying eye enemy; mimic (monster) chests; power-star pickup.
+- Burnt marks after kills, darker ground (Claude's ideas, never asked for).
+
+## We said NO (do not suggest again)
+- **No boss in the Forest** (28 Nov).
+- No creatures beside the witch; no spell buttons if it can be automatic.
+- No swapping shot colours (hers blue, enemy red).
+- Text: no all caps, no outlines, no soft pale yellow, no Pixelify, no fake bold.
+- Menu: no logo glint or star pop-ins, no purple bats, no white moon, no scroll banner for the stage name, no fantasy-UI banners or buttons, keep it calm.
+- Goals: no crosses.
+- Cat ring sparks: no strips or spirals.
+- No floating score numbers.
+- No big tune panel, no on/off switches for settled looks.
+- Recolouring: colours only, never add or move pixels.
+- Colour-cycling animations in the gallery: no (one card per colour).
+
+## Old ideas in DESIGN.md that are NOT agreed
+The "World guide" part is an early proposal: 10 places, a guardian in each, ingredients, recipes, medals, hard mode, a hut and map. Do not treat any of it as planned unless it is listed above.
+
+## Already done (so nobody offers it again)
+Goal box before a stage (tap a stage) - 4 stars and stars that open stages - cats - pause menu - sound, music and volume sliders - shop with 3 upgrades - saved coins - UPDATE button - scrolling stage path - settings (drag or stick, effects) - end screen - bigger explosions - white-ringed enemy shots - small test panel.
