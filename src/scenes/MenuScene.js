@@ -27,8 +27,8 @@ export class MenuScene extends Phaser.Scene {
     const sky = M.sky;
     this.load.spritesheet('menu_sky', 'assets/' + sky.file, { frameWidth: sky.frameW, frameHeight: sky.frameH });
     for (const d of M.decor) this.load.spritesheet('menu_' + d.key, 'assets/' + d.file, { frameWidth: d.frameW, frameHeight: d.frameH });
-    this.load.image('menu_logo', 'assets/' + M.logo.file); // only the letters: they rise and float
-    for (const k of ['fight', 'amp', 'flight']) this.load.image('menu_logo_' + k, 'assets/menu/logo-' + k + '.png'); // the three parts of the letters: "Fight", "&", "Flight" (together they are menu_logo)
+    this.load.image('menu_logo', 'assets/' + M.logo.file + '?v=' + C.version); // only the letters: they rise and float
+    for (const k of ['fight', 'amp', 'flight']) this.load.image('menu_logo_' + k, 'assets/menu/logo-' + k + '.png?v=' + C.version); // the three parts of the letters: "Fight", "&", "Flight" (together they are menu_logo)
     for (const nd of M.path.nodes) if (!nd.locked) this.load.image('stage_' + nd.theme, 'assets/ui/stage-' + nd.theme + '.png?v=' + C.version); // a small picture of each open stage (shown dimmed inside its tile)
     loadGoalArt(this, C.version); // the gold star and the goal icons (made into textures in sprites.js; the game uses the same ones)
     if (M.logo.decor) this.load.image('menu_logo_decor', 'assets/' + M.logo.decor); // the moon, stars and bats of the logo picture: they stay in the background
@@ -291,8 +291,6 @@ export class MenuScene extends Phaser.Scene {
     }
     const parts = ['fight', 'amp', 'flight'].map(k => 'menu_logo_' + k).filter(k => this.textures.exists(k)); // the words fly in one after the other; without the parts the whole logo rises at once
     const words = (parts.length === 3 ? parts : ['menu_logo']).map(k => this.add.image(L.x, H + 10, k).setOrigin(0.5, 0).setScale(L.scale));
-    const amp = words.find(im => im.texture.key === 'menu_logo_amp');
-    if (amp) amp.setDisplayOrigin(amp.width / 2, -L.ampDown); // the & sits lower than in the picture, between the two words
     const keys = [];
     if (SH.on) try {
       const w = src.width, h = src.height, base = document.createElement('canvas'); base.width = w; base.height = h;
