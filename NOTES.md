@@ -1438,3 +1438,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - Button words are one dark brown everywhere (Update and others were lighter than the settings buttons).
 - Credits lines fade at an edge while there is more beyond it. Logo 5 px lower.
 - UNVERIFIED: phone, speed with the extra sparks.
+
+## 2026-11-28 v1.9.211: menu details from a screenshot (branch menu-details)
+- Broom sparks in front are smaller and start further left. Pink glow behind Shop much fainter. The & 8 art px lower. Cauldron bubbles start in the liquid, inside the rim. Credits is a small button.
+- UNVERIFIED: phone.
