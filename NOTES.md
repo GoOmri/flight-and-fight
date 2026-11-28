@@ -1449,3 +1449,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-28 v1.9.213: Omri's new logo pictures (branch logo-new)
 - New logo-fight / amp / flight (same size and colours). Stacking: & at the bottom, Fight, Flight on top. logo-text.png rebuilt to match. Photoshop's extra blocks removed (pixels untouched).
 - UNVERIFIED: phone.
+
+## 2026-11-28 v1.9.214: logo 6 px lower (branch logo-lower)
+- Back to the height it had before the new pictures. UNVERIFIED: phone.
