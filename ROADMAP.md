@@ -11,7 +11,7 @@ Sizes: **S** = small (one sitting), **M** = medium, **L** = large (plan first, s
 - 4 stars per stage (cats, coins, all enemies, no hit). Shop (the cauldron): magnet, damage, fire speed, 10 levels each.
 - No boss, no spells, no credits screen. Saves live only in the browser.
 
-## The order (proposed 28 Nov; Omri decides)
+## The order (AGREED by Omri, 28 Nov 2026)
 
 ### 1. Check what is built (Omri on the phone, no building)
 - Can a **new player with nothing bought** clear the Forest? (Asked for in PLAN-cauldron.md, never checked.) Note: TUNE > Reset all erases your progress.
@@ -51,7 +51,6 @@ Decided 24 Nov, in this order. Each is taught alone in an easy wave first. Dange
 
 ## Needs Omri's decision
 - **Bosses at all?** No boss in the Forest. For the Swamp: never answered (art picked 20 Nov if built: Necromancer; style: shot patterns, spirals and walls).
-- The order above.
 - The name (see 7).
 - Shop levels: a more visual look than the potion tube (asked "shelve or work on it?", not answered).
 - A visible change of her shot at damage level 5 and 10 (what should it look like?).
