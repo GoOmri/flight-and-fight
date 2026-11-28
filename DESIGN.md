@@ -3,31 +3,24 @@
 Screen: 240 wide x 427 tall (x 0 = left, y 0 = top). The ship sits near y 347. Pixel art, one art pixel = 3 screen units.
 Colour rules (already in src/sprites.js): player bullets are a cyan-white bolt, enemy bullets are a pink orb with a dark outline, coins are violet gems, no yellow or gold on bullets. Players never see technical text. (OLD intro: see the CURRENT LOOK section below.)
 
-## CURRENT LOOK (updated 21 Nov 2026, v1.9.71). Where this section and the older text below disagree, THIS section wins.
+## CURRENT LOOK (updated 28 Nov 2026, v1.9.204). Where older text below disagrees, THIS section and "UI rulebook" win. What is next is in ROADMAP.md.
 
-**Colour roles (what a colour means in play)**
-- Player side is COOL: the witch's shot is a blue teardrop, the weapon potion is a blue round flask. Danger is HOT: enemy shots are the red orb. Coins are gold. The heart pickup is pink with pink beams.
-- Every drop (coin, heart, potion) shares ONE shine: soft glow, spinning beams, a small twinkle. Only the colour, the beam length and the glow size differ per drop. Only the coin in front of a stack shines.
-- Reserved: bright red = enemy shots and danger only. Cyan-white = the witch's shots (not for menu text). Gold = coins AND the menu trim (see below). Green = good bars. These old rules no longer say "no gold in the menu": gold trim in the menus is now allowed on purpose.
+**Colour roles in play**
+- Her side is COOL: blue teardrop shot, blue potion flask. Danger is HOT: enemy shots are the red orb with a white ring, beating between two sizes. Coins gold, heart pickup pink.
+- Every drop (coin, heart, potion) shares one shine. Recolouring: swap colours only.
 
-**Menu and UI kit (one look everywhere)**
-- Palette: purple fill (0x3b1478), gold trim (0xf2b632), cream text (0xfff3c4), pink only for small accents (the menu's old plates, the "tap to play again" blink). Gold is the trim colour: path line, panel corners, button outline, selected-stage edge, gear, tap sparks, BEST score.
-- ONE font: PackFont (the pixel font of the Fantasy UI pack, drawn only at whole-pixel sizes, see fpx() in src/hud.js; config fontScale turns all text up or down). ONE button: the Medieval UI button recoloured purple with a gold outline (assets/ui/ui-med-button.png, 9-slice). Used by UPDATE, the settings buttons and the MENU button of the end screens. Stage tiles use the Medieval panel recoloured the same way (assets/ui/ui-med-panel.png), the settings use the parchment (Fantasy UI pack), the gear is its medallion.
-- Recolouring rule: swap colours only, never add, remove or move pixels.
-- Touch targets: at least about 44 phone px (the touch box is bigger than the picture for UPDATE and the settings buttons).
+**Text and buttons** (details in "UI rulebook" at the end)
+- Text font Alagard, titles DungeonFont. Titles strong yellow, the rest white, dark brown on buttons. No outlines, no all caps.
+- Purple ragged boxes. Rolled scroll = does something or takes you somewhere; flat button = pick or buy. Small X closes a box.
 
 **Main menu**
-- A gold line runs up the middle (endless at the top, it dissolves just above the logo). Stage tiles sit left and right of it, stage 1 at the bottom. Each open tile shows a dimmed picture of its stage (night forest, glowing swamp), its name, the 4 medals and the best score; a locked stage is greyed and says SOON. The next stage to play has a pulsing gold edge.
-- The path scrolls (drag, glide, rubber band at the ends). A player can look 3 stages beyond the highest open stage (config path.lookAhead).
-- Foreground friends (always in front of everything): witch with a broom trail, ghost, cat, cauldron with bubbles. The logo words (Fight, &, Flight) rise from below one after the other; the moon, stars and bats around the logo are plain background.
-- Small effects (cauldron bubbles, broom trail, fireflies, shooting stars, tap sparks, button pop, tilt parallax) can all be switched off in the settings (EFFECTS: FULL / LOW). Keep the menu calm: when in doubt remove an effect, do not add one.
-- Settings (gear): CONTROLS (drag or stick), TUNE PANEL on or off, EFFECTS full or low, SOUND (not in the game yet).
+- Gold line up the middle, stage tiles left and right, stage 1 lowest, the path scrolls. A locked tile shows ??? or its stage number and the stars needed.
+- Tap a stage: a box with its picture, the 4 goals and Play.
+- Cat bottom left, cauldron (the shop) bottom right, witch and ghost above, the orange moon of the sky, coins top left, cog top right.
+- Settings: controls (drag or stick), effects (full or low), sound and music sliders, Update. The test panel: 5 taps on the version number.
 
 **Controls**
-- Relative drag: touch anywhere, the witch moves by the finger's movement (x 1.2). A small dead zone after touch-down. A thumb that rests moves nothing. Soft walls (she slows near the edges). A spring: quick while the finger moves, a little bounce while the thumb rests, no overshoot after a swipe ends.
-
-**Open items**
-- Sound (none yet), a soft glow behind enemies, the pause and game-over leftovers, the power-star, bosses, a credits screen, a loading bar, the "unlock moment" for a new stage.
+- Relative drag by default: touch anywhere, she moves by the finger's movement. Soft walls. Mouse on a computer.
 
 ---
 
