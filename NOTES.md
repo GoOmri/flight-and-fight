@@ -1468,3 +1468,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-28 gallery cards open on idle or flying (local tool; branch gallery-idle)
 - Idle first, else flying; space ships get a card each (they shared one).
+
+## 2026-11-28 gallery: animations restored, shots and tiles grouped (local tool; branch gallery-restore)
+- The blanket "doubtful = still" rule had stopped good animations (mud, asteroids, explosions, portal and more): removed. Compared with the old list: only face, missile and bar pictures stopped on purpose.
+- Fire bullet sheet cut into single shots; UI atlas sizes share a card; Kenney UI is 12 family cards; SovDigital clips read from the pack data (8 directions).
