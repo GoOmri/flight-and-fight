@@ -82,7 +82,7 @@ Decided 24 Nov, in this order. Each is taught alone in an easy wave first. Dange
 - No floating score numbers.
 - No big tune panel, no on/off switches for settled looks.
 - Recolouring: colours only, never add or move pixels.
-- Colour-cycling animations in the gallery: no (one card per colour).
+- Gallery: no colour-cycling animations, no separate card per colour or button state (28 Nov: colours and states are dropdowns on one card).
 
 ## Old ideas in DESIGN.md that are NOT agreed
 The "World guide" part is an early proposal: 10 places, a guardian in each, ingredients, recipes, medals, hard mode, a hut and map. Do not treat any of it as planned unless it is listed above.
