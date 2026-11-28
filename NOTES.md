@@ -1442,3 +1442,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-28 v1.9.211: menu details from a screenshot (branch menu-details)
 - Broom sparks in front are smaller and start further left. Pink glow behind Shop much fainter. The & 8 art px lower. Cauldron bubbles start in the liquid, inside the rim. Credits is a small button.
 - UNVERIFIED: phone.
+
+## 2026-11-28 v1.9.212: the & moved inside the logo pictures (branch logo-amp)
+- logo-amp.png and logo-text.png have the & 8 px lower (pixels moved, none recoloured); the code shift is gone. The logo pictures load with ?v= so a phone does not keep the old ones.
