@@ -1389,3 +1389,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-27 v1.9.201: shop cauldron lower (branch cauldron-lower)
 - Cauldron, "Shop" word, glow and touch area moved down 4 px. It now sits almost on the bottom edge.
 - Checked in the browser. UNVERIFIED: phone (tilting may push the very bottom off screen).
+
+## 2026-11-28 v1.9.202: white ring on enemy shots (branch shot-white)
+- The 1 art px ring around enemy shots is white instead of dark; same size, same two-size beat.
+- The TUNE "New enemy shots" switch is gone.
+- UNVERIFIED: how it looks moving in a real stage, phone.

@@ -1,9 +1,7 @@
 // The test panel (phone friendly). Only exists when it is switched on: 5 taps on the version number in the menu, or ?tune=1 in the
 // web address. A small button sits under the hearts; a tap opens the panel and PAUSES the game.
-// Kept small on purpose (Omri, 2026-11-27): jump to a wave, no damage, finish / lose the run, reset all progress, and for now
-// the switch for the new enemy shots. Balance numbers are changed in src/config.js.
+// Kept small on purpose (Omri, 2026-11-27): jump to a wave, no damage, finish / lose the run, reset all progress. Balance numbers are changed in src/config.js.
 import { CONFIG as C, hex } from './config.js';
-import { shotsOn, toggleShots } from './shots.js';
 import { FONT } from './hud.js';
 import { resetBank, resetUpgrades } from './bank.js';
 import { resetStages } from './medals.js';
@@ -91,7 +89,7 @@ export class Tune {
     const gear = () => button(GEAR.x - GEAR.w / 2, GEAR.y - GEAR.h / 2, GEAR.w, GEAR.h, this.open ? 'X' : 'Tune', () => this.toggle(), this.open ? P.pink : P.purple);
     if (!this.open) { gear(); return; }
     const rowsEnd = PANEL.y + PANEL.top + ROWS.length * PANEL.rowH;
-    const h = rowsEnd - PANEL.y + 3 * (CHEAT.h + CHEAT.gap) + CHEAT.gap;
+    const h = rowsEnd - PANEL.y + 2 * (CHEAT.h + CHEAT.gap) + CHEAT.gap;
     g.fillStyle(P.dark, 0.92).fillRect(PANEL.x, PANEL.y, PANEL.w, h);
     g.lineStyle(2, P.pink, 1).strokeRect(PANEL.x, PANEL.y, PANEL.w, h);
     gear();
@@ -104,12 +102,11 @@ export class Tune {
       button(PANEL.x + 192, y + 2, BTN.w, BTN.h, '+', () => this.change(r, 1));
     });
     const x1 = PANEL.x + (PANEL.w - 2 * CHEAT.w - CHEAT.gap) / 2, x2 = x1 + CHEAT.w + CHEAT.gap;
-    const y1 = rowsEnd + CHEAT.gap, y2 = y1 + CHEAT.h + CHEAT.gap, y3 = y2 + CHEAT.h + CHEAT.gap, sure = this.isSure();
+    const y1 = rowsEnd + CHEAT.gap, y2 = y1 + CHEAT.h + CHEAT.gap, sure = this.isSure();
     button(x1, y1, CHEAT.w, CHEAT.h, 'Finish stage', () => this.endRun(true));
     button(x2, y1, CHEAT.w, CHEAT.h, 'Lose now', () => this.endRun(false));
     button(x1, y2, CHEAT.w, CHEAT.h, 'Restart stage', () => this.restart());
     button(x2, y2, CHEAT.w, CHEAT.h, sure ? 'Sure? Tap again' : 'Reset all', () => this.resetAll(), sure ? P.pink : P.purple);
-    button(x1, y3, 2 * CHEAT.w + CHEAT.gap, CHEAT.h, 'New enemy shots: ' + (shotsOn() ? 'on' : 'off'), () => { toggleShots(); this.draw(); }, shotsOn() ? P.pink : P.purple);
   }
 
   toggle() {
