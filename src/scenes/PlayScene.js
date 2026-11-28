@@ -12,7 +12,7 @@ import { findSprites } from '../forestArt.js';
 import { ROCKS } from '../rocks.js';
 import { Tune, tuneEnabled } from '../tune.js';
 import { boom } from '../boom.js';
-import { makeBoldShot, shotsOn, boldScale } from '../shots.js';
+import { makeBoldShot, boldScale } from '../shots.js';
 import { Medals, goalsOf, saveMedals, saveBest } from '../medals.js';
 import { loadBank, addBank, loadLevel, upgradeValue } from '../bank.js';
 
@@ -1438,7 +1438,7 @@ export class PlayScene extends Phaser.Scene {
     const hit = C.enemyBullet.hitSize;
     if (C.feel.fireFlashScale > 0) this.ring(e.x, e.y + 14, 0xffffff, C.feel.fireFlashScale, C.feel.fireFlashMs, C.feel.fireFlashAlpha); // telegraph
     for (let i = 0; i < n; i++) {
-      const b = this.spawn(this.enemyBullets, this.textures.exists('eb_pic') ? (shotsOn() && this.textures.exists('eb_bold') ? 'eb_bold' : 'eb_pic') : 'ebullet', e.x, e.y + 14, this.textures.exists('eb_pic') ? C.enemyBullet.scale : 2);
+      const b = this.spawn(this.enemyBullets, this.textures.exists('eb_pic') ? (this.textures.exists('eb_bold') ? 'eb_bold' : 'eb_pic') : 'ebullet', e.x, e.y + 14, this.textures.exists('eb_pic') ? C.enemyBullet.scale : 2);
       if (!b) return;
       b.setDepth(C.enemyBullet.depth); // above all play effects, below the HUD
       b.body.setSize(hit, hit); // only the bright core hurts
@@ -1517,7 +1517,7 @@ export class PlayScene extends Phaser.Scene {
 
   cullOffscreen(time) {
     this.bullets.children.iterate(b => { if (b && b.active && b.y < -20) this.kill(b); });
-    const bold = shotsOn() && this.textures.exists('eb_bold'), pulse = C.feel.enemyShotPulse, pm = C.feel.enemyShotPulseMs; // the new shots beat between two sizes (shots.js), the old ones swell
+    const bold = this.textures.exists('eb_bold'), pulse = C.feel.enemyShotPulse, pm = C.feel.enemyShotPulseMs; // the shot picture beats between two sizes (shots.js), the code-drawn orb swells
     this.enemyBullets.children.iterate(b => {
       if (b && b.active && bold) b.setScale(boldScale(this, C.enemyBullet.scale, time, b.x * 3));
       else if (b && b.active && pulse > 0) b.setScale((this.textures.exists('eb_pic') ? C.enemyBullet.scale : PX) * (1 + pulse * Math.sin(time * TAU / pm + b.x * 0.2))); // gentle swell around the shot's OWN size (it used to reset every shot to 3x)

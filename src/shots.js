@@ -1,9 +1,5 @@
-// Enemy shots that stand out: a copy of the red orb with a dark ring around it and a near-white middle, pulsing a bit faster.
-// The art file is not edited and the hit box stays the same size. TUNE has an on / off switch (saved) to compare.
-const KEY = 'ff_shots';
-export const shotsOn = () => { try { return localStorage.getItem(KEY) !== '0'; } catch (e) { return true; } };
-export const toggleShots = () => { try { localStorage.setItem(KEY, shotsOn() ? '0' : '1'); } catch (e) { /* not saved */ } return shotsOn(); };
-
+// Enemy shots that stand out: a copy of the red orb with a white ring around it and a near-white middle, pulsing a bit faster.
+// The art file is not edited and the hit box stays the same size.
 const RING = 1; // ring width in art pixels
 // The shot beats between two sizes: its full size and SHRINK game px smaller, STEP_MS each (no smooth swelling).
 const SHRINK = 2, STEP_MS = 130;
@@ -12,7 +8,7 @@ export function boldScale(scene, scale, time, offset) {
   return Math.floor((time + offset) / STEP_MS) % 2 ? scale * (across - SHRINK) / across : scale;
 }
 
-// Makes the texture 'eb_bold' once from 'eb_pic' (the plain orb stays for "off").
+// Makes the texture 'eb_bold' once from 'eb_pic'.
 export function makeBoldShot(scene) {
   if (scene.textures.exists('eb_bold') || !scene.textures.exists('eb_pic')) return;
   const img = scene.textures.get('eb_pic').getSourceImage(), w = img.width + 2 * RING, h = img.height + 2 * RING;
@@ -29,12 +25,12 @@ export function makeBoldShot(scene) {
       if (dist < 1.8) set(i, 255, 255, 255, 255); else if (dist < 2.8) set(i, 255, 200, 200, 255);
       continue;
     }
-    let near = false; // a see-through pixel close to the orb becomes the dark ring
+    let near = false; // a see-through pixel close to the orb becomes the white ring
     for (let dy = -RING; dy <= RING && !near; dy++) for (let dx = -RING; dx <= RING; dx++) {
       const nx = x + dx, ny = y + dy;
       if (nx >= 0 && ny >= 0 && nx < w && ny < h && Math.abs(dx) + Math.abs(dy) <= RING && solid[ny * w + nx]) { near = true; break; }
     }
-    if (near) set(i, 26, 0, 18, 235);
+    if (near) set(i, 255, 255, 255, 255);
   }
   ctx.putImageData(px, 0, 0); cv.refresh();
   let l = w, r = 0; for (let i = 0; i < w * h; i++) if (d[i * 4 + 3] > 128) { l = Math.min(l, i % w); r = Math.max(r, i % w); }
