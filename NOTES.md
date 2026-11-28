@@ -1462,3 +1462,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 ## 2026-11-28 gallery fixes (local tool, no game change; branch gallery-notes)
 - Space shooter sheets and the wizard summon were cut at the wrong frame size. Known sizes now live in art-packs/_tools/gallery/layouts.json; doubtful sheets are marked "? frame size guessed". 1x and 2x copies share a card.
 - Raven icon pack moved into art-packs/ui-buttons/raven-fantasy-icons/. Settings icon choices: art-packs/_tools/settings-icon/.
+
+## 2026-11-28 gallery checked sheet by sheet (local tool, no game change; branch gallery-check)
+- Nothing moves unless its frame size is known; UI packs are still pictures; big pictures are shrunk. Fixed: wizard cards and attack, silver coin, face / missile / bullet sheets, preview GIFs. New check.html shows every moving card as its frames; all 23 pages were looked at.
