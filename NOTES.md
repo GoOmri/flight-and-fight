@@ -1452,3 +1452,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-28 v1.9.214: logo 6 px lower (branch logo-lower)
 - Back to the height it had before the new pictures. UNVERIFIED: phone.
+
+## 2026-11-28 v1.9.215: new logo colours from Omri (branch logo-new2)
+- logo-fight / amp / flight updated (same size and shape), logo-text.png rebuilt, Photoshop extras removed. UNVERIFIED: phone.
