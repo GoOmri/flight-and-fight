@@ -291,6 +291,8 @@ export class MenuScene extends Phaser.Scene {
     }
     const parts = ['fight', 'amp', 'flight'].map(k => 'menu_logo_' + k).filter(k => this.textures.exists(k)); // the words fly in one after the other; without the parts the whole logo rises at once
     const words = (parts.length === 3 ? parts : ['menu_logo']).map(k => this.add.image(L.x, H + 10, k).setOrigin(0.5, 0).setScale(L.scale));
+    const amp = words.find(im => im.texture.key === 'menu_logo_amp');
+    if (amp) amp.setDisplayOrigin(amp.width / 2, -L.ampDown); // the & sits lower than in the picture, between the two words
     const keys = [];
     if (SH.on) try {
       const w = src.width, h = src.height, base = document.createElement('canvas'); base.width = w; base.height = h;
@@ -445,7 +447,12 @@ export class MenuScene extends Phaser.Scene {
       return bar;
     });
     this.panelButtons.push(this.makeUpdate(S.y + 238, keep));
-    const credits = mkBtn(mid - 40, S.y + 272, 80, 'ui_med-button', 'Credits', () => this.openCredits()); credits.btn = false; // (btn = the little pop, which is for Update and the cog)
+    // Credits: a small button, the scroll drawn at two thirds (its pixels stay even)
+    const cw = 56, cx = mid - cw / 2, cy = S.y + 273, credits = { x: cx - 8, y: cy - 6, w: cw + 16, h: 30, down: false, shown: false, action: () => this.openCredits() };
+    const cimg = keep(addSlice(this, cx, cy, 'ui_med-button', cw * 1.5, 26, 10, 10, 0, 0).setOrigin(0, 0).setScale(2 / 3), 1);
+    credits.label = T(mid, cy + 10, 'Credits', ink).setFontSize(C.smallPx);
+    credits.draw = () => { const sink = credits.down ? 1 : 0; cimg.setTint(sink ? 0xbbbbbb : 0xffffff).setY(cy + sink); credits.label.setY(cy + 10 + sink); };
+    this.panelButtons.push(credits);
     this.panelButtons.push(this.closeX(S.x + S.w, S.y, keep, () => this.popOut(this.panelBox, this.panelVeil, S.x + S.w / 2, S.y + S.h / 2, () => this.openSettings(false))));
     this.panelVeil = veil; this.panelBox = this.add.container(0, 0, objs.filter(o => o !== veil)).setDepth(S.depth);
     this.panelObjs = objs;
@@ -740,12 +747,12 @@ export class MenuScene extends Phaser.Scene {
     const boiler = this.decorItems.find(i => i.key === 'boiler'), witch = this.decorItems.find(i => i.key === 'witch');
     if (boiler) this.time.addEvent({ delay: B.cauldron.every, loop: true, callback: () => { // bubbles rise from the cauldron
       const s = boiler.s;
-      this.bit(s.x + rnd(-7, 7), s.y - s.displayHeight + B.cauldron.dy, { tint: pick(B.cauldron.tints), vx: rnd(-6, 6), vy: -rnd(20, 34), life: rnd(1200, 1900), s0: 1.6, s1: 0.5, a0: 0.9, add: true, depth: 51 });
+      this.bit(s.x + rnd(-B.cauldron.spread, B.cauldron.spread), s.y - s.displayHeight + B.cauldron.dy + rnd(-1, 2), { tint: pick(B.cauldron.tints), vx: rnd(-6, 6), vy: -rnd(20, 34), life: rnd(1200, 1900), s0: 1.6, s1: 0.5, a0: 0.9, add: true, depth: 51.7 }); // over the pot and the word's glow, under the word
     } });
     if (witch) this.time.addEvent({ delay: B.trail.every, loop: true, callback: () => { // sparks fall behind her broom
       const s = witch.s;
       const front = Math.random() < B.trail.front; // in front: starts on the bristles and is drawn over the witch (depth 50)
-      this.bit(s.x + B.trail.dx + (front ? rnd(-2, 14) : rnd(-4, 4)), s.y + B.trail.dy + (front ? rnd(-6, 3) : rnd(-4, 4)), { tint: pick(B.trail.tints), vx: -rnd(10, 26), vy: rnd(2, 18), life: rnd(900, 1500), s0: B.trail.size, s1: 0.6, a0: 1, add: B.trail.add, depth: front ? 50.5 : 49 }); // bigger, longer lived and (not additive) clearly visible on the light sky
+      this.bit(s.x + B.trail.dx + (front ? rnd(-9, 1) : rnd(-4, 4)), s.y + B.trail.dy + (front ? rnd(-6, 3) : rnd(-4, 4)), { tint: pick(B.trail.tints), vx: -rnd(10, 26), vy: rnd(2, 18), life: rnd(900, 1500), s0: front ? B.trail.frontSize : B.trail.size, s1: 0.6, a0: 1, add: B.trail.add, depth: front ? 50.5 : 49 }); // bigger, longer lived and (not additive) clearly visible on the light sky
     } });
     // fireflies: a few dots wander slowly and blink
     const F = B.fireflies;
