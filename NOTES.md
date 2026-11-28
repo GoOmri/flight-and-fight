@@ -1408,3 +1408,7 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - ROADMAP.md rewritten from the notes, the design file and the code: order of work, open decisions, parked, refused, done.
 - Rule added to CLAUDE.md to keep it current. DESIGN.md "CURRENT LOOK" and NEXT-CHAT.md brought up to date (both described old versions).
 - Omri: no boss in the Forest. The older notes only said "not sure" and had picked boss art.
+
+## 2026-11-28 phone test of v1.9.204 (notes only)
+- Stage 1 with nothing bought: challenging (good). Coins maybe too fast: from the 4th attempt upgrades make it really easy. Shots, explosions, tilt, "New": fine.
+- Galleries were unreachable because the preview server was stopped after each test; it is now to be left running.
