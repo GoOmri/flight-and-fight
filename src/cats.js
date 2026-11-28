@@ -232,6 +232,7 @@ export class Cats {
       c.hearts.push({ im: h, d: i * 0.3, x0: h.x });
     }
     this.saved++;
+    if (!s.over) s.dropEnemyCoins(c.x, c.y - c.top, { coins: CC.coins, coinSpread: CC.coinSpread, coinHop: CC.coinHop }); // a thank-you: ordinary coins, so they count for the all-coins star
     s.onCatSaved(this.saved, this.total);
   }
 
