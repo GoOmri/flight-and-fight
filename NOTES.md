@@ -1394,3 +1394,8 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 - The 1 art px ring around enemy shots is white instead of dark; same size, same two-size beat.
 - The TUNE "New enemy shots" switch is gone.
 - UNVERIFIED: how it looks moving in a real stage, phone.
+
+## 2026-11-28 v1.9.203: bigger cauldron, deeper menu parallax (branch menu-depth)
+- Shop cauldron scale 5/3 to 2; word, glow and touch area follow.
+- Menu sky moves 12 px on phone tilt (was 4) and 0.1 px per scrolled px (was 0.08); the moon now moves with it. Sky drawn a bit bigger (cover 1.123) to make room.
+- Checked in the browser (tilt faked, no edge shows). UNVERIFIED: real tilting on the phone. EFFECTS LOW turns tilt off.
