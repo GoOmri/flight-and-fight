@@ -1429,3 +1429,6 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-28 v1.9.208: credits scroll bar further from the edge (branch credits-bar)
 - Moved 7 px inward. UNVERIFIED: phone.
+
+## 2026-11-28 v1.9.209: credits scroll bar grows and shrinks with the box (branch credits-bar-scale)
+- The bar was hidden until the box finished popping. Now the bar and the list window scale with it. UNVERIFIED: how it looks moving on the phone.

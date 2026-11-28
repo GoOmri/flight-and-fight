@@ -594,7 +594,7 @@ export class MenuScene extends Phaser.Scene {
     if (this.textures.exists('ui_panel-parchment')) keep(this.add.image(x, y0, this.parchment(w, h)).setOrigin(0, 0));
     else keep(this.add.graphics().fillStyle(0x3a1a72, 1).fillRoundedRect(x, y0, w, h, M.plateRadius));
     keep(this.add.text(mid, y0 + 30, 'Credits', { ...FONT_TITLE, fontSize: '24px', color: hex(P.title) }).setOrigin(0.5), 2);
-    // the list is its own container so it can be clipped to the window; it follows the box while the box grows or shrinks
+    // the list is its own container so it can be clipped to the window; the list, its window and the scroll bar grow and shrink with the box
     const lines = []; let y = top + 6;
     const T = (s, color) => lines.push(this.add.text(mid, y, s, { ...FONT_MONO, color }).setFontSize(C.smallPx).setOrigin(0.5));
     CREDITS.forEach(([what, who]) => {
@@ -614,9 +614,10 @@ export class MenuScene extends Phaser.Scene {
       if (!sc.held && sc.v) { sc.move(sc.v * delta / 1000); sc.v *= Math.exp(-4 * delta / 1000); if (Math.abs(sc.v) < 4) sc.v = 0; } // a little glide after the finger lifts
       const k = box.scaleX;
       list.setScale(k).setPosition(box.x, box.y - sc.at * k);
+      clip.setScale(k).setPosition(box.x, box.y); bar.setScale(k).setPosition(box.x, box.y);
       const th = Math.max(14, view * view / (view + max));
       bar.clear();
-      if (max && k > 0.99) bar.fillStyle(0xa89cd0, 0.8).fillRect(x + w - 18, top + (view - th) * sc.at / max, 2, th); // where you are in the list
+      if (max) bar.fillStyle(0xa89cd0, 0.8).fillRect(x + w - 18, top + (view - th) * sc.at / max, 2, th); // where you are in the list
     };
     const gone = () => { this.events.off('update', follow); this.events.off('shutdown', gone); this.scroller = null; };
     const close = () => { gone(); objs.forEach(o => o.destroy()); box.destroy(); list.destroy(); clip.destroy(); this.boxObjs = null; this.panelButtons = this.settingsButtons; };
