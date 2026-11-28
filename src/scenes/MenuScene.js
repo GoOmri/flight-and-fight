@@ -614,6 +614,10 @@ export class MenuScene extends Phaser.Scene {
       if (!sc.held && sc.v) { sc.move(sc.v * delta / 1000); sc.v *= Math.exp(-4 * delta / 1000); if (Math.abs(sc.v) < 4) sc.v = 0; } // a little glide after the finger lifts
       const k = box.scaleX;
       list.setScale(k).setPosition(box.x, box.y - sc.at * k);
+      lines.forEach(t => { // fade near an edge only while there is more text beyond it
+        const ty = t.y - sc.at, up = sc.at > 1 ? (ty - top - 4) / 30 : 1, down = sc.at < max - 1 ? (top + view - 4 - ty) / 30 : 1;
+        t.setAlpha(Phaser.Math.Clamp(Math.min(up, down), 0, 1));
+      });
       clip.setScale(k).setPosition(box.x, box.y); bar.setScale(k).setPosition(box.x, box.y);
       const th = Math.max(14, view * view / (view + max));
       bar.clear();
@@ -702,6 +706,16 @@ export class MenuScene extends Phaser.Scene {
     this.tweens.add({ targets: this.shopGlow, alpha: G.alphaMax, duration: G.ms, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
     this.shopSign = this.add.text(S.x, S.y, 'Shop', { ...FONT_TITLE, fontSize: S.size + 'px', color: hex(S.color), stroke: hex(P.shadow), strokeThickness: 0}).setOrigin(0.5).setDepth(52).setPadding(0, 0, 0, 2).setShadow(0, C.game.render, hex(P.shadow), 0, false, true); // drop shadow: 1 game px (shadow offsets are in canvas pixels)
     this.decorItems.push({ s: this.shopGlow, pos: { x: G.x, y: G.y }, par, key: 'shopglow' }, { s: this.shopSign, pos: { x: S.x, y: S.y }, par, key: 'shopsign' });
+    const WG = C.shop.wordGlow; // its own picture: canvas mode cannot tint the gold one
+    if (!this.textures.exists('menu_wordglow')) {
+      const cv = this.textures.createCanvas('menu_wordglow', 64, 64), c = cv.getContext(), f = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+      const rgb = [(WG.color >> 16) & 255, (WG.color >> 8) & 255, WG.color & 255].join(',');
+      f.addColorStop(0, 'rgba(' + rgb + ',1)'); f.addColorStop(0.5, 'rgba(' + rgb + ',0.6)'); f.addColorStop(1, 'rgba(' + rgb + ',0)');
+      c.fillStyle = f; c.fillRect(0, 0, 64, 64); cv.refresh();
+    }
+    const glow = this.add.image(S.x, S.y, 'menu_wordglow').setDisplaySize(WG.rx * 2, WG.ry * 2).setDepth(51.5).setAlpha(WG.alphaMin); // over the pot and its bubbles, under the word
+    this.tweens.add({ targets: glow, alpha: WG.alphaMax, duration: C.shop.glow.ms, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.decorItems.push({ s: glow, pos: { x: S.x, y: S.y }, par, key: 'wordglow' });
   }
 
   // ---- little pictures and effects -------------------------------------------------------------------------------------------------
@@ -730,7 +744,8 @@ export class MenuScene extends Phaser.Scene {
     } });
     if (witch) this.time.addEvent({ delay: B.trail.every, loop: true, callback: () => { // sparks fall behind her broom
       const s = witch.s;
-      this.bit(s.x + B.trail.dx + rnd(-4, 4), s.y + B.trail.dy + rnd(-4, 4), { tint: pick(B.trail.tints), vx: -rnd(10, 26), vy: rnd(2, 18), life: rnd(900, 1500), s0: B.trail.size, s1: 0.6, a0: 1, add: B.trail.add, depth: 49 }); // bigger, longer lived and (not additive) clearly visible on the light sky
+      const front = Math.random() < B.trail.front; // in front: starts on the bristles and is drawn over the witch (depth 50)
+      this.bit(s.x + B.trail.dx + (front ? rnd(-2, 14) : rnd(-4, 4)), s.y + B.trail.dy + (front ? rnd(-6, 3) : rnd(-4, 4)), { tint: pick(B.trail.tints), vx: -rnd(10, 26), vy: rnd(2, 18), life: rnd(900, 1500), s0: B.trail.size, s1: 0.6, a0: 1, add: B.trail.add, depth: front ? 50.5 : 49 }); // bigger, longer lived and (not additive) clearly visible on the light sky
     } });
     // fireflies: a few dots wander slowly and blink
     const F = B.fireflies;
