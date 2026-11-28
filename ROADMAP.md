@@ -23,7 +23,8 @@ Sizes: **S** = small (one sitting), **M** = medium, **L** = large (plan first, s
 
 ### 2. Fix what is already out
 - Shop prices and strength: **do not change yet** (Omri, 28 Nov): later stages may be harder. Look again after step 3.
-- Open question (28 Nov): keep 10 levels per upgrade, open more levels with new stages, or no cap?
+- DECIDED (28 Nov), build with the stage work (step 3): **damage has no level cap** (prices keep rising). Fire speed and magnet keep a limit. The shop tube goes; each row shows name, level number, price (or Max).
+- **Rescued cats drop a few coins (S)** (Omri, 28 Nov). Amount not agreed.
 - **Credits screen (S-M).** The game is public and several art and font licences ask for credit. Today the credit is only in CREDITS.md, not in the game. (20 Nov: "not yet".)
 - **Settings icon** instead of the cog (S): cog with a moon or cat eye, or a wand. Not picked. The spellbook is saved for something else.
 - **UI rulebook leftovers** (S): same margins in every box, text sizes.
