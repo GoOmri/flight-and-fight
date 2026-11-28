@@ -1,5 +1,16 @@
 # Credits
 
+## Missing or unclear licences (noted 28 Nov 2026; sort out before a store release)
+Used in the game now:
+- **Fire wisp** enemy (assets/enemies/wisp.png): author and source unknown.
+- **DungeonFont** (the title font): author and licence unknown.
+- **Cat meows** (assets/sfx/meow-1, meow-2): source not recorded.
+- **Ghost** enemy: no licence stated on its page (author known: dyru).
+- **Skull goal icon**: page says "royalty free", no licence text.
+Omri confirmed in chat that the wisp, ghost, skull pack and meows may be used. Nothing confirmed in writing for DungeonFont.
+Not used by the game but still in the repository: violet potion (no licence text in its pack).
+The wisp, DungeonFont and meows are not on the in-game credits screen because there is no one to name.
+
 - **Witch on Broomstick** sprites (assets/witch): by Svetlana Kushnariova (Cabbit) and Jordan Irwin (AntumDeluge), based on work by Svetlana Kushnariova.
   OpenGameArt: https://opengameart.org/node/86131
   Licence: CC BY 3.0 or later / OGA-BY 3.0 or later (texts in assets/witch). Changes: none (only the 24x32 sheets are used).
