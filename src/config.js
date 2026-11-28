@@ -33,7 +33,7 @@ const SHINE = { radius: 13, offsetY: 0, inner: 1, widthStart: 1, widthEnd: 5, al
 const shine = own => ({ ...SHINE, ...own, glow: { ...SHINE.glow, ...(own.glowOver || {}) } }); // every drop has its OWN numbers (own glow object too); glowOver = the glow numbers that differ
 
 export const CONFIG = {
-  version: "1.9.209", // bump on every push so the player/Omri can see the build
+  version: "1.9.210", // bump on every push so the player/Omri can see the build
   // Start menu (src/scenes/MenuScene.js). All sizes are logical px (game is 240x427).
   menu: {
     // UI palette (purple / pink / cyan / cream on dark; flat, no glow). Used by the menu, the end screen and the plates.
@@ -41,12 +41,12 @@ export const CONFIG = {
     plateDrop: 4, plateDownShift: 2, plateBorderW: 3, plateRadius: 10, tabW: 6, // chunky button plate: bottom edge height, how far a pressed plate sinks, border, corner, stage colour tab
     tabColors: { forest: 0xff9a2e, swamp: 0x3df2ff },
     bgColor: 0x14161f, titleY: 46, titleSize: 24, titleStroke: 4, // titleY..titleStroke: the old plain-text title (used only if the logo picture is missing)
-    logo: { file: 'menu/logo-text.png', decor: 'menu/logo-decor.png', decorParts: [[26,8,1,1],[39,3,5,5],[52,7,1,1],[64,2,5,5],[81,6,1,1],[111,73,5,5],[8,53,5,5]], /* stars and dots only: the white moon and the two purple bats of the picture are left out */ decorAt: {}, decorScale: {}, decorPop: false, decorDelay: 1500, decorStepMs: 140, wordStepMs: 100, riseMs: 1200, overshoot: 0.6, x: 120, y: 252, scale: 1.7 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
+    logo: { file: 'menu/logo-text.png', decor: 'menu/logo-decor.png', decorParts: [[26,8,1,1],[39,3,5,5],[52,7,1,1],[64,2,5,5],[81,6,1,1],[111,73,5,5],[8,53,5,5]], /* stars and dots only: the white moon and the two purple bats of the picture are left out */ decorAt: {}, decorScale: {}, decorPop: false, decorDelay: 1500, decorStepMs: 140, wordStepMs: 100, riseMs: 1200, overshoot: 0.6, x: 120, y: 257, scale: 1.7 }, // the game logo (pumpkin colours), 116x83 art px; scale 1 = 3 canvas px per art px
     // Small effects of the menu (src/scenes/MenuScene.js startEffects): cauldron bubbles, sparks behind the witch's broom (dx, dy from her centre), fireflies, shooting stars (every ms [min, max],
     // start x / y ranges, travel dx / dy, ms) and the sparks on a touch (count, how far, ms). tilt: the sky and the friends shift when the phone is tilted (range = degrees for the full shift, sky = px).
     bits: {
-      cauldron: { every: 260, dy: 8, tints: [0xff5ac8, 0x3df2ff, 0xfff3c4] },
-      trail: { every: 38, dx: -38, dy: 26, size: 2.8, add: false, tints: [0xff5ac8, 0xffffff, 0xf2b632, 0xff8ad8] },
+      cauldron: { every: 110, dy: 8, tints: [0xff5ac8, 0x3df2ff, 0xfff3c4] },
+      trail: { every: 20, front: 0.4, /* share of the sparks that start on the broom, in front of it */ dx: -38, dy: 26, size: 2.8, add: false, tints: [0xff5ac8, 0xffffff, 0xf2b632, 0xff8ad8] },
       fireflies: { count: 7, area: [24, 16, 216, 236], color: 0xfff3a0 },
       star: { everyMs: [8000, 14000], x: [130, 250], y: [8, 80], dx: -110, dy: 55, ms: 650 },
       tap: { count: 9, dist: [12, 26], ms: 420, tints: [0xf2b632, 0xff5ac8, 0xfff3c4] }
@@ -105,6 +105,7 @@ export const CONFIG = {
     sign: { x: 208, y: 403, size: 18, color: 0xf2b632, stroke: 3 }, // the word SHOP on the cauldron's pot: middle point, text size (title font, plain px), colour, outline px. Cauldron size: menu.decor "boiler" scale
     // soft gold glow behind the cauldron while at least one upgrade level can be bought: middle point, half width / height (px), colour,
     // alpha at the bright and the dim end of the pulse, ms for one way (dim to bright)
+    wordGlow: { rx: 28, ry: 15, color: 0xff5ac8, alphaMax: 0.95, alphaMin: 0.65 }, // a soft light right behind the word Shop, always on
     glow: { x: 208, y: 401, rx: 36, ry: 36, color: 0xffd040, alphaMax: 0.9, alphaMin: 0.35, ms: 900 },
     panel: { x: 14, w: 212, headH: 66, rowH: 50, footH: 14, buyW: 54, depth: 100,
       // upgrade level = a glowing potion tube: width / height (px) and colours (rim, empty glass, liquid, top shine, surface edge, bubbles)

@@ -1432,3 +1432,9 @@ Ship follows the finger and auto-fires. 3 enemy types, one wave, one boss, score
 
 ## 2026-11-28 v1.9.209: credits scroll bar grows and shrinks with the box (branch credits-bar-scale)
 - The bar was hidden until the box finished popping. Now the bar and the list window scale with it. UNVERIFIED: how it looks moving on the phone.
+
+## 2026-11-28 v1.9.210: menu glow, more sparks, one button brown, credits fade, logo lower (branch menu-sparkle)
+- Pink glow behind the word Shop (the gold glow when something can be bought stays). Cauldron bubbles about 2.4x, broom sparks about 2x, 40% of them in front of the broom.
+- Button words are one dark brown everywhere (Update and others were lighter than the settings buttons).
+- Credits lines fade at an edge while there is more beyond it. Logo 5 px lower.
+- UNVERIFIED: phone, speed with the extra sparks.
